@@ -185,30 +185,70 @@
   window.claude = { use: async (n) => (n === "db" ? { doc, collection } : n === "user" ? userNs : n === "downloads" ? downloads : null) };
 
   /* ---------- sign-in screen ---------- */
+  const clean = (t) => String(t || "").replace(/[<>&]/g, "");
   function showSignIn(note) {
     document.getElementById("tabs").hidden = true;
     document.getElementById("main").innerHTML = `
       <section class="view" style="max-width:440px;margin:48px auto">
-        <form class="panel" id="signin" style="padding:28px;display:grid;gap:14px">
-          <div><h2>Sign in to Lead Desk</h2><p class="muted" style="margin:6px 0 0">Enter your work email. We'll send you a sign-in link.</p></div>
-          <label class="f">Work email<input id="si-email" type="email" autocomplete="email" required placeholder="name@samsotech.com"></label>
-          <button class="btn pri" id="si-btn" type="submit">Email me a sign-in link</button>
+        <form class="panel" id="signin" style="padding:28px;display:grid;gap:14px" novalidate>
+          <div><h2>Sign in to Lead Desk</h2><p class="muted" style="margin:6px 0 0">Use the work email and password back office gave you.</p></div>
+          <label class="f">Work email<input id="si-email" type="email" autocomplete="username" required placeholder="name@samsotech.com"></label>
+          <label class="f">Password<input id="si-pass" type="password" autocomplete="current-password"></label>
+          <button class="btn pri" id="si-btn" type="submit">Sign in</button>
+          <button class="btn" id="si-link" type="button">Email me a sign-in link instead</button>
           <div id="si-msg" class="small">${note || ""}</div>
         </form>
       </section>`;
+    const $e = () => document.getElementById("si-email").value.trim().toLowerCase();
+    const msg = (h) => (document.getElementById("si-msg").innerHTML = h);
+    const bad = (t) => msg(`<span style="color:var(--bad)">${clean(t)}</span>`);
     document.getElementById("signin").onsubmit = async (e) => {
       e.preventDefault();
-      const email = document.getElementById("si-email").value.trim().toLowerCase();
-      const btn = document.getElementById("si-btn"), msg = document.getElementById("si-msg");
-      if (!EMAIL_RE.test(email)) { msg.innerHTML = '<span style="color:var(--bad)">Enter a valid email address.</span>'; return; }
-      btn.disabled = true; btn.textContent = "Sending…";
+      const email = $e(), password = document.getElementById("si-pass").value;
+      if (!EMAIL_RE.test(email)) return bad("Enter a valid email address.");
+      if (!password) return bad("Enter your password, or use the email link button.");
+      const btn = document.getElementById("si-btn"); btn.disabled = true; btn.textContent = "Signing in…";
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      btn.disabled = false; btn.textContent = "Sign in";
+      if (error) bad(/invalid login/i.test(error.message) ? "Email or password is wrong. Ask back office to reset your password if you've forgotten it." : error.message);
+    };
+    document.getElementById("si-link").onclick = async () => {
+      const email = $e();
+      if (!EMAIL_RE.test(email)) return bad("Enter a valid email address first.");
+      const btn = document.getElementById("si-link"); btn.disabled = true; btn.textContent = "Sending…";
       const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-      btn.disabled = false; btn.textContent = "Email me a sign-in link";
-      msg.innerHTML = error
-        ? `<span style="color:var(--bad)">${/not on the Lead Desk user list|signups not allowed|403/i.test(error.message) ? "This email isn't on the Lead Desk user list. Ask back office to add you." : "Couldn't send the link: " + error.message.replace(/[<>&]/g, "")}</span>`
-        : `<span style="color:var(--ok)">Check your inbox for an email from Lead Desk and open the link on this device.</span>`;
+      btn.disabled = false; btn.textContent = "Email me a sign-in link instead";
+      if (error) bad(/not on the Lead Desk user list|signups not allowed|403/i.test(error.message) ? "This email isn't on the Lead Desk user list. Ask back office to add you." : "Couldn't send the link: " + error.message);
+      else msg(`<span style="color:var(--ok)">Check your inbox for an email from Lead Desk and open the link on this device.</span>`);
     };
   }
+
+  /* ---------- change password ---------- */
+  window.__changePassword = function () {
+    const host = document.createElement("div");
+    host.className = "scrim"; host.style.alignItems = "center"; host.style.justifyContent = "center";
+    host.innerHTML = `<form class="panel" style="width:min(400px,calc(100% - 32px));display:grid;gap:12px;padding:22px" novalidate>
+        <h3>Change password</h3>
+        <label class="f">New password<input id="cp1" type="password" autocomplete="new-password" minlength="8"></label>
+        <label class="f">Repeat new password<input id="cp2" type="password" autocomplete="new-password"></label>
+        <div id="cpm" class="small"></div>
+        <div class="row"><button class="btn pri" type="submit">Save password</button><button class="btn" type="button" id="cpx">Cancel</button></div>
+      </form>`;
+    document.body.appendChild(host);
+    const close = () => host.remove();
+    host.querySelector("#cpx").onclick = close;
+    host.onclick = (e) => { if (e.target === host) close(); };
+    host.querySelector("form").onsubmit = async (e) => {
+      e.preventDefault();
+      const a = host.querySelector("#cp1").value, b = host.querySelector("#cp2").value, m = host.querySelector("#cpm");
+      if (a.length < 8) { m.innerHTML = '<span style="color:var(--bad)">Use at least 8 characters.</span>'; return; }
+      if (a !== b) { m.innerHTML = '<span style="color:var(--bad)">The two passwords don\'t match.</span>'; return; }
+      const { error } = await sb.auth.updateUser({ password: a });
+      if (error) m.innerHTML = `<span style="color:var(--bad)">${clean(error.message)}</span>`;
+      else { m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(close, 1200); }
+    };
+    host.querySelector("#cp1").focus();
+  };
 
   let started = false;
   async function start(session) {

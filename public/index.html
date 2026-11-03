@@ -308,7 +308,7 @@ function render(){const m=$("#main");
   $("#tabs").hidden=allowed.length<2;
   document.querySelectorAll("#tabs button").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab)});
   const pt=document.querySelector('#tabs [data-tab="pipe"]');pt.textContent=S.role==="sales"?"My leads":S.role==="management"?"Team pipeline":"Pipelines";
-  $("#who").innerHTML=`<span class="chip">${esc(ROLE_LABEL[S.role])}${S.role==="sales"&&S.myEng?" · "+esc(S.myEng):""}</span>`+(S.myName?` <span class="small muted">${esc(S.myName)}</span>`:"")+(window.LD_HOSTED?` <button class="btn sm" onclick="window.__signOut()">Sign out</button>`:"");
+  $("#who").innerHTML=`<span class="chip">${esc(ROLE_LABEL[S.role])}${S.role==="sales"&&S.myEng?" · "+esc(S.myEng):""}</span>`+(S.myName?` <span class="small muted">${esc(S.myName)}</span>`:"")+(window.LD_HOSTED?` <button class="btn sm" onclick="window.__changePassword()">Password</button> <button class="btn sm" onclick="window.__signOut()">Sign out</button>`:"");
   $("#banner").querySelector("[data-perm]")?.remove();
   if(isBO()&&!S.canEdit&&!S.isOwner)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
 ({new:renderNew,bo:renderBO,pipe:renderPipe,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
