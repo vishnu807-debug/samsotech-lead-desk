@@ -205,7 +205,15 @@ const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","
  sources:["Support Team","AMC Team","Info Mailbox","Website / Chat","Oracle Marketplace","Newsletter","Events","PMS Vendor / Partner","Customer Referral"].map(n=>({name:n,cat:"Inbound"})).concat(["Email Marketing","Apollo","Cold Calling","LinkedIn Prospecting","Sales (self-generated)"].map(n=>({name:n,cat:"Outbound"}))),
  departments:["Marketing","Support","AMC","Sales","Info / Admin","Management"],
  fx:{AED:1,USD:3.6725,EUR:4.0,GBP:4.65,SAR:0.98,INR:0.042,MYR:0.83},
+ regions:["Middle East", "Africa", "Europe", "CIS & Central Asia", "South Asia", "APAC", "Americas"],
  weeklyTarget:25,slaVerifyHours:24,slaContactDays:3,quoteStaleDays:14,incentivePct:1};
+const REGION_MAP={"uae":"Middle East","dubai":"Middle East","abu dhabi":"Middle East","al ain":"Middle East","sharjah":"Middle East","rak":"Middle East","ras al khaimah":"Middle East","deira":"Middle East","jumairah":"Middle East","jumeirah":"Middle East","fujairah":"Middle East","ajman":"Middle East","qatar":"Middle East","doha":"Middle East","ksa":"Middle East","saudi":"Middle East","saudi arabia":"Middle East","soudi":"Middle East","riyadh":"Middle East","jeddah":"Middle East","makkah":"Middle East","madinah":"Middle East","al khobar":"Middle East","dammam":"Middle East","tabuk":"Middle East","bahrain":"Middle East","kuwait":"Middle East","oman":"Middle East","muscat":"Middle East","salalah":"Middle East","jordan":"Middle East","amman":"Middle East","lebanon":"Middle East","beirut":"Middle East","iraq":"Middle East","erbil":"Middle East","baghdad":"Middle East","israel":"Middle East","egypt":"Middle East","cairo":"Middle East","dar al taqwa":"Middle East","africa":"Africa","south africa":"Africa","johannesburg":"Africa","sandton":"Africa","cape town":"Africa","kenya":"Africa","nairobi":"Africa","tanzania":"Africa","zanzibar":"Africa","zanibar":"Africa","serengeti":"Africa","serena":"Africa","uganda":"Africa","kampala":"Africa","rwanda":"Africa","gasabo":"Africa","kigali":"Africa","nigeria":"Africa","lagos":"Africa","victoria island":"Africa","aguda":"Africa","ghana":"Africa","accra":"Africa","benin":"Africa","cotonou – benin":"Africa","cotonou":"Africa","niamey":"Africa","niger":"Africa","congo":"Africa","zambia":"Africa","zimbabwe":"Africa","namibia":"Africa","windhoek south":"Africa","windhoek":"Africa","mauritius":"Africa","seychelles":"Africa","morocco":"Africa","marrakech":"Africa","casablanca":"Africa","tunisia":"Africa","algeria":"Africa","ethiopia":"Africa","djibouti":"Africa","senegal":"Africa","dakar":"Africa","gabon":"Africa","libreville":"Africa","south sudan":"Africa","juba":"Africa","botswana":"Africa","mozambique":"Africa","madagascar":"Africa","victorua house":"Africa","uk":"Europe","united kingdom":"Europe","london":"Europe","edinburgh":"Europe","manchester":"Europe","ireland":"Europe","dublin":"Europe","france":"Europe","paris":"Europe","cannes":"Europe","germany":"Europe","munich":"Europe","italy":"Europe","milano":"Europe","milan":"Europe","rome":"Europe","spain":"Europe","barcelona":"Europe","madrid":"Europe","girona":"Europe","mallorca":"Europe","portugal":"Europe","lisbon":"Europe","lisboa":"Europe","porto":"Europe","netherland":"Europe","netherlands":"Europe","amsterdam":"Europe","belgium":"Europe","switzerland":"Europe","gotthardstrasse":"Europe","austria":"Europe","dornbirn, austria":"Europe","hungary":"Europe","budapest":"Europe","czech republic":"Europe","prague":"Europe","poland":"Europe","slovakia":"Europe","slovenia":"Europe","croatia":"Europe","serbia":"Europe","bulgaria":"Europe","greece":"Europe","athens":"Europe","cyprus":"Europe","malta":"Europe","monaco":"Europe","sweden":"Europe","stockholm":"Europe","iceland":"Europe","turkey":"Europe","antalya":"Europe","istanbul":"Europe","moldovo":"Europe","moldova":"Europe","kosovo":"Europe","romania":"Europe","denmark":"Europe","norway":"Europe","finland":"Europe","georgia":"CIS & Central Asia","tbilisi":"CIS & Central Asia","batumi":"CIS & Central Asia","bakuriani":"CIS & Central Asia","tsinandali":"CIS & Central Asia","iveria":"CIS & Central Asia","azerbaijan":"CIS & Central Asia","baku":"CIS & Central Asia","kazakhstan":"CIS & Central Asia","almaty":"CIS & Central Asia","aktau":"CIS & Central Asia","kyrgyzstan":"CIS & Central Asia","bishkek":"CIS & Central Asia","uzbekistan":"CIS & Central Asia","tashkent":"CIS & Central Asia","samarkand":"CIS & Central Asia","mongolia":"CIS & Central Asia","armenia":"CIS & Central Asia","russia":"CIS & Central Asia","india":"South Asia","delhi":"South Asia","new delhi":"South Asia","gurgaon india":"South Asia","mumbai":"South Asia","pune":"South Asia","goa":"South Asia","bengaluru":"South Asia","banglore":"South Asia","bengluru":"South Asia","chennai":"South Asia","cochin india":"South Asia","kochi":"South Asia","hyderabad":"South Asia","india hyderabad":"South Asia","ahmedabad":"South Asia","india ahmedabad":"South Asia","kanpur":"South Asia","india kanpur":"South Asia","lucknow":"South Asia","indore-india":"South Asia","odisha":"South Asia","rajasthan":"South Asia","jaipur":"South Asia","deharadun":"South Asia","dehradun":"South Asia","haridwar":"South Asia","visakhapatnam":"South Asia","sriperumbudur":"South Asia","up":"South Asia","jk":"South Asia","sri lanka":"South Asia","colombo":"South Asia","maldives":"South Asia","nepal":"South Asia","kathmandu":"South Asia","bhutan":"South Asia","pakistan":"South Asia","lahore":"South Asia","karachi":"South Asia","bangladesh":"South Asia","dhaka":"South Asia","malaysia":"APAC","kuala lumpur":"APAC","empire city, damansara":"APAC","johor":"APAC","thailand":"APAC","bangkok":"APAC","phuket":"APAC","phayathai-thailand":"APAC","koh samui":"APAC","vietnam":"APAC","viet nam":"APAC","da nang":"APAC","hanoi":"APAC","ho chi minh":"APAC","cambodia":"APAC","laos":"APAC","indonesia":"APAC","jakarta":"APAC","bali":"APAC","bengkong":"APAC","batam":"APAC","singapore":"APAC","philippines":"APAC","manila":"APAC","japan":"APAC","tokyo":"APAC","kyoto":"APAC","osaka":"APAC","sapporo":"APAC","yokohama":"APAC","okinawa":"APAC","niseko":"APAC","korea":"APAC","south korea":"APAC","seoul":"APAC","china":"APAC","hong kong":"APAC","macau":"APAC","taiwan":"APAC","australia":"APAC","melbourne":"APAC","sydney":"APAC","perth":"APAC","queensland":"APAC","new zealand":"APAC","auckland":"APAC","fiji":"APAC","sigatoka, fiji islands":"APAC","papua new guinea":"APAC","port moresby":"APAC","sir john guise drive, port moresby":"APAC","guam":"APAC","brunei":"APAC","usa":"Americas","us":"Americas","ny":"Americas","new york":"Americas","santa monica":"Americas","doonbeg-us":"Americas","canada":"Americas","mexico":"Americas","brazil":"Americas","brasil":"Americas","argentina":"Americas","colombia":"Americas","chile":"Americas","peru":"Americas","costa rica":"Americas","south america":"Americas","dominican republic":"Americas","santo domingo":"Americas","grenada":"Americas","bermuda":"Americas","turks and caicos":"Americas","urks & caicos islands":"Americas","west indies":"Americas","jamaica":"Americas","bahamas":"Americas","panama":"Americas","suriname":"Americas","paramaribo":"Americas"};
+const REGION_KEYS=Object.keys(REGION_MAP).filter(k=>k.length>=3).sort((a,b)=>b.length-a.length).map(k=>[k,new RegExp("(^|[^a-z])"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"([^a-z]|$)")]);
+function guessRegion(loc){const s=String(loc||"").toLowerCase().replace(/\s+/g," ").trim();if(!s||s==="-")return"";if(REGION_MAP[s])return REGION_MAP[s];for(const[k,re]of REGION_KEYS)if(re.test(s))return REGION_MAP[k];return""}
+const regionList=()=>(S.settings.regions&&S.settings.regions.length?S.settings.regions:DEFAULTS.regions);
+const regionOf=l=>l.region||guessRegion(l.country)||"Unassigned";
+const todayISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const reqDate=l=>l.requirementDate||(l.createdAt||"").slice(0,10);
 const OPEN=["New","Info Needed","Assigned","Meeting Done","Quotation Sent","On Hold"];
 const BLOCKING=OPEN.concat(["Won"]);
 const STOP=new Set(["the","hotel","hotels","and","by","resort","resorts","spa","a","of","at","de","la","le"]);
@@ -257,8 +265,19 @@ function opts(list,sel,ph){return(ph?`<option value="">${esc(ph)}</option>`:"")+
 
 /* ---------- account + product duplicate logic ---------- */
 function allAccounts(){const m={};for(const[k,a]of Object.entries(S.registry))m[k]={key:k,name:a.n,country:a.c,hist:a.p||{},wonHist:!!a.w,live:false};
-  for(const[k,a]of Object.entries(S.accounts))m[k]=Object.assign(m[k]||{hist:{}},{key:k,name:a.name,country:a.country||m[k]?.country||"",city:a.city,group:a.group,live:true});return m}
-function findAccounts(q,limit=8){const k=keyOf(q);if(!k)return[];const out=[];for(const a of Object.values(allAccounts())){const s=similar(k,a.key);if(s>=0.55)out.push([s,a])}
+  for(const l of S.leads)if(l.accountKey&&!m[l.accountKey])m[l.accountKey]={key:l.accountKey,name:l.accountName,country:l.country||"",hist:{},live:true};
+  for(const[k,a]of Object.entries(S.accounts))if(!a.deleted)m[k]=Object.assign(m[k]||{hist:{}},{key:k,name:a.name,country:a.country||m[k]?.country||"",city:a.city,group:a.group,live:true});
+  for(const[k,a]of Object.entries(S.accounts))if(a.deleted){if(a.mergedInto&&m[a.mergedInto])m[a.mergedInto].hist=Object.assign({},S.registry[k]?.p||{},m[a.mergedInto].hist||{});delete m[k]}
+  return m}
+function histOf(key){const h={};for(const[k,a]of Object.entries(S.accounts))if(a.deleted&&a.mergedInto===key)Object.assign(h,S.registry[k]?.p||{});return Object.assign(h,S.registry[key]?.p||{})}
+const removedAccounts=()=>Object.entries(S.accounts).filter(([,a])=>a.deleted).map(([k,a])=>Object.assign({key:k},a)).sort((x,y)=>(y.deletedAt||"")>(x.deletedAt||"")?1:-1);
+const normTxt=x=>String(x||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim();
+function findAccounts(q,limit=8,withPlace){const nq=normTxt(q);if(nq.length<2)return[];const k=keyOf(q);const qt=nq.split(" ");const out=[];
+  for(const a of Object.values(allAccounts())){const nn=normTxt(a.name);const words=(withPlace?nn+" "+normTxt(a.country)+" "+normTxt(a.city):nn).split(" ");let s=0;
+    if(a.key===k||nn===nq)s=1;else if(nn.startsWith(nq))s=.96;else if(qt.every(t=>words.some(w=>w.startsWith(t))))s=.92;else if(nn.includes(nq))s=.88;
+    else if(nq.length>=5){const f=similar(k,a.key);if(f>=.78)s=f*.85}
+    if(s)out.push([s,a])}
+  out.sort((x,y)=>y[0]-x[0]||x[1].name.localeCompare(y[1].name));
   return out.sort((x,y)=>y[0]-x[0]).slice(0,limit).map(x=>Object.assign({score:x[0]},x[1]))}
 function leadsFor(key){return S.leads.filter(l=>l.accountKey===key)}
 function productState(key,product,exceptId){const pdef=prodList(true).find(p=>p.name===product)||{};
@@ -267,13 +286,13 @@ function productState(key,product,exceptId){const pdef=prodList(true).find(p=>p.
   if(live.length){const l=live[0];return{state:"blocked",lead:l,msg:`${l.status==="Won"?"Already won":"Open"} · ${l.ref}${l.assignedTo?" · "+l.assignedTo:""}`}}
   const ext=(S.extLocks[key]||[]).find(r=>r.product===product&&r.ref!==exceptId&&BLOCKING.includes(r.status));
   if(ext)return{state:"blocked",lead:{id:ext.ref,ref:ext.ref,status:ext.status,assignedTo:ext.assigned_to},msg:`${ext.status==="Won"?"Already won":"Open"} · ${ext.ref}${ext.assigned_to?" · "+ext.assigned_to:""}`};
-  const h=(S.registry[key]?.p||{})[product];
+  const h=histOf(key)[product];
   if(h)return{state:"hist",msg:`In 2026 sheet · ${h.r}${h.e?" · "+h.e:""}`};
   return{state:"ok"}}
 function dupChecks(l){const out=[];const others=S.leads.filter(x=>x.id!==l.id);
   productsOf(l).forEach(p=>{const ps=productState(l.accountKey,p,l.id);
     if(ps.state==="blocked"){const x=ps.lead;out.push({lvl:"bad",msg:`${p} is already ${x.status==="Won"?"won":"open"} for this account: ${x.ref} (${x.status}${x.assignedTo?", "+x.assignedTo:""})`,ref:x.id})}
-    const h=(S.registry[l.accountKey]?.p||{})[p];if(h)out.push({lvl:"warn",msg:`${p} was logged in the 2026 sheet: ${h.r}${h.e?" with "+h.e:""}${h.m?" ("+h.m+")":""}`})});
+    const h=histOf(l.accountKey)[p];if(h)out.push({lvl:"warn",msg:`${p} was logged in the 2026 sheet: ${h.r}${h.e?" with "+h.e:""}${h.m?" ("+h.m+")":""}`})});
   const em=(l.contact?.email||"").toLowerCase();if(em)others.filter(x=>(x.contact?.email||"").toLowerCase()===em&&x.accountKey!==l.accountKey).slice(0,2).forEach(x=>out.push({lvl:"warn",msg:`Same contact email used on another account: ${x.accountName} (${x.ref})`,ref:x.id}));
   const near=findAccounts(l.accountName,4).filter(a=>a.key!==l.accountKey&&a.score>=0.75);near.forEach(a=>out.push({lvl:"warn",msg:`Similar account exists: ${a.name}${a.country?" · "+a.country:""}`}));
   const dom=emailDomain(em);if(dom){const sib=others.filter(x=>emailDomain(x.contact?.email)===dom&&x.accountKey!==l.accountKey);if(sib.length)out.push({lvl:"info",msg:`${sib.length} other lead(s) share the domain @${dom} — possibly the same group or chain`})}
@@ -315,7 +334,7 @@ function render(){const m=$("#main");
   if(isBO()&&!S.canEdit&&!S.isOwner)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
 ({new:renderNew,bo:renderBO,pipe:renderPipe,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
 function softRender(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm"))render();else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
-  if(S.drawer)refreshDrawer()}
+  if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
 function updateCounts(){if(!isBO()){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
 
 /* ======================= 1. NEW LEAD (any department) ======================= */
@@ -349,6 +368,8 @@ function renderNew(m){
    <div class="view" style="gap:14px">
     <div class="panel"><h3>4 · Lead origin</h3>
       <div style="display:grid;gap:12px">
+        <div class="grid2"><label class="f">Requirement received on <span class="req">*</span><input id="f-reqdate" type="date" max="${todayISO()}" value="${esc(f.reqDate||todayISO())}"></label>
+        <label class="f">Region <span class="req">*</span><select id="f-region">${opts(regionList(),f.region||"","Choose region")}</select></label></div>
         <div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">Category <span class="seg cat" id="catSeg"><button type="button" data-v="Inbound" ${sales?"hidden":""}>Inbound</button><button type="button" data-v="Outbound">Outbound</button></span></div>
         <label class="f">Source channel <span class="req">*</span><select id="f-source">${opts(st.sources.filter(s=>!sales||s.cat==="Outbound").map(s=>s.name),f.source,"Choose a source")}</select></label>
         <label class="f">Lead generated by <span class="req">*</span><input id="f-genby" placeholder="Your name" value="${esc(sales?S.myEng:(lsGet("ld.genby")||""))}" ${sales?"readonly":""}></label>
@@ -369,11 +390,13 @@ function renderNew(m){
    </div>
   </form></section>`;
   drawAcctBox();drawProducts();setCat(f.category||"");
+  $("#f-reqdate").onchange=e=>{f.reqDate=e.target.value};$("#f-region").onchange=e=>{f.region=e.target.value;f.regionManual=!!e.target.value};
   $("#catSeg").onclick=e=>{const b=e.target.closest("button");if(b&&!sales){f.category=b.dataset.v;f.catManual=true;setCat(f.category)}};
   $("#f-source").onchange=e=>{f.source=e.target.value;if(f.source&&!f.catManual&&!sales){f.category=catOf(f.source);setCat(f.category)}};
   $("#leadForm").onsubmit=e=>{e.preventDefault();submitLead()};
 }
 function setCat(v){document.querySelectorAll("#catSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v))}
+function syncRegion(){const f=S.form;if(!f||f.regionManual||!f.account)return;const g=guessRegion(f.account.country)||guessRegion(f.account.city);const el=$("#f-region");if(g&&el){f.region=g;el.value=g}}
 function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
   if(f.account){const a=f.account;const n=a.isNew?0:leadsFor(a.key).length;
     box.innerHTML=`<div class="acct"><div style="min-width:0;flex:1"><b>${esc(a.name)}</b> <span class="chip">${a.isNew?"New account":"Existing account"}</span>
@@ -381,7 +404,7 @@ function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
       <button type="button" class="btn sm" id="acctChange">Change</button></div>
       ${a.isNew?`<div class="grid3" style="margin-top:12px"><label class="f">Country <span class="req">*</span><input id="f-country" value="${esc(a.country||"")}"></label><label class="f">City<input id="f-city" value="${esc(a.city||"")}"></label><label class="f">Group / chain<input id="f-group" placeholder="e.g. Marriott" value="${esc(a.group||"")}"></label></div>`:""}`;
     $("#acctChange").onclick=()=>{f.account=null;f.newName="";drawAcctBox();drawProducts()};
-    ["country","city","group"].forEach(k=>{const el=$("#f-"+k);if(el)el.oninput=()=>a[k]=el.value});return}
+    ["country","city","group"].forEach(k=>{const el=$("#f-"+k);if(el)el.oninput=()=>{a[k]=el.value;if(k!=="group")syncRegion()}});syncRegion();return}
   box.innerHTML=`<label class="f">Property / company name <span class="req">*</span><div class="ta"><input id="f-acct" autocomplete="off" placeholder="Start typing, e.g. Sheraton Johor Bahru" value="${esc(f.newName)}"><div class="sugg" id="sugg" hidden></div></div></label>`;
   const inp=$("#f-acct"),sg=$("#sugg");let hl=-1;
   const show=()=>{const q=inp.value.trim();f.newName=q;if(q.length<2){sg.hidden=true;return}
@@ -392,7 +415,9 @@ function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
   inp.oninput=show;inp.onfocus=show;
   inp.onkeydown=e=>{const bs=[...sg.querySelectorAll("button")];if(!bs.length)return;if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();hl=(hl+(e.key==="ArrowDown"?1:-1)+bs.length)%bs.length;bs.forEach((b,i)=>b.classList.toggle("hl",i===hl))}else if(e.key==="Enter"&&hl>=0){e.preventDefault();bs[hl].click()}};
   sg.onclick=e=>{const b=e.target.closest("button");if(!b)return;
-    if(b.dataset.new){const q=inp.value.trim();const near=findAccounts(q,3).filter(h=>h.score>=0.8);
+    if(b.dataset.new){const q=inp.value.trim();const tomb=S.accounts[keyOf(q)];
+      if(tomb&&tomb.deleted&&tomb.mergedInto&&allAccounts()[tomb.mergedInto]){const t=allAccounts()[tomb.mergedInto];f.account=Object.assign({isNew:false},t);toast(`“${q}” was merged into ${t.name}, so that account was selected`);loadLocks(t.key).then(()=>{if(S.form===f)drawProducts()});f.confirmNew=null;drawAcctBox();drawProducts();return}
+      const near=findAccounts(q,3).filter(h=>h.score>=0.8);
       if(near.length&&!f.confirmNew){f.confirmNew=q;sg.innerHTML=`<div style="padding:10px 12px" class="small"><b style="color:var(--warn)">Similar accounts found.</b> Pick one if it's the same property:</div>`+near.map(h=>`<button type="button" data-k="${esc(h.key)}"><b>${esc(h.name)}</b> <span class="small muted">${esc(h.country||"")}</span></button>`).join("")+`<button type="button" class="new" data-new="1">It's a different property — create “${esc(q)}”</button>`;return}
       f.account={isNew:true,key:keyOf(q),name:q,country:"",city:"",group:"",hist:{}}}
     else{const a=allAccounts()[b.dataset.k];f.account=Object.assign({isNew:false},a);loadLocks(a.key).then(()=>{if(S.form===f)drawProducts()})}
@@ -419,6 +444,8 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(!f.category)errs.push("Choose Inbound or Outbound");
   if(!v("f-source"))errs.push("Choose the source channel");
   if(!v("f-genby"))errs.push("Add who generated the lead");
+  if(!v("f-reqdate"))errs.push("Add the date the requirement came in");else if(v("f-reqdate")>todayISO())errs.push("The requirement date can't be in the future");
+  if(!v("f-region"))errs.push("Choose the region");
   if(errs.length){msg.innerHTML=`<div class="notice bad">${errs.map(esc).join(" · ")}</div>`;return}
   if(!S.db){msg.innerHTML=`<div class="notice bad">The lead database isn't available. Sign in and reopen the page.</div>`;return}
   const a=f.account;const sales=isSales();
@@ -430,11 +457,12 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   btn.disabled=true;btn.textContent="Saving…";if(!sales){lsSet("ld.genby",v("f-genby"));lsSet("ld.dept",v("f-dept"))}
   try{
     const aref=S.db.doc("accounts/"+a.key);const ex=await aref.get();
-    if(!ex.exists)await aref.set({name:a.name,key:a.key,country:(a.country||"").trim(),city:(a.city||"").trim(),group:(a.group||"").trim(),domain:emailDomain(v("f-cemail")),createdAt:nowISO(),createdBy:S.uid||null,fromSheet:!!S.registry[a.key]});
+    if(!ex.exists||(ex.data().deleted&&!ex.data().mergedInto))await aref.set({name:a.name,key:a.key,country:(a.country||"").trim(),city:(a.city||"").trim(),group:(a.group||"").trim(),region:v("f-region"),domain:emailDomain(v("f-cemail")),createdAt:nowISO(),createdBy:S.uid||null,fromSheet:!!S.registry[a.key]});
     const ref=await nextRef();const t=nowISO();const ps=f.products.slice();
     await S.db.doc("leads/"+ref).set({ref,accountKey:a.key,accountName:a.name,country:(a.country||S.accounts[a.key]?.country||"").trim(),
         contact:{name:v("f-cname"),title:v("f-ctitle"),email:v("f-cemail"),phone:v("f-cphone")},products:ps,product:ps.join(", "),category:sales?"Outbound":f.category,source:v("f-source"),
         generatedBy:sales?S.myEng:v("f-genby"),department:sales?"Sales":v("f-dept"),rooms:+v("f-rooms")||null,pms:v("f-pms"),timeline:v("f-when"),preferred:sales?S.myEng:v("f-pref"),notes:v("f-notes"),
+        requirementDate:v("f-reqdate"),region:v("f-region"),
         status:"New",assignedTo:sales?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},histRepeat:ps.some(p=>productState(a.key,p).state==="hist"),
         log:[{t,by:"",byId:S.uid||null,a:"Lead submitted · "+ps.join(", ")+" (generated by "+v("f-genby")+")"}]});
     S.form=null;render();$("#submitMsg").innerHTML=`<div class="notice ok">Submitted <span class="mono">${ref}</span> with ${ps.length} product${ps.length>1?"s":""}. ${sales?"Back office will check it for duplicates; it then moves to Assigned in My leads.":"Back office will verify and assign it."}</div>`;scrollTo(0,0);
@@ -467,7 +495,7 @@ function qCard(l){const ch=dupChecks(l);const bad=ch.some(c=>c.lvl==="bad");cons
   return`<div class="qcard ${bad?"blockd":ch.length?"flag":""}">
    <div class="qtop"><span class="mono">${esc(l.ref)}</span><b>${esc(l.accountName)}</b><span class="muted">${esc(l.country||"")}</span><span class="sp"></span><span class="${stCls(l.status)}">${esc(l.status)}</span></div>
    <div class="row">${productsOf(l).map(p=>`<span class="chip">${esc(p)}</span>`).join("")}<span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span><span class="chip">${esc(l.source)}</span>${l.preferred?`<span class="chip">Prefers ${esc(l.preferred)}</span>`:""}</div>
-   <div class="kv"><span>Contact <b>${esc(l.contact?.name)}</b>${l.contact?.title?" · "+esc(l.contact.title):""}</span><span><b>${esc(l.contact?.email||l.contact?.phone||"")}</b></span><span>By <b>${esc(l.generatedBy)}</b>${l.department?" · "+esc(l.department):""}</span><span style="${hrs>(S.settings.slaVerifyHours||24)?"color:var(--bad)":""}">Waiting <b>${hrs<1?"<1h":hrs<48?Math.round(hrs)+"h":Math.round(hrs/24)+" days"}</b></span></div>
+   <div class="kv"><span>Requirement <b>${fmtD(reqDate(l))}</b></span><span>Region <b>${esc(regionOf(l))}</b></span><span>Contact <b>${esc(l.contact?.name)}</b>${l.contact?.title?" · "+esc(l.contact.title):""}</span><span><b>${esc(l.contact?.email||l.contact?.phone||"")}</b></span><span>By <b>${esc(l.generatedBy)}</b>${l.department?" · "+esc(l.department):""}</span><span style="${hrs>(S.settings.slaVerifyHours||24)?"color:var(--bad)":""}">Waiting <b>${hrs<1?"<1h":hrs<48?Math.round(hrs)+"h":Math.round(hrs/24)+" days"}</b></span></div>
    ${l.notes?`<div class="small">${esc(l.notes)}</div>`:""}
    ${ch.length?`<div class="view" style="gap:4px">${ch.map(c=>`<div class="notice ${c.lvl}" style="padding:6px 10px">${esc(c.msg)}</div>`).join("")}</div>`:`<div class="notice ok" style="padding:6px 10px">No duplicates found for this account and product.</div>`}
    <div class="row"><button class="btn pri sm" data-open="${esc(l.id)}">Review and assign</button></div></div>`}
@@ -498,7 +526,7 @@ function renderPipe(m){const isSales=S.role==="sales";if(!isSales&&!S.me)S.me="_
 function lcard(l){const stale=l.status==="Assigned"&&days(l.assignedAt)>(S.settings.slaContactDays||3);const qst=l.status==="Quotation Sent"&&days(l.stageAt?.["Quotation Sent"])>(S.settings.quoteStaleDays||14);
   const fu=l.nextFollowUp&&OPEN.includes(l.status)&&l.nextFollowUp<=new Date().toISOString().slice(0,10);
   return`<button class="lc" data-open="${esc(l.id)}"><span class="row" style="gap:6px"><span class="mono muted">${esc(l.ref)}</span><span class="sp"></span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span></span>
-   <b style="font-size:13.5px">${esc(l.accountName)}</b><span class="small muted">${esc(l.product)}${S.role!=="sales"&&S.me==="__all"?" · "+esc(l.assignedTo):""}</span>
+   <b style="font-size:13.5px">${esc(l.accountName)}</b><span class="small muted">${esc(regionOf(l))} · received ${fmtD(reqDate(l))}</span><span class="small muted">${esc(l.product)}${S.role!=="sales"&&S.me==="__all"?" · "+esc(l.assignedTo):""}</span>
    ${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
    ${stale?`<span class="late">No meeting yet · assigned ${Math.floor(days(l.assignedAt))} days ago</span>`:""}${qst?`<span class="late">Quote open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days</span>`:""}${fu?`<span class="late">Follow-up due ${esc(l.nextFollowUp)}</span>`:""}</button>`}
 
@@ -517,7 +545,8 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
    <div class="panel" style="padding:14px"><div class="timeline">
      <div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>
      <div><span>Contact</span><span>${esc(l.contact?.name)}${l.contact?.title?", "+esc(l.contact.title):""}<br><span class="mono">${esc(l.contact?.email||"")}</span> ${esc(l.contact?.phone||"")}</span></div>
-     <div><span>Generated by</span><span>${esc(l.generatedBy)}${l.department?" · "+esc(l.department):""} · ${fmtD(l.createdAt)}</span></div>
+     <div><span>Generated by</span><span>${esc(l.generatedBy)}${l.department?" · "+esc(l.department):""} · entered ${fmtD(l.createdAt)}</span></div>
+     <div id="detArea" style="display:contents"></div>
      ${l.rooms||l.pms||l.timeline?`<div><span>Qualification</span><span>${[l.rooms?l.rooms+" rooms":"",l.pms,l.timeline].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}
      ${l.notes?`<div><span>Requirement</span><span>${esc(l.notes)}</span></div>`:""}
      <div><span>Assigned to</span><span>${l.assignedTo?`<b>${esc(l.assignedTo)}</b> · ${fmtD(l.assignedAt)}${l.priority?" · "+esc(l.priority)+" priority":""}`:"Not assigned"}</span></div>
@@ -535,7 +564,17 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $("#dClose").onclick=closeDrawer;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeDrawer()};
   document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer)closeDrawer()};
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
-  fillNames();drawProdArea(l);drawActions(l)}
+  fillNames();drawDetails(l);drawProdArea(l);drawActions(l)}
+function drawDetails(l){const D=$("#detArea");if(!D)return;const can=canAct(l);
+  if(S.drawer.mode!=="details"){D.innerHTML=`<div><span>Requirement received</span><span>${fmtD(reqDate(l))}${l.requirementDate?"":` <span class="muted small">(entry date)</span>`}</span></div>
+    <div><span>Region</span><span>${esc(regionOf(l))}${!l.region&&regionOf(l)!=="Unassigned"?` <span class="muted small">(from country)</span>`:""}${can?` <button class="btn sm" id="detEdit" style="margin-left:6px">Edit date or region</button>`:""}</span></div>`;
+    $("#detEdit")?.addEventListener("click",()=>{S.drawer.mode="details";drawDetails(l)});return}
+  D.innerHTML=`<div><span>Requirement received</span><span><input id="dt-req" type="date" max="${todayISO()}" value="${esc(reqDate(l))}" style="width:auto"></span></div>
+    <div><span>Region</span><span class="row" style="gap:6px"><select id="dt-reg" style="width:auto">${opts(regionList(),regionOf(l)==="Unassigned"?"":regionOf(l),"Choose region")}</select><button class="btn sm pri" id="dt-save">Save</button><button class="btn sm" id="dt-x">Cancel</button></span></div>`;
+  $("#dt-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
+  $("#dt-save").onclick=async()=>{const d=$("#dt-req").value,r=$("#dt-reg").value;if(!d||d>todayISO()){toast("Pick a requirement date that isn't in the future");return}if(!r){toast("Choose a region");return}
+    const ch=[];if(d!==reqDate(l))ch.push("requirement date "+fmtD(d));if(r!==regionOf(l))ch.push("region "+r);if(!ch.length&&l.requirementDate&&l.region){S.drawer.mode=null;drawDrawer();return}
+    await patch(l,{requirementDate:d,region:r},"Updated "+(ch.join(" and ")||"details"))}}
 function fillNames(){const els=[...document.querySelectorAll("[data-uid]")];const ids=[...new Set(els.map(e=>e.dataset.uid))];if(!ids.length||!S.user)return;
   S.user.profiles(ids).then(ps=>{ids.forEach(id=>{S.names[id]=(ps[id]&&ps[id].name)||""});document.querySelectorAll("[data-uid]").forEach(e=>{const n=S.names[e.dataset.uid];e.textContent=n||e.dataset.fallback||"a team member"})}).catch(()=>{})}
 function canEditProducts(l){return OPEN.includes(l.status)&&canAct(l)&&(isBO()||l.status!=="New")}
@@ -558,7 +597,7 @@ function actor(){return S.role==="sales"?S.myEng:""}
 async function patch(l,data,logMsg,status){const t=nowISO();const body=Object.assign({},data,{updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:logMsg}]});
   if(status){body.status=status;body.stageAt=Object.assign({},l.stageAt||{},{[status]:t})}
   try{await S.db.doc("leads/"+l.id).update(body);S.drawer.mode=null;toast(logMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}}
-function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=S.role==="management"?"":`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or back office can update it.</div>`;return}const mode=S.drawer.mode==="prods"?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
+function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=S.role==="management"?"":`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or back office can update it.</div>`;return}const mode=["prods","details"].includes(S.drawer.mode)?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
   const inBO=l.status==="New"||l.status==="Info Needed";
   const amountForm=(title,withNo,noLabel)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">
     <div class="grid3"><label class="f">Amount <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,"AED")}</select></label><label class="f">Date<input id="a-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
@@ -610,14 +649,14 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=S.role=
     patch(l,{lost:null},"Reopened",back)});
   $("#fuSave")?.addEventListener("click",()=>{const d=$("#fu").value;patch(l,{nextFollowUp:d||null},d?"Follow-up set for "+d:"Follow-up cleared")})}
 function suggestOwner(l){const prev=S.leads.filter(x=>x.accountKey===l.accountKey&&x.assignedTo).map(x=>x.assignedTo);if(prev.length)return prev[0];
-  const h=Object.values(S.registry[l.accountKey]?.p||{}).map(x=>x.e).filter(e=>spNames().includes(e));if(h.length)return h[0];
+  const h=Object.values(histOf(l.accountKey)).map(x=>x.e).filter(e=>spNames().includes(e));if(h.length)return h[0];
   const byC={};S.leads.filter(x=>x.country&&x.country.toLowerCase()===(l.country||"").toLowerCase()&&x.assignedTo).forEach(x=>byC[x.assignedTo]=(byC[x.assignedTo]||0)+1);
   return Object.entries(byC).sort((a,b)=>b[1]-a[1])[0]?.[0]||""}
 
 /* ======================= 4. MANAGEMENT ======================= */
-function inPeriod(l){const d=new Date(l.createdAt),n=new Date();if(S.period==="all")return true;if(S.period==="month")return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();
+function inPeriod(l){const d=new Date(reqDate(l)+"T12:00:00"),n=new Date();if(S.period==="all")return true;if(S.period==="month")return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();
   if(S.period==="quarter")return d.getFullYear()===n.getFullYear()&&Math.floor(d.getMonth()/3)===Math.floor(n.getMonth()/3);return d.getFullYear()===n.getFullYear()}
-function renderMgmt(m){const all=S.leads.filter(inPeriod).filter(l=>S.catFilter==="All"||l.category===S.catFilter);
+function renderMgmt(m){const inReg=l=>!S.regFilter||regionOf(l)===S.regFilter;const all=S.leads.filter(inPeriod).filter(inReg).filter(l=>S.catFilter==="All"||l.category===S.catFilter);
   const valid=all.filter(l=>!["Duplicate","Rejected"].includes(l.status));
   const has=(l,s)=>!!l.stageAt?.[s];
   const F=[["Submitted",all.length],["Verified & assigned",valid.filter(l=>has(l,"Assigned")).length],["Meeting done",valid.filter(l=>has(l,"Meeting Done")).length],["Quotation sent",valid.filter(l=>has(l,"Quotation Sent")).length],["Won",valid.filter(l=>l.status==="Won").length]];
@@ -627,7 +666,7 @@ function renderMgmt(m){const all=S.leads.filter(inPeriod).filter(l=>S.catFilter=
   const dupRate=all.length?all.filter(l=>l.status==="Duplicate").length/all.length:0;
   const verH=valid.filter(l=>l.verifiedAt).map(l=>(new Date(l.verifiedAt)-new Date(l.createdAt))/36e5);const avgVer=verH.length?verH.reduce((a,b)=>a+b,0)/verH.length:null;
   const grp=(keyF)=>{const g={};valid.forEach(l=>{const ks=[].concat(keyF(l)||"—");ks.forEach(k=>{const o=g[k]||(g[k]={n:0,meet:0,quote:0,won:0,wonV:0,pipe:0,lost:0});o.n++;if(has(l,"Meeting Done"))o.meet++;if(has(l,"Quotation Sent"))o.quote++;if(l.status==="Won"){o.won++;o.wonV+=leadValue(l)}if(l.status==="Lost")o.lost++;if(["Meeting Done","Quotation Sent"].includes(l.status))o.pipe+=leadValue(l)})});return Object.entries(g).sort((a,b)=>b[1].wonV-a[1].wonV||b[1].n-a[1].n)};
-  const cat={Inbound:{n:0,v:0,w:0},Outbound:{n:0,v:0,w:0}};S.leads.filter(inPeriod).filter(l=>!["Duplicate","Rejected"].includes(l.status)).forEach(l=>{const c=cat[l.category]||cat.Inbound;c.n++;if(l.status==="Won"){c.w++;c.v+=leadValue(l)}});
+  const cat={Inbound:{n:0,v:0,w:0},Outbound:{n:0,v:0,w:0}};S.leads.filter(inPeriod).filter(inReg).filter(l=>!["Duplicate","Rejected"].includes(l.status)).forEach(l=>{const c=cat[l.category]||cat.Inbound;c.n++;if(l.status==="Won"){c.w++;c.v+=leadValue(l)}});
   const rep={};valid.filter(l=>l.assignedTo).forEach(l=>{const o=rep[l.assignedTo]||(rep[l.assignedTo]={a:0,open:0,stale:0,meet:0,quote:0,won:0,v:0,lost:0,ttq:[]});o.a++;if(OPEN.includes(l.status))o.open++;
     if(l.status==="Assigned"&&days(l.assignedAt)>(S.settings.slaContactDays||3))o.stale++;if(has(l,"Meeting Done"))o.meet++;if(has(l,"Quotation Sent")){o.quote++;o.ttq.push((new Date(l.stageAt["Quotation Sent"])-new Date(l.assignedAt||l.createdAt))/864e5)}if(l.status==="Won"){o.won++;o.v+=leadValue(l)}if(l.status==="Lost")o.lost++});
   const gen=grp(l=>l.generatedBy).slice(0,10);const inc=(S.settings.incentivePct||0)/100;
@@ -638,8 +677,9 @@ function renderMgmt(m){const all=S.leads.filter(inPeriod).filter(l=>S.catFilter=
   S.leads.filter(l=>l.status==="Quotation Sent"&&days(l.stageAt?.["Quotation Sent"])>(S.settings.quoteStaleDays||14)).forEach(l=>al.push(["warn",`${l.ref} · quote of ${fmtAED(leadValue(l))} open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days`,l]));
   const weeks=weeklySeries(12);
   m.innerHTML=`<section class="view">
-   <div class="vhead"><div><h2>Lead generation and conversion</h2><p>Live figures from leads entered in Lead Desk. The 2026 baseline below comes from the Excel workbook up to 20 Oct 2026.</p></div>
+   <div class="vhead"><div><h2>Lead generation and conversion</h2><p>Live figures from leads entered in Lead Desk, dated by when the requirement came in. The 2026 baseline below comes from the Excel workbook up to 20 Oct 2026.</p></div>
     <div class="row"><span class="seg" id="perSeg">${[["month","Month"],["quarter","Quarter"],["ytd","Year"],["all","All"]].map(([v,t])=>`<button data-v="${v}" aria-pressed="${S.period===v}">${t}</button>`).join("")}</span>
+    <select id="regF" style="width:auto">${opts(regionList().concat(["Unassigned"]),S.regFilter||"","All regions")}</select>
     <span class="seg" id="catF">${["All","Inbound","Outbound"].map(v=>`<button data-v="${v}" aria-pressed="${S.catFilter===v}">${v}</button>`).join("")}</span>
     ${S.downloads?`<button class="btn" id="csvBtn">Export CSV</button>`:""}</div></div>
    <div class="kpis">
@@ -656,6 +696,7 @@ function renderMgmt(m){const all=S.leads.filter(inPeriod).filter(l=>S.catFilter=
    </div>
    <div class="panel"><h3>Weekly leads vs target</h3>${weekChart(weeks,S.settings.weeklyTarget||25)}</div>
    <div class="panel"><h3>Needs attention <span class="chip">${al.length}</span></h3>${al.length?`<div class="alerts">${al.slice(0,12).map(([lv,t,l])=>`<button class="alert" data-open="${esc(l.id)}"><span class="dot" style="background:var(--${lv})"></span><span style="flex:1;min-width:0">${esc(t)}</span><span class="small muted">${esc(l.accountName)}</span></button>`).join("")}</div>`:`<p class="muted small">No overdue verifications, untouched assignments or stale quotations.</p>`}</div>
+   <div><h3 style="margin-bottom:8px">By region</h3>${grpTable(grp(l=>regionOf(l)),"Region",false)}</div>
    <div><h3 style="margin-bottom:8px">By source channel</h3>${grpTable(grp(l=>l.source),"Source",true)}</div>
    <div><h3 style="margin-bottom:8px">Sales engineer scorecard</h3><div class="tw"><table><thead><tr><th>Engineer</th><th class="num">Assigned</th><th class="num">Open</th><th class="num">No meeting &gt;${S.settings.slaContactDays||3}d</th><th class="num">Meetings</th><th class="num">Quotes</th><th class="num">Avg days to quote</th><th class="num">Won</th><th class="num">Won value</th><th class="num">Win rate</th></tr></thead><tbody>
     ${Object.entries(rep).sort((a,b)=>b[1].v-a[1].v).map(([n,o])=>`<tr><td>${esc(n)}</td><td class="num">${o.a}</td><td class="num">${o.open}</td><td class="num" style="${o.stale?"color:var(--bad);font-weight:600":""}">${o.stale}</td><td class="num">${o.meet}</td><td class="num">${o.quote}</td><td class="num">${o.ttq.length?(o.ttq.reduce((a,b)=>a+b,0)/o.ttq.length).toFixed(1):"—"}</td><td class="num">${o.won}</td><td class="num">${fmtAED(o.v)}</td><td class="num">${o.won+o.lost?Math.round(o.won/(o.won+o.lost)*100)+"%":"—"}</td></tr>`).join("")||`<tr><td colspan="10" class="empty">No assigned leads in this period.</td></tr>`}</tbody></table></div></div>
@@ -665,6 +706,7 @@ function renderMgmt(m){const all=S.leads.filter(inPeriod).filter(l=>S.catFilter=
   </section>`;
   $("#perSeg").onclick=e=>{const b=e.target.closest("button");if(b){S.period=b.dataset.v;render()}};
   $("#catF").onclick=e=>{const b=e.target.closest("button");if(b){S.catFilter=b.dataset.v;render()}};
+  $("#regF").onchange=e=>{S.regFilter=e.target.value;render()};
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
   $("#csvBtn")?.addEventListener("click",exportCSV)}
 function catBlock(a,b,lab,money){const t=a+b;const pa=t?a/t*100:50;return`<div style="margin-bottom:10px"><div class="legend" style="margin-bottom:5px"><span><i style="background:var(--inb)"></i>Inbound ${money?fmtAED(a):fmtN(a)}</span><span><i style="background:var(--outb)"></i>Outbound ${money?fmtAED(b):fmtN(b)}</span><span class="sp"></span><span>${lab}</span></div>
@@ -673,7 +715,7 @@ function grpTable(rows,label,showPipe){return`<div class="tw"><table><thead><tr>
   ${rows.map(([n,o])=>`<tr><td>${esc(n)}${showPipe?` <span class="chip ${catOf(n)==="Outbound"?"outb":"inb"}">${catOf(n)==="Outbound"?"Out":"In"}</span>`:""}</td><td class="num">${o.n}</td><td class="num">${o.meet}</td><td class="num">${o.quote}</td><td class="num">${o.won}</td><td class="num">${o.n?(o.won/o.n*100).toFixed(0)+"%":"—"}</td>${showPipe?`<td class="num">${fmtAED(o.pipe)}</td>`:""}<td class="num">${fmtAED(o.wonV)}</td></tr>`).join("")||`<tr><td colspan="8" class="empty">No leads in this period.</td></tr>`}</tbody></table></div>`}
 function weeklySeries(n){const out=[];const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));
   for(let i=n-1;i>=0;i--){const s=new Date(d);s.setDate(s.getDate()-7*i);const e=new Date(s);e.setDate(e.getDate()+7);
-    const ls=S.leads.filter(l=>{const c=new Date(l.createdAt);return c>=s&&c<e&&!["Duplicate","Rejected"].includes(l.status)});
+    const ls=S.leads.filter(l=>{const c=new Date(reqDate(l)+"T12:00:00");return c>=s&&c<e&&(!S.regFilter||regionOf(l)===S.regFilter)&&!["Duplicate","Rejected"].includes(l.status)});
     out.push({label:s.toLocaleDateString("en-GB",{day:"2-digit",month:"short"}),in:ls.filter(l=>l.category!=="Outbound").length,out:ls.filter(l=>l.category==="Outbound").length})}return out}
 function weekChart(ws,target){const W=760,H=200,pl=34,pb=26,pt=10;const mx=Math.max(target*1.2,...ws.map(w=>w.in+w.out),1);const step=Math.ceil(mx/4/5)*5||5;const top=step*4;
   const bw=(W-pl-10)/ws.length;const y=v=>pt+(H-pt-pb)*(1-v/top);
@@ -695,23 +737,26 @@ function baseline(){const h=S.history;if(!h)return"";const ms=Object.keys(h.lead
    <div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:520px;height:auto" role="img" aria-label="2026 monthly leads and order value">${g}${bars}${line}</svg></div>
    <div class="tw" style="margin-top:14px"><table><thead><tr><th>Source (sheet)</th><th class="num">Leads</th><th class="num">Orders</th><th class="num">Conv.</th><th class="num">Order value</th></tr></thead><tbody>
    ${src.map(([k,n])=>`<tr><td>${esc(k)} <span class="chip ${catOf(k)==="Outbound"?"outb":"inb"}">${catOf(k)==="Outbound"?"Out":"In"}</span></td><td class="num">${n}</td><td class="num">${h.ordersBySource[k]||0}</td><td class="num">${((h.ordersBySource[k]||0)/n*100).toFixed(1)}%</td><td class="num">${fmtAED(h.orderValueBySource[k]||0)}</td></tr>`).join("")}</tbody></table></div></div>`}
-async function exportCSV(){const cols=["ref","createdAt","accountName","country","product","category","source","generatedBy","department","contact.name","contact.email","contact.phone","status","assignedTo","priority","meeting.aed","quote.aed","quote.no","order.aed","order.no","order.date","lost.reason"];
-  const get=(o,p)=>p.split(".").reduce((a,k)=>a?.[k],o)??"";const q=v=>`"${String(v).replace(/"/g,'""')}"`;
+async function exportCSV(){const cols=["ref","requirementDate","createdAt","accountName","country","region","product","category","source","generatedBy","department","contact.name","contact.email","contact.phone","status","assignedTo","priority","meeting.aed","quote.aed","quote.no","order.aed","order.no","order.date","lost.reason"];
+  const get=(o,p)=>p==="region"?regionOf(o):p==="requirementDate"?reqDate(o):p.split(".").reduce((a,k)=>a?.[k],o)??"";const q=v=>`"${String(v).replace(/"/g,'""')}"`;
   const csv=[cols.join(",")].concat(S.leads.slice().sort((a,b)=>a.ref<b.ref?-1:1).map(l=>cols.map(c=>q(get(l,c))).join(","))).join("\n");
   try{await S.downloads.save({filename:`lead-desk-${new Date().toISOString().slice(0,10)}.csv`,data:new Blob([csv],{type:"text/csv"})})}catch(e){if(e?.code!=="cancelled")toast("Export didn't complete")}}
 
 /* ======================= 5. ACCOUNTS ======================= */
 function renderAccts(m){const prods=prodList().filter(p=>!p.repeatable).map(p=>p.name);const q=S.acctQ;
-  const accs=Object.values(allAccounts());let list=q?findAccounts(q,60):accs.sort((a,b)=>(b.live?1:0)-(a.live?1:0)||a.name.localeCompare(b.name)).slice(0,60);
+  const accs=Object.values(allAccounts());let list=q?findAccounts(q,60,true):accs.sort((a,b)=>(b.live?1:0)-(a.live?1:0)||a.name.localeCompare(b.name)).slice(0,60);
   const cell=(a,p)=>{const ls=leadsFor(a.key).filter(l=>productsOf(l).includes(p));let c="",t="";
     if(ls.some(l=>l.status==="Won")){c="won";t="Won"}else if(ls.some(l=>OPEN.includes(l.status))){c="open";t="Open"}else if(a.hist?.[p]){c="hist";t="In 2026 sheet "+a.hist[p].r}else if(ls.some(l=>l.status==="Lost")){c="lost";t="Lost"}
     return`<td class="c">${c?`<span class="mx ${c}" title="${esc(t)}"></span>`:""}</td>`};
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Accounts</h2><p>One row per property. ${fmtN(accs.length)} accounts, including ${fmtN(Object.keys(S.registry).length)} unique properties merged from the 2026 sheet. Empty cells show products not yet offered to that property.</p></div>
    <input id="acctQ" placeholder="Search accounts" value="${esc(q)}" style="max-width:280px"></div>
    <div class="legend"><span><i style="background:var(--ok)"></i>Won</span><span><i style="background:var(--accent)"></i>Open lead</span><span><i style="background:var(--warn)"></i>Logged in 2026 sheet</span><span><i style="background:var(--bad)"></i>Lost</span></div>
-   <div class="tw matrix"><table><thead><tr><th>Account</th><th>Country</th>${prods.map(p=>`<th class="c" style="writing-mode:vertical-rl;transform:rotate(180deg);height:120px;padding:8px 4px;white-space:nowrap">${esc(p)}</th>`).join("")}</tr></thead><tbody>
-   ${list.map(a=>`<tr><td style="white-space:nowrap">${esc(a.name)}${a.live?"":` <span class="chip">sheet</span>`}</td><td>${esc(a.country||"")}</td>${prods.map(p=>cell(a,p)).join("")}</tr>`).join("")||`<tr><td colspan="${prods.length+2}" class="empty">No accounts match.</td></tr>`}</tbody></table></div>
-   <p class="small muted">Showing up to 60 accounts. Search to find a specific property.</p></section>`;
+   <div class="tw matrix"><table><thead><tr><th>Account</th><th>Country</th><th class="num">Leads</th>${prods.map(p=>`<th class="c" style="writing-mode:vertical-rl;transform:rotate(180deg);height:120px;padding:8px 4px;white-space:nowrap">${esc(p)}</th>`).join("")}${isBO()?"<th></th>":""}</tr></thead><tbody>
+   ${list.map(a=>{const dup=isBO()&&likelyDuplicates(a,1).length;return`<tr><td style="white-space:nowrap">${esc(a.name)}${a.live?"":` <span class="chip">sheet</span>`}${dup?` <span class="chip" style="background:var(--warn-soft);color:var(--warn)">possible duplicate</span>`:""}</td><td>${esc(a.country||"")}</td><td class="num">${leadsFor(a.key).length}</td>${prods.map(p=>cell(a,p)).join("")}${isBO()?`<td><button class="btn sm" data-merge="${esc(a.key)}">Merge or delete</button></td>`:""}</tr>`}).join("")||`<tr><td colspan="${prods.length+4}" class="empty">No accounts match.</td></tr>`}</tbody></table></div>
+   <p class="small muted">Showing up to 60 accounts. Search to find a specific property.</p>
+   ${isBO()&&removedAccounts().length?`<div class="panel"><h3>Removed accounts</h3><p class="small muted" style="margin:0 0 8px">Restoring an account makes it searchable again. Leads already moved by a merge stay with the account they were moved to.</p><div class="alerts">${removedAccounts().slice(0,25).map(r=>`<div class="alert" style="cursor:default"><span style="flex:1;min-width:0"><b>${esc(r.name)}</b> <span class="small muted">${r.mergedInto?"merged into "+esc(r.mergedIntoName||r.mergedInto):"deleted"} · ${fmtD(r.deletedAt)}</span></span><button class="btn sm" data-restore="${esc(r.key)}">Restore</button></div>`).join("")}</div></div>`:""}</section>`;
+  m.querySelectorAll("[data-merge]").forEach(b=>b.onclick=()=>openMerge(b.dataset.merge));
+  m.querySelectorAll("[data-restore]").forEach(b=>b.onclick=async()=>{try{await S.db.doc("accounts/"+b.dataset.restore).delete();toast("Account restored")}catch(e){toast("Couldn't restore: "+(e.code||e.message))}});
   const inp=$("#acctQ");inp.oninput=()=>{S.acctQ=inp.value;clearTimeout(inp.t);inp.t=setTimeout(()=>{render();const i=$("#acctQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)}}
 
 /* ======================= 6. SETTINGS (editors) ======================= */
@@ -742,7 +787,8 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
     <label class="f">Days to first meeting<input id="s-cd" type="number" value="${st.slaContactDays}"></label><label class="f">Quote stale after (days)<input id="s-qd" type="number" value="${st.quoteStaleDays}"></label>
     <label class="f">Lead generator incentive %<input id="s-inc" type="number" step="0.1" value="${st.incentivePct}"></label>
     <label class="f">Departments (comma separated)<input id="s-dep" value="${esc(st.departments.join(", "))}"></label></div>
-    <button class="btn pri" id="setSave" type="button">Save sources, rates and targets</button></div></div>
+    <label class="f">Regions, one per line<textarea id="s-reg" rows="6">${esc(regionList().join("\n"))}</textarea></label>
+    <button class="btn pri" id="setSave" type="button">Save sources, regions, rates and targets</button></div></div>
   </form></section>`;
   bindUsers();
   const save=async(body,okMsg)=>{try{await S.db.doc("config/settings").update(body);toast(okMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}};
@@ -762,7 +808,51 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
     const fx={};lines("s-fx").forEach(l=>{const[k,v]=l.split("=").map(s=>s.trim());if(k&&+v>0)fx[k.toUpperCase()]=+v});fx.AED=1;
     const sources=uniqList(lines("s-src").map(l=>{const[n,c]=l.split("|").map(s=>s.trim());return{name:n,cat:/out/i.test(c||"")?"Outbound":"Inbound"}}),x=>x);
     await save({sources,fx,weeklyTarget:+$("#s-tg").value||25,slaVerifyHours:+$("#s-sla").value||24,slaContactDays:+$("#s-cd").value||3,quoteStaleDays:+$("#s-qd").value||14,incentivePct:+$("#s-inc").value||0,
-      departments:[...new Set($("#s-dep").value.split(",").map(s=>s.trim()).filter(Boolean))]},"Settings saved")}}
+      departments:[...new Set($("#s-dep").value.split(",").map(s=>s.trim()).filter(Boolean))],regions:uniqList(lines("s-reg").map(n=>({name:n})),x=>x).map(x=>x.name)},"Settings saved")}}
+/* ---------- merge or delete a duplicate account (back office) ---------- */
+function likelyDuplicates(a,limit=6){const n=normTxt(a.name);if(n.length<3)return[];const out=[];const A=allAccounts();
+  for(const b of Object.values(A)){if(b.key===a.key)continue;const m=normTxt(b.name);if(!m)continue;let sc=0;
+    if(m===n)sc=1;else if(m.startsWith(n+" ")||n.startsWith(m+" "))sc=.9;else if(m.slice(0,3)===n.slice(0,3)&&Math.abs(m.length-n.length)<8){const f=similar(a.key,b.key);if(f>=.82)sc=f}
+    if(sc&&(!a.country||!b.country||sc>=.95||normTxt(a.country)===normTxt(b.country)||guessRegion(a.country)===guessRegion(b.country)))out.push([sc,b])}
+  return out.sort((x,y)=>y[0]-x[0]).slice(0,limit).map(x=>x[1])}
+function openMerge(key){S.merge={key,target:null,armed:null,q:""};drawMerge()}
+function closeMerge(){S.merge=null;$("#drawerHost").innerHTML=""}
+function drawMerge(){const mg=S.merge;if(!mg)return;const A=allAccounts();const a=A[mg.key];if(!a){closeMerge();return}
+  const ls=leadsFor(a.key);const hist=Object.keys(a.hist||{});const t=mg.target&&A[mg.target];
+  const card=(x,lab)=>`<div class="acct"><div style="flex:1;min-width:0"><div class="small muted">${lab}</div><b>${esc(x.name)}</b> <span class="small muted">${esc(x.country||"")}</span>
+    <div class="small muted">${leadsFor(x.key).length} lead(s) in Lead Desk${Object.keys(x.hist||{}).length?` · ${Object.keys(x.hist).length} product(s) in the 2026 sheet`:""}</div></div></div>`;
+  const dups=likelyDuplicates(a);const hits=mg.q?findAccounts(mg.q,8,true).filter(h=>h.key!==a.key):[];
+  const pick=list=>list.map(h=>`<button type="button" class="alert" data-pick="${esc(h.key)}"><span style="flex:1;min-width:0"><b>${esc(h.name)}</b> <span class="small muted">${esc(h.country||"")} · ${leadsFor(h.key).length} lead(s)</span></span><span class="chip">${mg.target===h.key?"selected":"choose"}</span></button>`).join("");
+  $("#drawerHost").innerHTML=`<div class="scrim" id="mScrim"><aside class="drawer" role="dialog" aria-modal="true" aria-label="Merge or delete account">
+   <div class="row"><h2 style="flex:1">Merge or delete account</h2><button class="btn sm" id="mClose">Close</button></div>
+   ${card(a,"Account to remove")}
+   ${ls.length?`<div class="small muted">Leads on this account: ${ls.slice(0,8).map(l=>`<span class="mono">${esc(l.ref)}</span>`).join(", ")}${ls.length>8?" and "+(ls.length-8)+" more":""}</div>`:""}
+   <div class="panel" style="padding:14px;display:grid;gap:10px"><h3>Merge into the account to keep</h3>
+     <p class="small muted" style="margin:0">All leads move to the account you keep, and its product history includes this account's 2026 sheet entries. The removed name can't be created again; typing it on the New lead form selects the kept account.</p>
+     ${dups.length?`<div class="small"><b>Likely duplicates</b></div><div class="alerts">${pick(dups)}</div>`:`<div class="small muted">No obvious duplicates found. Search for the account to keep.</div>`}
+     <label class="f">Search for the account to keep<input id="mq" autocomplete="off" value="${esc(mg.q)}" placeholder="Property name or country"></label>
+     ${hits.length?`<div class="alerts">${pick(hits)}</div>`:mg.q?`<div class="small muted">No matching account.</div>`:""}
+     ${t?card(t,"Account to keep"):""}
+     <div class="row"><button class="btn pri" id="mDo" ${t?"":"disabled"}>${mg.armed==="merge"?`Confirm: move ${ls.length} lead(s) and remove “${esc(a.name)}”`:"Merge into selected account"}</button>${mg.armed==="merge"?`<button class="btn" id="mUndoArm">Cancel</button>`:""}</div>
+     <div id="mMsg" class="small"></div></div>
+   <div class="panel" style="padding:14px;display:grid;gap:10px"><h3>Delete without merging</h3>
+     ${ls.length?`<div class="notice warn">This account has ${ls.length} lead(s), so it can't be deleted on its own. Merge it into the right account instead, so the leads aren't left without an account.</div>`
+       :`<p class="small muted" style="margin:0">Use this for an account created by mistake. It has no leads, so nothing else changes.</p><div><button class="btn bad" id="mDel">${mg.armed==="del"?`Confirm: delete “${esc(a.name)}”`:"Delete account"}</button></div>`}
+   </div></aside></div>`;
+  $("#mClose").onclick=closeMerge;$("#mScrim").onclick=e=>{if(e.target.id==="mScrim")closeMerge()};
+  const mq=$("#mq");mq.oninput=()=>{mg.q=mq.value;clearTimeout(mq.t);mq.t=setTimeout(()=>{drawMerge();const i=$("#mq");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)};
+  document.querySelectorAll("#drawerHost [data-pick]").forEach(b=>b.onclick=()=>{mg.target=b.dataset.pick;mg.armed=null;drawMerge()});
+  $("#mUndoArm")?.addEventListener("click",()=>{mg.armed=null;drawMerge()});
+  $("#mDo").onclick=async()=>{if(!t)return;if(mg.armed!=="merge"){mg.armed="merge";drawMerge();return}
+    const btn=$("#mDo");btn.disabled=true;btn.textContent="Merging…";
+    try{await mergeAccount(a,t);toast(`Merged “${a.name}” into ${t.name}`);closeMerge()}catch(e){$("#mMsg").innerHTML=`<span style="color:var(--bad)">Couldn't finish the merge (${esc(e.code||e.message)}). Leads already moved stay moved; run the merge again to finish.</span>`;btn.disabled=false;btn.textContent="Try again"}};
+  $("#mDel")?.addEventListener("click",async()=>{if(mg.armed!=="del"){mg.armed="del";drawMerge();return}
+    try{await S.db.doc("accounts/"+a.key).set({name:a.name,key:a.key,country:a.country||"",deleted:true,deletedAt:nowISO(),deletedBy:S.uid||null});toast(`Deleted “${a.name}”`);closeMerge()}catch(e){toast("Couldn't delete: "+(e.code||e.message))}})}
+async function mergeAccount(src,tgt){const t=nowISO();
+  for(const l of leadsFor(src.key)){await S.db.doc("leads/"+l.id).update({accountKey:tgt.key,accountName:tgt.name,country:l.country||tgt.country||"",updatedAt:t,
+    log:[...(l.log||[]),{t,by:"",byId:S.uid||null,a:`Account merged: “${src.name}” into “${tgt.name}”`}]})}
+  await S.db.doc("accounts/"+src.key).set({name:src.name,key:src.key,country:src.country||"",deleted:true,mergedInto:tgt.key,mergedIntoName:tgt.name,movedLeads:leadsFor(src.key).map(l=>l.id),deletedAt:t,deletedBy:S.uid||null})}
+
 function usersPanel(){const mem=Object.entries(S.users);const mapped=new Set(mem.filter(([,u])=>u.engineer).map(([,u])=>nk(u.engineer)));
   return`<div class="panel"><div class="row" style="margin-bottom:6px"><h3>Users and access</h3><span class="chip">${mem.length+(window.LD_HOSTED?0:1)} users</span></div>
    <p class="small muted" style="margin:0 0 12px;max-width:80ch">${window.LD_HOSTED?"Only people on this list can sign in. Add their work email and role; they sign in with a link sent to that email. Sales engineers only ever see the leads assigned to their linked name.":"Only people on this list can use Lead Desk; everyone else sees an access-denied page. People sign in with their claude.ai account. In the page's Share menu, give back-office users <b>Editor</b> access and sales engineers and management <b>Contributor</b> access."}</p>
