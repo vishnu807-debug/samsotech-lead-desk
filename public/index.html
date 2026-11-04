@@ -82,6 +82,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .sp{flex:1}
 .chip{display:inline-flex;align-items:center;gap:4px;font:500 11.5px var(--f-body);padding:2px 8px;border-radius:20px;background:var(--sunk);color:var(--muted);white-space:nowrap;letter-spacing:.01em}
+.chip.m-on{background:var(--accent-soft);color:var(--accent)} .chip.m-site{background:var(--ok-soft);color:var(--ok)}
 .chip.inb{background:var(--inb-soft);color:var(--inb)} .chip.outb{background:var(--outb-soft);color:var(--outb)}
 .st{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:4px;white-space:nowrap}
 .st-New{background:var(--accent-soft);color:var(--accent)} .st-Info{background:var(--warn-soft);color:var(--warn)}
@@ -183,6 +184,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="new" role="tab">New lead</button>
       <button data-tab="bo" role="tab">Back office <span class="count" id="c-bo" hidden></span></button>
       <button data-tab="pipe" role="tab">My pipeline</button>
+      <button data-tab="meet" role="tab">Meetings</button>
       <button data-tab="mgmt" role="tab">Management</button>
       <button data-tab="accts" role="tab">Accounts</button>
       <button data-tab="set" role="tab">Products &amp; settings</button>
@@ -213,6 +215,9 @@ function guessRegion(loc){const s=String(loc||"").toLowerCase().replace(/\s+/g,"
 const regionList=()=>(S.settings.regions&&S.settings.regions.length?S.settings.regions:DEFAULTS.regions);
 const regionOf=l=>l.region||guessRegion(l.country)||"Unassigned";
 const todayISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const MEET_TYPES=["New lead meeting","Follow-up meeting"];
+function meetingsOf(l){if(Array.isArray(l.meetings))return l.meetings;
+  return l.meeting?[{id:"m0",date:(l.meeting.date||"").slice(0,10),mode:l.meeting.mode||"",type:"New lead meeting",products:productsOf(l),notes:l.meeting.notes||"",legacy:true}]:[]}
 const reqDate=l=>l.requirementDate||(l.createdAt||"").slice(0,10);
 const OPEN=["New","Info Needed","Assigned","Meeting Done","Quotation Sent","On Hold"];
 const BLOCKING=OPEN.concat(["Won"]);
@@ -221,7 +226,7 @@ const STOP=new Set(["the","hotel","hotels","and","by","resort","resorts","spa","
 const S={settings:DEFAULTS,registry:{},history:null,accounts:{},leads:[],leadMap:{},loaded:{leads:false,accounts:false},
   uid:null,canEdit:false,canWrite:null,db:null,user:null,downloads:null,tab:"new",period:"ytd",catFilter:"All",
   me:lsGet("ld.me")||"", form:null, drawer:null, acctQ:"", pq:"", users:{}, usersLoaded:false, role:null, myEng:"", isOwner:false, myName:"", names:{}, extLocks:{}};
-const TABS={backoffice:["new","bo","pipe","mgmt","accts","set"],management:["mgmt","pipe","accts"],sales:["pipe","new"]};
+const TABS={backoffice:["new","bo","pipe","meet","mgmt","accts","set"],management:["mgmt","meet","pipe","accts"],sales:["pipe","meet","new"]};
 const isSales=()=>S.role==="sales";
 async function loadLocks(key){if(!window.LD_HOSTED||isBO()||!key)return;try{const{data}=await window.__sb.rpc("product_locks",{p_account:key});if(data)S.extLocks[key]=data}catch(e){}}
 const ROLE_LABEL={backoffice:"Back office",management:"Management",sales:"Sales engineer"};
@@ -300,7 +305,7 @@ function dupChecks(l){const out=[];const others=S.leads.filter(x=>x.id!==l.id);
 
 /* ---------- boot ---------- */
 async function boot(){
-  bindTabs();const hash=location.hash.slice(1);if(["new","bo","pipe","mgmt","accts","set"].includes(hash))S.tab=hash;
+  bindTabs();const hash=location.hash.slice(1);if(["new","bo","pipe","meet","mgmt","accts","set"].includes(hash)){S.tab=hash;S.tabChosen=true}
   const [db,user,downloads]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("downloads")]);
   S.db=db;S.user=user;S.downloads=downloads;
   if(user){const me=await user.me();S.uid=me.id;S.isOwner=me.isOwner;S.myName=me.name;S.canEdit=await user.canEdit();S.canWrite=await user.can("data.write")}
@@ -316,7 +321,7 @@ async function boot(){
     if(!q.metadata.fromCache){S.loaded.leads=true;clearTimeout(timer);if($("#banner").textContent.includes("Still waiting"))$("#banner").innerHTML=""}softRender()},e=>{clearTimeout(timer);errH(e)});
   render();
 }
-function bindTabs(){$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;S.tab=b.dataset.tab;try{history.replaceState(null,"","#"+S.tab)}catch(_){location.hash=S.tab}render()});
+function bindTabs(){$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;S.tab=b.dataset.tab;S.tabChosen=true;try{history.replaceState(null,"","#"+S.tab)}catch(_){location.hash=S.tab}render()});
   window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&h!==S.tab&&document.querySelector(`[data-tab="${h}"]`)){S.tab=h;render()}})}
 
 /* full render on tab switch; soft render on data change keeps forms intact */
@@ -325,14 +330,14 @@ function render(){const m=$("#main");
   if(!S.usersLoaded){m.innerHTML=`<div class="panel empty">Checking your access…</div>`;$("#tabs").hidden=true;return}
   if(!S.role){$("#tabs").hidden=true;$("#who").innerHTML="";m.innerHTML=`<section class="view" style="max-width:560px;margin:40px auto"><div class="panel" style="padding:28px;display:grid;gap:10px"><h2>You don't have access yet</h2>
     <p class="muted" style="margin:0">${S.uid?`You're signed in${S.myName?" as <b>"+esc(S.myName)+"</b>":""}, but you aren't on the Lead Desk user list.`:"Lead Desk couldn't identify your account."} Ask a back-office user to add you under Products &amp; settings → Users and access, then reload this page.</p>${window.LD_HOSTED?`<div><button class="btn" onclick="window.__signOut()">Sign out</button></div>`:""}</div></section>`;return}
-  const allowed=TABS[S.role];if(!allowed.includes(S.tab))S.tab=allowed[0];
+  const allowed=TABS[S.role];if(!S.tabChosen||!allowed.includes(S.tab)){S.tab=allowed[0];S.tabChosen=true}
   $("#tabs").hidden=allowed.length<2;
   document.querySelectorAll("#tabs button").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab)});
   const pt=document.querySelector('#tabs [data-tab="pipe"]');pt.textContent=S.role==="sales"?"My leads":S.role==="management"?"Team pipeline":"Pipelines";
   $("#who").innerHTML=`<span class="chip">${esc(ROLE_LABEL[S.role])}${S.role==="sales"&&S.myEng?" · "+esc(S.myEng):""}</span>`+(S.myName?` <span class="small muted">${esc(S.myName)}</span>`:"")+(window.LD_HOSTED?` <button class="btn sm" onclick="window.__changePassword()">Password</button> <button class="btn sm" onclick="window.__signOut()">Sign out</button>`:"");
   $("#banner").querySelector("[data-perm]")?.remove();
   if(isBO()&&!S.canEdit&&!S.isOwner)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
-({new:renderNew,bo:renderBO,pipe:renderPipe,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
+({new:renderNew,bo:renderBO,pipe:renderPipe,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
 function softRender(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm"))render();else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
 function updateCounts(){if(!isBO()){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
@@ -550,7 +555,8 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      ${l.rooms||l.pms||l.timeline?`<div><span>Qualification</span><span>${[l.rooms?l.rooms+" rooms":"",l.pms,l.timeline].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}
      ${l.notes?`<div><span>Requirement</span><span>${esc(l.notes)}</span></div>`:""}
      <div><span>Assigned to</span><span>${l.assignedTo?`<b>${esc(l.assignedTo)}</b> · ${fmtD(l.assignedAt)}${l.priority?" · "+esc(l.priority)+" priority":""}`:"Not assigned"}</span></div>
-     ${money(l.meeting,"Meeting done")}${money(l.quote,"Quotation")}${money(l.order,"Order")}
+     ${money(l.meeting,"Deal estimate")}
+     ${meetingsOf(l).length?`<div><span>Meetings (${meetingsOf(l).length})</span><span style="display:grid;gap:4px">${meetingsOf(l).slice().sort((a,b)=>a.date<b.date?1:-1).map(x=>`<span>${fmtD(x.date)} · ${x.mode?`<span class="chip ${x.mode==="Onsite"?"m-site":"m-on"}">${esc(x.mode)}</span>`:`<span class="chip">mode not recorded</span>`} ${esc(x.type||"")}<br><span class="small muted">${esc((x.products||[]).join(", "))}${x.notes?" · "+esc(x.notes):""}${x.by?" · "+esc(x.by):""}</span></span>`).join("")}</span></div>`:""}${money(l.quote,"Quotation")}${money(l.order,"Order")}
      ${l.lost?`<div><span>Lost reason</span><span>${esc(l.lost.reason)}${l.lost.notes?" · "+esc(l.lost.notes):""}</span></div>`:""}
      ${l.dupOf?`<div><span>Duplicate of</span><span class="mono">${esc(l.dupOf)}</span></div>`:""}
      ${l.nextFollowUp?`<div><span>Next follow-up</span><span>${esc(l.nextFollowUp)}</span></div>`:""}
@@ -599,13 +605,31 @@ async function patch(l,data,logMsg,status){const t=nowISO();const body=Object.as
   try{await S.db.doc("leads/"+l.id).update(body);S.drawer.mode=null;toast(logMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}}
 function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=S.role==="management"?"":`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or back office can update it.</div>`;return}const mode=["prods","details"].includes(S.drawer.mode)?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
   const inBO=l.status==="New"||l.status==="Info Needed";
-  const amountForm=(title,withNo,noLabel)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">
+  const meetFields=()=>{const first=!meetingsOf(l).length;const lp=productsOf(l);const extra=prodList().map(p=>p.name).filter(n=>!lp.includes(n));
+    return`<div class="grid2"><div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">Meeting held <span class="req">*</span><span class="seg" id="mt-mode"><button type="button" data-v="Online">Online</button><button type="button" data-v="Onsite">Onsite</button></span></div>
+      <label class="f">Meeting type<select id="mt-type">${opts(MEET_TYPES,first?"New lead meeting":"Follow-up meeting")}</select></label></div>
+      <div class="f" style="display:grid;gap:6px;font-size:12.5px;font-weight:500;color:var(--muted)">Products discussed <span class="req">*</span>
+        <div class="row" style="gap:6px" id="mt-prods">${lp.map(n=>`<label class="pchk sel" style="padding:5px 9px"><input type="checkbox" data-mp="${esc(n)}" checked>${esc(n)}</label>`).join("")}</div>
+        ${extra.length?`<select id="mt-add" style="max-width:320px">${opts(extra,"","+ Another product discussed")}</select>`:""}</div>`};
+  const bindMeet=()=>{let mode="";$("#mt-mode").onclick=e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.v;$("#mt-mode").dataset.v=mode;document.querySelectorAll("#mt-mode button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===mode))};
+    $("#mt-add")?.addEventListener("change",e=>{const n=e.target.value;if(!n)return;const ps=productState(l.accountKey,n,l.id);if(ps.state==="blocked"){toast(`${n} is already ${ps.msg}`);e.target.value="";return}
+      $("#mt-prods").insertAdjacentHTML("beforeend",`<label class="pchk sel" style="padding:5px 9px"><input type="checkbox" data-mp="${esc(n)}" checked>${esc(n)} <small style="display:inline">(new)</small></label>`);e.target.querySelector(`option[value="${CSS.escape(n)}"]`)?.remove();e.target.value=""});
+    $("#mt-prods").onchange=e=>{const c=e.target.closest("input");if(c)c.closest("label").classList.toggle("sel",c.checked)}};
+  const readMeet=(date,notes)=>{const mode=$("#mt-mode").dataset.v||"";const products=[...document.querySelectorAll("#mt-prods input:checked")].map(c=>c.dataset.mp);
+    if(!mode)return{err:"Choose whether the meeting was Online or Onsite."};if(!products.length)return{err:"Tick at least one product discussed."};
+    if(!date||date>todayISO())return{err:"Pick the meeting date (not in the future)."};
+    return{m:{id:"m"+Date.now().toString(36),date,mode,type:$("#mt-type").value,products,notes,by:actor(),byId:S.uid||null,at:nowISO()}}};
+  const meetBody=(m)=>{const lp=productsOf(l);const add=m.products.filter(n=>!lp.includes(n));const body={meetings:[...meetingsOf(l).map(({legacy,...x})=>x),m]};
+    if(add.length){const all=lp.concat(add);body.products=all;body.product=all.join(", ")}return{body,add}};
+  const amountForm=(title,withNo,noLabel,withMeet)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withMeet?meetFields():""}
     <div class="grid3"><label class="f">Amount <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,"AED")}</select></label><label class="f">Date<input id="a-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
     ${withNo?`<label class="f">${noLabel}<input id="a-no"></label>`:""}<label class="f">Notes<input id="a-notes"></label><div class="small muted" id="a-aed"></div>
     <div class="row"><button class="btn pri" id="a-save">Save</button><button class="btn" id="a-cancel">Cancel</button></div></div></div>`;
   const bindAmount=(field,status,msg)=>{const upd=()=>{const v=+$("#a-val").value;$("#a-aed").textContent=v?"= "+fmtAED(toAED(v,$("#a-cur").value)):""};$("#a-val").oninput=upd;$("#a-cur").onchange=upd;$("#a-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};
     $("#a-save").onclick=async()=>{const v=+$("#a-val").value;if(!(v>0)){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Enter the amount. It's required at this stage.</span>`;return}
       const c=$("#a-cur").value;const o={value:v,currency:c,aed:toAED(v,c),date:$("#a-date").value,notes:$("#a-notes").value.trim()};if($("#a-no"))o.no=$("#a-no").value.trim();
+      if(field==="meeting"){const r=readMeet(o.date,o.notes);if(r.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
+        o.mode=r.m.mode;const{body,add}=meetBody(r.m);body.meeting=o;await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")} · estimate ${fmtAED(o.aed)}${add.length?" · products added: "+add.join(", "):""}`,status);return}
       await patch(l,{[field]:o},`${msg} · ${fmtAED(o.aed)}`,status)}};
   if(inBO){
     if(!isBO()){A.innerHTML=`<div class="notice warn">Waiting for back office to verify and assign.</div>`;return}
@@ -624,7 +648,15 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=S.role=
     $("#v-save").onclick=()=>{const who=$("#v-sp").value;if(!who){toast("Choose a sales engineer");return}const t=nowISO();
       patch(l,{assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t},`Verified and assigned to ${who}`,"Assigned")};
     $("#v-info").onclick=()=>{S.drawer.mode="info";drawActions(l)};$("#v-dup").onclick=()=>{S.drawer.mode="dup";drawActions(l)};$("#v-rej").onclick=()=>{S.drawer.mode="rej";drawActions(l)};return}
-  if(mode==="meet"){A.innerHTML=amountForm("Meeting done · estimated deal value");bindAmount("meeting","Meeting Done","Meeting done");return}
+  if(mode==="meet"){A.innerHTML=amountForm("Meeting done · estimated deal value",false,"",true);bindAmount("meeting","Meeting Done","Meeting done");bindMeet();return}
+  if(mode==="logmeet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log a meeting</h3><div style="display:grid;gap:10px">${meetFields()}
+      <div class="grid2"><label class="f">Meeting date <span class="req">*</span><input id="lm-date" type="date" max="${todayISO()}" value="${todayISO()}"></label><label class="f">Updated deal estimate (optional)<input id="lm-val" type="number" min="0" step="0.01" placeholder="AED"></label></div>
+      <label class="f">Notes<input id="lm-notes" placeholder="What was discussed, next step"></label><div class="small" id="lm-msg"></div>
+      <div class="row"><button class="btn pri" id="lm-save">Save meeting</button><button class="btn" id="lm-x">Cancel</button></div></div></div>`;
+    bindMeet();$("#lm-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
+    $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
+      const{body,add}=meetBody(r.m);const v=+$("#lm-val").value;if(v>0)body.meeting=Object.assign({},l.meeting||{},{value:v,currency:"AED",aed:Math.round(v),date:r.m.date,mode:r.m.mode});
+      await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${v>0?" · estimate "+fmtAED(v):""}${add.length?" · products added: "+add.join(", "):""}`)};return}
   if(mode==="quote"){A.innerHTML=amountForm("Quotation sent · quoted value",true,"Quotation number");bindAmount("quote","Quotation Sent","Quotation sent");return}
   if(mode==="won"){A.innerHTML=amountForm("Order closed · order value",true,"PO / order number");bindAmount("order","Won","Order won");return}
   if(mode==="lost"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Mark as lost</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="l-r">${opts(["Price","Went with competitor","No budget","No response","Project cancelled","Not a fit","Other"],"","Choose")}</select></label><label class="f">Details / competitor<input id="l-n"></label><div class="row"><button class="btn bad" id="l-save">Mark lost</button><button class="btn" id="l-cancel">Cancel</button></div></div></div>`;
@@ -632,7 +664,8 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=S.role=
   if(mode==="reassign"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Reassign</h3><div class="row"><select id="re-sp" style="flex:1">${opts(sp,l.assignedTo)}</select><button class="btn pri" id="re-save">Reassign</button><button class="btn" id="re-cancel">Cancel</button></div></div>`;
     $("#re-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#re-save").onclick=()=>{const w=$("#re-sp").value;patch(l,{assignedTo:w,assignedAt:nowISO()},`Reassigned from ${l.assignedTo} to ${w}`)};return}
   const s=l.status;const b=[];
-  if(["Assigned","On Hold"].includes(s))b.push(`<button class="btn pri" data-m="meet">Meeting done</button>`);
+  if(["Assigned","On Hold"].includes(s)&&!meetingsOf(l).length)b.push(`<button class="btn pri" data-m="meet">Meeting done</button>`);
+  if((meetingsOf(l).length||["Meeting Done","Quotation Sent","Won"].includes(s))&&(OPEN.includes(s)||s==="Won"))b.push(`<button class="btn ${s==="On Hold"?"pri":""}" data-m="logmeet">Log a meeting</button>`);
   if(["Assigned","Meeting Done","On Hold"].includes(s))b.push(`<button class="btn ${s==="Meeting Done"?"pri":""}" data-m="quote">Quotation sent</button>`);
   if(["Meeting Done","Quotation Sent","On Hold"].includes(s))b.push(`<button class="btn ok" data-m="won">Order won</button>`);
   if(["Quotation Sent"].includes(s))b.push(`<button class="btn" data-m="quote">Revise quotation</button>`);
@@ -652,6 +685,53 @@ function suggestOwner(l){const prev=S.leads.filter(x=>x.accountKey===l.accountKe
   const h=Object.values(histOf(l.accountKey)).map(x=>x.e).filter(e=>spNames().includes(e));if(h.length)return h[0];
   const byC={};S.leads.filter(x=>x.country&&x.country.toLowerCase()===(l.country||"").toLowerCase()&&x.assignedTo).forEach(x=>byC[x.assignedTo]=(byC[x.assignedTo]||0)+1);
   return Object.entries(byC).sort((a,b)=>b[1]-a[1])[0]?.[0]||""}
+
+/* ======================= MEETINGS ======================= */
+function monthMeetings(month){const out=[];const isSales=S.role==="sales";
+  for(const l of S.leads){if(isSales&&nk(l.assignedTo)!==nk(S.myEng))continue;
+    for(const m of meetingsOf(l))if((m.date||"").slice(0,7)===month)out.push({m,l})}
+  return out.sort((a,b)=>a.m.date<b.m.date?1:a.m.date>b.m.date?-1:a.l.ref<b.l.ref?-1:1)}
+function renderMeet(m){const isSales=S.role==="sales";const month=S.mMonth||todayISO().slice(0,7);S.mMonth=month;
+  const F=S.mf||(S.mf={eng:"",cat:"All",mode:"All",type:"All"});
+  let rows=monthMeetings(month);const allMonth=rows.length;
+  rows=rows.filter(({m:x,l})=>(!F.eng||l.assignedTo===F.eng)&&(F.cat==="All"||l.category===F.cat)&&(F.mode==="All"||x.mode===F.mode)&&(F.type==="All"||x.type===F.type));
+  const cnt=f=>rows.filter(f).length;const isOn=r=>r.m.mode==="Online",isSite=r=>r.m.mode==="Onsite",isIn=r=>r.l.category!=="Outbound",isOut=r=>r.l.category==="Outbound",isNew=r=>r.m.type==="New lead meeting",isFu=r=>r.m.type==="Follow-up meeting";
+  const mName=new Date(month+"-15").toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  const byEng={};rows.forEach(r=>{const k=r.l.assignedTo||"—";const o=byEng[k]||(byEng[k]={n:0,on:0,site:0,nw:0,fu:0,inb:0,outb:0,leads:new Set()});o.n++;if(isOn(r))o.on++;if(isSite(r))o.site++;if(isNew(r))o.nw++;if(isFu(r))o.fu++;if(isOut(r))o.outb++;else o.inb++;o.leads.add(r.l.id)});
+  const byProd={};rows.forEach(r=>(r.m.products||[]).forEach(p=>{const o=byProd[p]||(byProd[p]={n:0,on:0,site:0,nw:0,fu:0});o.n++;if(isOn(r))o.on++;if(isSite(r))o.site++;if(isNew(r))o.nw++;if(isFu(r))o.fu++}));
+  const seg=(id,vals,cur)=>`<span class="seg" id="${id}">${vals.map(v=>`<button data-v="${v}" aria-pressed="${cur===v}">${v}</button>`).join("")}</span>`;
+  m.innerHTML=`<section class="view">
+   <div class="vhead"><div><h2>Meetings · ${esc(mName)}</h2><p>${isSales?"Your meetings this month.":"Every meeting logged by the sales team."} Each meeting is counted separately, so a lead with three meetings counts three times. Log meetings from a lead with <b>Meeting done</b> or <b>Log a meeting</b>.</p></div>
+    <div class="row"><input id="mMonth" type="month" value="${month}" max="${todayISO().slice(0,7)}" style="width:auto">
+     ${isSales?"":`<select id="mEng" style="width:auto">${opts(spNames(),F.eng,"All engineers")}</select>`}
+     ${S.downloads?`<button class="btn" id="mCsv">Export CSV</button>`:""}</div></div>
+   <div class="row">${seg("mCat",["All","Inbound","Outbound"],F.cat)}${seg("mMode",["All","Online","Onsite"],F.mode)}<select id="mType" style="width:auto"><option value="All">All meeting types</option>${MEET_TYPES.map(t=>`<option${F.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
+   <div class="kpis">
+    <div class="kpi"><div class="l">Meetings</div><div class="v">${rows.length}</div><div class="s">${new Set(rows.map(r=>r.l.id)).size} leads${rows.length!==allMonth?` · ${allMonth} before filters`:""}</div></div>
+    <div class="kpi"><div class="l">Online / Onsite</div><div class="v">${cnt(isOn)} / ${cnt(isSite)}</div><div class="s">${cnt(r=>!r.m.mode)?cnt(r=>!r.m.mode)+" without mode":"every meeting has a mode"}</div></div>
+    <div class="kpi"><div class="l">New lead / Follow-up</div><div class="v">${cnt(isNew)} / ${cnt(isFu)}</div><div class="s">first meetings vs follow-ups</div></div>
+    <div class="kpi"><div class="l">Inbound / Outbound</div><div class="v">${cnt(isIn)} / ${cnt(isOut)}</div><div class="s">by lead category</div></div>
+   </div>
+   <div class="grid2">
+    <div><h3 style="margin-bottom:8px">Inbound and outbound, by meeting type</h3><div class="tw"><table><thead><tr><th></th><th class="num">Online</th><th class="num">Onsite</th><th class="num">New lead</th><th class="num">Follow-up</th><th class="num">Total</th></tr></thead><tbody>
+     ${[["Inbound",isIn],["Outbound",isOut]].map(([t,f])=>`<tr><td><span class="chip ${t==="Outbound"?"outb":"inb"}">${t}</span></td><td class="num">${cnt(r=>f(r)&&isOn(r))}</td><td class="num">${cnt(r=>f(r)&&isSite(r))}</td><td class="num">${cnt(r=>f(r)&&isNew(r))}</td><td class="num">${cnt(r=>f(r)&&isFu(r))}</td><td class="num"><b>${cnt(f)}</b></td></tr>`).join("")}
+     <tr><td><b>Total</b></td><td class="num"><b>${cnt(isOn)}</b></td><td class="num"><b>${cnt(isSite)}</b></td><td class="num"><b>${cnt(isNew)}</b></td><td class="num"><b>${cnt(isFu)}</b></td><td class="num"><b>${rows.length}</b></td></tr></tbody></table></div></div>
+    <div><h3 style="margin-bottom:8px">Products discussed</h3><div class="tw"><table><thead><tr><th>Product</th><th class="num">Meetings</th><th class="num">Online</th><th class="num">Onsite</th><th class="num">New lead</th><th class="num">Follow-up</th></tr></thead><tbody>
+     ${Object.entries(byProd).sort((a,b)=>b[1].n-a[1].n).map(([p,o])=>`<tr><td>${esc(p)}</td><td class="num">${o.n}</td><td class="num">${o.on}</td><td class="num">${o.site}</td><td class="num">${o.nw}</td><td class="num">${o.fu}</td></tr>`).join("")||`<tr><td colspan="6" class="empty">No meetings in ${esc(mName)}.</td></tr>`}</tbody></table></div></div>
+   </div>
+   ${isSales?"":`<div><h3 style="margin-bottom:8px">By sales engineer</h3><div class="tw"><table><thead><tr><th>Engineer</th><th class="num">Meetings</th><th class="num">Leads met</th><th class="num">Online</th><th class="num">Onsite</th><th class="num">New lead</th><th class="num">Follow-up</th><th class="num">Inbound</th><th class="num">Outbound</th></tr></thead><tbody>
+     ${Object.entries(byEng).sort((a,b)=>b[1].n-a[1].n).map(([n,o])=>`<tr><td>${esc(n)}</td><td class="num"><b>${o.n}</b></td><td class="num">${o.leads.size}</td><td class="num">${o.on}</td><td class="num">${o.site}</td><td class="num">${o.nw}</td><td class="num">${o.fu}</td><td class="num">${o.inb}</td><td class="num">${o.outb}</td></tr>`).join("")||`<tr><td colspan="9" class="empty">No meetings in ${esc(mName)}.</td></tr>`}</tbody></table></div></div>`}
+   <div><h3 style="margin-bottom:8px">All meetings in ${esc(mName)}</h3><div class="tw"><table><thead><tr><th>Date</th><th>Lead</th><th>Property</th><th>Category</th><th>Type</th><th>Held</th><th>Products discussed</th>${isSales?"":"<th>Engineer</th>"}<th>Notes</th></tr></thead><tbody>
+     ${rows.map(({m:x,l})=>`<tr class="click" data-open="${esc(l.id)}"><td style="white-space:nowrap">${fmtD(x.date)}</td><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}<div class="small muted">${esc(regionOf(l))}</div></td><td><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span></td><td>${x.type==="Follow-up meeting"?"Follow-up":"New lead"}</td><td>${x.mode?`<span class="chip ${x.mode==="Onsite"?"m-site":"m-on"}">${esc(x.mode)}</span>`:`<span class="muted small">not recorded</span>`}</td><td>${esc((x.products||[]).join(", "))}</td>${isSales?"":`<td>${esc(l.assignedTo)}</td>`}<td class="small">${esc(x.notes||"")}</td></tr>`).join("")||`<tr><td colspan="9" class="empty">No meetings logged in ${esc(mName)}${allMonth?" match these filters":""}.</td></tr>`}</tbody></table></div></div>
+  </section>`;
+  $("#mMonth").onchange=e=>{S.mMonth=e.target.value||todayISO().slice(0,7);render()};
+  $("#mEng")?.addEventListener("change",e=>{F.eng=e.target.value;render()});
+  [["mCat","cat"],["mMode","mode"]].forEach(([id,k])=>$("#"+id).onclick=e=>{const b=e.target.closest("button");if(b){F[k]=b.dataset.v;render()}});
+  $("#mType").onchange=e=>{F.type=e.target.value;render()};
+  m.querySelectorAll("[data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
+  $("#mCsv")?.addEventListener("click",async()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+    const csv=[["Date","Lead","Property","Region","Category","Meeting type","Held","Products discussed","Engineer","Notes"].join(",")].concat(rows.map(({m:x,l})=>[x.date,l.ref,l.accountName,regionOf(l),l.category,x.type,x.mode,(x.products||[]).join("; "),l.assignedTo,x.notes].map(q).join(","))).join("\n");
+    try{await S.downloads.save({filename:`meetings-${month}.csv`,data:new Blob([csv],{type:"text/csv"})})}catch(e){}})}
 
 /* ======================= 4. MANAGEMENT ======================= */
 function inPeriod(l){const d=new Date(reqDate(l)+"T12:00:00"),n=new Date();if(S.period==="all")return true;if(S.period==="month")return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();
