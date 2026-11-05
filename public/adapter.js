@@ -14,6 +14,16 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" },
   });
   window.__sb = sb;
+  window.__adminUser = async (action, email) => {
+    const { data, error } = await sb.functions.invoke("user-admin", { body: { action, email } });
+    if (error) {
+      let msg = error.message;
+      try { const j = await error.context.json(); if (j && j.error) msg = j.error; } catch (_) {}
+      if (/Failed to send|not found|404/i.test(msg)) msg = "The user-admin function isn't set up yet (see README). Create the login in Supabase instead.";
+      return { error: msg };
+    }
+    return data;
+  };
   window.__signOut = async () => { await sb.auth.signOut(); location.href = location.pathname; };
 
   let ME = { email: "", role: null };
@@ -93,7 +103,10 @@
       },
       async set(d) {
         if (r.t === "members") return writeMembers(d);
-        const { error } = await sb.from(r.t).upsert({ [r.k]: r.id, doc: d }, { onConflict: r.k });
+        let { error } = r.t === "leads"
+          ? await sb.from("leads").insert({ id: r.id, doc: d })           // plain insert: a sales engineer may create a lead they can't read back
+          : await sb.from(r.t).upsert({ [r.k]: r.id, doc: d }, { onConflict: r.k });
+        if (error && r.t === "leads" && error.code === "23505") ({ error } = await sb.from("leads").update({ doc: d }).eq("id", r.id));
         if (error) throw dbErr(error);
         (caches[r.t] = caches[r.t] || new Map()).set(r.id, d);
       },
@@ -162,10 +175,10 @@
   const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   const prof = (id) => ({ id, name: id && id.includes("@") ? id : "", email: id && id.includes("@") ? id : null, avatarUrl: "", color: "#6b7a8f", isMe: id === ME.email, guest: false });
   const userNs = {
-    me: async () => ({ id: ME.email, name: ME.email, email: ME.email, isOwner: false, canEdit: ME.role === "backoffice", avatarUrl: "", color: "#6b7a8f" }),
+    me: async () => ({ id: ME.email, name: ME.email, email: ME.email, isOwner: false, canEdit: (ME.role === "supervisor" || ME.role === "backoffice"), avatarUrl: "", color: "#6b7a8f" }),
     id: async () => ME.email,
     isOwner: async () => false,
-    canEdit: async () => ME.role === "backoffice",
+    canEdit: async () => (ME.role === "supervisor" || ME.role === "backoffice"),
     can: async () => true,
     name: async () => ME.email,
     email: async () => ME.email,
@@ -191,7 +204,7 @@
     document.getElementById("main").innerHTML = `
       <section class="view" style="max-width:440px;margin:48px auto">
         <form class="panel" id="signin" style="padding:28px;display:grid;gap:14px" novalidate>
-          <div><h2>Sign in to Lead Desk</h2><p class="muted" style="margin:6px 0 0">Use the work email and password back office gave you.</p></div>
+          <div><h2>Sign in to Lead Desk</h2><p class="muted" style="margin:6px 0 0">Use the work email and password your Supervisor gave you.</p></div>
           <label class="f">Work email<input id="si-email" type="email" autocomplete="username" required placeholder="name@samsotech.com"></label>
           <label class="f">Password<input id="si-pass" type="password" autocomplete="current-password"></label>
           <button class="btn pri" id="si-btn" type="submit">Sign in</button>
@@ -210,7 +223,7 @@
       const btn = document.getElementById("si-btn"); btn.disabled = true; btn.textContent = "Signing in…";
       const { error } = await sb.auth.signInWithPassword({ email, password });
       btn.disabled = false; btn.textContent = "Sign in";
-      if (error) bad(/invalid login/i.test(error.message) ? "Email or password is wrong. Ask back office to reset your password if you've forgotten it." : error.message);
+      if (error) bad(/invalid login/i.test(error.message) ? "Email or password is wrong. Ask a Supervisor to reset your password if you've forgotten it." : error.message);
     };
     document.getElementById("si-link").onclick = async () => {
       const email = $e();
@@ -218,34 +231,36 @@
       const btn = document.getElementById("si-link"); btn.disabled = true; btn.textContent = "Sending…";
       const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
       btn.disabled = false; btn.textContent = "Email me a sign-in link instead";
-      if (error) bad(/not on the Lead Desk user list|signups not allowed|403/i.test(error.message) ? "This email isn't on the Lead Desk user list. Ask back office to add you." : "Couldn't send the link: " + error.message);
+      if (error) bad(/not on the Lead Desk user list|signups not allowed|403/i.test(error.message) ? "This email isn't on the Lead Desk user list. Ask a Supervisor to add you." : "Couldn't send the link: " + error.message);
       else msg(`<span style="color:var(--ok)">Check your inbox for an email from Lead Desk and open the link on this device.</span>`);
     };
   }
 
   /* ---------- change password ---------- */
-  window.__changePassword = function () {
+  window.__changePassword = function (forced) {
     const host = document.createElement("div");
     host.className = "scrim"; host.style.alignItems = "center"; host.style.justifyContent = "center";
     host.innerHTML = `<form class="panel" style="width:min(400px,calc(100% - 32px));display:grid;gap:12px;padding:22px" novalidate>
-        <h3>Change password</h3>
+        <h3>${forced ? "Choose your own password" : "Change password"}</h3>
+        ${forced ? '<p class="small muted" style="margin:0">You signed in with the temporary password your Supervisor gave you. Choose a password only you know before you continue.</p>' : ""}
         <label class="f">New password<input id="cp1" type="password" autocomplete="new-password" minlength="8"></label>
         <label class="f">Repeat new password<input id="cp2" type="password" autocomplete="new-password"></label>
         <div id="cpm" class="small"></div>
-        <div class="row"><button class="btn pri" type="submit">Save password</button><button class="btn" type="button" id="cpx">Cancel</button></div>
+        <div class="row"><button class="btn pri" type="submit">Save password</button>${forced ? '<button class="btn" type="button" id="cpx">Sign out</button>' : '<button class="btn" type="button" id="cpx">Cancel</button>'}</div>
       </form>`;
     document.body.appendChild(host);
     const close = () => host.remove();
-    host.querySelector("#cpx").onclick = close;
-    host.onclick = (e) => { if (e.target === host) close(); };
+    host.querySelector("#cpx").onclick = forced ? () => window.__signOut() : close;
+    if (!forced) host.onclick = (e) => { if (e.target === host) close(); };
     host.querySelector("form").onsubmit = async (e) => {
       e.preventDefault();
       const a = host.querySelector("#cp1").value, b = host.querySelector("#cp2").value, m = host.querySelector("#cpm");
       if (a.length < 8) { m.innerHTML = '<span style="color:var(--bad)">Use at least 8 characters.</span>'; return; }
       if (a !== b) { m.innerHTML = '<span style="color:var(--bad)">The two passwords don\'t match.</span>'; return; }
-      const { error } = await sb.auth.updateUser({ password: a });
+      if (a === "Samsotech123") { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
+      const { error } = await sb.auth.updateUser({ password: a, data: { must_change_password: false } });
       if (error) m.innerHTML = `<span style="color:var(--bad)">${clean(error.message)}</span>`;
-      else { m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(close, 1200); }
+      else { m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(() => { close(); if (forced && window.__afterPassword) window.__afterPassword(); }, 900); }
     };
     host.querySelector("#cp1").focus();
   };
@@ -257,8 +272,12 @@
     ME.email = (session.user.email || "").toLowerCase();
     const { data } = await sb.from("members").select("role,engineer").eq("email", ME.email).eq("active", true).maybeSingle();
     ME.role = data ? data.role : null;
-    window.__ldReady = true;
-    window.__startApp && window.__startApp();
+    const go = () => { window.__ldReady = true; window.__startApp && window.__startApp(); };
+    if (session.user.user_metadata && session.user.user_metadata.must_change_password) {
+      document.getElementById("main").innerHTML = '<div class="panel empty">Choose your own password to continue.</div>';
+      window.__afterPassword = go; window.__changePassword(true); return;
+    }
+    go();
   }
   sb.auth.onAuthStateChange((evt, session) => {
     if (evt === "SIGNED_OUT") { location.href = location.pathname; return; }
