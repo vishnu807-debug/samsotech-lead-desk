@@ -161,6 +161,14 @@ tr.tot td{background:var(--sunk);font-weight:600}
 .mg [id^=mg-]{scroll-margin-top:70px}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;max-width:300px;box-shadow:var(--shadow)}
 .view>*,.grid2>*,.mg .panel{min-width:0}
+td.mono{white-space:nowrap}.fgrid select,.fgrid input{height:38px}.fexp{margin-left:auto}.expw{position:relative}.expm{position:absolute;right:0;top:calc(100% + 4px);z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:6px;min-width:220px;display:grid}
+.expm button{all:unset;cursor:pointer;padding:8px 10px;border-radius:6px;font-size:13.5px}.expm button:hover,.expm button:focus-visible{background:var(--accent-soft);color:var(--accent)}
+.fgrid .f.fsearch{min-width:230px;flex:1 1 230px;max-width:340px}.fgrid .f.fsm{min-width:120px}
+.afchips{gap:6px}.fchip{all:unset;cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-size:12.5px;padding:3px 10px;border-radius:14px;background:var(--accent-soft);color:var(--accent)}
+.fchip span{font-size:14px;line-height:1}.fchip:hover{background:var(--accent);color:var(--accent-ink)}.fchip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px;margin-right:4px}@keyframes sp{to{transform:rotate(360deg)}}
+@media (max-width:760px){.fexp{margin-left:0;min-width:100%!important}.expm{left:0;right:auto}.fgrid .f.fsearch{max-width:none;min-width:100%}}
+
 @media (max-width:760px){.grid2.tight,.mg .grid2{grid-template-columns:1fr}.hbr{grid-template-columns:minmax(70px,96px) 1fr auto}.fgrid .f.fw{min-width:100%}.fgrid .f{min-width:calc(50% - 7px);flex:1}}
 /* queue cards */
 .qcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
@@ -425,7 +433,7 @@ function render(){const m=$("#main");
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
 ({new:renderNew,bo:renderBO,pipe:renderPipe,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
-function softRender(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement||document.activeElement.id!=="lfQ")render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
+function softRender(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
 // A lead is "new for me" from the moment it is assigned to me until I open it (assigneeSeenAt is stored on the lead).
 const NEW_DAYS=14;
@@ -514,24 +522,97 @@ function syncTerritory(){const f=S.form,N=$("#terrNote");if(!f||!N)return;const 
   const pref=$("#f-pref");if(pref&&!f.prefManual&&t.owner&&spNames().includes(t.owner))pref.value=t.owner}
 function leadsSwitch(canCreate){return canCreate?`<div class="row"><span class="seg" id="newSeg"><button data-v="form" aria-pressed="${S.newView!=="list"}">Submit a lead</button><button data-v="list" aria-pressed="${S.newView==="list"}">${viewAll()?"All leads":"My leads list"}</button></span></div>`:""}
 function bindLeadsSwitch(){$("#newSeg")?.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.newView=b.dataset.v;render()})}
-function renderLeadList(m,canCreate){const F=S.lf||(S.lf={q:"",status:"Open",region:"",eng:"",cat:"All",n:100});
-  const STAT={"Open":l=>OPEN.includes(l.status),"Awaiting approval":l=>["New","Info Needed"].includes(l.status),"Won":l=>l.status==="Won","Lost":l=>l.status==="Lost","Duplicate / rejected":l=>["Duplicate","Rejected"].includes(l.status),"All":()=>true};
-  const q=nk(F.q);let ls=S.leads.filter(l=>viewAll()||isMine(l)).filter(STAT[F.status]||STAT.All)
-    .filter(l=>(!F.region||regionOf(l)===F.region)&&(!F.eng||l.assignedTo===F.eng)&&(F.cat==="All"||l.category===F.cat)&&(!q||nk(l.ref+" "+l.accountName+" "+l.product+" "+(l.country||"")+" "+(l.contact?.name||"")).includes(q)))
-    .sort((a,b)=>reqDate(b).localeCompare(reqDate(a))||b.ref.localeCompare(a.ref));
-  const total=ls.length;ls=ls.slice(0,F.n);
+/* ---------- Leads tab: list with filters, sorting, KPIs and export (one filter function feeds table, KPIs and export) ---------- */
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const LSTAT={"All":()=>true,"Open":l=>OPEN.includes(l.status),"Awaiting approval":l=>["New","Info Needed"].includes(l.status),"Won":l=>l.status==="Won","Lost":l=>l.status==="Lost","On hold":l=>l.status==="On Hold","Duplicate / rejected":l=>["Duplicate","Rejected"].includes(l.status)};
+const NO_DEPT="Not recorded";
+function lf(){const F=S.lf||(S.lf={});const d={q:"",status:"All",region:"",eng:"",cat:"All",dept:"",year:String(new Date().getFullYear()),month:"",n:100};for(const k in d)if(F[k]===undefined)F[k]=d[k];return F}
+const LF_RESET=()=>({q:"",status:"All",region:"",eng:"",cat:"All",dept:"",year:"",month:"",n:100});
+const deptOf=l=>(l.department||"").trim()||NO_DEPT;
+function leadDepts(){return[...new Set((S.settings.departments||[]).concat(S.leads.map(l=>(l.department||"").trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b)).concat([NO_DEPT])}
+function leadYears(){return[...new Set(S.leads.map(l=>reqDate(l).slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse()}
+const LCOLS=[{k:"ref",label:"Ref"},{k:"recv",label:"Received",v:l=>reqDate(l)},{k:"acct",label:"Property",v:l=>l.accountName||""},{k:"dept",label:"Department",v:deptOf},{k:"region",label:"Region",v:regionOf},
+  {k:"prod",label:"Products",v:l=>l.product||""},{k:"cat",label:"Source",v:l=>l.category||""},{k:"status",label:"Status",v:l=>l.status},{k:"eng",label:"Engineer",v:l=>l.assignedTo||""},{k:"val",label:"Value",num:1,v:leadValue}];
+function filterLeads(F){const q=nk(F.q);
+  return S.leads.filter(l=>viewAll()||isMine(l)).filter(LSTAT[F.status]||LSTAT.All).filter(l=>{const d=reqDate(l);
+    return(!F.year||d.slice(0,4)===F.year)&&(!F.year||!F.month||+d.slice(5,7)===+F.month)&&(!F.region||regionOf(l)===F.region)&&(!F.eng||l.assignedTo===F.eng)
+      &&(F.cat==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.cat)&&(!F.dept||deptOf(l)===F.dept)
+      &&(!q||nk(l.ref+" "+l.accountName+" "+l.product+" "+(l.country||"")+" "+(l.contact?.name||"")+" "+(l.contact?.email||"")+" "+(l.generatedBy||"")).includes(q))})}
+function sortedLeads(F){return sortRows("leads",filterLeads(F),LCOLS,{k:"recv",d:-1})}
+function lfActive(F){const a=[];if(F.dept)a.push(["dept","Department: "+F.dept]);if(F.year)a.push(["year","Year: "+F.year]);if(F.year&&F.month)a.push(["month","Month: "+MONTHS[F.month-1]]);
+  if(F.eng)a.push(["eng","Engineer: "+F.eng]);if(F.cat!=="All")a.push(["cat","Source: "+F.cat]);if(F.status!=="All")a.push(["status","Status: "+F.status]);if(F.region)a.push(["region","Region: "+F.region]);if(F.q)a.push(["q","Search: “"+F.q+"”"]);return a}
+function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLeads(F);const total=all.length,ls=all.slice(0,F.n);
+  const won=all.filter(l=>l.status==="Won"),inb=all.filter(l=>l.category!=="Outbound").length;const act=lfActive(F);
+  const engs=[...new Set(spNames().concat(S.leads.map(l=>l.assignedTo).filter(Boolean)))].sort((a,b)=>a.localeCompare(b));
+  const kpi=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:""}</div>`;
   m.innerHTML=`<section class="view">${leadsSwitch(canCreate)}
-   <div class="vhead"><div><h2>${viewAll()?"All leads":"My leads"}</h2><p>${viewAll()?"Every lead across the sales team.":"Leads assigned to you."} Click a lead to open it.</p></div>
-    <div class="row"><input id="lfQ" placeholder="Search ref, property, product, contact" value="${esc(F.q)}" style="min-width:260px;width:auto"></div></div>
-   <div class="row"><select id="lfS" style="width:auto">${opts(Object.keys(STAT),F.status)}</select><select id="lfR" style="width:auto">${opts(regionList().concat(["Unassigned"]),F.region,"All regions")}</select>
-    ${viewAll()?`<select id="lfE" style="width:auto">${opts(spNames(),F.eng,"All engineers")}</select>`:""}<span class="seg" id="lfC">${["All","Inbound","Outbound"].map(v=>`<button data-v="${v}" aria-pressed="${F.cat===v}">${v}</button>`).join("")}</span><span class="small muted">${fmtN(total)} lead${total===1?"":"s"}</span></div>
-   <div class="tw"><table><thead><tr><th>Ref</th><th>Received</th><th>Property</th><th>Region</th><th>Products</th><th>Category</th><th>Status</th>${viewAll()?"<th>Engineer</th>":""}<th class="num">Value</th></tr></thead><tbody>
-   ${ls.map(l=>`<tr class="click" data-open="${esc(l.id)}"><td class="mono">${esc(l.ref)}</td><td style="white-space:nowrap">${fmtD(reqDate(l))}</td><td>${esc(l.accountName)}<div class="small muted">${esc(l.country||"")}</div></td><td>${esc(regionOf(l))}</td><td>${esc(l.product)}</td><td><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span></td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td>${viewAll()?`<td>${esc(l.assignedTo||"—")}</td>`:""}<td class="num">${leadValue(l)?fmtAED(leadValue(l)):""}</td></tr>`).join("")||`<tr><td colspan="9" class="empty">No leads match.</td></tr>`}
-   </tbody></table></div>${total>F.n?`<div><button class="btn" id="lfMore">Show ${Math.min(100,total-F.n)} more</button></div>`:""}</section>`;
-  bindLeadsSwitch();m.querySelectorAll("[data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
+   <div class="vhead"><div><h2>${viewAll()?"All leads":"My leads"}</h2><p>${viewAll()?"Every lead across the sales team.":"Leads assigned to you."} Filters combine; click a lead to open it.</p></div></div>
+   <div class="panel afbar lfbar">
+    <div class="fgrid">
+     <label class="f fsearch">Search<input id="lfQ" placeholder="Ref, property, product, contact" value="${esc(F.q)}"></label>
+     <label class="f">Department<input id="lfD" list="dl-dept" placeholder="All departments" value="${esc(F.dept)}" autocomplete="off"><datalist id="dl-dept">${leadDepts().map(d=>`<option value="${esc(d)}">`).join("")}</datalist></label>
+     <label class="f fsm">Year<select id="lfY"><option value="">All years</option>${leadYears().concat(F.year&&!leadYears().includes(F.year)?[F.year]:[]).map(y=>`<option${y===F.year?" selected":""}>${y}</option>`).join("")}</select></label>
+     <label class="f fsm">Month<select id="lfM" ${F.year?"":"disabled title=\"Choose a year first\""}><option value="">All months</option>${MONTHS.map((n,i)=>`<option value="${i+1}"${+F.month===i+1?" selected":""}>${n}</option>`).join("")}</select></label>
+     ${viewAll()?`<label class="f">Engineer<input id="lfE" list="dl-eng" placeholder="All engineers" value="${esc(F.eng)}" autocomplete="off"><datalist id="dl-eng">${engs.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>`:""}
+     <div class="f fw"><span>Lead source</span><span class="seg" id="lfC" style="margin-top:4px">${["All","Inbound","Outbound"].map(v=>`<button type="button" data-v="${v}" aria-pressed="${F.cat===v}">${v}</button>`).join("")}</span></div>
+     <label class="f fsm">Status<select id="lfS">${opts(Object.keys(LSTAT),F.status)}</select></label>
+     <label class="f fsm">Region<select id="lfR">${opts(regionList().concat(["Unassigned"]),F.region,"All regions")}</select></label>
+     <div class="f fexp"><span>&nbsp;</span><div class="expw"><button class="btn pri" id="lfX" type="button" aria-haspopup="menu" aria-expanded="false" ${total?"":"disabled"}>Export ${fmtN(total)}</button>
+      <div class="expm" id="lfXm" role="menu" hidden><button type="button" role="menuitem" data-x="xlsx">Excel (.xlsx)</button><button type="button" role="menuitem" data-x="csv">CSV (.csv)</button><div class="small muted" style="padding:6px 10px 2px">All ${fmtN(total)} matching lead${total===1?"":"s"}, not just this page</div></div></div></div>
+    </div>
+    <div class="row afchips">${act.length?act.map(([k,t])=>`<button type="button" class="fchip" data-clr="${k}" title="Remove this filter">${esc(t)}<span aria-hidden="true">×</span></button>`).join("")+`<button type="button" class="btn sm" id="lfClr">Clear all</button>`:`<span class="small muted">No filters applied: showing all ${viewAll()?"":"your "}leads.</span>`}</div>
+   </div>
+   <div class="kpis k5">${kpi("Leads",fmtN(total),`${fmtN(inb)} inbound · ${fmtN(total-inb)} outbound`)}${kpi("Awaiting approval",fmtN(all.filter(l=>["New","Info Needed"].includes(l.status)).length))}${kpi("Open",fmtN(all.filter(l=>OPEN.includes(l.status)).length))}
+    ${kpi("Orders closed",fmtN(won.length),total?fmtP(won.length/total)+" of these leads":"")}${kpi("Order value",fmtAED(won.reduce((s,l)=>s+leadValue(l),0)))}</div>
+   <div class="tw"><table><thead><tr>${LCOLS.filter(c=>c.k!=="eng"||viewAll()).map(c=>th("leads",c)).join("")}</tr></thead><tbody>
+   ${ls.map(l=>`<tr class="click" data-open="${esc(l.id)}"><td class="mono">${esc(l.ref)}</td><td style="white-space:nowrap">${fmtD(reqDate(l))}</td><td>${esc(l.accountName)}<div class="small muted">${esc(l.country||"")}</div></td><td>${l.department?esc(l.department):`<span class="muted">—</span>`}</td><td>${esc(regionOf(l))}</td><td>${esc(l.product)}</td><td><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span></td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td>${viewAll()?`<td>${esc(l.assignedTo||"—")}</td>`:""}<td class="num">${leadValue(l)?fmtAED(leadValue(l)):""}</td></tr>`).join("")||`<tr><td colspan="10" class="empty">No leads match these filters.${act.length?` <button class="btn sm" id="lfClr2" type="button">Clear all filters</button>`:""}</td></tr>`}
+   </tbody></table></div>${total>F.n?`<div class="row"><button class="btn" id="lfMore">Show ${Math.min(100,total-F.n)} more</button><span class="small muted">Showing ${fmtN(F.n)} of ${fmtN(total)}</span></div>`:total?`<div class="small muted">Showing all ${fmtN(total)}</div>`:""}</section>`;
+  bindLeadsSwitch();bindSort(m);m.querySelectorAll("[data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
+  const go=()=>{F.n=100;render()};
   const qi=$("#lfQ");qi.oninput=()=>{F.q=qi.value;F.n=100;clearTimeout(qi.t);qi.t=setTimeout(()=>{render();const i=$("#lfQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)};
-  $("#lfS").onchange=e=>{F.status=e.target.value;F.n=100;render()};$("#lfR").onchange=e=>{F.region=e.target.value;render()};$("#lfE")?.addEventListener("change",e=>{F.eng=e.target.value;render()});
-  $("#lfC").onclick=e=>{const b=e.target.closest("button");if(b){F.cat=b.dataset.v;render()}};$("#lfMore")?.addEventListener("click",()=>{F.n+=100;render()})}
+  const combo=(id,key,list)=>{const i=$(id);if(!i)return;const apply=()=>{const v=i.value.trim();const hit=list.find(x=>nk(x)===nk(v));if(!v){if(F[key]){F[key]="";go()}}else if(hit){if(F[key]!==hit){F[key]=hit;go()}else i.value=hit}};
+    i.addEventListener("change",apply);i.addEventListener("keydown",e=>{if(e.key==="Enter")apply();if(e.key==="Escape"){i.value=F[key];i.blur()}});i.addEventListener("blur",()=>setTimeout(()=>{if(document.activeElement!==i&&i.isConnected)i.value=F[key]},150));i.addEventListener("focus",()=>i.select())};
+  combo("#lfD","dept",leadDepts());combo("#lfE","eng",engs);
+  $("#lfY").onchange=e=>{F.year=e.target.value;if(!F.year)F.month="";go()};$("#lfM").onchange=e=>{F.month=e.target.value;go()};
+  $("#lfS").onchange=e=>{F.status=e.target.value;go()};$("#lfR").onchange=e=>{F.region=e.target.value;go()};
+  $("#lfC").onclick=e=>{const b=e.target.closest("button");if(b){F.cat=b.dataset.v;go()}};
+  const clrAll=()=>{S.lf=LF_RESET();render()};$("#lfClr")?.addEventListener("click",clrAll);$("#lfClr2")?.addEventListener("click",clrAll);
+  m.querySelectorAll("[data-clr]").forEach(b=>b.onclick=()=>{const k=b.dataset.clr;F[k]=k==="cat"||k==="status"?"All":"";if(k==="year")F.month="";go()});
+  $("#lfMore")?.addEventListener("click",()=>{F.n+=100;render()});
+  const xb=$("#lfX"),xm=$("#lfXm");const close=()=>{xm.hidden=true;xb.setAttribute("aria-expanded","false")};
+  xb.onclick=e=>{e.stopPropagation();xm.hidden=!xm.hidden;xb.setAttribute("aria-expanded",String(!xm.hidden));if(!xm.hidden){xm.querySelector("button").focus();setTimeout(()=>document.addEventListener("click",close,{once:true}))}};
+  xm.querySelectorAll("[data-x]").forEach(b=>b.onclick=e=>{e.stopPropagation();close();exportLeads(b.dataset.x)})}
+
+/* ---------- export: the same filter + sort as the table, every matching row ---------- */
+function exportName(F,ext){const p=["Leads"];if(F.cat!=="All")p.push(F.cat);p.push(F.dept?F.dept:"All_Departments");if(F.eng)p.push(F.eng);if(F.region)p.push(F.region);if(F.status!=="All")p.push(F.status);
+  if(F.year&&F.month)p.push(MONTHS[F.month-1]);p.push(F.year||"All_Years");
+  return p.join("_").replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g,"_").replace(/_+/g,"_")+"."+ext}
+function exportRows(ls){const d=v=>v?new Date(String(v).length===10?v+"T12:00:00":v):null;
+  const lastUpd=l=>l.updatedAt||(l.log&&l.log.length?l.log[l.log.length-1].t:null)||l.createdAt;
+  const ordStatus=l=>l.status==="Won"?"Order closed":l.status==="Lost"?"Lost":l.status==="Quotation Sent"?"Quotation sent":["Duplicate","Rejected"].includes(l.status)?"Not applicable":"No order yet";
+  const H=[["Ref",l=>l.ref],["Received",l=>d(reqDate(l)),1],["Property",l=>l.accountName||""],["Region",regionOf],["Products",l=>productsOf(l).join(", ")],
+    ["Status",l=>l.status],["Engineer",l=>l.assignedTo||""],["Value (AED)",l=>leadValue(l)||"",0,1]];
+  return{H,rows:ls.map(l=>H.map(([,f])=>{const v=f(l);return v instanceof Date&&isNaN(v)?null:v}))}}
+let XLSX_P=null;
+function loadXLSX(){if(window.XLSX)return Promise.resolve(window.XLSX);return XLSX_P||(XLSX_P=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+  s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error("Excel library didn't load"));s.onerror=()=>{XLSX_P=null;rej(new Error("Couldn't load the Excel library. Check your internet connection or use CSV."))};document.head.appendChild(s)}))}
+async function exportLeads(fmt){const F=lf();const b=$("#lfX");const label=b?.textContent;
+  const ls=sortedLeads(F);if(!ls.length){toast("No leads match these filters, so there's nothing to export.");return}
+  if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing ${fmt==="xlsx"?"Excel":"CSV"}…`}
+  try{const{H,rows}=exportRows(ls);const name=exportName(F,fmt);let blob;
+    if(fmt==="csv"){const fd=v=>v instanceof Date?`${String(v.getDate()).padStart(2,"0")}-${MONTHS[v.getMonth()].slice(0,3)}-${v.getFullYear()}`:v;const q=v=>{v=fd(v);if(v==null)return"";const s=String(v);return/[",\n\r]/.test(s)||/^[=+\-@]/.test(s)?`"${(/^[=+\-@]/.test(s)?"'":"")+s.replace(/"/g,'""')}"`:s};
+      blob=new Blob(["﻿"+[H.map(h=>q(h[0])).join(",")].concat(rows.map(r=>r.map(q).join(","))).join("\r\n")],{type:"text/csv;charset=utf-8"})}
+    else{const X=await loadXLSX();const ws=X.utils.aoa_to_sheet([H.map(h=>h[0])].concat(rows),{cellDates:true,dateNF:"dd-mmm-yyyy"});
+      H.forEach((h,c)=>{if(h[2]||h[3])for(let r=1;r<=rows.length;r++){const cell=ws[X.utils.encode_cell({r,c})];if(cell&&h[2]&&cell.t==="d")cell.z="dd-mmm-yyyy";if(cell&&h[3]&&cell.t==="n")cell.z="#,##0"}});
+      ws["!cols"]=H.map((h,c)=>({wch:Math.min(40,Math.max(h[0].length,...rows.slice(0,300).map(r=>r[c]instanceof Date?11:String(r[c]??"").length))+2)}));ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:H.length-1}})};ws["!freeze"]={xSplit:0,ySplit:1};
+      const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Leads");
+      blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array",cellDates:true})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
+    window.__lastExport={name,size:blob.size,rows:rows.length,fmt};
+    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+    toast(`${name} is ready: ${fmtN(rows.length)} lead${rows.length===1?"":"s"}`)}
+  catch(e){if(e?.code==="cancelled"||e?.name==="AbortError")toast("Export cancelled");else{console.error(e);toast("Export failed: "+(e?.message||e?.code||"unknown error"))}}
+  finally{const nb=$("#lfX");if(nb){nb.disabled=false;nb.textContent=label||"Export"}}}
+
 function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
   if(f.account){const a=f.account;const n=a.isNew?0:leadsFor(a.key).length;
     box.innerHTML=`<div class="acct"><div style="min-width:0;flex:1"><b>${esc(a.name)}</b> <span class="chip">${a.isNew?"New account":"Existing account"}</span>
