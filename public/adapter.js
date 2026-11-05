@@ -103,10 +103,17 @@
       },
       async set(d) {
         if (r.t === "members") return writeMembers(d);
-        let { error } = r.t === "leads"
-          ? await sb.from("leads").insert({ id: r.id, doc: d })           // plain insert: a sales engineer may create a lead they can't read back
+        // leads and accounts: plain insert, because a sales engineer may create a row they can't read back
+        // (an upsert would also need read access to the row)
+        const plain = r.t === "leads" || r.t === "accounts";
+        let { error } = plain
+          ? await sb.from(r.t).insert({ [r.k]: r.id, doc: d })
           : await sb.from(r.t).upsert({ [r.k]: r.id, doc: d }, { onConflict: r.k });
-        if (error && r.t === "leads" && error.code === "23505") ({ error } = await sb.from("leads").update({ doc: d }).eq("id", r.id));
+        if (error && plain && error.code === "23505") {
+          const up = await sb.from(r.t).update({ doc: d }).eq(r.k, r.id).select(r.k);
+          // an account that already exists but isn't visible to this user is fine: the lead links to it by key
+          error = r.t === "accounts" && (up.error || !(up.data || []).length) ? null : up.error;
+        }
         if (error) throw dbErr(error);
         (caches[r.t] = caches[r.t] || new Map()).set(r.id, d);
       },
