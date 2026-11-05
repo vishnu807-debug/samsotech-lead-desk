@@ -163,6 +163,27 @@ tr.tot td{background:var(--sunk);font-weight:600}
 .mg [id^=mg-]{scroll-margin-top:70px}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;max-width:300px;box-shadow:var(--shadow)}
 .view>*,.grid2>*,.mg .panel{min-width:0}
+/* management tabs + order tree + supervisor edit form */
+.mtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.mtabs button{all:unset;cursor:pointer;padding:9px 14px;font:500 13.5px var(--f-body);color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.mtabs button:hover{color:var(--ink)}.mtabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}.mtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px}
+.xbtn{all:unset;cursor:pointer;width:20px;height:20px;display:inline-grid;place-items:center;border-radius:4px;margin-right:6px;color:var(--muted);vertical-align:-2px}
+.xbtn:hover{background:var(--sunk);color:var(--ink)}.xbtn:focus-visible{outline:2px solid var(--accent)}.xpad{display:inline-block;width:26px}
+.tw-car{display:inline-block;transition:transform .15s;font-size:11px}.xbtn[aria-expanded="true"] .tw-car{transform:rotate(90deg)}
+tr.xopen td{border-bottom-color:transparent}tr.xrow>td{padding:0 12px 12px 38px;background:var(--surface)}
+.otree{border-left:2px solid var(--accent-soft);padding-left:12px;display:grid}
+.otr{all:unset;display:grid;grid-template-columns:118px minmax(160px,2fr) 100px 52px minmax(120px,1.5fr) 130px 60px;gap:10px;align-items:center;padding:7px 8px;border-radius:6px;font-size:12.5px;position:relative;box-sizing:border-box;width:100%}
+button.otr{cursor:pointer}button.otr:hover{background:var(--accent-soft)}button.otr:focus-visible{outline:2px solid var(--accent)}
+button.otr::before{content:"";position:absolute;left:-14px;top:50%;width:10px;border-top:2px solid var(--accent-soft)}
+.otr .num{text-align:right;font-variant-numeric:tabular-nums}.otr .dbar{margin-left:auto;max-width:110px}
+.oth{font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:4px}
+.otot{border-top:1px solid var(--line);border-radius:0;margin-top:2px;font-weight:600}
+.ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eform{display:grid;gap:12px}.efs{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:0;min-width:0}
+.efs legend{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:0 4px}
+.emeet{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}.emeet:first-of-type{border-top:0;padding-top:0;margin-top:0}
+@media (max-width:760px){.otr{grid-template-columns:1fr auto;row-gap:2px}.otr>span:nth-child(3),.otr>span:nth-child(4),.otr>span:nth-child(5),.otr>span:nth-child(7){display:none}.oth{display:none}tr.xrow>td{padding-left:12px}}
+
 /* ---- UX pass: header account menu, mobile nav, pipeline, empty states ---- */
 .acctm{position:relative}.acctm summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 10px 4px 4px;border-radius:20px;border:1px solid var(--line);background:var(--surface)}
 .acctm summary::-webkit-details-marker{display:none}.acctm summary:hover{background:var(--sunk)}.acctm summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -408,7 +429,7 @@ const PERMISSIONS=[
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.delete","Delete leads","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"]];
 const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
@@ -921,7 +942,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
    <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span><span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
    <div><h2>${esc(l.accountName)}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
    <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
-   <div class="panel" style="padding:14px"><div class="timeline">
+   <div class="panel" style="padding:14px" id="detPanel">${can("lead.edit_fields")?`<div class="row" style="margin:-2px 0 8px"><span class="small muted">Lead details</span><span class="sp"></span><button type="button" class="btn sm" id="editAll">Edit details</button></div>`:""}<div class="timeline">
      <div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>
      <div><span>Contact</span><span>${esc(l.contact?.name)}${l.contact?.title?", "+esc(l.contact.title):""}<br><span class="mono">${esc(l.contact?.email||"")}</span> ${esc(l.contact?.phone||"")}</span></div>
      <div><span>Generated by</span><span>${esc(l.generatedBy)}${l.department?" · "+esc(l.department):""} · entered ${fmtD(l.createdAt)}</span></div>
@@ -945,7 +966,68 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $(".drawer").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...e.currentTarget.querySelectorAll("button,input,select,textarea,a[href]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeDrawer()};
   document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer)closeDrawer()};
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
-  fillNames();drawDetails(l);drawProdArea(l);drawActions(l)}
+  fillNames();drawDetails(l);drawProdArea(l);drawActions(l);
+  $("#editAll")?.addEventListener("click",()=>editAllDetails(l))}
+/* Supervisor: edit every field in the details box in one form */
+function editAllDetails(l){const P=$("#detPanel");if(!P)return;const st=S.settings;const c=l.contact||{};const sb=subOf(l);
+  const srcs=[...new Set((st.sources||[]).map(x=>x.name).concat(l.source?[l.source]:[]))];const deps=[...new Set((st.departments||[]).concat(l.department?[l.department]:[]))];
+  const mo=(o,k)=>o?.[k]??"";const ms=meetingsOf(l).map(({legacy,...x})=>x);
+  const money=(key,lab,withNo)=>`<fieldset class="efs"><legend>${lab}</legend><div class="grid3"><label class="f">Amount (AED)<input type="number" min="0" step="0.01" data-m="${key}.aed" value="${esc(mo(l[key],"aed"))}"></label><label class="f">Date<input type="date" max="${todayISO()}" data-m="${key}.date" value="${esc(mo(l[key],"date"))}"></label>${withNo?`<label class="f">${key==="order"?"PO / order no.":"Quotation no."}<input data-m="${key}.no" value="${esc(mo(l[key],"no"))}"></label>`:"<span></span>"}</div></fieldset>`;
+  P.innerHTML=`<div class="row" style="margin-bottom:10px"><h3>Edit lead details</h3><span class="sp"></span><span class="chip">Supervisor</span></div>
+   <div class="eform">
+    <fieldset class="efs"><legend>Origin</legend><div class="grid3">
+     <label class="f">Category<select id="e-cat">${opts(["Inbound","Outbound"],l.category||"Inbound")}</select></label>
+     <label class="f">Source channel<select id="e-src">${opts(srcs,l.source||"","—")}</select></label>
+     <label class="f">Department<select id="e-dep">${opts(deps,l.department||"","—")}</select></label>
+     <label class="f">Generated by<input id="e-gen" value="${esc(l.generatedBy||"")}"></label>
+     <label class="f">Requirement received<input id="e-req" type="date" max="${todayISO()}" value="${esc(reqDate(l))}"></label>
+     <label class="f">Region<select id="e-reg">${opts(regionList(),l.region||(regionOf(l)==="No region"?"":regionOf(l)),"Choose region")}</select></label>
+     ${sb?`<label class="f">${SUBDIV[sb.c].label}<select id="e-sub"><option value="">Not known</option>${subOptions(sb.c,sb.n)}</select></label>`:""}
+    </div></fieldset>
+    <fieldset class="efs"><legend>Contact</legend><div class="grid2">
+     <label class="f">Name<input id="e-cn" value="${esc(c.name||"")}"></label><label class="f">Designation<input id="e-ct" value="${esc(c.title||"")}"></label>
+     <label class="f">Email<input id="e-ce" type="email" value="${esc(c.email||"")}"></label><label class="f">Phone / WhatsApp<input id="e-cp" value="${esc(c.phone||"")}"></label></div></fieldset>
+    <fieldset class="efs"><legend>Requirement and qualification</legend>
+     <label class="f">Requirement / notes<textarea id="e-notes" rows="3">${esc(l.notes||"")}</textarea></label>
+     <div class="grid3" style="margin-top:10px"><label class="f">Rooms<input id="e-rooms" type="number" min="0" value="${esc(l.rooms??"")}"></label><label class="f">PMS<input id="e-pms" value="${esc(l.pms||"")}"></label><label class="f">Timeline<input id="e-when" value="${esc(l.timeline||"")}"></label></div></fieldset>
+    <fieldset class="efs"><legend>Assignment</legend><div class="grid3">
+     <label class="f">Assigned to<select id="e-as">${opts(spNames().concat(l.assignedTo&&!spNames().includes(l.assignedTo)?[l.assignedTo]:[]),l.assignedTo||"","Not assigned")}</select></label>
+     <label class="f">Assigned on<input id="e-asd" type="date" max="${todayISO()}" value="${esc((l.assignedAt||"").slice(0,10))}"></label>
+     <label class="f">Priority<select id="e-pr">${opts(["High","Medium","Low"],l.priority||"","—")}</select></label></div></fieldset>
+    ${money("meeting","Deal estimate",false)}${money("quote","Quotation",true)}${money("order","Order",true)}
+    <fieldset class="efs"><legend>Meetings (${ms.length})</legend>${ms.length?ms.map((x,i)=>`<div class="emeet" data-i="${i}"><div class="grid3">
+      <label class="f">Date<input type="date" max="${todayISO()}" data-k="date" value="${esc(x.date||"")}"></label>
+      <label class="f">Held<select data-k="mode">${opts(["Online","Onsite"],x.mode||"","—")}</select></label>
+      <label class="f">Type<select data-k="type">${opts(MEET_TYPES,x.type||"")}</select></label></div>
+      <label class="f" style="margin-top:8px">Products discussed<input data-k="products" value="${esc((x.products||[]).join(", "))}"></label>
+      <label class="f" style="margin-top:8px">Notes<textarea rows="2" data-k="notes">${esc(x.notes||"")}</textarea></label>
+      <label class="small" style="display:flex;gap:6px;align-items:center;margin-top:6px;color:var(--bad)"><input type="checkbox" data-k="del" style="width:auto"> Delete this meeting</label></div>`).join(""):`<p class="small muted" style="margin:0">No meetings on this lead.</p>`}</fieldset>
+    ${l.lost?`<fieldset class="efs"><legend>Lost</legend><label class="f">Reason<input id="e-lost" value="${esc(l.lost.reason||"")}"></label></fieldset>`:""}
+   </div>
+   <div id="e-msg" class="small" style="margin-top:8px"></div>
+   <div class="row" style="margin-top:10px"><button type="button" class="btn pri" id="e-save">Save changes</button><button type="button" class="btn" id="e-cancel">Cancel</button><span class="sp"></span><span class="small muted">Status and products are changed with the buttons below.</span></div>`;
+  P.querySelector("input,select")?.focus();
+  $("#e-cancel").onclick=()=>drawDrawer();
+  $("#e-save").onclick=async()=>{const g=id=>$(id)?.value.trim()??"";const errs=[];const today=todayISO();
+    const email=g("#e-ce");if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))errs.push("The email address doesn't look right");
+    for(const id of["#e-req","#e-asd"])if(g(id)>today)errs.push("Dates can't be in the future");
+    const body={category:g("#e-cat"),source:g("#e-src"),department:g("#e-dep"),generatedBy:g("#e-gen"),requirementDate:g("#e-req")||reqDate(l),region:g("#e-reg"),
+      contact:Object.assign({},c,{name:g("#e-cn"),title:g("#e-ct"),email,phone:g("#e-cp")}),notes:g("#e-notes"),rooms:g("#e-rooms")===""?null:+g("#e-rooms"),pms:g("#e-pms"),timeline:g("#e-when"),
+      assignedTo:g("#e-as"),priority:g("#e-pr")};
+    if($("#e-sub"))body.subdivision=g("#e-sub");
+    if(g("#e-asd"))body.assignedAt=g("#e-asd")===(l.assignedAt||"").slice(0,10)?l.assignedAt:g("#e-asd")+"T12:00:00.000Z";else if(body.assignedTo&&body.assignedTo!==l.assignedTo)body.assignedAt=nowISO();
+    for(const k of["meeting","quote","order"]){const a=P.querySelector(`[data-m="${k}.aed"]`).value,d=P.querySelector(`[data-m="${k}.date"]`).value,no=P.querySelector(`[data-m="${k}.no"]`)?.value.trim();
+      if(a===""&&!d&&!no){if(l[k])body[k]=null;continue}if(a!==""&&+a<0)errs.push("Amounts can't be negative");if(d>today)errs.push("Dates can't be in the future");
+      const prev=l[k]||{};const aed=a===""?null:+a;body[k]=Object.assign({},prev,{aed,value:prev.currency&&prev.currency!=="AED"&&prev.aed===aed?prev.value:aed,currency:prev.currency&&prev.currency!=="AED"&&prev.aed===aed?prev.currency:"AED",date:d||prev.date||""},no!==undefined?{no}:{})}
+    const nm=[];P.querySelectorAll(".emeet").forEach(el=>{const x=ms[+el.dataset.i];const v=k=>el.querySelector(`[data-k="${k}"]`);if(v("del").checked)return;
+      const d=v("date").value;if(d>today)errs.push("Meeting dates can't be in the future");nm.push(Object.assign({},x,{date:d,mode:v("mode").value,type:v("type").value,notes:v("notes").value.trim(),products:v("products").value.split(",").map(t=>t.trim()).filter(Boolean)}))});
+    if(ms.length)body.meetings=nm;if(l.lost&&$("#e-lost"))body.lost=Object.assign({},l.lost,{reason:g("#e-lost")});
+    if(errs.length){$("#e-msg").innerHTML=`<span style="color:var(--bad)">${[...new Set(errs)].map(esc).join(" · ")}</span>`;return}
+    const LBL={category:"category",source:"source",department:"department",generatedBy:"generated by",requirementDate:"requirement date",region:"region",subdivision:"emirate/state",contact:"contact",notes:"requirement",rooms:"rooms",pms:"PMS",timeline:"timeline",assignedTo:"assigned to",assignedAt:"assigned date",priority:"priority",meeting:"deal estimate",quote:"quotation",order:"order",meetings:"meetings",lost:"lost reason"};
+    const clean=v=>Array.isArray(v)?v.map(clean):v&&typeof v==="object"?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==""&&v[k]!=null).map(k=>[k,clean(v[k])])):(v===""?null:v);const norm=v=>JSON.stringify(clean(v)??null);const changed=Object.keys(body).filter(k=>norm(body[k])!==norm(k==="requirementDate"?reqDate(l):k==="region"&&!l.region?(regionOf(l)==="No region"?"":regionOf(l)):k==="subdivision"&&!l.subdivision?(subOf(l)?.n||""):k==="meetings"?ms:l[k]));
+    if(!changed.length){drawDrawer();return}const out={};changed.forEach(k=>out[k]=body[k]);
+    const b=$("#e-save");b.disabled=true;b.textContent="Saving…";
+    try{await patch(l,out,"Details edited: "+changed.map(k=>LBL[k]||k).join(", "));toast("Lead details saved")}catch(e){b.disabled=false;b.textContent="Save changes";$("#e-msg").innerHTML=`<span style="color:var(--bad)">Couldn't save (${esc(e.code||e.message)}).</span>`}}}
 function drawDetails(l){const D=$("#detArea");if(!D)return;const can=canAct(l);
   if(S.drawer.mode!=="details"){D.innerHTML=`<div><span>Requirement received</span><span>${fmtD(reqDate(l))}${l.requirementDate?"":` <span class="muted small">(entry date)</span>`}</span></div>
     <div><span>Region</span><span>${esc(regionOf(l))}${!l.region&&regionOf(l)!=="No region"?` <span class="muted small">(from country)</span>`:""}${can?` <button class="btn sm" id="detEdit" style="margin-left:6px">Edit date or ${subOf(l)?"location":"region"}</button>`:""}</span></div>
@@ -1265,7 +1347,15 @@ function renderAccts(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatrix(m
   const inp=$("#acctQ");inp.oninput=()=>{S.acctQ=inp.value;S.acctN=50;clearTimeout(inp.t);inp.t=setTimeout(()=>{render();const i=$("#acctQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)}}
 
 /* ======================= 4. MANAGEMENT ======================= */
-function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
+function orderTree(ls,x){const os=ls.filter(l=>l.assignedTo===x.name&&l.status==="Won").sort((a,b)=>orderVal(b)-orderVal(a)||reqDate(b).localeCompare(reqDate(a)));
+  const wonOn=l=>l.order?.date||l.stageAt?.Won||reqDate(l);const mx=Math.max(1,...os.map(orderVal));
+  return`<tr class="xrow"><td colspan="10"><div class="otree" role="group" aria-label="${esc(x.name)}'s orders">
+   <div class="otr oth"><span>Order</span><span>Property</span><span>Won</span><span>Source</span><span>Products</span><span class="num">Value</span><span class="num">Share</span></div>
+   ${os.map(l=>{const v=orderVal(l);return`<button type="button" class="otr" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span class="ell"><b>${esc(l.accountName)}</b> <span class="muted small">${esc(l.country||"")}</span></span><span>${fmtD(wonOn(l))}</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span></span><span class="ell small">${esc(productsOf(l).join(", "))}</span><span class="num">${v?fmtAED(v):`<span class="muted" data-tip="Won, but no order amount was recorded">no amount</span>`}${v?dbar(v,mx,"--c-main"):""}</span><span class="num muted">${x.rev?fmtP(v/x.rev):"—"}</span></button>`}).join("")}
+   <div class="otr otot"><span></span><span>${os.length} order${os.length===1?"":"s"}${x.noVal?` · ${x.noVal} without amount`:""}</span><span></span><span></span><span class="small muted">${x.inbOrders} inbound · ${x.outbOrders} outbound</span><span class="num"><b>${fmtAED(x.rev)}</b></span><span class="num muted">100%</span></div>
+  </div></td></tr>`}
+const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
+function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=S.mgView||"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
   const er=sortRows("eng",E,ecols,{k:"rev",d:-1});const topRev=E.slice().sort((a,b)=>b.rev-a.rev).slice(0,3).filter(x=>x.rev>0).map(x=>x.name);const mxRev=Math.max(1,...E.map(x=>x.rev));
@@ -1293,15 +1383,15 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
   {const known=new Set(spNames().map(nk));const odd=E.filter(x=>!known.has(nk(x.name)));if(odd.length)gaps.push(`${odd.reduce((a,x)=>a+x.leads,0)} leads are assigned to ${odd.length} name${odd.length===1?"":"s"} not on the Sales engineer list (${odd.slice(0,4).map(x=>"“"+x.name+"”").join(", ")}${odd.length>4?"…":""}), so those leads are ranked separately. Reassign them, or use Hand over in Products & settings, to merge them into the right engineer.`)}
   if(!S.leads.some(l=>l.status==="Lost"))gaps.push(`No leads are marked Lost yet, so conversion is measured against all leads, not only closed ones.`);
   m.innerHTML=`<section class="view mg">
-   <div class="vhead"><div><h2>Management</h2><p>Team performance, inbound vs outbound results and revenue intelligence. Every table, card and chart follows the filters below.</p></div>
+   <div class="vhead"><div><h2>Management</h2><p>Team performance and revenue. Every figure follows the filters.</p></div>
     <div class="row">${S.downloads&&can("lead.export")?`<button class="btn" id="csvBtn">Export leads CSV</button>`:""}</div></div>
    ${filterBar()}
-   <nav class="subnav" aria-label="Sections">${[["mg-ov","Overview"],["mg-eng","Engineers"],["mg-io","Inbound vs outbound"],["mg-rpa","Revenue per account"],["mg-reg","Regions"],["mg-ops","Pipeline health"]].map(([i,t])=>`<button type="button" class="btn sm" data-jump="${i}">${t}</button>`).join("")}</nav>
+   <div class="mtabs" role="tablist" aria-label="Management views">${MG_VIEWS.map(([i,t])=>`<button type="button" role="tab" data-mv="${i}" aria-selected="${MV===i}" tabindex="${MV===i?0:-1}">${t}</button>`).join("")}</div>
    <div id="mg-ov" class="kpis k7">
     ${kpi("Engineers",fmtN(E.length),"with leads in period")}${kpi("Accounts",fmtN(T.accounts),`${fmtN(T.custAcc)} customers`)}${kpi("Leads",fmtN(T.leads),`${fmtN(S1.leads)} in · ${fmtN(S2.leads)} out`)}
     ${kpi("Orders closed",fmtN(T.orders),T.noVal?`${T.noVal} without amount`:"")}${kpi("Revenue",fmtAED(T.rev),"")}${kpi("Conversion",T.leads?fmtP(pct(T.orders,T.leads)):"—","orders ÷ leads")}${kpi("Revenue / account",fmtAED(T.accounts?T.rev/T.accounts:0),`${fmtAED(T.custAcc?T.rev/T.custAcc:0)} per customer`)}
    </div>
-   <div class="grid2">
+   <div class="grid2" data-sec="ov">
     <div class="panel"><h3>Sales leaderboard</h3><p class="small muted" style="margin:2px 0 12px">Top engineers by revenue and by orders closed</p>
      <div class="grid2 tight"><div><div class="small muted" style="margin-bottom:6px">Revenue</div>${hbars(byRev.slice(0,5).filter(x=>x.rev).map(x=>({label:x.name,v:x.rev,tip:`${x.name}: ${fmtAED(x.rev)} from ${x.orders} order(s)`})))}</div>
      <div><div class="small muted" style="margin-bottom:6px">Orders closed</div>${hbars(E.slice().sort((a,b)=>b.orders-a.orders||b.rev-a.rev).slice(0,5).filter(x=>x.orders).map(x=>({label:x.name,v:x.orders,tip:`${x.name}: ${x.orders} order(s), ${fmtAED(x.rev)}`})),{fmt:fmtN})}</div></div></div>
@@ -1310,13 +1400,14 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
      <div class="row small muted" style="margin-top:6px"><span>Conversion: inbound <b class="mono" style="color:var(--ink)">${fmtP(pct(S1.orders,S1.leads))}</b></span><span>outbound <b class="mono" style="color:var(--ink)">${fmtP(pct(S2.orders,S2.leads))}</b></span><span>Avg order: ${fmtAED(S1.orders?S1.rev/S1.orders:0)} · ${fmtAED(S2.orders?S2.rev/S2.orders:0)}</span></div></div>
    </div>
 
-   <div id="mg-eng"><div class="row" style="margin-bottom:8px"><h3>Engineer performance</h3><span class="sp"></span><span class="small muted">Click a column to sort · top 3 by revenue highlighted</span></div>
+   <div id="mg-eng" data-sec="eng"><div class="row" style="margin-bottom:8px"><h3>Engineer performance</h3><span class="sp"></span><span class="small muted">Sort by any column · ▸ shows the orders behind the revenue</span><button type="button" class="btn sm" id="xAll">${E.length&&E.every(x=>!x.orders||(S.xEng||{})[x.name])?"Collapse all":"Expand all"}</button></div>
     <div class="tw"><table><thead><tr>${ecols.map(c=>th("eng",c)).join("")}</tr></thead><tbody>
-    ${er.map(x=>{const t=topRev.indexOf(x.name);return`<tr class="${t>=0?"top":""}"><td>${t>=0?rank(t):""}<b>${esc(x.name)}</b></td><td>${esc(x.region)}${x.regionMore?` <span class="small muted">+${x.regionMore}</span>`:""}</td><td class="num">${x.accounts}</td><td class="num">${x.leads}</td><td class="num">${x.outb}</td><td class="num">${x.inb}</td><td class="num">${x.orders}</td><td class="num">${fmtAED(x.rev)}${dbar(x.rev,mxRev,"--c-main")}</td><td class="num">${fmtAED(x.rpa)}</td><td class="num">${fmtP(x.conv)}</td></tr>`}).join("")||`<tr><td colspan="10" class="empty">No assigned leads for these filters.</td></tr>`}
+    ${er.filter(x=>S.engZero||x.orders||x.leads>=20).map(x=>{const t=topRev.indexOf(x.name);const xo=!!(S.xEng||{})[x.name];return`<tr class="${t>=0?"top":""}${xo?" xopen":""}"><td>${x.orders?`<button type="button" class="xbtn" data-xeng="${esc(x.name)}" aria-expanded="${xo}" aria-label="${xo?"Hide":"Show"} ${esc(x.name)}'s orders"><span class="tw-car" aria-hidden="true">▸</span></button>`:`<span class="xpad"></span>`}${t>=0?rank(t):""}<b>${esc(x.name)}</b></td><td>${esc(x.region)}${x.regionMore?` <span class="small muted">+${x.regionMore}</span>`:""}</td><td class="num">${x.accounts}</td><td class="num">${x.leads}</td><td class="num">${x.outb}</td><td class="num">${x.inb}</td><td class="num">${x.orders}</td><td class="num">${fmtAED(x.rev)}${dbar(x.rev,mxRev,"--c-main")}</td><td class="num">${fmtAED(x.rpa)}</td><td class="num">${fmtP(x.conv)}</td></tr>${xo?orderTree(R.ls,x):""}`}).join("")||`<tr><td colspan="10" class="empty">No assigned leads for these filters.</td></tr>`}
+    ${er.some(x=>!(x.orders||x.leads>=20))?`<tr><td colspan="10" style="text-align:center;padding:6px"><button type="button" class="btn sm" id="engZero">${S.engZero?"Hide engineers with no orders":`Show ${er.filter(x=>!(x.orders||x.leads>=20)).length} more engineers with no orders and under 20 leads`}</button></td></tr>`:""}
     ${E.length?`<tr class="tot"><td><b>Team</b></td><td></td><td class="num">${fmtN(T.accounts)}</td><td class="num">${fmtN(T.leads)}</td><td class="num">${fmtN(S2.leads)}</td><td class="num">${fmtN(S1.leads)}</td><td class="num">${fmtN(T.orders)}</td><td class="num">${fmtAED(T.rev)}</td><td class="num">${fmtAED(T.accounts?T.rev/T.accounts:0)}</td><td class="num">${T.leads?fmtP(pct(T.orders,T.leads)):"—"}</td></tr>`:""}
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">An account worked by two engineers counts for each of them, so engineer accounts can add up to more than the team total.</p></div>
 
-   <div id="mg-io" class="panel"><div class="row" style="margin-bottom:12px"><h3>Sales performance: inbound vs outbound</h3></div>
+   <div id="mg-io" class="panel" data-sec="io"><div class="row" style="margin-bottom:12px"><h3>Sales performance: inbound vs outbound</h3></div>
     <div class="ins">
      ${insight("Most inbound orders",E,x=>x.inbOrders,(v,x)=>`${v} order${v===1?"":"s"} · ${fmtAED(x.inbRev)}`)}
      ${insight("Most outbound orders",E,x=>x.outbOrders,(v,x)=>`${v} order${v===1?"":"s"} · ${fmtAED(x.outbRev)}`)}
@@ -1336,7 +1427,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
      ${pr.length?`<tr class="tot"><td><b>Team</b></td><td class="num">${fmtN(R.src[src].leads)}</td><td class="num">${fmtN(R.src[src].conv)}</td><td class="num">${fmtN(R.src[src].orders)}</td><td class="num">${fmtP(pct(R.src[src].orders,R.src[src].leads))}</td><td class="num">${fmtAED(R.src[src].rev)}</td><td class="num">${R.src[src].orders?fmtAED(R.src[src].rev/R.src[src].orders):"—"}</td></tr>`:""}
     </tbody></table></div></div>
 
-   <div id="mg-rpa" class="panel"><div class="row" style="margin-bottom:12px"><h3>Revenue per account</h3></div>
+   <div id="mg-rpa" class="panel" data-sec="rev"><div class="row" style="margin-bottom:12px"><h3>Revenue per account</h3></div>
     <div class="ins">
      ${insight("Highest revenue per account",E,x=>x.rpa,(v,x)=>`${fmtAED(v)} · ${x.accounts} accounts`)}
      ${insight("Most valuable accounts",E.filter(x=>x.custAcc>=3),x=>x.rpc,(v,x)=>`${fmtAED(v)} per customer · ${x.custAcc} customers`,"Needs 3+ customer accounts.")}
@@ -1353,21 +1444,26 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
      ${lr.map(x=>`<tr class="${rk[x.name]<3&&x.rev?"top":""}"><td class="num">${x.rev?rank(rk[x.name]):""}</td><td><b>${esc(x.name)}</b></td><td class="num">${x.accounts}</td><td class="num">${x.custAcc}</td><td class="num">${x.orders}</td><td class="num">${fmtAED(x.rev)}</td><td class="num">${fmtAED(x.rpa)}</td><td class="num">${x.custAcc?fmtAED(x.rpc):"—"}</td><td class="num">${x.orders?fmtAED(x.aov):"—"}</td><td class="num">${fmtP(x.share)}${dbar(x.share,Math.max(...E.map(e=>e.share),0.0001),"--c-main")}</td><td class="num">${fmtP(x.conv)}</td></tr>`).join("")||`<tr><td colspan="11" class="empty">No engineers with leads for these filters.</td></tr>`}
     </tbody></table></div><p class="small muted" style="margin:6px 0 0"># is the revenue rank. Rev / customer divides revenue by accounts that placed an order, showing who manages the most valuable buying accounts.</p></div>
 
-   <div id="mg-reg" class="panel"><h3>Regional performance</h3><p class="small muted" style="margin:2px 0 12px">Revenue, accounts and orders by region</p>
+   <div id="mg-reg" class="panel" data-sec="reg"><h3>Regional performance</h3><p class="small muted" style="margin:2px 0 12px">Revenue, accounts and orders by region</p>
     <div class="tw plain"><table><thead><tr><th>Region</th><th style="min-width:200px">Revenue</th><th style="min-width:150px">Accounts</th><th style="min-width:150px">Orders</th><th class="num">Leads</th><th class="num">Conversion</th><th class="num">Rev / account</th></tr></thead><tbody>
      ${regs.map(r=>`<tr><td><b>${esc(r.region)}</b></td><td><span class="mono">${fmtAED(r.rev)}</span>${dbar(r.rev,mxRR,"--c-main")}</td><td><span class="mono">${r.accounts}</span>${dbar(r.accounts,mxRA,"--c-main")}</td><td><span class="mono">${r.orders}</span>${dbar(r.orders,mxRO,"--c-main")}</td><td class="num">${r.leads}</td><td class="num">${fmtP(pct(r.orders,r.leads))}</td><td class="num">${fmtAED(r.accounts?r.rev/r.accounts:0)}</td></tr>`).join("")||`<tr><td colspan="7" class="empty">No leads for these filters.</td></tr>`}
     </tbody></table></div></div>
 
-   ${subs.length?`<div class="panel"><h3>UAE emirates and US states</h3><p class="small muted" style="margin:2px 0 12px">Leads, orders and revenue by emirate and state, with the territory owner</p>
+   ${subs.length?`<div class="panel" data-sec="reg"><h3>UAE emirates and US states</h3><p class="small muted" style="margin:2px 0 12px">Leads, orders and revenue by emirate and state, with the territory owner</p>
     <div class="tw plain"><table><thead><tr><th>Emirate / state</th><th>Group</th><th>Owner</th><th style="min-width:150px">Leads</th><th class="num">Accounts</th><th class="num">Orders</th><th style="min-width:170px">Revenue</th><th class="num">Conversion</th></tr></thead><tbody>
      ${subs.map(x=>`<tr><td><b>${esc(x.n)}</b> <span class="small muted">${x.c}</span></td><td>${esc(x.g||"—")}</td><td>${x.n==="Not set"?`<span class="muted">—</span>`:esc(territoryOf(x.c,"",{c:x.c,n:x.n}).owner||"—")}</td><td><span class="mono">${x.leads}</span>${dbar(x.leads,mxSL,"--c-main")}</td><td class="num">${x.acc.size}</td><td class="num">${x.orders}</td><td><span class="mono">${fmtAED(x.rev)}</span>${dbar(x.rev,mxSR,"--c-main")}</td><td class="num">${fmtP(pct(x.orders,x.leads))}</td></tr>`).join("")}
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
-   ${gaps.length?`<div class="notice info"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}</div>`:""}
-   <div id="mg-ops"></div>
+   ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}</div>`:""}
+   <div id="mg-ops" data-sec="ops"></div>
   </section>`;
   mgmtOps($("#mg-ops"));
   bindFilters(m);bindSort(m);
-  m.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>document.getElementById(b.dataset.jump)?.scrollIntoView({behavior:"smooth",block:"start"}));
+  m.querySelectorAll("[data-sec]").forEach(x=>{x.hidden=x.dataset.sec!==MV});
+  const mt=m.querySelector(".mtabs");mt.onclick=e=>{const b=e.target.closest("[data-mv]");if(b){S.mgView=b.dataset.mv;render()}};
+  mt.onkeydown=e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;const i=MG_VIEWS.findIndex(v=>v[0]===MV);S.mgView=MG_VIEWS[(i+(e.key==="ArrowRight"?1:-1)+MG_VIEWS.length)%MG_VIEWS.length][0];render();m.querySelector('.mtabs [aria-selected="true"]')?.focus()};
+  m.querySelectorAll("[data-xeng]").forEach(b=>b.onclick=()=>{const n=b.dataset.xeng;S.xEng=S.xEng||{};S.xEng[n]=!S.xEng[n];render()});
+  $("#engZero")?.addEventListener("click",()=>{S.engZero=!S.engZero;render()});
+  $("#xAll")?.addEventListener("click",()=>{const open=!E.every(x=>!x.orders||(S.xEng||{})[x.name]);S.xEng={};if(open)E.forEach(x=>{if(x.orders)S.xEng[x.name]=true});render()});
   $("#perfS").onclick=e=>{const b=e.target.closest("button");if(b){S.perfSrc=b.dataset.v;render()}};
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
   $("#csvBtn")?.addEventListener("click",exportCSV)}
