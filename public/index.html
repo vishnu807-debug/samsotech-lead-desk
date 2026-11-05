@@ -429,7 +429,7 @@ const PERMISSIONS=[
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.delete","Delete leads","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"]];
 const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
@@ -859,6 +859,11 @@ async function nextRef(){if(window.LD_HOSTED){const{data,error}=await window.__s
   throw{code:"busy",message:"Reference counter busy, try again"}}
 
 /* ======================= 2. BACK OFFICE ======================= */
+/* a lead assigned to two people at once ("Vishnu Himani", "Imtishal, Mustafa") has no single owner */
+function nameParts(n){return String(n||"").split(/\s*(?:,|&|\/|\+|\band\b)\s*|\s+/i).map(x=>x.trim()).filter(Boolean)}
+function sharedOwners(n){if(!n)return null;const sp=spNames();if(sp.some(x=>nk(x)===nk(n)))return null;const ps=nameParts(n);if(ps.length<2)return null;
+  const hit=ps.map(p=>sp.find(x=>nk(x)===nk(p)));return hit.every(Boolean)?hit:null}
+const sharedLeads=()=>S.leads.filter(l=>OPEN.includes(l.status)&&!["New","Info Needed"].includes(l.status)&&sharedOwners(l.assignedTo));
 function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").sort((a,b)=>a.createdAt<b.createdAt?-1:1);
   const recent=S.leads.filter(l=>l.verifiedAt).sort((a,b)=>a.verifiedAt<b.verifiedAt?1:-1).slice(0,12);
   const sla=S.settings.slaVerifyHours||24;
@@ -866,17 +871,23 @@ function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Inf
   m.innerHTML=`<section class="view">
    <div class="vhead"><div><h2>Verification queue</h2><p>Check each lead for duplicates, then verify and assign it to a sales engineer, ask the submitter for more information, or close it as a duplicate or invalid.</p></div>
    <div class="row">${can("page.settings")?`<button class="btn sm" id="goSet">Manage products and engineers</button>`:""}<span class="chip">${q.length} waiting</span><span class="chip" style="${q.some(l=>days(l.createdAt)*24>sla)?"background:var(--bad-soft);color:var(--bad)":""}">${q.filter(l=>days(l.createdAt)*24>sla).length} past ${sla}h SLA</span></div></div>
+   ${can("lead.reassign")&&sharedLeads().length?`<div class="panel" style="border-left:3px solid var(--warn)"><div class="row" style="margin-bottom:6px"><h3>${sharedLeads().length} leads are assigned to two people</h3><span class="sp"></span><button class="btn pri sm" id="unshare" type="button">Move them to the queue</button></div>
+    <p class="small muted" style="margin:0 0 10px">Each lead should have one engineer. Moving them removes the combined name and puts them in the queue below, where you pick one engineer. Meetings, products and notes stay on the lead.</p>
+    <div class="alerts">${sharedLeads().map(l=>`<button class="alert" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span style="flex:1;min-width:0"><b>${esc(l.accountName)}</b> <span class="small muted">${esc(l.country||"")}</span></span>${sharedOwners(l.assignedTo).map(n=>`<span class="chip">${esc(n)}</span>`).join(" + ")}</button>`).join("")}</div></div>`:""}
    <div class="view" style="gap:10px">${q.length?q.map(qCard).join(""):`<div class="panel empty">${S.loaded.leads?"Nothing waiting. New leads appear here as soon as they are submitted.":"Loading the queue…"}</div>`}</div>
    <div class="grid2">
     <div class="panel"><h3>Open leads per sales engineer</h3>${Object.keys(load).length?`<div class="funnel">${Object.entries(load).sort((a,b)=>b[1]-a[1]).map(([n,c])=>{const mx=Math.max(...Object.values(load));return`<div class="frow"><span>${esc(n)}</span><div class="fbar"><i style="width:${c/mx*100}%"></i></div><span class="num">${c} open</span></div>`}).join("")}</div>`:`<p class="muted small">No leads assigned yet. Workload shows here so you can balance assignments.</p>`}</div>
     <div class="panel"><h3>Recently verified</h3>${recent.length?`<div class="alerts">${recent.map(l=>`<button class="alert" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span style="flex:1;min-width:0">${esc(l.accountName)} · ${esc(l.product)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span></button>`).join("")}</div>`:`<p class="muted small">Verified leads will be listed here.</p>`}</div>
    </div></section>`;
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
+  $("#unshare")?.addEventListener("click",async e=>{const b=e.currentTarget;const ls=sharedLeads();b.disabled=true;b.textContent="Moving…";let ok=0;
+    for(const l of ls){try{if(await patch(l,{assignedTo:"",formerAssignee:l.assignedTo,preferred:"",assignedMailFor:""},`Was assigned to "${l.assignedTo}" (${sharedOwners(l.assignedTo).join(" and ")}); moved back to the queue to choose one engineer`,"New"))ok++}catch(err){}}
+    toast(ok===ls.length?`${ok} lead${ok===1?"":"s"} moved to the queue`:`${ok} of ${ls.length} moved; try again for the rest`)});
   $("#goSet")?.addEventListener("click",()=>{S.tab="set";try{history.replaceState(null,"","#set")}catch(_){}render()})}
 function qCard(l){const ch=dupChecks(l);const bad=ch.some(c=>c.lvl==="bad");const hrs=days(l.createdAt)*24;
   return`<div class="qcard ${bad?"blockd":ch.length?"flag":""}">
    <div class="qtop"><span class="mono">${esc(l.ref)}</span><b>${esc(l.accountName)}</b><span class="muted">${esc(l.country||"")}</span><span class="sp"></span><span class="${stCls(l.status)}">${esc(l.status)}</span></div>
-   <div class="row">${productsOf(l).map(p=>`<span class="chip">${esc(p)}</span>`).join("")}<span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span><span class="chip">${esc(l.source)}</span>${l.preferred?`<span class="chip">Prefers ${esc(l.preferred)}</span>`:""}</div>
+   <div class="row">${productsOf(l).map(p=>`<span class="chip">${esc(p)}</span>`).join("")}<span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span><span class="chip">${esc(l.source)}</span>${l.preferred?`<span class="chip">Prefers ${esc(l.preferred)}</span>`:""}${l.formerAssignee?`<span class="chip" style="background:var(--warn-soft);color:var(--warn)">Was shared: ${esc((sharedOwners(l.formerAssignee)||[l.formerAssignee]).join(" + "))} · pick one</span>`:""}</div>
    <div class="kv">${ownerOf(l)?`<span>Territory <b>${esc(ownerOf(l))}</b></span>`:`<span style="color:var(--warn)">No territory owner</span>`}${meetingsOf(l).length?`<span>Meetings <b>${meetingsOf(l).length}</b></span>`:""}<span>Requirement <b>${fmtD(reqDate(l))}</b></span><span>Region <b>${esc(regionOf(l))}</b></span><span>Contact <b>${esc(l.contact?.name)}</b>${l.contact?.title?" · "+esc(l.contact.title):""}</span><span><b>${esc(l.contact?.email||l.contact?.phone||"")}</b></span><span>By <b>${esc(l.generatedBy)}</b>${l.department?" · "+esc(l.department):""}</span><span style="${hrs>(S.settings.slaVerifyHours||24)?"color:var(--bad)":""}">Waiting <b>${hrs<1?"<1h":hrs<48?Math.round(hrs)+"h":Math.round(hrs/24)+" days"}</b></span></div>
    ${l.notes?`<div class="small">${esc(l.notes)}</div>`:""}
    ${ch.length?`<div class="view" style="gap:4px">${ch.map(c=>`<div class="notice ${c.lvl}" style="padding:6px 10px">${esc(c.msg)}</div>`).join("")}</div>`:`<div class="notice ok" style="padding:6px 10px">No duplicates found for this account and product.</div>`}
@@ -1062,7 +1073,7 @@ function drawProdArea(l){const P=$("#prodArea");if(!P)return;const cur=productsO
 function actor(){return S.myEng||""}
 async function patch(l,data,logMsg,status){const t=nowISO();const body=Object.assign({},data,{updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:logMsg}]});
   if(status){body.status=status;body.stageAt=Object.assign({},l.stageAt||{},{[status]:t})}
-  try{await S.db.doc("leads/"+l.id).update(body);S.drawer.mode=null;toast(logMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}}
+  try{await S.db.doc("leads/"+l.id).update(body);if(S.drawer)S.drawer.mode=null;toast(logMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}}
 function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll()&&!can("lead.edit_own")?`<div class="small muted">Read-only for your role.</div>`:`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or a Lead Manager can update it.</div>`;return}const mode=["prods","details"].includes(S.drawer.mode)?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
   const inBO=l.status==="New"||l.status==="Info Needed";
   const meetFields=()=>{const first=!meetingsOf(l).length;const lp=productsOf(l);const extra=prodList().map(p=>p.name).filter(n=>!lp.includes(n));
@@ -1212,6 +1223,131 @@ function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO()
   $("#mCsv")?.addEventListener("click",async()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
     const csv=[["Date","Lead","Property","Region","Category","Meeting type","Held","Products discussed","Engineer","Notes"].join(",")].concat(rows.map(({m:x,l})=>[x.date,l.ref,l.accountName,regionOf(l),l.category,x.type,x.mode,(x.products||[]).join("; "),l.assignedTo,x.notes].map(q).join(","))).join("\n");
     try{await S.downloads.save({filename:`meetings-${month}.csv`,data:new Blob([csv],{type:"text/csv"})});toast(`meetings-${month}.csv is ready`)}catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code||"unknown error"))}})}
+
+
+/* ======================= SALES PERFORMANCE PRESENTATION (.pptx) =======================
+   Built in the browser from the same analytics() the Management tab uses, for the filters on screen. */
+let PPTX_P=null;
+function loadPptx(){if(window.PptxGenJS)return Promise.resolve(window.PptxGenJS);
+  const urls=["https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js","https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"];
+  return PPTX_P||(PPTX_P=new Promise((res,rej)=>{const next=i=>{if(i>=urls.length){PPTX_P=null;rej(new Error("Couldn't load the presentation library. Check your internet connection and try again."));return}
+    const s=document.createElement("script");s.src=urls[i];s.onload=()=>window.PptxGenJS?res(window.PptxGenJS):next(i+1);s.onerror=()=>{s.remove();next(i+1)};document.head.appendChild(s)};next(0)}))}
+function deckData(F){const R=analytics(F),T=R.tot,E=R.engs.slice().sort((a,b)=>b.rev-a.rev||b.orders-a.orders);
+  const won=R.ls.filter(l=>l.status==="Won");const wonOn=l=>(l.order?.date||l.stageAt?.Won||reqDate(l)||"").slice(0,7);
+  const months=[...new Set(R.ls.map(l=>reqDate(l).slice(0,7)).concat(won.map(wonOn)).filter(Boolean))].sort();
+  const monthly=months.map(m=>({m,leads:R.ls.filter(l=>reqDate(l).slice(0,7)===m).length,orders:won.filter(l=>wonOn(l)===m).length,rev:won.filter(l=>wonOn(l)===m).reduce((s,l)=>s+orderVal(l),0)}));
+  const P={};R.ls.forEach(l=>productsOf(l).forEach(p=>{const o=P[p]||(P[p]={p,leads:0,orders:0,rev:0});o.leads++;if(l.status==="Won"){o.orders++;o.rev+=orderVal(l)}}));
+  const prods=Object.values(P).sort((a,b)=>b.rev-a.rev||b.orders-a.orders||b.leads-a.leads);
+  const regs=R.regions.slice().sort((a,b)=>b.rev-a.rev||b.leads-a.leads);
+  const S1=R.src.Inbound,S2=R.src.Outbound;const top=E[0];const known=new Set(spNames().map(nk));
+  const conv=E.filter(x=>x.leads>=MIN_CONV&&x.orders).sort((a,b)=>b.conv-a.conv)[0];const rpa=E.filter(x=>x.rpa).sort((a,b)=>b.rpa-a.rpa)[0];
+  const rpc=E.filter(x=>x.custAcc>=3).sort((a,b)=>b.rpc-a.rpc)[0];const reg=regs.find(r=>r.rev>0);const prod=prods.find(p=>p.rev>0);
+  const take=[];
+  if(T.rev)take.push(`${fmtAED(T.rev)} revenue from ${fmtN(T.orders)} orders closed out of ${fmtN(T.leads)} leads (${fmtP(pct(T.orders,T.leads))} conversion).`);
+  if(S1.rev+S2.rev)take.push(`${S1.rev>=S2.rev?"Inbound":"Outbound"} leads brought ${fmtP(pct(Math.max(S1.rev,S2.rev),S1.rev+S2.rev))} of revenue; inbound converts at ${fmtP(pct(S1.orders,S1.leads))} vs outbound ${fmtP(pct(S2.orders,S2.leads))}.`);
+  if(top&&top.rev)take.push(`${top.name} leads revenue with ${fmtAED(top.rev)} (${fmtP(top.share)} of the total) from ${top.orders} orders.`);
+  if(conv)take.push(`Strongest conversion: ${conv.name}, ${fmtP(conv.conv)} (${conv.orders} of ${conv.leads} leads).`);
+  if(reg)take.push(`${reg.region} is the top region at ${fmtAED(reg.rev)} from ${reg.orders} orders.`);
+  if(prod)take.push(`${prod.p} is the top product by order value (${fmtAED(prod.rev)}, ${prod.orders} orders).`);
+  const gaps=[];if(T.noVal)gaps.push(`${T.noVal} won lead${T.noVal===1?" has":"s have"} no order amount (counted as orders, not revenue).`);
+  if(T.leads&&T.stageTracked/T.leads<.5)gaps.push(`Meeting and quotation stages are only recorded for ${fmtN(T.stageTracked)} of ${fmtN(T.leads)} leads.`);
+  const odd=E.filter(x=>!known.has(nk(x.name)));if(odd.length)gaps.push(`${odd.length} assignee name${odd.length===1?" is":"s are"} not on the engineer list and appear separately.`);
+  return{R,T,E,S1,S2,monthly,prods,regs,take,gaps,conv,rpa,rpc,top}}
+function filterSummary(F){const a=[periodText(F)];if(F.region)a.push(F.region);if(F.sub)a.push(F.sub);if(F.eng)a.push(F.eng);if(F.src!=="All")a.push(F.src+" leads");if(F.status)a.push(F.status+" accounts");return a.join(" · ")}
+async function createDeck(){if(!can("report.deck")){toast("Your role can't create presentations.");return}
+  const b=$("#deckBtn");const lab=b?.innerHTML;if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Building presentation…`}
+  try{const PptxGenJS=await loadPptx();const F=af();const D=deckData(F);const{R,T,E,S1,S2}=D;
+    if(!T.leads){toast("No leads match these filters, so there's nothing to present.");return}
+    const C={ink:"142131",muted:"5A6779",line:"D9DFE7",sunk:"EEF1F5",acc:"1E5AA8",accSoft:"E3ECF8",inb:"008F84",outb:"A35F00",ok:"1D7A3A",white:"FFFFFF"};
+    const FONT="Calibri";const pptx=new PptxGenJS();pptx.layout="LAYOUT_WIDE";pptx.author="Lead Desk";pptx.company="Samsotech";pptx.title="Sales performance overview";
+    const sub=filterSummary(F);const today=fmtD(new Date().toISOString());let n=0;
+    const page=(title,kicker)=>{const s=pptx.addSlide();n++;s.background={color:C.white};
+      s.addText(kicker||"",{x:0.6,y:0.35,w:9,h:0.3,fontFace:FONT,fontSize:11,color:C.acc,bold:true,charSpacing:1});
+      s.addText(title,{x:0.6,y:0.62,w:12.1,h:0.6,fontFace:FONT,fontSize:26,bold:true,color:C.ink});
+      s.addShape(pptx.ShapeType.line,{x:0.6,y:7.0,w:12.13,h:0,line:{color:C.line,width:0.75}});
+      s.addText(`Samsotech · Sales performance · ${sub}`,{x:0.6,y:7.05,w:10.5,h:0.3,fontFace:FONT,fontSize:9,color:C.muted});
+      s.addText(String(n),{x:12.2,y:7.05,w:0.53,h:0.3,fontFace:FONT,fontSize:9,color:C.muted,align:"right"});return s};
+    const kpi=(s,x,y,w,label,value,note)=>{s.addShape(pptx.ShapeType.rect,{x,y,w,h:1.25,fill:{color:C.sunk},line:{color:C.sunk}});
+      s.addText(label.toUpperCase(),{x:x+0.18,y:y+0.12,w:w-0.3,h:0.28,fontFace:FONT,fontSize:9,bold:true,color:C.muted,charSpacing:1});
+      s.addText(value,{x:x+0.18,y:y+0.4,w:w-0.3,h:0.5,fontFace:FONT,fontSize:value.length>9?17:value.length>7?19:22,bold:true,color:C.ink,fit:"shrink"});
+      if(note)s.addText(note,{x:x+0.18,y:y+0.88,w:w-0.3,h:0.28,fontFace:FONT,fontSize:9,color:C.muted})};
+    const th=t=>({text:t,options:{bold:true,color:C.muted,fill:{color:C.sunk},fontSize:9}});
+    const table=(s,head,rows,o)=>s.addTable([head.map(th)].concat(rows.map(r=>r.map(c=>typeof c==="object"&&c&&c.text!==undefined?c:{text:String(c??"")}))),
+      Object.assign({x:0.6,y:1.5,w:12.13,fontFace:FONT,fontSize:10,color:C.ink,border:{type:"solid",pt:0.5,color:C.line},margin:[3,6,3,6],rowH:0.3,autoPage:false},o||{}));
+    const num=(t,b)=>({text:t,options:{align:"right",bold:!!b}});
+    const bars=(s,labels,values,o)=>s.addChart(pptx.ChartType.bar,[{name:o.name||"",labels,values}],Object.assign({barDir:"bar",chartColors:[o.color||C.acc],
+      catAxisLabelFontFace:FONT,catAxisLabelFontSize:10,catAxisLabelColor:C.ink,catAxisLineShow:false,catAxisOrientation:"maxMin",valAxisHidden:true,valGridLine:{style:"none"},
+      showValue:true,dataLabelFontFace:FONT,dataLabelFontSize:9,dataLabelColor:C.ink,dataLabelFormatCode:o.fmt||"#,##0",dataLabelPosition:"outEnd",barGapWidthPct:60,showLegend:false},o));
+
+    // 1. Title
+    {const s=pptx.addSlide();n++;s.background={color:C.white};s.addShape(pptx.ShapeType.rect,{x:0,y:0,w:0.28,h:7.5,fill:{color:C.acc},line:{color:C.acc}});
+     s.addText("SAMSOTECH",{x:0.9,y:1.6,w:11,h:0.4,fontFace:FONT,fontSize:13,bold:true,color:C.acc,charSpacing:3});
+     s.addText("Sales performance overview",{x:0.9,y:2.05,w:11.5,h:1.0,fontFace:FONT,fontSize:40,bold:true,color:C.ink});
+     s.addText(sub,{x:0.9,y:3.1,w:11.5,h:0.5,fontFace:FONT,fontSize:16,color:C.muted});
+     s.addText(`Prepared ${today} from Lead Desk · ${fmtN(T.leads)} leads · ${fmtN(E.length)} engineers`,{x:0.9,y:6.3,w:11.5,h:0.4,fontFace:FONT,fontSize:11,color:C.muted})}
+    // 2. Headline numbers + takeaways
+    {const s=page("Headline numbers","AT A GLANCE");const w=(12.13-6*0.15)/7;
+     [["Leads",fmtN(T.leads),`${fmtN(S1.leads)} in · ${fmtN(S2.leads)} out`],["Accounts",fmtN(T.accounts),`${fmtN(T.custAcc)} customers`],["Orders",fmtN(T.orders),T.noVal?`${T.noVal} without amount`:""],
+      ["Revenue",fmtAED(T.rev),""],["Conversion",fmtP(pct(T.orders,T.leads)),"orders ÷ leads"],["Rev / account",fmtAED(T.accounts?T.rev/T.accounts:0),""],["Avg order",fmtAED(T.orders?T.rev/T.orders:0),""]]
+      .forEach((k,i)=>kpi(s,0.6+i*(w+0.15),1.5,w,...k));
+     s.addText("Key takeaways",{x:0.6,y:3.1,w:6,h:0.4,fontFace:FONT,fontSize:16,bold:true,color:C.ink});
+     s.addText(D.take.map(t=>({text:t,options:{bullet:{indent:16},paraSpaceAfter:8}})),{x:0.6,y:3.55,w:12.1,h:3.2,fontFace:FONT,fontSize:14,color:C.ink,valign:"top"})}
+    // 3. Inbound vs outbound
+    {const s=page(`${S1.rev>=S2.rev?"Inbound":"Outbound"} leads bring ${fmtP(pct(Math.max(S1.rev,S2.rev),S1.rev+S2.rev))} of revenue`,"INBOUND VS OUTBOUND");
+     s.addChart(pptx.ChartType.bar,[{name:"Inbound",labels:["Leads","Orders"],values:[S1.leads,S1.orders]},{name:"Outbound",labels:["Leads","Orders"],values:[S2.leads,S2.orders]}],
+      {x:0.6,y:1.5,w:6,h:3.6,barDir:"col",barGrouping:"clustered",chartColors:[C.inb,C.outb],showValue:true,dataLabelFontSize:10,dataLabelFormatCode:"#,##0",dataLabelPosition:"outEnd",valAxisHidden:true,valGridLine:{style:"none"},catAxisLabelFontSize:11,showLegend:true,legendPos:"t",legendFontSize:10,barGapWidthPct:50});
+     s.addChart(pptx.ChartType.bar,[{name:"Revenue (AED)",labels:["Inbound","Outbound"],values:[Math.round(S1.rev),Math.round(S2.rev)]}],
+      {x:6.9,y:1.5,w:5.8,h:3.6,barDir:"col",chartColors:[C.inb,C.outb],showValue:true,dataLabelFontSize:10,dataLabelFormatCode:"#,##0",dataLabelPosition:"outEnd",valAxisHidden:true,valGridLine:{style:"none"},catAxisLabelFontSize:11,showLegend:false,barGapWidthPct:50,showTitle:true,title:"Revenue (AED)",titleFontSize:11,titleColor:C.muted});
+     table(s,["","Leads","Converted","Orders","Conversion","Revenue","Avg order"],[["Inbound",S1,R.src.Inbound],["Outbound",S2,R.src.Outbound]].map(([t,x])=>[{text:t,options:{bold:true,color:t==="Inbound"?C.inb:C.outb}},num(fmtN(x.leads)),num(fmtN(x.conv)),num(fmtN(x.orders)),num(fmtP(pct(x.orders,x.leads))),num(fmtAED(x.rev)),num(x.orders?fmtAED(x.rev/x.orders):"—")]),
+      {y:5.35,colW:[1.9,1.4,1.4,1.4,1.6,2.4,2.03]})}
+    // 4. Engineer revenue ranking
+    {const top=E.filter(x=>x.rev>0).slice(0,12);const s=page(top[0]?`${top[0].name} leads with ${fmtAED(top[0].rev)} (${fmtP(top[0].share)} of revenue)`:"Revenue by engineer","ENGINEER RANKING");
+     if(top.length)bars(s,top.map(x=>x.name),top.map(x=>Math.round(x.rev)),{x:0.6,y:1.45,w:7.4,h:5.4});else s.addText("No revenue in this period.",{x:0.6,y:1.6,w:8,h:0.4,fontSize:14,color:C.muted});
+     const ob=E.filter(x=>x.orders).sort((a,b)=>b.orders-a.orders).slice(0,8);
+     s.addText("Most orders closed",{x:8.4,y:1.45,w:4.3,h:0.35,fontFace:FONT,fontSize:13,bold:true,color:C.ink});
+     table(s,["Engineer","Orders","Conv."],ob.map(x=>[x.name,num(String(x.orders)),num(fmtP(x.conv))]),{x:8.4,y:1.85,w:4.33,colW:[2.2,1.0,1.13]})}
+    // 5. Engineer performance table
+    {const rows=E.filter(x=>x.orders||x.leads>=10).slice(0,15);const s=page("Engineer performance","TEAM");
+     table(s,["Engineer","Region","Accounts","Leads","Inbound","Outbound","Orders","Revenue","Rev / account","Conversion"],
+      rows.map((x,i)=>[{text:x.name,options:{bold:i<3&&x.rev>0}},x.region,num(fmtN(x.accounts)),num(fmtN(x.leads)),num(fmtN(x.inb)),num(fmtN(x.outb)),num(fmtN(x.orders)),num(fmtAED(x.rev),i<3&&x.rev>0),num(fmtAED(x.rpa)),num(fmtP(x.conv))])
+      .concat([[{text:"Team",options:{bold:true}},"",num(fmtN(T.accounts),1),num(fmtN(T.leads),1),num(fmtN(S1.leads),1),num(fmtN(S2.leads),1),num(fmtN(T.orders),1),num(fmtAED(T.rev),1),num(fmtAED(T.accounts?T.rev/T.accounts:0),1),num(fmtP(pct(T.orders,T.leads)),1)]]),
+      {colW:[1.7,1.4,1.0,0.9,1.0,1.0,0.9,1.6,1.4,1.23],rowH:0.29,fontSize:10});
+     if(E.length>rows.length)s.addText(`${E.length-rows.length} more engineers with fewer than 10 leads and no orders are not shown.`,{x:0.6,y:6.55,w:12,h:0.3,fontFace:FONT,fontSize:9,color:C.muted})}
+    // 6. Revenue per account
+    {const r=E.filter(x=>x.rpa).sort((a,b)=>b.rpa-a.rpa).slice(0,10);const s=page(D.rpa?`${D.rpa.name} earns the most per account: ${fmtAED(D.rpa.rpa)}`:"Revenue per account","REVENUE INTELLIGENCE");
+     if(r.length)bars(s,r.map(x=>x.name),r.map(x=>Math.round(x.rpa)),{x:0.6,y:1.45,w:6.2,h:5.4,color:C.acc});
+     const cards=[["Highest revenue per account",D.rpa,x=>`${fmtAED(x.rpa)} · ${x.accounts} accounts`],["Most valuable accounts (3+ customers)",D.rpc,x=>`${fmtAED(x.rpc)} per customer account`],["Highest overall revenue",D.top&&D.top.rev?D.top:null,x=>`${fmtAED(x.rev)} · ${fmtP(x.share)} of total`],["Strongest conversion",D.conv,x=>`${fmtP(x.conv)} · ${x.orders} of ${x.leads} leads`]];
+     cards.forEach(([q,x,f],i)=>{const y=1.45+i*1.35;s.addShape(pptx.ShapeType.rect,{x:7.2,y,w:5.53,h:1.2,fill:{color:i===0?C.accSoft:C.sunk},line:{color:i===0?C.accSoft:C.sunk}});
+       s.addText(q.toUpperCase(),{x:7.4,y:y+0.1,w:5.2,h:0.3,fontFace:FONT,fontSize:9,bold:true,color:C.muted,charSpacing:1});
+       s.addText(x?x.name:"—",{x:7.4,y:y+0.38,w:5.2,h:0.4,fontFace:FONT,fontSize:18,bold:true,color:C.ink});
+       s.addText(x?f(x):"Not enough data",{x:7.4,y:y+0.78,w:5.2,h:0.3,fontFace:FONT,fontSize:11,color:C.muted})})}
+    // 7. Regions
+    {const g=D.regs.filter(x=>x.leads);const s=page(g.find(x=>x.rev)?`${g.find(x=>x.rev).region} is the top region by revenue`:"Regional performance","REGIONS");
+     const gr=g.filter(x=>x.rev>0).slice(0,8);if(gr.length)bars(s,gr.map(x=>x.region),gr.map(x=>Math.round(x.rev)),{x:0.6,y:1.45,w:5.6,h:5.3});
+     table(s,["Region","Accounts","Leads","Orders","Revenue","Conv."],g.slice(0,12).map(x=>[x.region,num(fmtN(x.accounts)),num(fmtN(x.leads)),num(fmtN(x.orders)),num(fmtAED(x.rev)),num(fmtP(pct(x.orders,x.leads)))]),{x:6.6,y:1.5,w:6.13,colW:[1.7,0.9,0.8,0.8,1.2,0.73]})}
+    // 8. Monthly trend (two charts, one measure each)
+    if(D.monthly.length>1){const s=page("Monthly trend","TREND");const lab=D.monthly.map(x=>MON3[+x.m.slice(5,7)-1]+" "+x.m.slice(2,4));
+     s.addChart(pptx.ChartType.bar,[{name:"Leads received",labels:lab,values:D.monthly.map(x=>x.leads)}],{x:0.6,y:1.45,w:6,h:5.2,barDir:"col",chartColors:[C.acc],showValue:true,dataLabelFontSize:9,dataLabelPosition:"outEnd",valAxisHidden:true,valGridLine:{style:"none"},catAxisLabelFontSize:9,showTitle:true,title:"Leads received",titleFontSize:12,titleColor:C.ink,barGapWidthPct:40});
+     s.addChart(pptx.ChartType.bar,[{name:"Order value (AED)",labels:lab,values:D.monthly.map(x=>Math.round(x.rev))}],{x:6.9,y:1.45,w:5.83,h:5.2,barDir:"col",chartColors:[C.ok],showValue:true,dataLabelFontSize:8,dataLabelFormatCode:'#,##0,"k"',dataLabelPosition:"outEnd",valAxisHidden:true,valGridLine:{style:"none"},catAxisLabelFontSize:9,showTitle:true,title:"Order value by month won (AED)",titleFontSize:12,titleColor:C.ink,barGapWidthPct:40})}
+    // 9. Products
+    {const p=D.prods.slice(0,12);const s=page(p[0]&&p[0].rev?`${p[0].p} is the top product by order value`:"Products","PRODUCTS");
+     const pr=p.filter(x=>x.rev>0).slice(0,8);if(pr.length)bars(s,pr.map(x=>x.p),pr.map(x=>Math.round(x.rev)),{x:0.6,y:1.45,w:5.8,h:5.2,color:C.acc});
+     table(s,["Product","Leads","Orders","Conv.","Order value"],p.map(x=>[x.p,num(fmtN(x.leads)),num(fmtN(x.orders)),num(fmtP(pct(x.orders,x.leads))),num(fmtAED(x.rev))]),{x:6.8,y:1.5,w:5.93,colW:[2.3,0.8,0.8,0.8,1.23]});
+     s.addText("A lead with several products counts under each of them, so product totals can exceed the overall figures.",{x:6.8,y:6.55,w:5.9,h:0.3,fontFace:FONT,fontSize:9,color:C.muted})}
+    // 10. Method and data notes
+    {const s=page("How these numbers are calculated","NOTES");
+     const m=["Source: every lead in Lead Desk for "+sub+", dated by when the requirement came in. Duplicate and rejected leads are excluded.",
+       "Order closed = lead marked Won. Revenue = its order amount in AED. Conversion = orders closed ÷ leads.",
+       "An engineer's accounts are the properties with at least one of their leads; an account worked by two engineers counts for both.",
+       "Inbound / outbound follows the lead's category, set from its source channel."].concat(D.gaps);
+     s.addText(m.map(t=>({text:t,options:{bullet:{indent:16},paraSpaceAfter:10}})),{x:0.6,y:1.5,w:12.1,h:5.2,fontFace:FONT,fontSize:13,color:C.ink,valign:"top"})}
+    const blob=await pptx.write({outputType:"blob"});
+    const name=("Sales_Performance_"+[F.region,F.sub,F.eng,F.src!=="All"?F.src:""].filter(Boolean).join("_")+"_"+(periodRange(F)[0]?periodText(F):"All_time")).replace(/[\/\\:*?"<>|–·]+/g,"-").replace(/\s+/g,"_").replace(/_+/g,"_").replace(/-+/g,"-")+".pptx";
+    window.__lastDeck={name,size:blob.size,slides:n};
+    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+    toast(`${name} is ready (${n} slides)`)}
+  catch(e){if(e?.code==="cancelled")toast("Download cancelled");else{console.error(e);toast("Couldn't create the presentation: "+(e?.message||e?.code||"unknown error"))}}
+  finally{const nb=$("#deckBtn");if(nb){nb.disabled=false;nb.innerHTML=lab||"Create presentation"}}}
 
 /* ======================= ANALYTICS (one calculation shared by Accounts and Management) =======================
    Source of truth: the leads table only. Definitions used everywhere:
@@ -1384,7 +1520,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
   if(!S.leads.some(l=>l.status==="Lost"))gaps.push(`No leads are marked Lost yet, so conversion is measured against all leads, not only closed ones.`);
   m.innerHTML=`<section class="view mg">
    <div class="vhead"><div><h2>Management</h2><p>Team performance and revenue. Every figure follows the filters.</p></div>
-    <div class="row">${S.downloads&&can("lead.export")?`<button class="btn" id="csvBtn">Export leads CSV</button>`:""}</div></div>
+    <div class="row">${can("report.deck")?`<button class="btn pri" id="deckBtn" type="button" title="Builds a PowerPoint from the figures on this page, for the filters selected">Create presentation</button>`:""}${S.downloads&&can("lead.export")?`<button class="btn" id="csvBtn">Export leads CSV</button>`:""}</div></div>
    ${filterBar()}
    <div class="mtabs" role="tablist" aria-label="Management views">${MG_VIEWS.map(([i,t])=>`<button type="button" role="tab" data-mv="${i}" aria-selected="${MV===i}" tabindex="${MV===i?0:-1}">${t}</button>`).join("")}</div>
    <div id="mg-ov" class="kpis k7">
@@ -1466,7 +1602,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
   $("#xAll")?.addEventListener("click",()=>{const open=!E.every(x=>!x.orders||(S.xEng||{})[x.name]);S.xEng={};if(open)E.forEach(x=>{if(x.orders)S.xEng[x.name]=true});render()});
   $("#perfS").onclick=e=>{const b=e.target.closest("button");if(b){S.perfSrc=b.dataset.v;render()}};
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
-  $("#csvBtn")?.addEventListener("click",exportCSV)}
+  $("#csvBtn")?.addEventListener("click",exportCSV);$("#deckBtn")?.addEventListener("click",createDeck)}
 
 /* ---------- Management: pipeline health and operations (follows the same filters) ---------- */
 function inPeriod(l){const[f,t]=periodRange(af());const d=reqDate(l);return(!f||d>=f)&&(!t||d<=t)}
