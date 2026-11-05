@@ -152,7 +152,9 @@ td.num .dbar{margin-left:auto;max-width:120px}
 td.num .rk{margin:0}
 tr.top td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
 tr.tot td{background:var(--sunk);font-weight:600}
-.subnav{display:flex;gap:6px;flex-wrap:wrap}.mg td b,.tw.acct td:nth-child(3){white-space:nowrap}
+.subnav{display:flex;gap:6px;flex-wrap:wrap}
+.subgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}.subg{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.subr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-top:1px solid var(--line);font-size:13px}.subr:first-of-type{border-top:0}.mg td b,.tw.acct td:nth-child(3){white-space:nowrap}
 .h4{font:600 13.5px var(--f-body);margin:0 0 4px}
 .grid2.tight{gap:18px}
 .cmp{margin-bottom:12px}.cmp .row{gap:12px}.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:0}
@@ -281,10 +283,82 @@ const lowerNorm=x=>String(x||"").toLowerCase().replace(/\s+/g," ").trim();
 function areaOf(loc){const s=lowerNorm(loc);if(!s||s==="-")return{};if(AREA_ALIAS[s])return{city:lowerNorm(AREA_ALIAS[s])===s?"":s,country:AREA_ALIAS[s]};
   for(const[k,re]of AREA_KEYS)if(re.test(s))return{city:lowerNorm(AREA_ALIAS[k])===k?"":k,country:AREA_ALIAS[k]};return{}}
 function territoryMap(){const m={};(S.settings.territories||[]).forEach(t=>{if(t&&t.area&&t.engineer)m[lowerNorm(t.area)]=t.engineer});return m}
-function territoryOf(loc,region){const T=territoryMap();const s=lowerNorm(loc);const a=areaOf(loc);const r=region||guessRegion(loc);
+function territoryOf(loc,region,sub){const T=territoryMap();const s=lowerNorm(loc);const a=areaOf(loc);const r=region||guessRegion(loc);
+  if(sub&&sub.n)for(const k of[lowerNorm(subArea(sub.c,sub.n)),sub.c==="UAE"?lowerNorm(sub.n):""])if(k&&T[k])return{owner:T[k],area:(S.settings.territories||[]).find(t=>lowerNorm(t.area)===k)?.area||subArea(sub.c,sub.n)};
   for(const[k,label]of[[s,loc],[a.city,a.city],[lowerNorm(a.country),a.country],[lowerNorm(r),r]])if(k&&T[k])return{owner:T[k],area:(S.settings.territories||[]).find(t=>lowerNorm(t.area)===k)?.area||label};return{owner:"",area:a.country||""}}
-const ownerOf=l=>territoryOf(l.country,l.region).owner;
+const ownerOf=l=>territoryOf(l.country,l.region,subOf(l)).owner;
 const myAreas=eng=>(S.settings.territories||[]).filter(t=>nk(t.engineer)===nk(eng)).map(t=>t.area).sort();
+/* ===== Emirates (UAE) and states (USA): each one is its own territory area =====
+   Stored on a lead as `subdivision` (e.g. "Dubai", "Texas"). Leads without it are matched from the location and property name. */
+const SUBDIV={
+ UAE:{label:"Emirate",groups:[["Dubai",["Dubai"]],["Abu Dhabi",["Abu Dhabi"]],["Northern Emirates",["Sharjah","Ajman","Umm Al Quwain","Ras Al Khaimah"]],["East Coast",["Fujairah"]]],
+  alias:{"dubai":"Dubai","deira":"Dubai","bur dubai":"Dubai","jumeirah":"Dubai","jumairah":"Dubai","business bay":"Dubai","downtown dubai":"Dubai","dubai marina":"Dubai","jbr":"Dubai","jlt":"Dubai","palm jumeirah":"Dubai","the palm":"Dubai","al barsha":"Dubai","dubai creek":"Dubai","al garhoud":"Dubai","festival city":"Dubai","ibn battuta":"Dubai","jebel ali":"Dubai","dubai south":"Dubai","expo city":"Dubai","al qusais":"Dubai","karama":"Dubai","al sufouh":"Dubai","umm suqeim":"Dubai","al ghurair":"Dubai","hatta":"Dubai","al wasl":"Dubai","dubai hills":"Dubai","sheikh zayed road":"Dubai","bluewaters":"Dubai","la mer":"Dubai","city walk":"Dubai","al habtoor city":"Dubai","dubai silicon oasis":"Dubai","motor city":"Dubai","sports city":"Dubai","mall of the emirates":"Dubai","dubai mall":"Dubai","emirates hills":"Dubai","al jaddaf":"Dubai","al mamzar":"Dubai","al rigga":"Dubai","al muraqqabat":"Dubai","oud metha":"Dubai","dubai healthcare city":"Dubai","difc":"Dubai","world trade centre":"Dubai","al furjan":"Dubai","discovery gardens":"Dubai","arjan":"Dubai","al quoz":"Dubai","burj":"Dubai",
+   "abu dhabi":"Abu Dhabi","abu-dhabi":"Abu Dhabi","abudhabi":"Abu Dhabi","al ain":"Abu Dhabi","yas island":"Abu Dhabi","yas":"Abu Dhabi","saadiyat":"Abu Dhabi","al maryah":"Abu Dhabi","al reem":"Abu Dhabi","ruwais":"Abu Dhabi","liwa":"Abu Dhabi","al dhafra":"Abu Dhabi","qasr al sarab":"Abu Dhabi","al wagan":"Abu Dhabi","sir bani yas":"Abu Dhabi","mussafah":"Abu Dhabi",
+   "sharjah":"Sharjah","khor fakkan":"Sharjah","khorfakkan":"Sharjah","kalba":"Sharjah","al majaz":"Sharjah","al khan":"Sharjah",
+   "ajman":"Ajman","umm al quwain":"Umm Al Quwain","umm al qaiwain":"Umm Al Quwain","uaq":"Umm Al Quwain",
+   "ras al khaimah":"Ras Al Khaimah","rak":"Ras Al Khaimah","al marjan":"Ras Al Khaimah","al hamra":"Ras Al Khaimah","jebel jais":"Ras Al Khaimah","mina al arab":"Ras Al Khaimah",
+   "fujairah":"Fujairah","dibba":"Fujairah","al aqah":"Fujairah"}},
+ USA:{label:"State",groups:[
+   ["Northeast",["Connecticut","Maine","Massachusetts","New Hampshire","New Jersey","New York","Pennsylvania","Rhode Island","Vermont"]],
+   ["Southeast",["Alabama","Delaware","District of Columbia","Florida","Georgia","Kentucky","Maryland","Mississippi","North Carolina","South Carolina","Tennessee","Virginia","West Virginia"]],
+   ["Central / Midwest",["Illinois","Indiana","Iowa","Kansas","Michigan","Minnesota","Missouri","Nebraska","North Dakota","Ohio","South Dakota","Wisconsin"]],
+   ["South Central",["Arkansas","Louisiana","Oklahoma","Texas"]],
+   ["West",["Alaska","Arizona","California","Colorado","Hawaii","Idaho","Montana","Nevada","New Mexico","Oregon","Utah","Washington","Wyoming"]],
+   ["Territories",["Puerto Rico","US Virgin Islands"]]],
+  codes:{AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming",PR:"Puerto Rico",VI:"US Virgin Islands"},
+  alias:{"new york city":"New York","nyc":"New York","manhattan":"New York","brooklyn":"New York","queens":"New York","niagara falls":"New York","buffalo":"New York","boston":"Massachusetts","cape cod":"Massachusetts","philadelphia":"Pennsylvania","pittsburgh":"Pennsylvania","atlantic city":"New Jersey","newark":"New Jersey","providence":"Rhode Island","hartford":"Connecticut","portland, maine":"Maine",
+   "washington dc":"District of Columbia","washington d.c.":"District of Columbia","washington, dc":"District of Columbia","d.c.":"District of Columbia","miami":"Florida","miami beach":"Florida","orlando":"Florida","tampa":"Florida","fort lauderdale":"Florida","key west":"Florida","sandestin":"Florida","destin":"Florida","naples, fl":"Florida","palm beach":"Florida","jacksonville":"Florida","atlanta":"Georgia","savannah":"Georgia","charlotte":"North Carolina","raleigh":"North Carolina","asheville":"North Carolina","charleston, sc":"South Carolina","myrtle beach":"South Carolina","hilton head":"South Carolina","nashville":"Tennessee","memphis":"Tennessee","louisville":"Kentucky","baltimore":"Maryland","virginia beach":"Virginia","birmingham, al":"Alabama","biloxi":"Mississippi",
+   "chicago":"Illinois","detroit":"Michigan","minneapolis":"Minnesota","st. louis":"Missouri","st louis":"Missouri","kansas city":"Missouri","branson":"Missouri","cleveland":"Ohio","cincinnati":"Ohio","columbus, oh":"Ohio","indianapolis":"Indiana","milwaukee":"Wisconsin","omaha":"Nebraska","des moines":"Iowa",
+   "houston":"Texas","dallas":"Texas","austin":"Texas","san antonio":"Texas","fort worth":"Texas","el paso":"Texas","new orleans":"Louisiana","oklahoma city":"Oklahoma","tulsa":"Oklahoma","little rock":"Arkansas",
+   "los angeles":"California","san francisco":"California","san diego":"California","san jose":"California","napa":"California","palm springs":"California","santa monica":"California","beverly hills":"California","anaheim":"California","lake tahoe":"California","sacramento":"California","las vegas":"Nevada","reno":"Nevada","phoenix":"Arizona","scottsdale":"Arizona","sedona":"Arizona","tucson":"Arizona","denver":"Colorado","aspen":"Colorado","vail":"Colorado","salt lake city":"Utah","park city":"Utah","seattle":"Washington","portland, or":"Oregon","portland":"Oregon","honolulu":"Hawaii","waikiki":"Hawaii","maui":"Hawaii","kauai":"Hawaii","anchorage":"Alaska","albuquerque":"New Mexico","santa fe":"New Mexico","boise":"Idaho","jackson hole":"Wyoming","san juan":"Puerto Rico","st. thomas":"US Virgin Islands","st thomas":"US Virgin Islands"}}};
+const US_NAMES=SUBDIV.USA.groups.flatMap(g=>g[1]);
+for(const n of US_NAMES)SUBDIV.USA.alias[n.toLowerCase()]=n;
+for(const g of SUBDIV.UAE.groups)for(const n of g[1])SUBDIV.UAE.alias[n.toLowerCase()]=n;
+const SUB_KEYS={};for(const c of Object.keys(SUBDIV))SUB_KEYS[c]=Object.keys(SUBDIV[c].alias).sort((a,b)=>b.length-a.length).map(k=>[k,new RegExp("(^|[^a-z])"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"([^a-z]|$)")]);
+const subNames=c=>SUBDIV[c]?SUBDIV[c].groups.flatMap(g=>g[1]):[];
+const subGroupOf=(c,n)=>(SUBDIV[c]?.groups.find(g=>g[1].includes(n))||[])[0]||"";
+const subArea=(c,n)=>c+" · "+n;               // territory area name, e.g. "USA · Texas"
+const US_CITY=Object.keys(SUBDIV.USA.alias).filter(k=>!US_NAMES.map(x=>x.toLowerCase()).includes(k));
+/* which country (UAE/USA) a location belongs to */
+function subCountry(loc){const a=areaOf(loc).country;if(a==="UAE"||a==="USA")return a;const s=lowerNorm(loc);if(!s)return"";
+  if(/(^|[^a-z])(usa|u\.s\.a\.?|united states|america)([^a-z]|$)/.test(s)||/-us$/.test(s))return"USA";
+  if(US_CITY.some(k=>s===k))return"USA";if(SUBDIV.UAE.alias[s])return"UAE";return""}
+/* detect the emirate/state from free text */
+function detectSub(c,texts,codeText){if(!SUBDIV[c])return"";
+  if(c==="USA"&&codeText){const m=String(codeText).trim().match(/(?:^|[,\s])([A-Z]{2})(?:\s+\d{5})?$/);if(m&&SUBDIV.USA.codes[m[1]])return SUBDIV.USA.codes[m[1]]}
+  for(const t of texts){const s=lowerNorm(t);if(!s)continue;if(SUBDIV[c].alias[s])return SUBDIV[c].alias[s];for(const[k,re]of SUB_KEYS[c])if(re.test(s))return SUBDIV[c].alias[k]}return""}
+const SUB_CACHE=new WeakMap();
+/* {c:"UAE",n:"Dubai",auto:true|false} or null */
+function subOf(l){if(!l)return null;const key=(l.subdivision||"")+"|"+(l.country||"")+"|"+(l.accountName||"");const hit=SUB_CACHE.get(l);if(hit&&hit.k===key)return hit.v;
+  let v=null;const c=subCountry(l.country)||(l.subdivision&&(subNames("UAE").includes(l.subdivision)?"UAE":subNames("USA").includes(l.subdivision)?"USA":""));
+  if(c){if(l.subdivision&&subNames(c).includes(l.subdivision))v={c,n:l.subdivision,auto:false};else{const n=detectSub(c,[l.country,l.accountName],l.country);v={c,n,auto:true}}}
+  SUB_CACHE.set(l,{k:key,v});return v}
+const subLabel=l=>{const s=subOf(l);return s&&s.n?s.n:""};
+function subOptions(c,sel){return SUBDIV[c].groups.map(([g,ns])=>`<optgroup label="${esc(g)}">${ns.map(n=>`<option${n===sel?" selected":""}>${esc(n)}</option>`).join("")}</optgroup>`).join("")}
+/* every emirate/state across both countries for filters, "UAE · Dubai" style */
+function subFilterList(){return["UAE","USA"].flatMap(c=>subNames(c).map(n=>subArea(c,n)))}
+const subKeyOf=l=>{const s=subOf(l);return s&&s.n?subArea(s.c,s.n):""};
+function subFilterOpts(){return["UAE","USA"].flatMap(c=>SUBDIV[c].groups.flatMap(([g,ns])=>(ns.length>1?[`${c} · ${g} (all)`]:[]).concat(ns.map(n=>subArea(c,n)))))}
+function subMatch(l,v){if(!v)return true;const s=subOf(l);if(!s||!s.n)return false;const m=v.match(/^(UAE|USA) · (.+) \(all\)$/);if(m)return s.c===m[1]&&subGroupOf(s.c,s.n)===m[2];return subArea(s.c,s.n)===v}
+
+/* ---------- Territories: emirates and states panel ---------- */
+function subTerrPanel(){const T=territoryMap();const counts={};S.leads.forEach(l=>{if(["Duplicate","Rejected"].includes(l.status))return;const k=subKeyOf(l);if(k)counts[k]=(counts[k]||0)+1;else{const s=subOf(l);if(s)counts[s.c+" · ?"]=(counts[s.c+" · ?"]||0)+1}});
+  const sp=spNames();const C=S.subC||"UAE";const fb=territoryOf(C).owner;
+  return`<div class="panel"><div class="row" style="margin-bottom:6px"><h3>Emirates and states</h3><span class="sp"></span><span class="seg" id="subC">${["UAE","USA"].map(c=>`<button type="button" data-v="${c}" aria-pressed="${C===c}">${c}</button>`).join("")}</span></div>
+   <p class="small muted" style="margin:0 0 12px;max-width:85ch">Each ${C==="UAE"?"emirate":"state"} can belong to its own engineer. Leads in a ${C==="UAE"?"emirate":"state"} with no owner fall back to the ${C} owner${fb?` (<b>${esc(fb)}</b>)`:""}. Use the group menu to give a whole group to one person.${counts[C+" · ?"]?` <b>${counts[C+" · ?"]}</b> ${C} lead${counts[C+" · ?"]===1?"":"s"} don't name a${C==="UAE"?"n emirate":" state"} yet; set it from the lead's details.`:""}</p>
+   <div class="subgrid">${SUBDIV[C].groups.map(([g,ns])=>`<div class="subg"><div class="row" style="margin-bottom:6px"><b>${esc(g)}</b><span class="sp"></span><select data-sgrp="${esc(C+"|"+g)}" style="width:auto;font-size:12px;padding:2px 6px"><option value="">Assign group to…</option>${sp.map(n=>`<option>${esc(n)}</option>`).join("")}<option value="__clear">Clear group</option></select></div>
+     ${ns.map(n=>{const a=subArea(C,n),o=T[lowerNorm(a)]||(C==="UAE"&&T[lowerNorm(n)])||"";return`<div class="subr"><span>${esc(n)}${C==="USA"?` <span class="muted small mono">${Object.entries(SUBDIV.USA.codes).find(x=>x[1]===n)?.[0]||""}</span>`:""} <span class="muted small">${counts[a]||0}</span></span><select data-sown="${esc(a)}" style="width:auto;font-size:12.5px;padding:2px 6px">${`<option value="">${fb?"↳ "+esc(fb):"Unassigned"}</option>`+sp.map(x=>`<option${x===o?" selected":""}>${esc(x)}</option>`).join("")}</select></div>`}).join("")}</div>`).join("")}</div>
+   <p class="small muted" style="margin:8px 0 0">Number = leads in that ${C==="UAE"?"emirate":"state"}. “↳” means it falls back to the ${C} owner.</p></div>`}
+function bindSubTerr(){const save=async(list,msg)=>{try{await S.db.doc("config/settings").update({territories:list});S.settings.territories=list;toast(msg);render()}catch(e){toast("Couldn't save territories: "+(e.code||e.message))}};
+  $("#subC")?.addEventListener("click",e=>{const b=e.target.closest("button");if(b){S.subC=b.dataset.v;render()}});
+  const setMany=(areas,eng)=>{const keys=new Set(areas.map(lowerNorm));let cur=(S.settings.territories||[]).filter(t=>!keys.has(lowerNorm(t.area)));
+    // an old plain-name entry (e.g. "Sharjah") is replaced by the new "UAE · Sharjah" entry
+    const plain=new Set(areas.filter(a=>a.startsWith("UAE · ")).map(a=>lowerNorm(a.slice(6))));cur=cur.filter(t=>!plain.has(lowerNorm(t.area)));
+    return eng?cur.concat(areas.map(a=>({area:a,engineer:eng}))):cur};
+  document.querySelectorAll("[data-sown]").forEach(s=>s.onchange=()=>{const a=s.dataset.sown;save(setMany([a],s.value),s.value?`${a} assigned to ${s.value}`:`${a} now falls back to the country owner`)});
+  document.querySelectorAll("[data-sgrp]").forEach(s=>s.onchange=()=>{if(!s.value)return;const[c,g]=s.dataset.sgrp.split("|");const ns=SUBDIV[c].groups.find(x=>x[0]===g)[1].map(n=>subArea(c,n));
+    save(setMany(ns,s.value==="__clear"?"":s.value),s.value==="__clear"?`${g} cleared`:`${g} (${ns.length}) assigned to ${s.value}`)})}
+
 const MEET_TYPES=["New lead meeting","Follow-up meeting"];
 function meetingsOf(l){if(Array.isArray(l.meetings))return l.meetings;
   return l.meeting?[{id:"m0",date:(l.meeting.date||"").slice(0,10),mode:l.meeting.mode||"",type:"New lead meeting",products:productsOf(l),notes:l.meeting.notes||"",legacy:true}]:[]}
@@ -404,7 +478,7 @@ async function boot(){
   if(user){const me=await user.me();S.uid=me.id;S.isOwner=me.isOwner;S.myName=me.name;S.canEdit=await user.canEdit();S.canWrite=await user.can("data.write")}
   if(!db){$("#banner").innerHTML=`<div class="notice bad" style="margin-top:14px">The shared lead database isn't available in this view. Sign in to claude.ai and open the artifact link to enter and track leads.</div>`;render();return}
   const timer=setTimeout(()=>{if(!S.loaded.leads)$("#banner").innerHTML=`<div class="notice warn" style="margin-top:14px">Still waiting for the lead database. What you see may be incomplete.</div>`},10000);
-  const errH=e=>{$("#banner").innerHTML=`<div class="notice bad" style="margin-top:14px">Lost connection to the lead database (${esc(e.code)}). Reload the page to reconnect.</div>`};
+  const errH=e=>{console.error("Lead Desk data error:",e);$("#banner").innerHTML=`<div class="notice bad" style="margin-top:14px">Lost connection to the lead database (${esc(e&&(e.code||e.name)||"error")}${e&&e.message?": "+esc(e.message):""}). Reload the page to reconnect.</div>`};
   db.doc("config/users").onSnapshot(s=>{S.users=s.exists?(s.data().members||{}):{};const before=S.role+"|"+S.myEng;S.usersLoaded=true;computeRole();if(before!==S.role+"|"+S.myEng)render();else softRender()},e=>{S.usersLoaded=true;computeRole();render();errH(e)});
   db.doc("config/permissions").onSnapshot(s=>{S.perms=s.exists?(s.data().roles||null):null;render()},()=>{});
   db.doc("config/settings").onSnapshot(s=>{if(s.exists)S.settings=Object.assign({},DEFAULTS,s.data());softRender()},errH);
@@ -419,7 +493,10 @@ function bindTabs(){$("#tabs").addEventListener("click",e=>{const b=e.target.clo
   window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&h!==S.tab&&document.querySelector(`[data-tab="${h}"]`)){S.tab=h;render()}})}
 
 /* full render on tab switch; soft render on data change keeps forms intact */
-function render(){const m=$("#main");
+function showFail(where,e){console.error("Lead Desk "+where+":",e);const m=$("#main");const msg=(e&&(e.message||e.code))||String(e);
+  m.innerHTML=`<div class="panel" style="padding:22px;display:grid;gap:8px"><h3>Something went wrong showing this page</h3><p class="muted" style="margin:0">Please send this message to whoever looks after Lead Desk:</p><pre class="mono" style="white-space:pre-wrap;background:var(--sunk);padding:10px;border-radius:8px;margin:0">${esc(where+": "+msg+(e&&e.stack?"\n"+String(e.stack).split("\n").slice(0,4).join("\n"):""))}</pre><div><button class="btn" onclick="location.reload()">Reload</button></div></div>`}
+function render(){try{renderInner()}catch(e){showFail("render "+(S.tab||""),e)}}
+function renderInner(){const m=$("#main");
   if(!S.db){m.innerHTML=`<div class="panel empty">Lead Desk needs you to be signed in to claude.ai with access to this page.</div>`;$("#tabs").hidden=true;return}
   if(!S.usersLoaded){m.innerHTML=`<div class="panel empty">Checking your access…</div>`;$("#tabs").hidden=true;return}
   if(!S.role){$("#tabs").hidden=true;$("#who").innerHTML="";m.innerHTML=`<section class="view" style="max-width:560px;margin:40px auto"><div class="panel" style="padding:28px;display:grid;gap:10px"><h2>You don't have access yet</h2>
@@ -433,7 +510,8 @@ function render(){const m=$("#main");
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
 ({new:renderNew,bo:renderBO,pipe:renderPipe,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
-function softRender(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
+function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
+function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
 // A lead is "new for me" from the moment it is assigned to me until I open it (assigneeSeenAt is stored on the lead).
 const NEW_DAYS=14;
@@ -483,6 +561,7 @@ function renderNew(m){
       <div style="display:grid;gap:12px">
         <div class="grid2"><label class="f">Requirement received on <span class="req">*</span><input id="f-reqdate" type="date" max="${todayISO()}" value="${esc(f.reqDate||todayISO())}"></label>
         <label class="f">Region <span class="req">*</span><select id="f-region">${opts(regionList(),f.region||"","Choose region")}</select></label></div>
+        <div id="subBox"></div>
         <div id="terrNote"></div>
         <div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">Category <span class="seg cat" id="catSeg"><button type="button" data-v="Inbound" ${sales?"hidden":""}>Inbound</button><button type="button" data-v="Outbound">Outbound</button></span></div>
         <label class="f">Source channel <span class="req">*</span><select id="f-source">${opts(st.sources.filter(s=>!sales||s.cat==="Outbound").map(s=>s.name),f.source,"Choose a source")}</select></label>
@@ -511,8 +590,13 @@ function renderNew(m){
   $("#leadForm").onsubmit=e=>{e.preventDefault();submitLead()};
 }
 function setCat(v){document.querySelectorAll("#catSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v))}
-function syncRegion(){const f=S.form;if(!f)return;if(!f.regionManual&&f.account){const g=guessRegion(f.account.country)||guessRegion(f.account.city);const el=$("#f-region");if(g&&el){f.region=g;el.value=g}}syncTerritory()}
-function formTerritory(){const f=S.form;if(!f||!f.account)return{owner:"",area:""};const loc=f.account.country||f.account.city||"";return territoryOf(loc,f.region||$("#f-region")?.value)}
+function syncRegion(){const f=S.form;if(!f)return;drawSub();if(!f.regionManual&&f.account){const g=guessRegion(f.account.country)||guessRegion(f.account.city);const el=$("#f-region");if(g&&el){f.region=g;el.value=g}}syncTerritory()}
+function formSub(){const f=S.form;if(!f||!f.account)return null;const loc=f.account.country||f.account.city||"";const c=subCountry(loc)||subCountry(f.account.city||"");if(!c)return null;
+  const n=f.subManual&&subNames(c).includes(f.sub)?f.sub:detectSub(c,[f.account.city,f.account.country,f.account.name],f.account.country);return{c,n:n||""}}
+function drawSub(){const B=$("#subBox"),f=S.form;if(!B||!f)return;const x=formSub();if(!x){B.innerHTML="";return}
+  B.innerHTML=`<label class="f" style="max-width:320px">${SUBDIV[x.c].label} <span class="req">*</span><select id="f-sub"><option value="">Choose ${SUBDIV[x.c].label.toLowerCase()}</option>${subOptions(x.c,x.n)}</select>${x.n&&!f.subManual?`<span class="small muted">Detected from the location</span>`:""}</label>`;
+  $("#f-sub").onchange=e=>{f.sub=e.target.value;f.subManual=true;syncTerritory()}}
+function formTerritory(){const f=S.form;if(!f||!f.account)return{owner:"",area:""};const loc=f.account.country||f.account.city||"";return territoryOf(loc,f.region||$("#f-region")?.value,formSub())}
 function syncTerritory(){const f=S.form,N=$("#terrNote");if(!f||!N)return;const t=formTerritory();
   if(!f.account){N.innerHTML="";return}
   if(isSales()){N.innerHTML=!t.owner?`<div class="notice info">No territory owner is set for ${esc(t.area||"this location")} yet. The lead will be assigned to you.</div>`
@@ -526,21 +610,22 @@ function bindLeadsSwitch(){$("#newSeg")?.addEventListener("click",e=>{const b=e.
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const LSTAT={"All":()=>true,"Open":l=>OPEN.includes(l.status),"Awaiting approval":l=>["New","Info Needed"].includes(l.status),"Won":l=>l.status==="Won","Lost":l=>l.status==="Lost","On hold":l=>l.status==="On Hold","Duplicate / rejected":l=>["Duplicate","Rejected"].includes(l.status)};
 const NO_DEPT="Not recorded";
-function lf(){const F=S.lf||(S.lf={});const d={q:"",status:"All",region:"",eng:"",cat:"All",dept:"",year:String(new Date().getFullYear()),month:"",n:100};for(const k in d)if(F[k]===undefined)F[k]=d[k];return F}
-const LF_RESET=()=>({q:"",status:"All",region:"",eng:"",cat:"All",dept:"",year:"",month:"",n:100});
+function lf(){const F=S.lf||(S.lf={});const d={q:"",source:"",status:"All",region:"",sub:"",eng:"",cat:"All",dept:"",year:String(new Date().getFullYear()),month:"",n:100};for(const k in d)if(F[k]===undefined)F[k]=d[k];return F}
+const LF_RESET=()=>({q:"",source:"",status:"All",region:"",sub:"",eng:"",cat:"All",dept:"",year:"",month:"",n:100});
 const deptOf=l=>(l.department||"").trim()||NO_DEPT;
+function leadSources(){return[...new Set((S.settings.sources||[]).map(x=>x.name).concat(S.leads.map(l=>(l.source||"").trim())).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function leadDepts(){return[...new Set((S.settings.departments||[]).concat(S.leads.map(l=>(l.department||"").trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b)).concat([NO_DEPT])}
 function leadYears(){return[...new Set(S.leads.map(l=>reqDate(l).slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse()}
-const LCOLS=[{k:"ref",label:"Ref"},{k:"recv",label:"Received",v:l=>reqDate(l)},{k:"acct",label:"Property",v:l=>l.accountName||""},{k:"dept",label:"Department",v:deptOf},{k:"region",label:"Region",v:regionOf},
-  {k:"prod",label:"Products",v:l=>l.product||""},{k:"cat",label:"Source",v:l=>l.category||""},{k:"status",label:"Status",v:l=>l.status},{k:"eng",label:"Engineer",v:l=>l.assignedTo||""},{k:"val",label:"Value",num:1,v:leadValue}];
+const LCOLS=[{k:"ref",label:"Ref"},{k:"recv",label:"Received",v:l=>reqDate(l)},{k:"acct",label:"Property",v:l=>l.accountName||""},{k:"source",label:"Source",v:l=>l.source||""},{k:"region",label:"Region",v:regionOf},
+  {k:"prod",label:"Products",v:l=>l.product||""},{k:"cat",label:"Category",v:l=>l.category||""},{k:"status",label:"Status",v:l=>l.status},{k:"eng",label:"Engineer",v:l=>l.assignedTo||""},{k:"val",label:"Value",num:1,v:leadValue}];
 function filterLeads(F){const q=nk(F.q);
   return S.leads.filter(l=>viewAll()||isMine(l)).filter(LSTAT[F.status]||LSTAT.All).filter(l=>{const d=reqDate(l);
     return(!F.year||d.slice(0,4)===F.year)&&(!F.year||!F.month||+d.slice(5,7)===+F.month)&&(!F.region||regionOf(l)===F.region)&&(!F.eng||l.assignedTo===F.eng)
-      &&(F.cat==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.cat)&&(!F.dept||deptOf(l)===F.dept)
+      &&(F.cat==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.cat)&&(!F.dept||deptOf(l)===F.dept)&&subMatch(l,F.sub)&&(!F.source||(l.source||"").trim()===F.source)
       &&(!q||nk(l.ref+" "+l.accountName+" "+l.product+" "+(l.country||"")+" "+(l.contact?.name||"")+" "+(l.contact?.email||"")+" "+(l.generatedBy||"")).includes(q))})}
 function sortedLeads(F){return sortRows("leads",filterLeads(F),LCOLS,{k:"recv",d:-1})}
-function lfActive(F){const a=[];if(F.dept)a.push(["dept","Department: "+F.dept]);if(F.year)a.push(["year","Year: "+F.year]);if(F.year&&F.month)a.push(["month","Month: "+MONTHS[F.month-1]]);
-  if(F.eng)a.push(["eng","Engineer: "+F.eng]);if(F.cat!=="All")a.push(["cat","Source: "+F.cat]);if(F.status!=="All")a.push(["status","Status: "+F.status]);if(F.region)a.push(["region","Region: "+F.region]);if(F.q)a.push(["q","Search: “"+F.q+"”"]);return a}
+function lfActive(F){const a=[];if(F.source)a.push(["source","Source: "+F.source]);if(F.dept)a.push(["dept","Department: "+F.dept]);if(F.year)a.push(["year","Year: "+F.year]);if(F.year&&F.month)a.push(["month","Month: "+MONTHS[F.month-1]]);
+  if(F.eng)a.push(["eng","Engineer: "+F.eng]);if(F.cat!=="All")a.push(["cat","Category: "+F.cat]);if(F.status!=="All")a.push(["status","Status: "+F.status]);if(F.region)a.push(["region","Region: "+F.region]);if(F.sub)a.push(["sub","Emirate / state: "+F.sub]);if(F.q)a.push(["q","Search: “"+F.q+"”"]);return a}
 function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLeads(F);const total=all.length,ls=all.slice(0,F.n);
   const won=all.filter(l=>l.status==="Won"),inb=all.filter(l=>l.category!=="Outbound").length;const act=lfActive(F);
   const engs=[...new Set(spNames().concat(S.leads.map(l=>l.assignedTo).filter(Boolean)))].sort((a,b)=>a.localeCompare(b));
@@ -550,13 +635,14 @@ function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLe
    <div class="panel afbar lfbar">
     <div class="fgrid">
      <label class="f fsearch">Search<input id="lfQ" placeholder="Ref, property, product, contact" value="${esc(F.q)}"></label>
-     <label class="f">Department<input id="lfD" list="dl-dept" placeholder="All departments" value="${esc(F.dept)}" autocomplete="off"><datalist id="dl-dept">${leadDepts().map(d=>`<option value="${esc(d)}">`).join("")}</datalist></label>
+     <label class="f">Source<input id="lfSrc" list="dl-src" placeholder="All sources" value="${esc(F.source)}" autocomplete="off"><datalist id="dl-src">${leadSources().map(d=>`<option value="${esc(d)}">`).join("")}</datalist></label>
      <label class="f fsm">Year<select id="lfY"><option value="">All years</option>${leadYears().concat(F.year&&!leadYears().includes(F.year)?[F.year]:[]).map(y=>`<option${y===F.year?" selected":""}>${y}</option>`).join("")}</select></label>
      <label class="f fsm">Month<select id="lfM" ${F.year?"":"disabled title=\"Choose a year first\""}><option value="">All months</option>${MONTHS.map((n,i)=>`<option value="${i+1}"${+F.month===i+1?" selected":""}>${n}</option>`).join("")}</select></label>
      ${viewAll()?`<label class="f">Engineer<input id="lfE" list="dl-eng" placeholder="All engineers" value="${esc(F.eng)}" autocomplete="off"><datalist id="dl-eng">${engs.map(n=>`<option value="${esc(n)}">`).join("")}</datalist></label>`:""}
-     <div class="f fw"><span>Lead source</span><span class="seg" id="lfC" style="margin-top:4px">${["All","Inbound","Outbound"].map(v=>`<button type="button" data-v="${v}" aria-pressed="${F.cat===v}">${v}</button>`).join("")}</span></div>
+     <div class="f fw"><span>Category</span><span class="seg" id="lfC" style="margin-top:4px">${["All","Inbound","Outbound"].map(v=>`<button type="button" data-v="${v}" aria-pressed="${F.cat===v}">${v}</button>`).join("")}</span></div>
      <label class="f fsm">Status<select id="lfS">${opts(Object.keys(LSTAT),F.status)}</select></label>
      <label class="f fsm">Region<select id="lfR">${opts(regionList().concat(["Unassigned"]),F.region,"All regions")}</select></label>
+     <label class="f">Emirate / state<input id="lfU" list="dl-sub" placeholder="All emirates & states" value="${esc(F.sub)}" autocomplete="off"><datalist id="dl-sub">${subFilterOpts().map(d=>`<option value="${esc(d)}">`).join("")}</datalist></label>
      <div class="f fexp"><span>&nbsp;</span><div class="expw"><button class="btn pri" id="lfX" type="button" aria-haspopup="menu" aria-expanded="false" ${total?"":"disabled"}>Export ${fmtN(total)}</button>
       <div class="expm" id="lfXm" role="menu" hidden><button type="button" role="menuitem" data-x="xlsx">Excel (.xlsx)</button><button type="button" role="menuitem" data-x="csv">CSV (.csv)</button><div class="small muted" style="padding:6px 10px 2px">All ${fmtN(total)} matching lead${total===1?"":"s"}, not just this page</div></div></div></div>
     </div>
@@ -565,14 +651,14 @@ function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLe
    <div class="kpis k5">${kpi("Leads",fmtN(total),`${fmtN(inb)} inbound · ${fmtN(total-inb)} outbound`)}${kpi("Awaiting approval",fmtN(all.filter(l=>["New","Info Needed"].includes(l.status)).length))}${kpi("Open",fmtN(all.filter(l=>OPEN.includes(l.status)).length))}
     ${kpi("Orders closed",fmtN(won.length),total?fmtP(won.length/total)+" of these leads":"")}${kpi("Order value",fmtAED(won.reduce((s,l)=>s+leadValue(l),0)))}</div>
    <div class="tw"><table><thead><tr>${LCOLS.filter(c=>c.k!=="eng"||viewAll()).map(c=>th("leads",c)).join("")}</tr></thead><tbody>
-   ${ls.map(l=>`<tr class="click" data-open="${esc(l.id)}"><td class="mono">${esc(l.ref)}</td><td style="white-space:nowrap">${fmtD(reqDate(l))}</td><td>${esc(l.accountName)}<div class="small muted">${esc(l.country||"")}</div></td><td>${l.department?esc(l.department):`<span class="muted">—</span>`}</td><td>${esc(regionOf(l))}</td><td>${esc(l.product)}</td><td><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span></td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td>${viewAll()?`<td>${esc(l.assignedTo||"—")}</td>`:""}<td class="num">${leadValue(l)?fmtAED(leadValue(l)):""}</td></tr>`).join("")||`<tr><td colspan="10" class="empty">No leads match these filters.${act.length?` <button class="btn sm" id="lfClr2" type="button">Clear all filters</button>`:""}</td></tr>`}
+   ${ls.map(l=>`<tr class="click" data-open="${esc(l.id)}"><td class="mono">${esc(l.ref)}</td><td style="white-space:nowrap">${fmtD(reqDate(l))}</td><td>${esc(l.accountName)}<div class="small muted">${esc(l.country||"")}</div></td><td>${l.source?esc(l.source):`<span class="muted">—</span>`}</td><td>${esc(regionOf(l))}${subLabel(l)?`<div class="small muted">${esc(subLabel(l))}</div>`:""}</td><td>${esc(l.product)}</td><td><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category||"—")}</span></td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td>${viewAll()?`<td>${esc(l.assignedTo||"—")}</td>`:""}<td class="num">${leadValue(l)?fmtAED(leadValue(l)):""}</td></tr>`).join("")||`<tr><td colspan="10" class="empty">No leads match these filters.${act.length?` <button class="btn sm" id="lfClr2" type="button">Clear all filters</button>`:""}</td></tr>`}
    </tbody></table></div>${total>F.n?`<div class="row"><button class="btn" id="lfMore">Show ${Math.min(100,total-F.n)} more</button><span class="small muted">Showing ${fmtN(F.n)} of ${fmtN(total)}</span></div>`:total?`<div class="small muted">Showing all ${fmtN(total)}</div>`:""}</section>`;
   bindLeadsSwitch();bindSort(m);m.querySelectorAll("[data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
   const go=()=>{F.n=100;render()};
   const qi=$("#lfQ");qi.oninput=()=>{F.q=qi.value;F.n=100;clearTimeout(qi.t);qi.t=setTimeout(()=>{render();const i=$("#lfQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)};
   const combo=(id,key,list)=>{const i=$(id);if(!i)return;const apply=()=>{const v=i.value.trim();const hit=list.find(x=>nk(x)===nk(v));if(!v){if(F[key]){F[key]="";go()}}else if(hit){if(F[key]!==hit){F[key]=hit;go()}else i.value=hit}};
     i.addEventListener("change",apply);i.addEventListener("keydown",e=>{if(e.key==="Enter")apply();if(e.key==="Escape"){i.value=F[key];i.blur()}});i.addEventListener("blur",()=>setTimeout(()=>{if(document.activeElement!==i&&i.isConnected)i.value=F[key]},150));i.addEventListener("focus",()=>i.select())};
-  combo("#lfD","dept",leadDepts());combo("#lfE","eng",engs);
+  combo("#lfU","sub",subFilterOpts());combo("#lfSrc","source",leadSources());combo("#lfE","eng",engs);
   $("#lfY").onchange=e=>{F.year=e.target.value;if(!F.year)F.month="";go()};$("#lfM").onchange=e=>{F.month=e.target.value;go()};
   $("#lfS").onchange=e=>{F.status=e.target.value;go()};$("#lfR").onchange=e=>{F.region=e.target.value;go()};
   $("#lfC").onclick=e=>{const b=e.target.closest("button");if(b){F.cat=b.dataset.v;go()}};
@@ -584,7 +670,7 @@ function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLe
   xm.querySelectorAll("[data-x]").forEach(b=>b.onclick=e=>{e.stopPropagation();close();exportLeads(b.dataset.x)})}
 
 /* ---------- export: the same filter + sort as the table, every matching row ---------- */
-function exportName(F,ext){const p=["Leads"];if(F.cat!=="All")p.push(F.cat);p.push(F.dept?F.dept:"All_Departments");if(F.eng)p.push(F.eng);if(F.region)p.push(F.region);if(F.status!=="All")p.push(F.status);
+function exportName(F,ext){const p=["Leads"];if(F.cat!=="All")p.push(F.cat);if(F.source)p.push(F.source);if(F.dept)p.push(F.dept);if(F.sub)p.push(F.sub.replace(" (all)","").replace(" · ","_"));if(F.eng)p.push(F.eng);if(F.region)p.push(F.region);if(F.status!=="All")p.push(F.status);
   if(F.year&&F.month)p.push(MONTHS[F.month-1]);p.push(F.year||"All_Years");
   return p.join("_").replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g,"_").replace(/_+/g,"_")+"."+ext}
 function exportRows(ls){const d=v=>v?new Date(String(v).length===10?v+"T12:00:00":v):null;
@@ -662,7 +748,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(!v("f-source"))errs.push("Choose the source channel");
   if(!v("f-genby"))errs.push("Add who generated the lead");
   if(!v("f-reqdate"))errs.push("Add the date the requirement came in");else if(v("f-reqdate")>todayISO())errs.push("The requirement date can't be in the future");
-  if(!v("f-region"))errs.push("Choose the region");
+  if(!v("f-region"))errs.push("Choose the region");{const x=formSub();if(x&&!x.n)errs.push("Choose the "+SUBDIV[x.c].label.toLowerCase())}
   if(errs.length){msg.innerHTML=`<div class="notice bad">${errs.map(esc).join(" · ")}</div>`;return}
   if(!S.db){msg.innerHTML=`<div class="notice bad">The lead database isn't available. Sign in and reopen the page.</div>`;return}
   const a=f.account;const sales=isSales();
@@ -680,7 +766,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
     await S.db.doc("leads/"+ref).set({ref,accountKey:a.key,accountName:a.name,country:(a.country||S.accounts[a.key]?.country||"").trim(),
         contact:{name:v("f-cname"),title:v("f-ctitle"),email:v("f-cemail"),phone:v("f-cphone")},products:ps,product:ps.join(", "),category:sales?"Outbound":f.category,source:v("f-source"),
         generatedBy:sales?S.myEng:v("f-genby"),department:sales?"Sales":v("f-dept"),rooms:+v("f-rooms")||null,pms:v("f-pms"),timeline:v("f-when"),preferred:sales?(terr.owner||S.myEng):v("f-pref"),territoryOwner:terr.owner||"",notes:v("f-notes"),
-        requirementDate:v("f-reqdate"),region:v("f-region"),
+        requirementDate:v("f-reqdate"),region:v("f-region"),subdivision:formSub()?.n||"",
         status:"New",assignedTo:sales&&ownLead?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},histRepeat:ps.some(p=>productState(a.key,p).state==="hist"),
         log:[{t,by:"",byId:S.uid||null,a:"Lead submitted · "+ps.join(", ")+" (generated by "+v("f-genby")+")"}]});
     S.form=null;render();$("#submitMsg").innerHTML=`<div class="notice ok">Submitted <span class="mono">${ref}</span> with ${ps.length} product${ps.length>1?"s":""}. ${sales?(ownLead?"It's in My leads under Awaiting approval. You can log meetings on it while it waits.":`It's in ${esc(terr.owner)}'s territory, so back office will pass it to ${esc(terr.owner)}.`):"Back office will verify and assign it."}</div>`;scrollTo(0,0);
@@ -764,7 +850,7 @@ function lcard(l){const stale=l.status==="Assigned"&&days(l.assignedAt)>(S.setti
    ${stale?`<span class="late">No meeting yet · assigned ${Math.floor(days(l.assignedAt))} days ago</span>`:""}${qst?`<span class="late">Quote open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days</span>`:""}${fu?`<span class="late">Follow-up ${esc(fuLabel(l))}</span>`:fuOpen(l)?`<span class="small muted">Follow-up ${esc(fuLabel(l))}</span>`:""}</button>`}
 
 /* ======================= LEAD DRAWER (back office + sales) ======================= */
-function openDrawer(id){S.drawer={id,mode:null};drawDrawer();const l=S.leadMap[id];if(l&&isNewForMe(l))markSeen([l])}
+function openDrawer(id){S.drawer={id,mode:null};S.vSubN=null;drawDrawer();const l=S.leadMap[id];if(l&&isNewForMe(l))markSeen([l])}
 function closeDrawer(){S.drawer=null;$("#drawerHost").innerHTML=""}
 function refreshDrawer(){if(!S.drawer)return;if(!S.drawer.mode)drawDrawer()}
 function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return}
@@ -801,14 +887,17 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   fillNames();drawDetails(l);drawProdArea(l);drawActions(l)}
 function drawDetails(l){const D=$("#detArea");if(!D)return;const can=canAct(l);
   if(S.drawer.mode!=="details"){D.innerHTML=`<div><span>Requirement received</span><span>${fmtD(reqDate(l))}${l.requirementDate?"":` <span class="muted small">(entry date)</span>`}</span></div>
-    <div><span>Region</span><span>${esc(regionOf(l))}${!l.region&&regionOf(l)!=="Unassigned"?` <span class="muted small">(from country)</span>`:""}${can?` <button class="btn sm" id="detEdit" style="margin-left:6px">Edit date or region</button>`:""}</span></div>`;
+    <div><span>Region</span><span>${esc(regionOf(l))}${!l.region&&regionOf(l)!=="Unassigned"?` <span class="muted small">(from country)</span>`:""}${can?` <button class="btn sm" id="detEdit" style="margin-left:6px">Edit date or ${subOf(l)?"location":"region"}</button>`:""}</span></div>
+    ${subOf(l)?`<div><span>${SUBDIV[subOf(l).c].label}</span><span>${subOf(l).n?esc(subOf(l).n)+(subOf(l).auto?` <span class="muted small">(detected)</span>`:""):`<span class="muted">Not set</span>`}${subOf(l).n?` <span class="muted small">· ${esc(subGroupOf(subOf(l).c,subOf(l).n))}</span>`:""}</span></div>`:""}`;
     $("#detEdit")?.addEventListener("click",()=>{S.drawer.mode="details";drawDetails(l)});return}
   D.innerHTML=`<div><span>Requirement received</span><span><input id="dt-req" type="date" max="${todayISO()}" value="${esc(reqDate(l))}" style="width:auto"></span></div>
-    <div><span>Region</span><span class="row" style="gap:6px"><select id="dt-reg" style="width:auto">${opts(regionList(),regionOf(l)==="Unassigned"?"":regionOf(l),"Choose region")}</select><button class="btn sm pri" id="dt-save">Save</button><button class="btn sm" id="dt-x">Cancel</button></span></div>`;
+    <div><span>Region</span><span class="row" style="gap:6px"><select id="dt-reg" style="width:auto">${opts(regionList(),regionOf(l)==="Unassigned"?"":regionOf(l),"Choose region")}</select>${subOf(l)?"":`<button class="btn sm pri" id="dt-save">Save</button><button class="btn sm" id="dt-x">Cancel</button>`}</span></div>
+    ${subOf(l)?`<div><span>${SUBDIV[subOf(l).c].label}</span><span class="row" style="gap:6px"><select id="dt-sub" style="width:auto"><option value="">Not known</option>${subOptions(subOf(l).c,subOf(l).n)}</select><button class="btn sm pri" id="dt-save">Save</button><button class="btn sm" id="dt-x">Cancel</button></span></div>`:""}`;
   $("#dt-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
   $("#dt-save").onclick=async()=>{const d=$("#dt-req").value,r=$("#dt-reg").value;if(!d||d>todayISO()){toast("Pick a requirement date that isn't in the future");return}if(!r){toast("Choose a region");return}
-    const ch=[];if(d!==reqDate(l))ch.push("requirement date "+fmtD(d));if(r!==regionOf(l))ch.push("region "+r);if(!ch.length&&l.requirementDate&&l.region){S.drawer.mode=null;drawDrawer();return}
-    await patch(l,{requirementDate:d,region:r},"Updated "+(ch.join(" and ")||"details"))}}
+    const sv=$("#dt-sub")?$("#dt-sub").value:null;const ch=[];if(d!==reqDate(l))ch.push("requirement date "+fmtD(d));if(r!==regionOf(l))ch.push("region "+r);if(sv!=null&&sv!==(l.subdivision||""))ch.push((SUBDIV[subOf(l).c].label.toLowerCase())+" "+(sv||"cleared"));
+    if(!ch.length&&l.requirementDate&&l.region){S.drawer.mode=null;drawDrawer();return}
+    const body={requirementDate:d,region:r};if(sv!=null)body.subdivision=sv;await patch(l,body,"Updated "+(ch.join(" and ")||"details"))}}
 function fillNames(){const els=[...document.querySelectorAll("[data-uid]")];const ids=[...new Set(els.map(e=>e.dataset.uid))];if(!ids.length||!S.user)return;
   S.user.profiles(ids).then(ps=>{ids.forEach(id=>{S.names[id]=(ps[id]&&ps[id].name)||""});document.querySelectorAll("[data-uid]").forEach(e=>{const n=S.names[e.dataset.uid];e.textContent=n||e.dataset.fallback||"a team member"})}).catch(()=>{})}
 function canEditProducts(l){return OPEN.includes(l.status)&&canAct(l)&&(can("lead.verify")||l.status!=="New")}
@@ -867,19 +956,22 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       $("#d-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#d-save").onclick=()=>{const of=($("#d-of").value.split(" · ")[0]||$("#d-ref").value.trim());patch(l,{dupOf:of,verifiedAt:nowISO()},"Closed as duplicate"+(of?" of "+of:""),"Duplicate")};return}
     if(mode==="rej"||mode==="info"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${mode==="rej"?"Reject lead":"Ask the submitter for information"}</h3><label class="f">${mode==="rej"?"Reason":"What's missing?"} <span class="req">*</span><input id="r-why"></label><div class="row" style="margin-top:10px"><button class="btn ${mode==="rej"?"bad":"pri"}" id="r-save">${mode==="rej"?"Reject":"Send back"}</button><button class="btn" id="r-cancel">Cancel</button></div></div>`;
       $("#r-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#r-save").onclick=()=>{const w=$("#r-why").value.trim();if(!w)return;mode==="rej"?patch(l,{verifiedAt:nowISO(),rejectReason:w},"Rejected: "+w,"Rejected"):patch(l,{},"Info requested: "+w,"Info Needed")};return}
-    const bad=dupChecks(l).some(c=>c.lvl==="bad");const terrO=ownerOf(l);const sug=terrO||l.preferred||suggestOwner(l);
+    const bad=dupChecks(l).some(c=>c.lvl==="bad");const sb0=subOf(l);S.vSub=sb0?{c:sb0.c,n:S.vSubN??sb0.n}:null;const terrO=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);const sug=terrO||l.preferred||suggestOwner(l);
     A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Verify and assign</h3>
      ${bad?`<div class="notice bad" style="margin-bottom:10px">This account already has this product open or won. Close it as a duplicate unless the client is buying again.</div>`:""}
      <div class="grid3"><label class="f">Sales engineer <span class="req">*</span><select id="v-sp">${opts(sp,sug,"Choose")}</select></label>
       <label class="f">Priority<select id="v-pr">${opts(["High","Medium","Low"],"Medium")}</select></label>
       <label class="f">Category<select id="v-cat">${opts(["Inbound","Outbound"],l.category)}</select></label></div>
-     <div class="small muted" style="margin-top:6px">${terrO?`Territory owner: <b>${esc(terrO)}</b> (${esc(territoryOf(l.country,l.region).area)})`:sug?`No territory owner for this location. Suggested: ${esc(sug)} (${l.preferred?"submitter's preference":"handled this account or country before"})`:`No territory owner for ${esc(areaOf(l.country).country||"this location")}. Add one under Products & settings → Territories.`}${l.generatedBy&&l.department==="Sales"?` · generated by ${esc(l.generatedBy)}`:""}${meetingsOf(l).length?` · ${meetingsOf(l).length} meeting(s) already logged`:""}</div>
+     ${S.vSub?`<label class="f" style="margin-top:10px;max-width:260px">${SUBDIV[S.vSub.c].label}${S.vSub.n&&sb0.auto&&S.vSubN==null?` <span class="small muted">(detected)</span>`:""}<select id="v-sub"><option value="">Not known</option>${subOptions(S.vSub.c,S.vSub.n)}</select></label>`:""}
+     <div class="small muted" style="margin-top:6px">${terrO?`Territory owner: <b>${esc(terrO)}</b> (${esc(territoryOf(l.country,l.region,S.vSub||subOf(l)).area)})`:sug?`No territory owner for this location. Suggested: ${esc(sug)} (${l.preferred?"submitter's preference":"handled this account or country before"})`:`No territory owner for ${esc(areaOf(l.country).country||"this location")}. Add one under Products & settings → Territories.`}${l.generatedBy&&l.department==="Sales"?` · generated by ${esc(l.generatedBy)}`:""}${meetingsOf(l).length?` · ${meetingsOf(l).length} meeting(s) already logged`:""}</div>
      <div id="v-terr" style="margin-top:6px"></div>
      <div class="row" style="margin-top:12px"><button class="btn pri" id="v-save" ${bad?"":""}>Verify and assign</button><button class="btn" id="v-info">Request info</button><button class="btn" id="v-dup">Duplicate</button><button class="btn bad" id="v-rej">Reject</button></div></div>`;
     $("#v-save").onclick=()=>{const who=$("#v-sp").value;if(!who){toast("Choose a sales engineer");return}const t=nowISO();
-      patch(l,{assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t},`Verified and assigned to ${who}`,"Assigned")};
+      const sub=S.vSub&&S.vSub.n?{subdivision:S.vSub.n}:{};S.vSubN=null;
+      patch(l,Object.assign({assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t},sub),`Verified and assigned to ${who}${sub.subdivision?" ("+sub.subdivision+")":""}`,"Assigned")};
+    $("#v-sub")?.addEventListener("change",e=>{S.vSubN=e.target.value;const o=territoryOf(l.country,l.region,{c:S.vSub.c,n:e.target.value}).owner;const keep=$("#v-sp").value;drawActions(l);if(o&&$("#v-sp"))$("#v-sp").value=o;else if($("#v-sp"))$("#v-sp").value=keep;$("#v-sp")?.dispatchEvent(new Event("change"))});
     $("#v-info").onclick=()=>{S.drawer.mode="info";drawActions(l)};$("#v-dup").onclick=()=>{S.drawer.mode="dup";drawActions(l)};$("#v-rej").onclick=()=>{S.drawer.mode="rej";drawActions(l)};
-    const tw=()=>{const w=$("#v-sp").value,o=ownerOf(l);$("#v-terr").innerHTML=o&&w&&nk(w)!==nk(o)?`<div class="notice warn" style="padding:6px 10px">${esc(territoryOf(l.country,l.region).area)} is ${esc(o)}'s territory. Assign to ${esc(w)} only if that's agreed.</div>`:""};$("#v-sp").addEventListener("change",tw);tw();return}}
+    const tw=()=>{const w=$("#v-sp").value,o=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);$("#v-terr").innerHTML=o&&w&&nk(w)!==nk(o)?`<div class="notice warn" style="padding:6px 10px">${esc(territoryOf(l.country,l.region,S.vSub||subOf(l)).area)} is ${esc(o)}'s territory. Assign to ${esc(w)} only if that's agreed.</div>`:""};$("#v-sp").addEventListener("change",tw);tw();return}}
   if(mode==="meet"){A.innerHTML=amountForm("Meeting done · estimated deal value",false,"",true);bindAmount("meeting","Meeting Done","Meeting done");bindMeet();return}
   if(mode==="logmeet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log a meeting</h3><div style="display:grid;gap:10px">${meetFields()}
       <div class="grid2"><label class="f">Meeting date <span class="req">*</span><input id="lm-date" type="date" max="${todayISO()}" value="${todayISO()}"></label><label class="f">Updated deal estimate (optional)<input id="lm-val" type="number" min="0" step="0.01" placeholder="AED"></label></div>
@@ -979,7 +1071,7 @@ function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO()
    - Converted: lead reached a meeting or beyond (Meeting Done, Quotation Sent, Won). Conversion rate: orders closed ÷ leads.
    - Engineer: the lead's assigned engineer. An engineer's accounts: distinct properties with at least one of their leads.
    - Account status: Customer (any order) › Active (open lead) › On hold › Lost (all leads lost) › Inactive. */
-const AF_DEF={period:"ytd",from:"",to:"",region:"",eng:"",src:"All",status:""};
+const AF_DEF={period:"ytd",from:"",to:"",region:"",sub:"",eng:"",src:"All",status:""};
 const PERIODS=[["month","This month"],["last30","Last 30 days"],["quarter","This quarter"],["ytd","Year to date"],["last12","Last 12 months"],["lastyear","Last calendar year"],["all","All time"],["custom","Custom range"]];
 const ACC_STATUS=[["Customer","--ok","At least one order closed"],["Active","--accent","Has an open lead"],["On hold","--warn","Leads on hold"],["Lost","--bad","Every lead lost"],["Inactive","--muted","No open lead or order"]];
 const MIN_CONV=5;   // leads needed before a conversion rate is ranked
@@ -998,7 +1090,7 @@ function acctStatus(ls){if(ls.some(l=>l.status==="Won"))return"Customer";if(ls.s
 const pct=(a,b)=>b?a/b:0, fmtP=x=>(x*100).toFixed(x>0&&x<.1?1:0)+"%";
 function analytics(F){const[f,t]=periodRange(F);
   let ls=S.leads.filter(l=>(viewAll()||isMine(l))&&!["Duplicate","Rejected"].includes(l.status)).filter(l=>{const d=reqDate(l);return(!f||d>=f)&&(!t||d<=t)})
-    .filter(l=>(!F.region||regionOf(l)===F.region)&&(F.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.src)&&(!F.eng||l.assignedTo===F.eng));
+    .filter(l=>(!F.region||regionOf(l)===F.region)&&subMatch(l,F.sub||"")&&(F.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.src)&&(!F.eng||l.assignedTo===F.eng));
   const A={};for(const l of ls){const k=accKey(l);const a=A[k]||(A[k]={key:k,name:l.accountName,country:l.country||"",region:regionOf(l),leads:[],engs:{}});a.leads.push(l);if(l.assignedTo)a.engs[l.assignedTo]=(a.engs[l.assignedTo]||0)+1}
   for(const a of Object.values(A)){a.status=acctStatus(a.leads);a.orders=a.leads.filter(l=>l.status==="Won").length;a.rev=a.leads.reduce((s,l)=>s+orderVal(l),0);
     const es=Object.entries(a.engs).sort((x,y)=>y[1]-x[1]);a.eng=es[0]?.[0]||"";a.otherEngs=es.slice(1).map(e=>e[0]);
@@ -1029,6 +1121,7 @@ function filterBar(){const F=af();const engs=[...new Set(spNames().concat(S.lead
    <label class="f">Period<select id="afP">${PERIODS.map(([v,t])=>`<option value="${v}"${F.period===v?" selected":""}>${t}</option>`).join("")}</select></label>
    ${F.period==="custom"?`<label class="f">From<input type="date" id="afFrom" value="${esc(F.from)}"></label><label class="f">To<input type="date" id="afTo" value="${esc(F.to)}"></label>`:""}
    <label class="f">Region<select id="afR">${opts(regionList().concat(["Unassigned"]),F.region,"All regions")}</select></label>
+   <label class="f">Emirate / state<select id="afU">${opts(subFilterOpts(),F.sub||"","All")}</select></label>
    ${viewAll()?`<label class="f">Engineer<select id="afE">${opts(engs,F.eng,"All engineers")}</select></label>`:""}
    <div class="f fw"><span>Lead source</span><span class="seg" id="afS" style="margin-top:4px">${["All","Inbound","Outbound"].map(v=>`<button type="button" data-v="${v}" aria-pressed="${F.src===v}">${v}</button>`).join("")}</span></div>
    <label class="f">Account status<select id="afA">${opts(ACC_STATUS.map(x=>x[0]),F.status,"Any status")}</select></label>
@@ -1037,7 +1130,7 @@ function filterBar(){const F=af();const engs=[...new Set(spNames().concat(S.lead
 function bindFilters(m){const F=af(),go=()=>{S.acctN=50;render()};
   $("#afP").onchange=e=>{F.period=e.target.value;if(F.period==="custom"&&!F.from){const[f,t]=periodRange(Object.assign({},F,{period:"ytd"}));F.from=f||"";F.to=ymd(new Date())}go()};
   $("#afFrom")?.addEventListener("change",e=>{F.from=e.target.value;go()});$("#afTo")?.addEventListener("change",e=>{F.to=e.target.value;go()});
-  $("#afR").onchange=e=>{F.region=e.target.value;go()};$("#afE")?.addEventListener("change",e=>{F.eng=e.target.value;go()});
+  $("#afR").onchange=e=>{F.region=e.target.value;go()};$("#afU").onchange=e=>{F.sub=e.target.value;go()};$("#afE")?.addEventListener("change",e=>{F.eng=e.target.value;go()});
   $("#afA").onchange=e=>{F.status=e.target.value;go()};$("#afS").onclick=e=>{const b=e.target.closest("button");if(b){F.src=b.dataset.v;go()}};
   $("#afReset")?.addEventListener("click",()=>{S.af=Object.assign({},AF_DEF);go()})}
 function sortRows(id,rows,cols,def){const st=(S.sort||(S.sort={}))[id]||(S.sort[id]=Object.assign({},def));const c=cols.find(c=>c.k===st.k)||cols[0];const v=c.v||(r=>r[c.k]);
@@ -1121,6 +1214,8 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
   const conv5i=E.filter(x=>x.inb>=MIN_CONV),conv5o=E.filter(x=>x.outb>=MIN_CONV),conv5=E.filter(x=>x.leads>=MIN_CONV);
   const pairRows=E.filter(x=>x.inb>=MIN_CONV||x.outb>=MIN_CONV).sort((a,b)=>Math.max(b.inbRate,b.outbRate)-Math.max(a.inbRate,a.outbRate)).slice(0,12)
     .map(x=>({label:x.name,a:x.inbRate,b:x.outbRate,tip:`${x.name}: inbound ${x.inbOrders}/${x.inb} = ${fmtP(x.inbRate)} · outbound ${x.outbOrders}/${x.outb} = ${fmtP(x.outbRate)}`}));
+  const SB={};for(const l of R.ls){const s=subOf(l);if(!s)continue;const k=s.n?subArea(s.c,s.n):s.c+" · Not set";const o=SB[k]||(SB[k]={k,c:s.c,n:s.n||"Not set",g:s.n?subGroupOf(s.c,s.n):"",acc:new Set,leads:0,orders:0,rev:0});o.acc.add(accKey(l));o.leads++;if(l.status==="Won"){o.orders++;o.rev+=orderVal(l)}}
+  const subs=Object.values(SB).sort((a,b)=>a.c.localeCompare(b.c)||(a.n==="Not set")-(b.n==="Not set")||b.rev-a.rev||b.leads-a.leads);const mxSR=Math.max(1,...subs.map(x=>x.rev)),mxSL=Math.max(1,...subs.map(x=>x.leads));
   const regs=R.regions.slice().sort((a,b)=>b.rev-a.rev||b.leads-a.leads);const mxRR=Math.max(1,...regs.map(r=>r.rev)),mxRA=Math.max(1,...regs.map(r=>r.accounts)),mxRO=Math.max(1,...regs.map(r=>r.orders));
   const kpi=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:""}</div>`;
   const srcRow=(lab,a,b,fmt)=>{const t=a+b;const pa=t?a/t*100:50;return`<div class="cmp"><div class="row small" style="margin-bottom:4px"><b>${lab}</b><span class="sp"></span><span><i class="sw" style="background:var(--c-in)"></i>${fmt(a)}</span><span><i class="sw" style="background:var(--c-out)"></i>${fmt(b)}</span></div>
@@ -1196,6 +1291,10 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
      ${regs.map(r=>`<tr><td><b>${esc(r.region)}</b></td><td><span class="mono">${fmtAED(r.rev)}</span>${dbar(r.rev,mxRR,"--c-main")}</td><td><span class="mono">${r.accounts}</span>${dbar(r.accounts,mxRA,"--c-main")}</td><td><span class="mono">${r.orders}</span>${dbar(r.orders,mxRO,"--c-main")}</td><td class="num">${r.leads}</td><td class="num">${fmtP(pct(r.orders,r.leads))}</td><td class="num">${fmtAED(r.accounts?r.rev/r.accounts:0)}</td></tr>`).join("")||`<tr><td colspan="7" class="empty">No leads for these filters.</td></tr>`}
     </tbody></table></div></div>
 
+   ${subs.length?`<div class="panel"><h3>UAE emirates and US states</h3><p class="small muted" style="margin:2px 0 12px">Leads, orders and revenue by emirate and state, with the territory owner</p>
+    <div class="tw plain"><table><thead><tr><th>Emirate / state</th><th>Group</th><th>Owner</th><th style="min-width:150px">Leads</th><th class="num">Accounts</th><th class="num">Orders</th><th style="min-width:170px">Revenue</th><th class="num">Conversion</th></tr></thead><tbody>
+     ${subs.map(x=>`<tr><td><b>${esc(x.n)}</b> <span class="small muted">${x.c}</span></td><td>${esc(x.g||"—")}</td><td>${x.n==="Not set"?`<span class="muted">—</span>`:esc(territoryOf(x.c,"",{c:x.c,n:x.n}).owner||"—")}</td><td><span class="mono">${x.leads}</span>${dbar(x.leads,mxSL,"--c-main")}</td><td class="num">${x.acc.size}</td><td class="num">${x.orders}</td><td><span class="mono">${fmtAED(x.rev)}</span>${dbar(x.rev,mxSR,"--c-main")}</td><td class="num">${fmtP(pct(x.orders,x.leads))}</td></tr>`).join("")}
+    </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}</div>`:""}
    <div id="mg-ops"></div>
   </section>`;
@@ -1208,7 +1307,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
 
 /* ---------- Management: pipeline health and operations (follows the same filters) ---------- */
 function inPeriod(l){const[f,t]=periodRange(af());const d=reqDate(l);return(!f||d>=f)&&(!t||d<=t)}
-function mgmtOps(m){const AF=af();const inReg=l=>(!AF.region||regionOf(l)===AF.region)&&(!AF.eng||l.assignedTo===AF.eng)&&(viewAll()||isMine(l));const all=S.leads.filter(inPeriod).filter(inReg).filter(l=>AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src);
+function mgmtOps(m){const AF=af();const inReg=l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(!AF.eng||l.assignedTo===AF.eng)&&(viewAll()||isMine(l));const all=S.leads.filter(inPeriod).filter(inReg).filter(l=>AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src);
   const valid=all.filter(l=>!["Duplicate","Rejected"].includes(l.status));
   const has=(l,s)=>!!l.stageAt?.[s];
   const F=[["Submitted",all.length],["Verified & assigned",valid.filter(l=>has(l,"Assigned")).length],["Meeting done",valid.filter(l=>has(l,"Meeting Done")).length],["Quotation sent",valid.filter(l=>has(l,"Quotation Sent")).length],["Won",valid.filter(l=>l.status==="Won").length]];
@@ -1319,6 +1418,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Supervisors manage users, roles, the product catalog and the sales engineer list here. Names must be unique, ignoring case and spacing. Retired names stay on existing leads but can no longer be chosen.</p></div></div>
   ${can("users.manage")?usersPanel()+permsPanel():""}
   ${territoryPanel()}
+  ${subTerrPanel()}
   <div class="grid2">
    <div class="panel"><h3>Product catalog <span class="chip">${prods.filter(p=>p.active!==false).length} active</span></h3>
      <form class="row" id="addProd" style="margin-bottom:6px"><input id="np" placeholder="New product name" style="flex:1"><label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="npRep" style="width:auto">Repeatable</label><button class="btn pri">Add product</button></form>
@@ -1340,7 +1440,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
     <label class="f">Regions, one per line<textarea id="s-reg" rows="6">${esc(regionList().join("\n"))}</textarea></label>
     <button class="btn pri" id="setSave" type="button">Save sources, regions, rates and targets</button></div></div>
   </form></section>`;
-  if(can("users.manage")){bindUsers();bindPerms()}bindTerritories();
+  if(can("users.manage")){bindUsers();bindPerms()}bindTerritories();bindSubTerr();
   const save=async(body,okMsg)=>{try{await S.db.doc("config/settings").update(body);toast(okMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}};
   const dupMsg=(el,list,name)=>{const n=name.trim().replace(/\s+/g," ");if(!n){el.innerHTML=`<div class="notice bad">Enter a name.</div>`;return null}
     const ex=list.find(x=>nk(x.name)===nk(n));if(ex){el.innerHTML=`<div class="notice bad">“${esc(ex.name)}” already exists${ex.active===false?" as a retired entry. Restore it instead":""}.</div>`;return null}
@@ -1442,7 +1542,7 @@ function drawHandover(){const h=S.hand;if(!h)return;const ls=openLeadsOf(h.name)
 async function setRetired(name,quiet){const list=spList(true).map(x=>nk(x.name)===nk(name)?Object.assign({},x,{active:false}):Object.assign({},x));
   try{await S.db.doc("config/settings").update({salespeople:list});S.settings.salespeople=list;if(!quiet)toast("Retired "+name);render()}catch(e){toast("Couldn't retire: "+(e.code||e.message));throw e}}
 function territoryPanel(){const T=(S.settings.territories||[]).slice().sort((a,b)=>a.engineer.localeCompare(b.engineer)||a.area.localeCompare(b.area));
-  const counts={};S.leads.forEach(l=>{if(l.status==="Duplicate")return;const t=territoryOf(l.country,l.region);const k=t.owner?"o:"+lowerNorm(t.area):"u:"+(t.area||"(no location)");counts[k]=(counts[k]||0)+1});
+  const counts={};S.leads.forEach(l=>{if(l.status==="Duplicate")return;const t=territoryOf(l.country,l.region,subOf(l));const k=t.owner?"o:"+lowerNorm(t.area):"u:"+(t.area||"(no location)");counts[k]=(counts[k]||0)+1});
   const gaps=Object.entries(counts).filter(([k])=>k.startsWith("u:")&&k!=="u:(no location)").map(([k,n])=>[k.slice(2),n]).sort((a,b)=>b[1]-a[1]).slice(0,12);
   const byEng={};T.forEach(t=>(byEng[t.engineer]=byEng[t.engineer]||[]).push(t));
   return`<div class="panel"><div class="row" style="margin-bottom:6px"><h3>Territories</h3><span class="chip">${T.length} areas</span></div>
