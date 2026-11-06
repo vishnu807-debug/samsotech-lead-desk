@@ -27,7 +27,7 @@
   /* audit trail: events the database can't see by itself (see supabase/10_audit_trail.sql) */
   window.__audit = (action, entity, id, summary, details) =>
     sb.rpc("log_event", { p_action: action, p_entity: entity || "session", p_entity_id: id || null, p_summary: summary || null, p_details: details || null }).then(() => {}, () => {});
-  window.__signOut = async () => { try { await window.__audit("signed_out", "session", ME.email, "Signed out"); } catch (e) {} await sb.auth.signOut(); location.href = location.pathname; };
+  window.__signOut = async () => { try { await window.__audit("signed_out", "session", ME.email, "Signed out"); } catch (e) {} try { await window.__clearCache(); } catch (e) {} await sb.auth.signOut(); location.href = location.pathname; };
 
   let ME = { email: "", role: null };
 
@@ -61,6 +61,46 @@
     }
     return out;
   }
+  /* ---------- low-data mode: device cache + "changed since" sync (supabase/11_low_data.sql) ---------- */
+  const SYNCED = { leads: true, accounts: true };           // tables that have updated_at
+  let hasStamp = null;                                       // null = unknown yet; false = SQL not run, use full loads
+  async function fetchSince(table, key, since) {
+    const out = []; const page = 1000;
+    for (let from = 0; ; from += page) {
+      let q = sb.from(table).select(key + ",doc,updated_at").order("updated_at").order(key).range(from, from + page - 1);
+      if (since) q = q.gt("updated_at", new Date(new Date(since).getTime() - 60000).toISOString());   // 1-minute overlap for slow saves
+      const { data, error } = await q;
+      if (error) throw error;
+      out.push(...data);
+      if (data.length < page) break;
+    }
+    return out;
+  }
+  async function fetchKeys(table, key) {
+    const out = []; const page = 5000;
+    for (let from = 0; ; from += page) {
+      const { data, error } = await sb.from(table).select(key).order(key).range(from, from + page - 1);
+      if (error) throw dbErr(error);
+      out.push(...data.map((x) => x[key]));
+      if (data.length < page) break;
+    }
+    return out;
+  }
+  const idb = (() => {
+    let dbp = null;
+    const open = () => dbp || (dbp = new Promise((res, rej) => {
+      try { const r = indexedDB.open("lead-desk", 1); r.onupgradeneeded = () => r.result.createObjectStore("cache"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
+      catch (e) { rej(e); }
+    }));
+    const tx = (mode, fn) => open().then((db) => new Promise((res, rej) => { const t = db.transaction("cache", mode); const st = t.objectStore("cache"); const r = fn(st); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); }));
+    return {
+      get: (k) => tx("readonly", (st) => st.get(k)).catch(() => null),
+      set: (k, v) => tx("readwrite", (st) => st.put(v, k)).catch(() => null),
+      clear: () => tx("readwrite", (st) => st.clear()).catch(() => null),
+    };
+  })();
+  window.__clearCache = () => idb.clear();
+
   async function readMembers() {
     const { data, error } = await sb.from("members").select("*").eq("active", true);
     if (error) throw dbErr(error);
@@ -81,12 +121,17 @@
 
   /* ---------- realtime fan-out ---------- */
   const listeners = {};  // table -> Set(fn)
+  const resync = {};     // table -> Set(fn) called when the live connection comes back after a drop
   function onTable(table, fn) {
     if (!listeners[table]) {
-      listeners[table] = new Set();
+      listeners[table] = new Set(); resync[table] = resync[table] || new Set();
+      let dropped = false;
       sb.channel("ld-" + table)
         .on("postgres_changes", { event: "*", schema: "public", table }, (p) => listeners[table].forEach((f) => f(p)))
-        .subscribe();
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") { if (dropped) { dropped = false; resync[table].forEach((f) => f()); } }
+          else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") dropped = true;
+        });
     }
     listeners[table].add(fn);
     return () => listeners[table].delete(fn);
@@ -122,8 +167,10 @@
       },
       async update(d) {
         if (r.t === "members") return writeMembers(merge(await readMembers(), d));
-        let base = caches[r.t] && caches[r.t].get(r.id);
-        if (!base) { const s = await ref.get(); if (!s.exists) throw { code: "invalid_argument", message: "Document does not exist" }; base = s.data(); }
+        // always start from the latest saved copy (one small read), so a change made by someone else
+        // a moment ago, or a device copy that is a little behind, is never overwritten
+        const s = await ref.get(); if (!s.exists) throw { code: "invalid_argument", message: "Document does not exist" };
+        const base = s.data();
         const next = merge(base, d);
         const { data, error } = await sb.from(r.t).update({ doc: next }).eq(r.k, r.id).select(r.k);
         if (error) throw dbErr(error);
@@ -163,19 +210,51 @@
           const docs = [...map.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([id, d]) => snap(id, d));
           next({ docs, size: docs.length, empty: !docs.length, metadata: { fromCache: false, hasPendingWrites: false }, docChanges: () => [] });
         };
-        const reload = () => fetchAll(table, key).then((rows) => { map.clear(); rows.forEach((x) => map.set(x[key], x.doc)); emit(); })
-          .catch((e) => alive && onErr && onErr(e));
-        reload();
+        // Data use matters (free plan: 5 GB a month). Live changes arrive one row at a time. For leads and
+        // accounts each device keeps a copy and only asks for rows changed since its last sync, plus the
+        // list of row keys (to drop rows that were deleted or are no longer visible to this user).
+        const ck = "v1:" + table + ":" + ME.email;
+        let sync = null, lastFull = 0, lastKeys = 0, inflight = null, saveT = null, last = 0;
+        const save = () => { clearTimeout(saveT); saveT = setTimeout(() => idb.set(ck, { sync, lastFull, rows: [...map.entries()] }), 1500); };
+        const serverNow = async () => { const { data, error } = await sb.rpc("server_now"); if (error || !data) throw Object.assign(new Error("no server_now"), { code: "42703" }); return data; };
+        const full = async () => {
+          if (SYNCED[table] && hasStamp !== false) {
+            try { const t0 = await serverNow(); const rows = await fetchSince(table, key, null); hasStamp = true; map.clear(); rows.forEach((x) => map.set(x[key], x.doc)); sync = t0; lastFull = lastKeys = Date.now(); emit(); save(); return; }
+            catch (e) { hasStamp = false; console.warn("Lead Desk: low-data mode unavailable, using full loads", e); }   // e.g. 11_low_data.sql not run yet
+          }
+          const rows = await fetchAll(table, key); map.clear(); rows.forEach((x) => map.set(x[key], x.doc)); lastFull = Date.now(); emit();
+        };
+        const delta = async () => {
+          const t0 = await serverNow(); const rows = await fetchSince(table, key, sync);
+          rows.forEach((x) => map.set(x[key], x.doc)); sync = t0;
+          if (Date.now() - lastKeys > 30 * 60000) {           // prune rows deleted or reassigned away, every 30 min
+            const keep = new Set(await fetchKeys(table, key)); [...map.keys()].forEach((k) => { if (!keep.has(k)) map.delete(k); }); lastKeys = Date.now();
+          }
+          emit(); save();
+        };
+        const reload = (force) => { if (inflight) return inflight; last = Date.now();
+          const useDelta = !force && SYNCED[table] && hasStamp === true && sync && Date.now() - lastFull < 24 * 3600000;
+          inflight = (useDelta ? delta().catch(() => full()) : full()).catch((e) => alive && onErr && onErr(e)).finally(() => { inflight = null; });
+          return inflight; };
+        (async () => {
+          if (SYNCED[table]) {
+            const c = await idb.get(ck);
+            if (c && c.rows && c.sync && alive) { c.rows.forEach(([k, d]) => map.set(k, d)); sync = c.sync; lastFull = c.lastFull || 0; hasStamp = true; emit(); lastKeys = 0; }
+          }
+          reload();
+        })();
+        resync[table] = resync[table] || new Set(); const rs = () => alive && reload(); resync[table].add(rs);
         const off = onTable(table, (p) => {
           if (p.eventType === "DELETE") { if (p.old && p.old[key]) map.delete(p.old[key]); }
           else if (p.new && p.new[key]) map.set(p.new[key], p.new.doc);
-          clearTimeout(timer); timer = setTimeout(emit, 120);
+          clearTimeout(timer); timer = setTimeout(() => { emit(); save(); }, 120);
         });
-        // a lead reassigned away from a sales engineer stops sending them events, so refresh now and then
-        const iv = setInterval(reload, 120000);
-        const vis = () => { if (document.visibilityState === "visible") reload(); };
+        // safety net, cheap in low-data mode (only changed rows come back)
+        const every = ME.role === "sales" ? 5 * 60000 : 10 * 60000;
+        const iv = setInterval(() => { if (document.visibilityState === "visible") reload(); }, every);
+        const vis = () => { if (document.visibilityState === "visible" && Date.now() - last > 2 * 60000) reload(); };
         document.addEventListener("visibilitychange", vis);
-        return () => { alive = false; off(); clearInterval(iv); document.removeEventListener("visibilitychange", vis); };
+        return () => { alive = false; off(); resync[table].delete(rs); clearInterval(iv); document.removeEventListener("visibilitychange", vis); };
       },
       async get() { const rows = await fetchAll(table, key); const docs = rows.map((x) => snap(x[key], x.doc)); return { docs, size: docs.length, empty: !docs.length, metadata: { fromCache: false }, docChanges: () => [] }; },
     };

@@ -163,6 +163,36 @@ tr.tot td{background:var(--sunk);font-weight:600}
 .mg [id^=mg-]{scroll-margin-top:70px}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;max-width:300px;box-shadow:var(--shadow)}
 .view>*,.grid2>*,.mg .panel{min-width:0}
+/* product matrix */
+.mxwrap{overflow:auto;max-height:calc(100vh - 150px);border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.mxt{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:13px}
+.mxt thead th{position:sticky;top:0;z-index:3;background:var(--sunk);vertical-align:bottom;border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.mxt .mxname{position:sticky;left:0;z-index:2;background:var(--surface);min-width:240px;max-width:300px;text-align:left;font:inherit;text-transform:none;letter-spacing:0;color:var(--ink);border-right:1px solid var(--line)}
+.mxt thead .mxname{z-index:4;background:var(--sunk);font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.mxt th.mxp{width:34px;min-width:34px;max-width:34px;padding:6px 0 6px;text-align:center}
+.mxpn{display:block;writing-mode:vertical-rl;transform:rotate(180deg);height:128px;margin:0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:none;letter-spacing:0;font:500 11.5px var(--f-body);color:var(--ink)}
+.mxpt{display:grid;margin-top:6px;font:600 10.5px var(--f-mono);letter-spacing:0;line-height:1.35}.mxpt .ok,.mxpo .ok{color:var(--ok)}.mxpt .acc,.mxpo .acc{color:var(--accent)}.mxpt .zero{color:var(--line)}
+.legend i.ic,.mxtag i.ic{width:11px;height:11px;border-radius:50%;margin:0}.legend i.ic-lost,.mxtag i.ic-lost{border-radius:0}
+.ic{display:inline-block;width:11px;height:11px;border-radius:50%;box-sizing:border-box;vertical-align:-1px}.ic-won{background:var(--ok)}.ic-open{border:2px solid var(--accent);background:linear-gradient(90deg,var(--accent) 50%,transparent 50%)}.ic-lost{width:11px;height:11px;border-radius:0;background:linear-gradient(45deg,transparent 42%,var(--bad) 42%,var(--bad) 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,var(--bad) 42%,var(--bad) 58%,transparent 58%)}
+.mxt td,.mxt tbody th{padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.mxt td.mxc{padding:0;text-align:center;width:34px;border-left:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.mxt tr.mxh:hover td,.mxt tr.mxh:hover th{background:color-mix(in srgb,var(--accent-soft) 45%,var(--surface))}
+.mxi{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;font-size:14px;line-height:1}
+.mxi.s-won{color:var(--ok);background:var(--ok-soft)}.mxi{font-size:15px}.legend b.mxi{width:20px;height:20px;vertical-align:middle;margin-right:2px}.mxi.s-open{color:var(--accent);background:var(--accent-soft)}.mxi.s-lost{color:var(--bad);background:var(--bad-soft);font-size:12px}
+b.mxi:not([class*="s-"]){border:1px dashed var(--line)}
+button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:focus-visible{outline:2px solid var(--ink)}
+.mxgr td{padding:0;background:var(--surface)}.mxgr-r td{background:var(--sunk)}
+.mxg{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 12px;width:100%;box-sizing:border-box;position:sticky;left:0;max-width:calc(100vw - 80px)}
+.mxg-r{font-size:14px}.mxg-c{padding-left:30px;font-size:13px}.mxg:hover{color:var(--accent)}.mxg:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.mxg[aria-expanded="true"] .tw-car{transform:rotate(90deg)}.mxcnt{color:var(--muted);font-size:12px;font-weight:400}.mxcnt .ok{color:var(--ok)}
+.cl{display:inline-block;font:600 11px var(--f-body);padding:2px 8px;border-radius:10px;background:var(--sunk);color:var(--muted)}.cl.yes{background:var(--ok-soft);color:var(--ok)}
+.linkb2{all:unset;cursor:pointer;font-weight:600;color:var(--ink)}.linkb2:hover{color:var(--accent);text-decoration:underline}.linkb2:focus-visible{outline:2px solid var(--accent)}
+.mxpm{min-width:300px;max-height:360px;overflow:auto;left:0;right:auto}.mxpl{display:grid}.mxpo{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer}.mxpo:hover{background:var(--sunk)}.mxpo input{width:auto}
+.mxcards{display:grid;gap:8px}.mxgrp{display:grid;gap:6px}.mxgrp>.mxg-r{background:var(--sunk);border-radius:8px}.mxgc{display:grid;gap:6px}
+.mxcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px}
+.mxtags{display:flex;flex-wrap:wrap;gap:6px}.mxtag{all:unset;cursor:pointer;font-size:12px;padding:3px 8px;border-radius:12px;background:var(--sunk)}
+.mxtag.s-won{background:var(--ok-soft);color:var(--ok)}.mxtag.s-open{background:var(--accent-soft);color:var(--accent)}.mxtag.s-lost{background:var(--bad-soft);color:var(--bad)}
+
 /* audit trail */
 .achip{display:inline-block;font:600 11px var(--f-body);padding:2px 8px;border-radius:10px;background:var(--sunk);color:var(--muted);white-space:nowrap}
 .achip.a-created,.achip.a-sign{background:var(--ok-soft);color:var(--ok)}.achip.a-deleted,.achip.a-merged{background:var(--bad-soft);color:var(--bad)}
@@ -439,7 +469,7 @@ const PERMISSIONS=[
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.delete","Delete leads","Leads"],
  ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
- ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"]];
+ ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
 const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
@@ -1397,11 +1427,11 @@ function renderAudit(m){const A=audState();
     <label class="f fsearch">Search<input id="audQ" placeholder="Lead ref, property, email, field" value="${esc(A.q)}"></label></div></div>
    ${A.err?`<div class="notice bad">${esc(A.err)}</div>`:""}
    <div class="tw"><table class="audt"><thead><tr><th style="width:150px">When</th><th>User</th><th>Action</th><th>Record</th><th>Details</th></tr></thead><tbody>
-    ${A.rows.map(r=>{const ch=r.changes&&typeof r.changes==="object"&&!Array.isArray(r.changes)?Object.entries(r.changes).filter(([,v])=>v&&("old" in v||"new" in v)):[];const op=!!A.open[r.id];
+    ${A.rows.map(r=>{try{const isObj=v=>!!v&&typeof v==="object"&&!Array.isArray(v);const ent=isObj(r.changes)?Object.entries(r.changes):[];const ch=ent.filter(([,v])=>isObj(v)&&("old" in v||"new" in v));const det=ent.filter(([,v])=>!(isObj(v)&&("old" in v||"new" in v)));const op=!!A.open[r.id];
       return`<tr class="${op?"xopen":""}"><td style="white-space:nowrap">${audTime(r.at)}</td><td>${r.actor==="system"?`<span class="muted">System</span>`:esc(r.actor)}${r.actor_role?`<div class="small muted">${esc(ROLE_LABEL[normRole(r.actor_role)]||r.actor_role)}</div>`:""}</td><td>${chip(r.action)}</td>
        <td>${r.entity==="lead"&&r.entity_id&&S.leadMap[r.entity_id]?`<button class="linkb" data-open="${esc(r.entity_id)}">${esc(r.entity_id)}</button>`:`<span class="mono small">${esc(r.entity_id||"")}</span>`}<div class="small muted">${esc(r.entity)}</div></td>
-       <td>${esc(audSummary(r))}${ch.length?` <button type="button" class="btn sm" data-aud="${r.id}" aria-expanded="${op}">${op?"Hide":"Show"} ${ch.length} change${ch.length===1?"":"s"}</button>`:""}
-        ${op?`<table class="chg"><thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead><tbody>${ch.map(([k,v])=>`<tr><td>${esc(AUD_FIELD[k]||k)}</td><td>${audVal(v.old)}</td><td>${audVal(v.new)}</td></tr>`).join("")}</tbody></table>`:""}</td></tr>`}).join("")||(A.loading?"":`<tr><td colspan="5" class="empty">No activity for these filters.</td></tr>`)}
+       <td>${esc(audSummary(r))}${ch.length?` <button type="button" class="btn sm" data-aud="${r.id}" aria-expanded="${op}">${op?"Hide":"Show"} ${ch.length} change${ch.length===1?"":"s"}</button>`:""}${det.length?`<div class="small muted">${det.map(([k,v])=>`${esc(k.charAt(0).toUpperCase()+k.slice(1))}: ${audVal(v)}`).join(" · ")}</div>`:""}
+        ${op?`<table class="chg"><thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead><tbody>${ch.map(([k,v])=>`<tr><td>${esc(AUD_FIELD[k]||k)}</td><td>${audVal(v.old)}</td><td>${audVal(v.new)}</td></tr>`).join("")}</tbody></table>`:""}</td></tr>`}catch(e){console.error("audit row",r,e);return`<tr><td style="white-space:nowrap">${esc(String(r&&r.at||""))}</td><td>${esc(String(r&&r.actor||""))}</td><td colspan="3" class="muted">${esc(String(r&&r.summary||"This entry couldn't be displayed"))}</td></tr>`}}).join("")||(A.loading?"":`<tr><td colspan="5" class="empty">No activity for these filters.</td></tr>`)}
    </tbody></table></div>
    <div class="row">${A.loading?`<span class="small muted"><span class="spin" aria-hidden="true"></span> Loading…</span>`:A.done?`<span class="small muted">${fmtN(A.rows.length)} entr${A.rows.length===1?"y":"ies"}</span>`:`<button class="btn" id="audMore" type="button">Load older entries</button><span class="small muted">${fmtN(A.rows.length)} shown</span>`}</div>
   </section>`;
@@ -1414,6 +1444,32 @@ function renderAudit(m){const A=audState();
   $("#audCsv")?.addEventListener("click",async()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
     const csv=["When,User,Role,Source,Action,Record type,Record,Summary,Changes"].concat(A.rows.map(r=>[r.at,r.actor,r.actor_role,r.source,r.action,r.entity,r.entity_id,r.summary,r.changes?JSON.stringify(r.changes):""].map(q).join(","))).join("\n");
     try{await S.downloads.save({filename:`audit-trail-${A.from||"start"}-to-${A.to||todayISO()}.csv`,data:new Blob(["﻿"+csv],{type:"text/csv"})});toast("Audit trail exported");window.__audit?.("exported","report","audit-trail",`Audit trail ${A.from} – ${A.to}: ${A.rows.length} entries`)}catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code))}})}
+
+
+/* ======================= BACKUP (Supervisor) =======================
+   One file with everything in Lead Desk: leads, accounts, users, settings, permissions and the audit trail.
+   The free Supabase plan has no automatic backups, so this is the safety net. */
+function backupPanel(){const lb=S.settings.lastBackup;const age=lb&&lb.at?Math.floor(days(lb.at)):null;const due=age==null||age>=7;
+  return`<div class="panel" id="backupPanel" style="${due?"border-left:3px solid var(--warn)":""}"><div class="row" style="margin-bottom:6px"><h3>Backup</h3><span class="sp"></span><button type="button" class="btn pri" id="bkBtn">Download full backup</button></div>
+   <p class="small muted" style="margin:0;max-width:85ch">Saves every lead, account, user, setting and the audit trail in one file. ${window.LD_HOSTED?"The free Supabase plan keeps no backups, so download one every week and keep it in a safe shared folder.":"Download one every week and keep it in a safe folder."}
+   <b style="color:var(--ink)">${lb&&lb.at?`Last backup: ${fmtD(lb.at)} (${age===0?"today":age===1?"yesterday":age+" days ago"}) by ${esc(lb.by||"someone")}.`:"No backup taken yet."}</b>${due?` <span style="color:var(--warn)">A backup is due.</span>`:""}</p></div>`}
+async function takeBackup(){if(!can("data.backup")){toast("Your role can't download backups.");return}const b=$("#bkBtn");const lab=b?.textContent;if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing backup…`}
+  try{const out={app:"Lead Desk",format:1,createdAt:nowISO(),createdBy:S.myName||S.uid||"",tables:{}};
+    if(window.LD_HOSTED&&window.__sb){const sb=window.__sb;
+      const all=async(t,cols,order)=>{const rows=[];for(let f=0;;f+=1000){const{data,error}=await sb.from(t).select(cols).order(order).range(f,f+999);if(error)throw error;rows.push(...data);if(data.length<1000)break}return rows};
+      out.tables.leads=await all("leads","id,doc","id");out.tables.accounts=await all("accounts","key,doc","key");out.tables.members=await all("members","*","email");out.tables.docs=await all("docs","path,doc","path");
+      try{out.tables.audit_log=await all("audit_log","*","id")}catch(e){out.tables.audit_log=[];out.note="Audit trail not included: "+(e.message||e.code)}}
+    else{out.tables.leads=S.leads.map(l=>({id:l.id,doc:l}));out.tables.accounts=Object.entries(S.accounts||{}).map(([key,doc])=>({key,doc}));out.tables.members=Object.entries(S.users||{}).map(([id,u])=>Object.assign({id},u));
+      out.tables.docs=[{path:"config/settings",doc:S.settings},{path:"config/permissions",doc:{roles:S.perms||DEFAULT_PERMS}}]}
+    out.counts=Object.fromEntries(Object.entries(out.tables).map(([k,v])=>[k,v.length]));
+    const d=new Date();const name=`LeadDesk_Backup_${ymd(d)}_${String(d.getHours()).padStart(2,"0")}${String(d.getMinutes()).padStart(2,"0")}.json`;
+    const blob=new Blob([JSON.stringify(out)],{type:"application/json"});
+    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+    window.__audit?.("exported","report",name,`Full backup: ${out.counts.leads} leads, ${out.counts.accounts} accounts, ${out.counts.members} users`,out.counts);
+    try{const lb={at:nowISO(),by:S.myEng||S.myName||""};await S.db.doc("config/settings").update({lastBackup:lb});S.settings.lastBackup=lb}catch(e){}
+    toast(`${name} is ready (${fmtN(out.counts.leads)} leads)`);render()}
+  catch(e){if(e?.code==="cancelled")toast("Download cancelled");else{console.error(e);toast("Backup failed: "+(e?.message||e?.code||"unknown error"))}}
+  finally{const nb=$("#bkBtn");if(nb){nb.disabled=false;nb.textContent=lab||"Download full backup"}}}
 
 /* ======================= ANALYTICS (one calculation shared by Accounts and Management) =======================
    Source of truth: the leads table only. Definitions used everywhere:
@@ -1751,37 +1807,135 @@ async function exportCSV(){if(!can("lead.export"))return;const cols=["ref","requ
   const csv=[cols.join(",")].concat(S.leads.slice().sort((a,b)=>a.ref<b.ref?-1:1).map(l=>cols.map(c=>q(get(l,c))).join(","))).join("\n");
   try{await S.downloads.save({filename:`lead-desk-${new Date().toISOString().slice(0,10)}.csv`,data:new Blob([csv],{type:"text/csv"})});window.__audit?.("exported","report","lead-desk.csv",`Exported all ${S.leads.length} leads to CSV`)}catch(e){if(e?.code!=="cancelled")toast("Export didn't complete")}}
 
-/* ---------- Accounts: product matrix (existing view) ---------- */
-function renderAcctMatrix(m){const prods=prodList().filter(p=>!p.repeatable).map(p=>p.name);const q=S.acctQ||"";
-  const own=a=>viewAll()||leadsFor(a.key).some(isMine)||(!!S.myEng&&nk(territoryOf(a.country).owner)===nk(S.myEng));
-  const accs=Object.values(allAccounts()).filter(own);let list=q?findAccounts(q,60,true).filter(own):accs.sort((a,b)=>(b.live?1:0)-(a.live?1:0)||a.name.localeCompare(b.name)).slice(0,60);
-  const cell=(a,p)=>{const ls=leadsFor(a.key).filter(l=>productsOf(l).includes(p));let c="",t="";
-    if(ls.some(l=>l.status==="Won")){c="won";t="Won"}else if(ls.some(l=>OPEN.includes(l.status))){c="open";t="Open"}else if(a.hist?.[p]){c="hist";t="In 2026 sheet "+a.hist[p].r}else if(ls.some(l=>l.status==="Lost")){c="lost";t="Lost"}
-    return`<td class="c">${c?`<span class="mx ${c}" title="${esc(t)}"></span>`:""}</td>`};
-  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Accounts</h2><p>${viewAll()?"":"Accounts where you own a lead or that sit in your territory. "}One row per property. ${fmtN(accs.length)} accounts, including ${fmtN(Object.keys(S.registry).length)} unique properties merged from the 2026 sheet. Empty cells show products not yet offered to that property.</p></div>
-   <div class="row"><input id="acctQ" placeholder="Search accounts" value="${esc(q)}" style="max-width:280px"><span class="seg" id="acctV"><button data-v="overview" aria-pressed="false">Overview</button><button data-v="matrix" aria-pressed="true">Product matrix</button></span></div></div>
-   <div class="legend"><span><i style="background:var(--ok)"></i>Won</span><span><i style="background:var(--accent)"></i>Open lead</span><span><i style="background:var(--warn)"></i>Logged in 2026 sheet</span><span><i style="background:var(--bad)"></i>Lost</span></div>
-   <div class="tw matrix"><table><thead><tr><th>Account</th><th>Country</th><th>Owner</th><th class="num">Leads</th>${prods.map(p=>`<th class="c" style="writing-mode:vertical-rl;transform:rotate(180deg);height:120px;padding:8px 4px;white-space:nowrap">${esc(p)}</th>`).join("")}${can("account.manage")?"<th></th>":""}</tr></thead><tbody>
-   ${list.map(a=>{const dup=can("account.manage")&&likelyDuplicates(a,1).length;return`<tr><td style="white-space:nowrap">${esc(a.name)}${a.live?"":` <span class="chip">sheet</span>`}${dup?` <span class="chip" style="background:var(--warn-soft);color:var(--warn)">possible duplicate</span>`:""}</td><td>${esc(a.country||"")}</td><td>${esc(territoryOf(a.country).owner||"—")}</td><td class="num">${leadsFor(a.key).length}</td>${prods.map(p=>cell(a,p)).join("")}${can("account.manage")?`<td><button class="btn sm" data-merge="${esc(a.key)}">Merge or delete</button></td>`:""}</tr>`}).join("")||`<tr><td colspan="${prods.length+4}" class="empty">No accounts match.</td></tr>`}</tbody></table></div>
-   <p class="small muted">Showing up to 60 accounts. Search to find a specific property.</p>
-   ${can("account.manage")&&removedAccounts().length?`<div class="panel"><h3>Removed accounts</h3><p class="small muted" style="margin:0 0 8px">Restoring an account makes it searchable again. Leads already moved by a merge stay with the account they were moved to.</p><div class="alerts">${removedAccounts().slice(0,25).map(r=>`<div class="alert" style="cursor:default"><span style="flex:1;min-width:0"><b>${esc(r.name)}</b> <span class="small muted">${r.mergedInto?"merged into "+esc(r.mergedIntoName||r.mergedInto):"deleted"} · ${fmtD(r.deletedAt)}</span></span><button class="btn sm" data-restore="${esc(r.key)}">Restore</button></div>`).join("")}</div></div>`:""}</section>`;
-  m.querySelectorAll("[data-merge]").forEach(b=>b.onclick=()=>openMerge(b.dataset.merge));
+/* ---------- Accounts: product matrix (hotels grouped by region → country, products × state) ---------- */
+const MX_STATES={won:{i:'<i class="ic ic-won"></i>',t:"Purchased",c:"--ok"},open:{i:'<i class="ic ic-open"></i>',t:"In progress",c:"--accent"},lost:{i:'<i class="ic ic-lost"></i>',t:"Lost",c:"--bad"}};
+const MX_SHOW=[["any","Interested (open or bought)"],["won","Purchased"],["open","In progress, not bought (cross-sell)"],["lost","Lost"],["none","Not discussed (white space)"]];
+function mxState(){const d={q:"",region:"",country:"",sub:"",eng:"",client:"all",prods:[],mode:"any",show:"any",open:{},more:{},init:false};const M=S.mx||(S.mx={});for(const k in d)if(M[k]===undefined)M[k]=d[k];return M}
+function mxData(){const prods=prodList().map(p=>p.name);const H={};
+  for(const l of S.leads){if(["Duplicate","Rejected"].includes(l.status)||!(viewAll()||isMine(l)))continue;const k=accKey(l);
+    const h=H[k]||(H[k]={key:k,name:l.accountName||"(no name)",country:"",region:"",sub:"",engs:{},leads:[],p:{},rev:0,last:""});h.leads.push(l);
+    const d=reqDate(l);if(d>=h.last){h.last=d;h.country=areaOf(l.country).country||l.country||"";h.city=l.country||"";h.region=regionOf(l);h.sub=subLabel(l);h.latest=l.id}
+    if(l.assignedTo)h.engs[l.assignedTo]=(h.engs[l.assignedTo]||0)+1;if(l.status==="Won")h.rev+=orderVal(l);
+    for(const p of productsOf(l)){const c=h.p[p]||(h.p[p]={won:null,open:null,lost:null});const st=l.status==="Won"?"won":OPEN.includes(l.status)?"open":l.status==="Lost"?"lost":null;if(st&&(!c[st]||reqDate(l)>reqDate(c[st])))c[st]=l}}
+  for(const h of Object.values(H)){h.eng=Object.entries(h.engs).sort((a,b)=>b[1]-a[1])[0]?.[0]||"";h.client=h.leads.some(l=>l.status==="Won");if(!h.country)h.country="Unknown";
+    h.st={};for(const p of prods){const c=h.p[p];h.st[p]=!c?"none":c.won?"won":c.open?"open":c.lost?"lost":"none"}}
+  return{prods,hotels:Object.values(H)}}
+function mxMatch(h,M,skip){const q=nk(M.q);
+  if(skip!=="client"&&M.client!=="all"&&(M.client==="clients")!==h.client)return false;
+  if(M.region&&h.region!==M.region)return false;if(M.country&&h.country!==M.country)return false;if(M.sub&&h.sub!==M.sub)return false;if(M.eng&&!h.engs[M.eng])return false;
+  if(q&&!nk(h.name+" "+h.city+" "+h.country).includes(q))return false;
+  if(M.prods.length){const ok=p=>{const s=h.st[p];return M.show==="any"?(s==="won"||s==="open"):s===M.show};if(M.mode==="all"?!M.prods.every(ok):!M.prods.some(ok))return false}
+  else if(M.show!=="any"&&!Object.values(h.st).includes(M.show))return false;
+  return true}
+function renderAcctMatrix(m){ensureTip();const M=mxState();const{prods,hotels}=mxData();
+  const base=hotels.filter(h=>mxMatch(h,M,"client"));const list=base.filter(h=>mxMatch(h,M));const nCli=base.filter(h=>h.client).length;
+  const regions=[...new Set(hotels.map(h=>h.region))].sort();const countries=[...new Set(hotels.filter(h=>!M.region||h.region===M.region).map(h=>h.country))].sort();
+  const subs=M.country==="UAE"||M.country==="USA"?subNames(M.country):[];const engs=[...new Set(hotels.flatMap(h=>Object.keys(h.engs)))].sort();
+  const filtering=!!(M.q||M.region||M.country||M.sub||M.eng||M.client!=="all"||M.prods.length||M.show!=="any");
+  // groups: region → country (→ emirate/state)
+  const G={};for(const h of list){const r=G[h.region]||(G[h.region]={n:h.region,c:{},hotels:0,cli:0,rev:0});r.hotels++;r.cli+=h.client?1:0;r.rev+=h.rev;
+    const ck=h.country+((h.country==="UAE"||h.country==="USA")&&h.sub?" · "+h.sub:"");const c=r.c[ck]||(r.c[ck]={n:ck,h:[],cli:0,rev:0});c.h.push(h);c.cli+=h.client?1:0;c.rev+=h.rev}
+  const regs=Object.values(G).sort((a,b)=>b.hotels-a.hotels);
+  if(!M.init&&regs[0]){M.init=true;M.open["r:"+regs[0].n]=true;const c0=Object.values(regs[0].c).sort((a,b)=>b.h.length-a.h.length)[0];if(c0)M.open["c:"+regs[0].n+"|"+c0.n]=true}
+  const autoOpen=filtering&&list.length<=150;const isOpen=k=>autoOpen?M.open[k]!==false:!!M.open[k];
+  // product column totals + top cross-sell (clients with an open lead for a product they haven't bought)
+  const colTot=Object.fromEntries(prods.map(p=>[p,{won:list.filter(h=>h.st[p]==="won").length,open:list.filter(h=>h.st[p]==="open").length}]));
+  const xs=prods.map(p=>({p,n:list.filter(h=>h.client&&h.st[p]==="open").length})).sort((a,b)=>b.n-a.n)[0];
+  const rev=list.reduce((s,h)=>s+h.rev,0);const ac=can("account.manage");const mobile=innerWidth<760;
+  const cell=(h,p)=>{const s=h.st[p];if(s==="none")return`<td class="mxc"></td>`;const c=h.p[p],l=c[s];const x=MX_STATES[s];
+    const tip=`${p}: ${x.t}${s==="open"?" ("+l.status+")":""} · ${l.ref}${s==="won"&&orderVal(l)?" · "+fmtAED(orderVal(l)):""}${s!=="won"&&c.won?"":""}`;
+    return`<td class="mxc"><button type="button" class="mxi s-${s}" data-open="${esc(l.id)}" data-tip="${esc(tip)}" aria-label="${esc(h.name+", "+tip)}">${x.i}</button></td>`};
+  const hotelRow=h=>`<tr class="mxh"><th scope="row" class="mxname"><button type="button" class="linkb2" data-open="${esc(h.latest)}">${esc(h.name)}</button><div class="small muted">${esc(h.city&&h.city!==h.country?h.city+", "+h.country:h.country)}${h.sub&&!(h.country==="UAE"||h.country==="USA")?"":""}</div></th>
+    <td>${h.client?`<span class="cl yes">Client</span>`:`<span class="cl">Prospect</span>`}</td><td class="small">${esc(h.eng||"—")}</td><td class="num">${h.rev?fmtAED(h.rev):`<span class="muted">—</span>`}</td>
+    ${prods.map(p=>cell(h,p)).join("")}${ac?`<td>${h.key.startsWith("name:")?"":`<button class="btn sm" data-merge="${esc(h.key)}" title="Merge or delete">⋯</button>`}</td>`:""}</tr>`;
+  const card=h=>`<div class="mxcard"><div class="row" style="gap:6px"><button type="button" class="linkb2" data-open="${esc(h.latest)}"><b>${esc(h.name)}</b></button><span class="sp"></span>${h.client?`<span class="cl yes">Client</span>`:`<span class="cl">Prospect</span>`}</div>
+    <div class="small muted">${esc(h.city&&h.city!==h.country?h.city+", "+h.country:h.country)} · ${esc(h.eng||"—")}${h.rev?" · "+fmtAED(h.rev):""}</div>
+    <div class="mxtags">${prods.filter(p=>h.st[p]!=="none").map(p=>{const s=h.st[p];return`<button type="button" class="mxtag s-${s}" data-open="${esc(h.p[p][s].id)}"><span aria-hidden="true">${MX_STATES[s].i}</span> ${esc(p)}</button>`}).join("")||`<span class="small muted">No products recorded</span>`}</div></div>`;
+  const PER=50;const cols=4+prods.length+(ac?1:0);
+  const body=regs.map(r=>{const rk="r:"+r.n,ro=isOpen(rk);const cs=Object.values(r.c).sort((a,b)=>b.h.length-a.h.length);
+    const head=`<button type="button" class="mxg mxg-r" data-g="${esc(rk)}" aria-expanded="${ro}"><span class="tw-car" aria-hidden="true">▸</span><b>${esc(r.n)}</b><span class="mxcnt">${fmtN(r.hotels)} hotel${r.hotels===1?"":"s"} · <span class="ok">${fmtN(r.cli)} client${r.cli===1?"":"s"}</span> · ${fmtN(r.hotels-r.cli)} prospect${r.hotels-r.cli===1?"":"s"}${r.rev?" · "+fmtAED(r.rev):""}</span></button>`;
+    const inner=ro?cs.map(c=>{const ck="c:"+r.n+"|"+c.n,co=isOpen(ck);const hs=c.h.slice().sort((a,b)=>(b.client-a.client)||b.rev-a.rev||a.name.localeCompare(b.name));const lim=M.more[ck]||PER;
+      const ch=`<button type="button" class="mxg mxg-c" data-g="${esc(ck)}" aria-expanded="${co}"><span class="tw-car" aria-hidden="true">▸</span>${esc(c.n)}<span class="mxcnt">${fmtN(c.h.length)} · <span class="ok">${fmtN(c.cli)} client${c.cli===1?"":"s"}</span>${c.rev?" · "+fmtAED(c.rev):""}</span></button>`;
+      const more=co&&hs.length>lim?`<button type="button" class="btn sm" data-more="${esc(ck)}">Show ${Math.min(PER,hs.length-lim)} more of ${hs.length-lim}</button>`:"";
+      return mobile?`<div class="mxgc">${ch}${co?hs.slice(0,lim).map(card).join("")+more:""}</div>`
+        :`<tr class="mxgr"><td colspan="${cols}">${ch}</td></tr>${co?hs.slice(0,lim).map(hotelRow).join("")+(more?`<tr><td colspan="${cols}" style="padding-left:44px">${more}</td></tr>`:""):""}`}).join(""):"";
+    return mobile?`<div class="mxgrp">${head}${inner}</div>`:`<tbody class="mxtb"><tr class="mxgr mxgr-r"><td colspan="${cols}">${head}</td></tr>${inner}</tbody>`}).join("");
+  const chips=[];if(M.q)chips.push(["q",`Search: “${M.q}”`]);if(M.region)chips.push(["region","Region: "+M.region]);if(M.country)chips.push(["country","Country: "+M.country]);if(M.sub)chips.push(["sub",M.country==="UAE"?"Emirate: "+M.sub:"State: "+M.sub]);
+  if(M.eng)chips.push(["eng","Engineer: "+M.eng]);if(M.client!=="all")chips.push(["client",M.client==="clients"?"Clients only":"Prospects only"]);if(M.prods.length)chips.push(["prods",`${M.mode==="all"?"All of":"Any of"}: ${M.prods.join(", ")}`]);if(M.show!=="any")chips.push(["show",MX_SHOW.find(x=>x[0]===M.show)[1]]);
+  m.innerHTML=`<section class="view">
+   <div class="vhead"><div><h2>Accounts</h2><p>${viewAll()?"Every hotel":"Your hotels"} by region and country, with what each one has bought and is discussing. Click a hotel or a product to open the lead.</p></div>
+    <div class="row">${can("lead.export")&&list.length?`<button class="btn" id="mxX" type="button">Export to Excel</button>`:""}<span class="seg" id="acctV"><button data-v="overview" aria-pressed="false">Overview</button><button data-v="matrix" aria-pressed="true">Product matrix</button></span></div></div>
+   <div class="panel afbar mxbar"><div class="fgrid">
+    <label class="f fsearch">Search<input id="mxQ" placeholder="Hotel, city or country" value="${esc(M.q)}"></label>
+    <label class="f fsm">Region<select id="mxR">${opts(regions,M.region,"All regions")}</select></label>
+    <label class="f fsm">Country<select id="mxC">${opts(countries,M.country,"All countries")}</select></label>
+    ${subs.length?`<label class="f fsm">${M.country==="UAE"?"Emirate":"State"}<select id="mxS">${opts(subs,M.sub,"All")}</select></label>`:""}
+    ${viewAll()?`<label class="f fsm">Engineer<select id="mxE">${opts(engs,M.eng,"All engineers")}</select></label>`:""}
+    <div class="f fw"><span>Hotels</span><span class="seg" id="mxCl" style="margin-top:4px">${[["all",`All ${fmtN(base.length)}`],["clients",`Clients ${fmtN(nCli)}`],["prospects",`Prospects ${fmtN(base.length-nCli)}`]].map(([v,t])=>`<button type="button" data-v="${v}" aria-pressed="${M.client===v}">${t}</button>`).join("")}</span></div>
+    <div class="f"><span>Products</span><div class="expw" style="margin-top:4px"><button type="button" class="btn" id="mxP" aria-haspopup="true" aria-expanded="false" style="width:100%;justify-content:space-between">${M.prods.length?`${M.prods.length} selected`:"Any product"} <span aria-hidden="true">▾</span></button>
+      <div class="expm mxpm" id="mxPm" hidden><div class="row" style="padding:4px 6px 8px;gap:6px"><span class="seg" id="mxMode"><button type="button" data-v="any" aria-pressed="${M.mode==="any"}">Any of</button><button type="button" data-v="all" aria-pressed="${M.mode==="all"}">All of</button></span><span class="sp"></span><button type="button" class="btn sm" id="mxPc">Clear</button></div>
+       <div class="mxpl">${prods.map(p=>`<label class="mxpo"><input type="checkbox" value="${esc(p)}" ${M.prods.includes(p)?"checked":""}> <span>${esc(p)}</span><span class="small"><span class="ok">${colTot[p].won} bought</span> · <span class="acc">${colTot[p].open} open</span></span></label>`).join("")}</div></div></div></div>
+    <label class="f">Show hotels where the product is<select id="mxSh">${MX_SHOW.map(([v,t])=>`<option value="${v}"${M.show===v?" selected":""}>${t}</option>`).join("")}</select></label>
+   </div>
+   <div class="row afchips">${chips.length?chips.map(([k,t])=>`<button type="button" class="fchip" data-mxc="${k}">${esc(t)}<span aria-hidden="true">×</span></button>`).join("")+`<button type="button" class="btn sm" id="mxClr">Clear all</button>`:`<span class="small muted">No filters: all ${fmtN(hotels.length)} hotels.</span>`}</div></div>
+   <div class="kpis k5">
+    <div class="kpi"><div class="l">Hotels</div><div class="v">${fmtN(list.length)}</div></div>
+    <div class="kpi"><div class="l">Clients</div><div class="v">${fmtN(list.filter(h=>h.client).length)}</div><div class="s">${list.length?fmtP(list.filter(h=>h.client).length/list.length):""} have bought</div></div>
+    <div class="kpi"><div class="l">Prospects</div><div class="v">${fmtN(list.filter(h=>!h.client).length)}</div></div>
+    <div class="kpi"><div class="l">Order value</div><div class="v">${fmtAED(rev)}</div></div>
+    <div class="kpi"><div class="l">Top cross-sell</div><div class="v" style="font-size:16px;line-height:1.3">${xs&&xs.n?esc(xs.p):"—"}</div><div class="s">${xs&&xs.n?`${xs.n} client${xs.n===1?"":"s"} discussing it`:"No open cross-sell leads"}</div></div></div>
+   <div class="row" style="gap:14px"><span class="legend">${Object.entries(MX_STATES).map(([k,x])=>`<span><b class="mxi s-${k}" aria-hidden="true" style="cursor:default">${x.i}</b> ${x.t}</span>`).join("")}<span><b class="mxi" style="cursor:default"></b> Not discussed</span></span><span class="sp"></span>
+    ${regs.length?`<button type="button" class="btn sm" id="mxOpen">Expand all</button><button type="button" class="btn sm" id="mxShut">Collapse all</button>`:""}</div>
+   ${!list.length?`<div class="panel emptyst"><h3>No hotels match these filters</h3><p class="muted">Try fewer products, another region, or clear the filters.</p><div><button class="btn pri" id="mxClr2" type="button">Clear all filters</button></div></div>`
+     :mobile?`<div class="mxcards">${body}</div>`
+     :`<div class="mxwrap"><table class="mxt"><thead><tr><th class="mxname">Hotel</th><th>Status</th><th>Engineer</th><th class="num">Order value</th>${prods.map(p=>`<th class="mxp" data-tip="${esc(p)}: ${colTot[p].won} purchased · ${colTot[p].open} in progress"><span class="mxpn">${esc(p)}</span><span class="mxpt"><span class="${colTot[p].won?"ok":"zero"}">${colTot[p].won||"·"}</span><span class="${colTot[p].open?"acc":"zero"}">${colTot[p].open||"·"}</span></span></th>`).join("")}${ac?"<th></th>":""}</tr></thead>${body}</table></div>`}
+   ${ac&&removedAccounts().length?`<details class="panel"><summary><b>Removed accounts</b> <span class="small muted">${removedAccounts().length}</span></summary><p class="small muted" style="margin:8px 0">Restoring an account makes it searchable again. Leads already moved by a merge stay with the account they were moved to.</p><div class="alerts">${removedAccounts().slice(0,25).map(r=>`<div class="alert" style="cursor:default"><span style="flex:1;min-width:0"><b>${esc(r.name)}</b> <span class="small muted">${r.mergedInto?"merged into "+esc(r.mergedIntoName||r.mergedInto):"deleted"} · ${fmtD(r.deletedAt)}</span></span><button class="btn sm" data-restore="${esc(r.key)}">Restore</button></div>`).join("")}</div></details>`:""}
+  </section>`;
+  const go=()=>{render()};const set=(k,v)=>{M[k]=v;if(k==="region"){M.country="";M.sub=""}if(k==="country")M.sub="";go()};
   $("#acctV").onclick=ev=>{const b=ev.target.closest("button");if(b){S.acctView=b.dataset.v;render()}};
+  const qi=$("#mxQ");qi.oninput=()=>{clearTimeout(qi.t);qi.t=setTimeout(()=>{M.q=qi.value;render();const i=$("#mxQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)};
+  $("#mxR").onchange=e=>set("region",e.target.value);$("#mxC").onchange=e=>set("country",e.target.value);$("#mxS")?.addEventListener("change",e=>set("sub",e.target.value));$("#mxE")?.addEventListener("change",e=>set("eng",e.target.value));
+  $("#mxSh").onchange=e=>set("show",e.target.value);$("#mxCl").onclick=e=>{const b=e.target.closest("button");if(b)set("client",b.dataset.v)};
+  const pb=$("#mxP"),pm=$("#mxPm");pb.onclick=e=>{e.stopPropagation();pm.hidden=!pm.hidden;pb.setAttribute("aria-expanded",String(!pm.hidden));if(!pm.hidden){pm.querySelector("input")?.focus();setTimeout(()=>document.addEventListener("click",function cl(ev){if(!pm.contains(ev.target)){pm.hidden=true;pb.setAttribute("aria-expanded","false");document.removeEventListener("click",cl)}}))}};
+  pm.addEventListener("click",e=>e.stopPropagation());pm.addEventListener("keydown",e=>{if(e.key==="Escape"){pm.hidden=true;pb.focus()}});
+  pm.querySelectorAll("input[type=checkbox]").forEach(c=>c.onchange=()=>{M.prods=[...pm.querySelectorAll("input:checked")].map(x=>x.value);render();$("#mxP")?.click()});
+  $("#mxMode").onclick=e=>{const b=e.target.closest("button");if(b){M.mode=b.dataset.v;render();$("#mxP")?.click()}};$("#mxPc").onclick=()=>{M.prods=[];render()};
+  const clr=()=>{S.mx=null;render()};$("#mxClr")?.addEventListener("click",clr);$("#mxClr2")?.addEventListener("click",clr);
+  m.querySelectorAll("[data-mxc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mxc;M[k]=k==="prods"?[]:k==="client"?"all":k==="show"?"any":"";if(k==="region"){M.country="";M.sub=""}if(k==="country")M.sub="";go()});
+  m.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{const k=b.dataset.g;M.open[k]=!isOpen(k);render();m.querySelector(`[data-g="${CSS.escape(k)}"]`)?.focus()});
+  m.querySelectorAll("[data-more]").forEach(b=>b.onclick=()=>{M.more[b.dataset.more]=(M.more[b.dataset.more]||PER)+PER;render()});
+  $("#mxOpen")?.addEventListener("click",()=>{regs.forEach(r=>{M.open["r:"+r.n]=true;Object.values(r.c).forEach(c=>M.open["c:"+r.n+"|"+c.n]=true)});render()});
+  $("#mxShut")?.addEventListener("click",()=>{Object.keys(M.open).forEach(k=>M.open[k]=false);render()});
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
+  m.querySelectorAll("[data-merge]").forEach(b=>b.onclick=()=>openMerge(b.dataset.merge));
   m.querySelectorAll("[data-restore]").forEach(b=>b.onclick=async()=>{try{await S.db.doc("accounts/"+b.dataset.restore).delete();toast("Account restored")}catch(e){toast("Couldn't restore: "+(e.code||e.message))}});
-  const inp=$("#acctQ");inp.oninput=()=>{S.acctQ=inp.value;clearTimeout(inp.t);inp.t=setTimeout(()=>{render();const i=$("#acctQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)}}
+  if(!renderAcctMatrix.rs){renderAcctMatrix.rs=1;let w=innerWidth<760;addEventListener("resize",()=>{const n=innerWidth<760;if(n!==w&&S.tab==="accts"&&S.acctView==="matrix"){w=n;render()}})}
+  $("#mxX")?.addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing…`;
+    try{const X=await loadXLSX();const T={won:"Purchased",open:"In progress",lost:"Lost",none:""};
+      const rows=list.slice().sort((a,b)=>a.region.localeCompare(b.region)||a.country.localeCompare(b.country)||(b.client-a.client)||a.name.localeCompare(b.name))
+        .map(h=>[h.region,h.country,h.sub||"",h.name,h.client?"Client":"Prospect",h.eng||"",h.rev||""].concat(prods.map(p=>T[h.st[p]])));
+      const ws=X.utils.aoa_to_sheet([["Region","Country","Emirate / State","Hotel","Status","Engineer","Order value (AED)"].concat(prods)].concat(rows));
+      ws["!cols"]=[{wch:14},{wch:16},{wch:16},{wch:36},{wch:10},{wch:14},{wch:14}].concat(prods.map(p=>({wch:Math.max(11,Math.min(22,p.length))})));ws["!freeze"]={xSplit:4,ySplit:1};ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:6+prods.length}})};
+      const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Product matrix");const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      const name=("Product_matrix_"+[M.region,M.country,M.sub,M.eng,M.client!=="all"?M.client:"",M.prods.length?M.prods.join("-"):""].filter(Boolean).join("_")||"Product_matrix_All").replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g,"_")+".xlsx";
+      if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+      window.__lastMx={name,rows:rows.length};toast(`${name} is ready: ${rows.length} hotels`);window.__audit?.("exported","report",name,`Exported the product matrix (${rows.length} hotels)`)}
+    catch(err){if(err?.code!=="cancelled")toast("Export failed: "+(err?.message||err?.code||"unknown error"))}
+    finally{const nb=$("#mxX");if(nb){nb.disabled=false;nb.textContent="Export to Excel"}}})}
+
 
 /* ======================= 6. SETTINGS (editors) ======================= */
 function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(true);
   if(!can("settings.manage")){m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Products, sales engineers, sources, exchange rates and targets. Only a Supervisor can change these.</p></div></div>
-   ${can("users.manage")?usersPanel()+permsPanel():""}
-   <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;if(can("users.manage")){bindUsers();bindPerms()}return}
+   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
+   <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;$("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}return}
   const row=(x,i,kind)=>`<div class="it" style="padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1;min-width:0;${x.active===false?"color:var(--muted);text-decoration:line-through":""}">${esc(x.name)}</span>
     ${kind==="p"?`<label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-rep="${i}" ${x.repeatable?"checked":""} style="width:auto">Repeatable</label>`:""}
     <span class="small muted" style="min-width:52px;text-align:right">${kind==="p"?useCount(x.name,"p")+" leads":`${openLeadsOf(x.name).length} open · ${myAreas(x.name).length} areas`}</span>
     ${kind==="s"&&(openLeadsOf(x.name).length||myAreas(x.name).length)?`<button type="button" class="btn sm" data-hand="${esc(x.name)}">Hand over</button>`:""}
     <button type="button" class="btn sm" data-tog="${kind}:${i}">${x.active===false?"Restore":"Retire"}</button></div>`;
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Supervisors manage users, roles, the product catalog and the sales engineer list here. Names must be unique, ignoring case and spacing. Retired names stay on existing leads but can no longer be chosen.</p></div></div>
-  ${can("users.manage")?usersPanel()+permsPanel():""}
+  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
   ${territoryPanel()}
   ${subTerrPanel()}
   <div class="grid2">
@@ -1805,7 +1959,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
     <label class="f">Regions, one per line<textarea id="s-reg" rows="6">${esc(regionList().join("\n"))}</textarea></label>
     <button class="btn pri" id="setSave" type="button">Save sources, regions, rates and targets</button></div></div>
   </form></section>`;
-  if(can("users.manage")){bindUsers();bindPerms()}bindTerritories();bindSubTerr();
+  $("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}bindTerritories();bindSubTerr();
   const save=async(body,okMsg)=>{try{await S.db.doc("config/settings").update(body);toast(okMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}};
   const dupMsg=(el,list,name)=>{const n=name.trim().replace(/\s+/g," ");if(!n){el.innerHTML=`<div class="notice bad">Enter a name.</div>`;return null}
     const ex=list.find(x=>nk(x.name)===nk(n));if(ex){el.innerHTML=`<div class="notice bad">“${esc(ex.name)}” already exists${ex.active===false?" as a retired entry. Restore it instead":""}.</div>`;return null}
