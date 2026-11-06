@@ -29,7 +29,9 @@
     sb.rpc("log_event", { p_action: action, p_entity: entity || "session", p_entity_id: id || null, p_summary: summary || null, p_details: details || null }).then(() => {}, () => {});
   window.__signOut = async () => { try { await window.__audit("signed_out", "session", ME.email, "Signed out"); } catch (e) {} try { await window.__clearCache(); } catch (e) {} await sb.auth.signOut(); location.href = location.pathname; };
 
-  let ME = { email: "", role: null };
+  let ME = { email: "", role: null, displayName: "" };
+  const NAMES = {};          // email -> display name, for the people this user can see
+  let DN_COLUMN = false;     // true once supabase/14_names.sql has added members.display_name
 
   /* ---------- helpers ---------- */
   const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
@@ -100,18 +102,34 @@
     };
   })();
   window.__clearCache = () => idb.clear();
+  // display name of the signed-in user (supabase/14_names.sql)
+  window.__setDisplayName = async (name) => {
+    const { data, error } = await sb.rpc("set_my_display_name", { p_name: name });
+    if (error) throw dbErr(error);
+    ME.displayName = data || ""; if (data) NAMES[ME.email] = data; else delete NAMES[ME.email];
+    return ME.displayName;
+  };
+  // Supervisor: rename a product or a sales engineer everywhere it is used, in one database transaction
+  window.__renameEverywhere = async (kind, from, to) => {
+    const { data, error } = await sb.rpc("rename_everywhere", { p_kind: kind, p_old: from, p_new: to });
+    if (error) throw dbErr(error);
+    return data;
+  };
 
   async function readMembers() {
     const { data, error } = await sb.from("members").select("*").eq("active", true);
     if (error) throw dbErr(error);
+    DN_COLUMN = !data.length || "display_name" in data[0];
     const members = {};
-    data.forEach((m) => (members[m.email] = { role: m.role, engineer: m.engineer || "", addedAt: m.added_at }));
+    data.forEach((m) => { members[m.email] = { role: m.role, engineer: m.engineer || "", addedAt: m.added_at, displayName: m.display_name || "" }; if (m.display_name) NAMES[m.email] = m.display_name; else delete NAMES[m.email]; });
     return { members };
   }
   async function writeMembers(doc) {
     const want = doc.members || {};
     const cur = (await readMembers()).members;
-    const rows = Object.entries(want).map(([email, m]) => ({ email: email.toLowerCase(), role: m.role, engineer: m.role === "sales" ? (m.engineer || null) : null, active: true, added_by: ME.email }));
+    const hasDN = Object.values(cur).some((m) => "displayName" in m) && DN_COLUMN;
+    const rows = Object.entries(want).map(([email, m]) => Object.assign({ email: email.toLowerCase(), role: m.role, engineer: m.role === "sales" ? (m.engineer || null) : null, active: true, added_by: ME.email },
+      hasDN ? { display_name: (m.displayName !== undefined ? String(m.displayName || "").trim().replace(/\s+/g, " ") : ((cur[email] || {}).displayName || "")) || null } : {}));
     // clear engineer links first so moving a name between people doesn't trip the uniqueness rule
     const removed = Object.keys(cur).filter((e) => !want[e]);
     if (removed.length) { const { error } = await sb.from("members").delete().in("email", removed); if (error) throw dbErr(error); }
@@ -262,14 +280,14 @@
 
   /* ---------- user namespace ---------- */
   const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-  const prof = (id) => ({ id, name: id && id.includes("@") ? id : "", email: id && id.includes("@") ? id : null, avatarUrl: "", color: "#6b7a8f", isMe: id === ME.email, guest: false });
+  const prof = (id) => ({ id, name: NAMES[id] || (id && id.includes("@") ? id : ""), email: id && id.includes("@") ? id : null, avatarUrl: "", color: "#6b7a8f", isMe: id === ME.email, guest: false });
   const userNs = {
-    me: async () => ({ id: ME.email, name: ME.email, email: ME.email, isOwner: false, canEdit: (ME.role === "supervisor" || ME.role === "backoffice"), avatarUrl: "", color: "#6b7a8f" }),
+    me: async () => ({ id: ME.email, name: ME.displayName || ME.email, email: ME.email, isOwner: false, canEdit: (ME.role === "supervisor" || ME.role === "backoffice"), avatarUrl: "", color: "#6b7a8f" }),
     id: async () => ME.email,
     isOwner: async () => false,
     canEdit: async () => (ME.role === "supervisor" || ME.role === "backoffice"),
     can: async () => true,
-    name: async () => ME.email,
+    name: async () => ME.displayName || ME.email,
     email: async () => ME.email,
     profiles: async (ids) => Object.fromEntries([].concat(ids).map((i) => [i, prof(i)])),
     search: async (q) => { q = String(q || "").trim().toLowerCase(); return EMAIL_RE.test(q) ? [prof(q)] : []; },
@@ -359,8 +377,10 @@
     if (started || !session) return;
     started = true;
     ME.email = (session.user.email || "").toLowerCase();
-    const { data } = await sb.from("members").select("role,engineer").eq("email", ME.email).eq("active", true).maybeSingle();
+    // "*" so this keeps working before supabase/14_names.sql adds the display_name column
+    const { data } = await sb.from("members").select("*").eq("email", ME.email).eq("active", true).maybeSingle();
     ME.role = data ? data.role : null;
+    ME.displayName = (data && data.display_name) || ""; if (ME.displayName) NAMES[ME.email] = ME.displayName;
     // log each new sign-in once (Supabase sets last_sign_in_at on every real sign-in)
     try {
       const k = "ld.signin." + ME.email, at = session.user.last_sign_in_at || "";
