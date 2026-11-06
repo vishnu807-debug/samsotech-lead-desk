@@ -24,7 +24,10 @@
     }
     return data;
   };
-  window.__signOut = async () => { await sb.auth.signOut(); location.href = location.pathname; };
+  /* audit trail: events the database can't see by itself (see supabase/10_audit_trail.sql) */
+  window.__audit = (action, entity, id, summary, details) =>
+    sb.rpc("log_event", { p_action: action, p_entity: entity || "session", p_entity_id: id || null, p_summary: summary || null, p_details: details || null }).then(() => {}, () => {});
+  window.__signOut = async () => { try { await window.__audit("signed_out", "session", ME.email, "Signed out"); } catch (e) {} await sb.auth.signOut(); location.href = location.pathname; };
 
   let ME = { email: "", role: null };
 
@@ -267,7 +270,7 @@
       if (a === "Samsotech123") { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
       const { error } = await sb.auth.updateUser({ password: a, data: { must_change_password: false } });
       if (error) m.innerHTML = `<span style="color:var(--bad)">${clean(error.message)}</span>`;
-      else { m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(() => { close(); if (forced && window.__afterPassword) window.__afterPassword(); }, 900); }
+      else { window.__audit("password_changed", "session", ME.email, forced ? "Changed the temporary password" : "Changed password"); m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(() => { close(); if (forced && window.__afterPassword) window.__afterPassword(); }, 900); }
     };
     host.querySelector("#cp1").focus();
   };
@@ -279,6 +282,11 @@
     ME.email = (session.user.email || "").toLowerCase();
     const { data } = await sb.from("members").select("role,engineer").eq("email", ME.email).eq("active", true).maybeSingle();
     ME.role = data ? data.role : null;
+    // log each new sign-in once (Supabase sets last_sign_in_at on every real sign-in)
+    try {
+      const k = "ld.signin." + ME.email, at = session.user.last_sign_in_at || "";
+      if (ME.role && at && localStorage.getItem(k) !== at) { localStorage.setItem(k, at); window.__audit("signed_in", "session", ME.email, "Signed in"); }
+    } catch (e) {}
     const go = () => { window.__ldReady = true; window.__startApp && window.__startApp(); };
     if (session.user.user_metadata && session.user.user_metadata.must_change_password) {
       document.getElementById("main").innerHTML = '<div class="panel empty">Choose your own password to continue.</div>';

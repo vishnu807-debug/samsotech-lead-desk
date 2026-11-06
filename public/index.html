@@ -163,6 +163,14 @@ tr.tot td{background:var(--sunk);font-weight:600}
 .mg [id^=mg-]{scroll-margin-top:70px}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;max-width:300px;box-shadow:var(--shadow)}
 .view>*,.grid2>*,.mg .panel{min-width:0}
+/* audit trail */
+.achip{display:inline-block;font:600 11px var(--f-body);padding:2px 8px;border-radius:10px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.achip.a-created,.achip.a-sign{background:var(--ok-soft);color:var(--ok)}.achip.a-deleted,.achip.a-merged{background:var(--bad-soft);color:var(--bad)}
+.achip.a-updated{background:var(--accent-soft);color:var(--accent)}.achip.a-exported,.achip.a-presentation,.achip.a-password{background:var(--warn-soft);color:var(--warn)}
+.linkb{all:unset;cursor:pointer;color:var(--accent);font:500 12.5px var(--f-mono)}.linkb:hover{text-decoration:underline}.linkb:focus-visible{outline:2px solid var(--accent)}
+table.chg{margin-top:8px;font-size:12px;border:1px solid var(--line);border-radius:6px;width:100%}table.chg th{font-size:10px;padding:5px 8px}table.chg td{padding:5px 8px;vertical-align:top;overflow-wrap:anywhere}
+.audt td{vertical-align:top}table.chg td:first-child{white-space:nowrap;width:1%;font-weight:500}
+
 /* management tabs + order tree + supervisor edit form */
 .mtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .mtabs button{all:unset;cursor:pointer;padding:9px 14px;font:500 13.5px var(--f-body);color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
@@ -283,6 +291,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="mgmt" role="tab">Management</button>
       <button data-tab="accts" role="tab">Accounts</button>
       <button data-tab="set" role="tab">Products &amp; settings</button>
+      <button data-tab="audit" role="tab">Audit trail</button>
     </nav>
     <div id="who" class="row" style="gap:6px"></div>
   </div>
@@ -425,7 +434,7 @@ const ROLES=["supervisor","leadmanager","management","sales"];
 const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales"};
 const PERMISSIONS=[
  ["page.leads","Leads tab: lead form and lead list","Pages"],["page.backoffice","Back office queue","Pages"],["page.pipelines","Pipelines","Pages"],
- ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],
+ ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],["page.audit","Audit trail (who did what, when)","Pages"],
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.delete","Delete leads","Leads"],
@@ -438,8 +447,8 @@ const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings",
 function permsFor(role){if(role==="supervisor")return PERMISSIONS.map(x=>x[0]);const def=DEFAULT_PERMS[role]||[];if(!(S.perms&&Array.isArray(S.perms[role])))return def;
   const known=Array.isArray(S.permsKnown)?S.permsKnown:PERMS_V1;return S.perms[role].concat(def.filter(p=>!known.includes(p)))}
 const can=perm=>!!S.role&&permsFor(S.role).includes(perm);
-const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings"};
-const LANDING=["bo","mgmt","pipe","meet","new","accts","set"];
+const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
+const LANDING=["bo","mgmt","pipe","meet","new","accts","set","audit"];
 const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet"};   // first page after sign-in
 const homeTab=()=>{const a=allowedTabs();return a.includes(HOME[S.role])?HOME[S.role]:a[0]};
 const allowedTabs=()=>LANDING.filter(t=>can(TAB_PERM[t]));
@@ -524,7 +533,7 @@ function dupChecks(l){const out=[];const others=S.leads.filter(x=>x.id!==l.id);
 
 /* ---------- boot ---------- */
 async function boot(){
-  bindTabs();const hash=location.hash.slice(1);if(["new","bo","pipe","meet","mgmt","accts","set"].includes(hash)){S.tab=hash;S.tabChosen=true}
+  bindTabs();const hash=location.hash.slice(1);if(["new","bo","pipe","meet","mgmt","accts","set","audit"].includes(hash)){S.tab=hash;S.tabChosen=true}
   const [db,user,downloads]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("downloads")]);
   S.db=db;S.user=user;S.downloads=downloads;
   if(user){const me=await user.me();S.uid=me.id;S.isOwner=me.isOwner;S.myName=me.name;S.canEdit=await user.canEdit();S.canWrite=await user.can("data.write")}
@@ -567,7 +576,7 @@ function renderInner(){const m=$("#main");
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&$("#tabs").scrollWidth>$("#tabs").clientWidth){const t=$("#tabs");t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2)}
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
-({new:renderNew,bo:renderBO,pipe:renderPipe,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet})[S.tab](m);updateCounts()}
+({new:renderNew,bo:renderBO,pipe:renderPipe,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
 function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
@@ -763,7 +772,7 @@ async function exportLeads(fmt){if(!can("lead.export")){toast("Your role can't e
       blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array",cellDates:true})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
     window.__lastExport={name,size:blob.size,rows:rows.length,fmt};
     if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
-    toast(`${name} is ready: ${fmtN(rows.length)} lead${rows.length===1?"":"s"}`)}
+    toast(`${name} is ready: ${fmtN(rows.length)} lead${rows.length===1?"":"s"}`);window.__audit?.("exported","report",name,`Exported ${rows.length} leads to ${fmt.toUpperCase()}`,{filters:lfActive(F).map(a=>a[1])})}
   catch(e){if(e?.code==="cancelled"||e?.name==="AbortError")toast("Export cancelled");else{console.error(e);toast("Export failed: "+(e?.message||e?.code||"unknown error"))}}
   finally{const nb=$("#lfX");if(nb){nb.disabled=false;nb.textContent=label||"Export"}}}
 
@@ -1222,7 +1231,7 @@ function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO()
   m.querySelectorAll("[data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
   $("#mCsv")?.addEventListener("click",async()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
     const csv=[["Date","Lead","Property","Region","Category","Meeting type","Held","Products discussed","Engineer","Notes"].join(",")].concat(rows.map(({m:x,l})=>[x.date,l.ref,l.accountName,regionOf(l),l.category,x.type,x.mode,(x.products||[]).join("; "),l.assignedTo,x.notes].map(q).join(","))).join("\n");
-    try{await S.downloads.save({filename:`meetings-${month}.csv`,data:new Blob([csv],{type:"text/csv"})});toast(`meetings-${month}.csv is ready`)}catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code||"unknown error"))}})}
+    try{await S.downloads.save({filename:`meetings-${month}.csv`,data:new Blob([csv],{type:"text/csv"})});toast(`meetings-${month}.csv is ready`);window.__audit?.("exported","report",`meetings-${month}.csv`,`Exported ${rows.length} meetings for ${month}`)}catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code||"unknown error"))}})}
 
 
 /* ======================= SALES PERFORMANCE PRESENTATION (.pptx) =======================
@@ -1345,9 +1354,66 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
     const name=("Sales_Performance_"+[F.region,F.sub,F.eng,F.src!=="All"?F.src:""].filter(Boolean).join("_")+"_"+(periodRange(F)[0]?periodText(F):"All_time")).replace(/[\/\\:*?"<>|–·]+/g,"-").replace(/\s+/g,"_").replace(/_+/g,"_").replace(/-+/g,"-")+".pptx";
     window.__lastDeck={name,size:blob.size,slides:n};
     if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
-    toast(`${name} is ready (${n} slides)`)}
+    toast(`${name} is ready (${n} slides)`);window.__audit?.("presentation","report",name,`Created the sales performance presentation (${n} slides)`,{filters:filterSummary(F)})}
   catch(e){if(e?.code==="cancelled")toast("Download cancelled");else{console.error(e);toast("Couldn't create the presentation: "+(e?.message||e?.code||"unknown error"))}}
   finally{const nb=$("#deckBtn");if(nb){nb.disabled=false;nb.innerHTML=lab||"Create presentation"}}}
+
+
+/* ======================= AUDIT TRAIL (Supervisor) =======================
+   Rows come from the database table audit_log (supabase/10_audit_trail.sql): every change is written by
+   database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
+const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
+const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation"};
+const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
+function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
+function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
+  if(Array.isArray(v)){if(v.every(x=>typeof x!=="object"))return esc(v.join(", "));if(v.length&&v[0]&&v[0].date!==undefined)return esc(v.map(x=>[x.date,x.mode,x.type].filter(Boolean).join(" ")).join(" · "));return esc(v.length+" item(s)")}
+  if(v.aed!==undefined)return esc([v.aed!=null?fmtAED(v.aed):"",v.date?fmtD(v.date):"",v.no||""].filter(Boolean).join(" · "));
+  if(v.name!==undefined||v.email!==undefined)return esc([v.name,v.title,v.email,v.phone].filter(Boolean).join(" · "));
+  const j=JSON.stringify(v);return esc(j.length>160?j.slice(0,160)+"…":j)}
+function audSummary(r){let t=(r.summary||"").replace(/^(Created|Updated|Deleted|Merged) \w+ [^:·]+(· )?/,"");const i=t.indexOf(": ");if(i<0||r.action!=="updated")return t;
+  const head=t.slice(0,i),rest=t.slice(i+2);const par=rest.indexOf(" (");const keys=(par<0?rest:rest.slice(0,par)).split(", ").map(k=>AUD_FIELD[k]||k);return`${head}: ${keys.join(", ")}${par<0?"":rest.slice(par)}`}
+function audTime(t){const d=new Date(t);return`${fmtD(t)} <span class="muted">${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}</span>`}
+async function audLoad(reset){const A=audState();if(!window.LD_HOSTED||!window.__sb)return;if(reset){A.rows=[];A.done=false;A.page=0;A.open={}}A.loading=true;A.err="";render();
+  try{const PG=100;let q=window.__sb.from("audit_log").select("*").order("at",{ascending:false}).range(A.page*PG,A.page*PG+PG-1);
+    if(A.from)q=q.gte("at",new Date(A.from+"T00:00:00").toISOString());if(A.to)q=q.lt("at",new Date(new Date(A.to+"T00:00:00").getTime()+864e5).toISOString());
+    if(A.actor)q=q.eq("actor",A.actor);if(A.entity==="report")q=q.in("action",["exported","presentation"]);else if(A.entity)q=q.eq("entity",A.entity);
+    if(A.q.trim()){const t=A.q.trim().replace(/[%,()]/g," ");q=q.or(`entity_id.ilike.%${t}%,summary.ilike.%${t}%,actor.ilike.%${t}%`)}
+    const{data,error}=await q;if(error)throw error;A.rows=A.rows.concat(data||[]);A.done=(data||[]).length<PG;A.page++}
+  catch(e){A.err=/audit_log|relation|schema cache|404/i.test(e.message||"")?"The audit trail table isn't set up yet. Run supabase/10_audit_trail.sql in the Supabase SQL Editor.":(e.message||String(e))}
+  A.loading=false;render()}
+function renderAudit(m){const A=audState();
+  if(!window.LD_HOSTED){m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Audit trail</h2></div></div><div class="panel emptyst"><h3>Available on the hosted Lead Desk</h3><p class="muted">The audit trail is recorded by the hosted database. In this version, each lead's Activity section is its history.</p></div></section>`;return}
+  if(!A.rows.length&&!A.done&&!A.loading&&!A.err){audLoad(true);return}
+  const actors=[...new Set(Object.keys(S.users||{}).concat(A.rows.map(r=>r.actor)).concat(["system"]))].sort();
+  const chip=a=>`<span class="achip a-${esc(a.split("_")[0])}">${esc(AUD_ACT[a]||a)}</span>`;
+  m.innerHTML=`<section class="view">
+   <div class="vhead"><div><h2>Audit trail</h2><p>Every change to leads, accounts, users and settings, and every sign-in and export, with who did it and when. Recorded by the database; it can't be edited or deleted.</p></div>
+    <div class="row">${S.downloads&&A.rows.length?`<button class="btn" id="audCsv" type="button">Export CSV</button>`:""}<button class="btn" id="audRef" type="button">Refresh</button></div></div>
+   <div class="panel afbar"><div class="fgrid">
+    <label class="f fsm">From<input type="date" id="audF" value="${esc(A.from)}" max="${todayISO()}"></label><label class="f fsm">To<input type="date" id="audT" value="${esc(A.to)}" max="${todayISO()}"></label>
+    <label class="f">User<select id="audU"><option value="">Everyone</option>${actors.map(a=>`<option${a===A.actor?" selected":""}>${esc(a)}</option>`).join("")}</select></label>
+    <label class="f">What<select id="audE">${AUD_ENT.map(([v,t])=>`<option value="${v}"${v===A.entity?" selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="f fsearch">Search<input id="audQ" placeholder="Lead ref, property, email, field" value="${esc(A.q)}"></label></div></div>
+   ${A.err?`<div class="notice bad">${esc(A.err)}</div>`:""}
+   <div class="tw"><table class="audt"><thead><tr><th style="width:150px">When</th><th>User</th><th>Action</th><th>Record</th><th>Details</th></tr></thead><tbody>
+    ${A.rows.map(r=>{const ch=r.changes&&typeof r.changes==="object"&&!Array.isArray(r.changes)?Object.entries(r.changes).filter(([,v])=>v&&("old" in v||"new" in v)):[];const op=!!A.open[r.id];
+      return`<tr class="${op?"xopen":""}"><td style="white-space:nowrap">${audTime(r.at)}</td><td>${r.actor==="system"?`<span class="muted">System</span>`:esc(r.actor)}${r.actor_role?`<div class="small muted">${esc(ROLE_LABEL[normRole(r.actor_role)]||r.actor_role)}</div>`:""}</td><td>${chip(r.action)}</td>
+       <td>${r.entity==="lead"&&r.entity_id&&S.leadMap[r.entity_id]?`<button class="linkb" data-open="${esc(r.entity_id)}">${esc(r.entity_id)}</button>`:`<span class="mono small">${esc(r.entity_id||"")}</span>`}<div class="small muted">${esc(r.entity)}</div></td>
+       <td>${esc(audSummary(r))}${ch.length?` <button type="button" class="btn sm" data-aud="${r.id}" aria-expanded="${op}">${op?"Hide":"Show"} ${ch.length} change${ch.length===1?"":"s"}</button>`:""}
+        ${op?`<table class="chg"><thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead><tbody>${ch.map(([k,v])=>`<tr><td>${esc(AUD_FIELD[k]||k)}</td><td>${audVal(v.old)}</td><td>${audVal(v.new)}</td></tr>`).join("")}</tbody></table>`:""}</td></tr>`}).join("")||(A.loading?"":`<tr><td colspan="5" class="empty">No activity for these filters.</td></tr>`)}
+   </tbody></table></div>
+   <div class="row">${A.loading?`<span class="small muted"><span class="spin" aria-hidden="true"></span> Loading…</span>`:A.done?`<span class="small muted">${fmtN(A.rows.length)} entr${A.rows.length===1?"y":"ies"}</span>`:`<button class="btn" id="audMore" type="button">Load older entries</button><span class="small muted">${fmtN(A.rows.length)} shown</span>`}</div>
+  </section>`;
+  const set=(k,v)=>{A[k]=v;audLoad(true)};
+  $("#audF").onchange=e=>set("from",e.target.value);$("#audT").onchange=e=>set("to",e.target.value);$("#audU").onchange=e=>set("actor",e.target.value);$("#audE").onchange=e=>set("entity",e.target.value);
+  const qi=$("#audQ");qi.oninput=()=>{clearTimeout(qi.t);qi.t=setTimeout(()=>{A.q=qi.value;audLoad(true).then(()=>{const i=$("#audQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}})},400)};
+  $("#audRef").onclick=()=>audLoad(true);$("#audMore")?.addEventListener("click",()=>audLoad(false));
+  m.querySelectorAll("[data-aud]").forEach(b=>b.onclick=()=>{A.open[b.dataset.aud]=!A.open[b.dataset.aud];render()});
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
+  $("#audCsv")?.addEventListener("click",async()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+    const csv=["When,User,Role,Source,Action,Record type,Record,Summary,Changes"].concat(A.rows.map(r=>[r.at,r.actor,r.actor_role,r.source,r.action,r.entity,r.entity_id,r.summary,r.changes?JSON.stringify(r.changes):""].map(q).join(","))).join("\n");
+    try{await S.downloads.save({filename:`audit-trail-${A.from||"start"}-to-${A.to||todayISO()}.csv`,data:new Blob(["﻿"+csv],{type:"text/csv"})});toast("Audit trail exported");window.__audit?.("exported","report","audit-trail",`Audit trail ${A.from} – ${A.to}: ${A.rows.length} entries`)}catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code))}})}
 
 /* ======================= ANALYTICS (one calculation shared by Accounts and Management) =======================
    Source of truth: the leads table only. Definitions used everywhere:
@@ -1683,7 +1749,7 @@ function baseline(){const h=S.history;if(!h)return"";const ms=Object.keys(h.lead
 async function exportCSV(){if(!can("lead.export"))return;const cols=["ref","requirementDate","createdAt","accountName","country","region","product","category","source","generatedBy","department","contact.name","contact.email","contact.phone","status","assignedTo","priority","meeting.aed","quote.aed","quote.no","order.aed","order.no","order.date","lost.reason"];
   const get=(o,p)=>p==="region"?regionOf(o):p==="requirementDate"?reqDate(o):p.split(".").reduce((a,k)=>a?.[k],o)??"";const q=v=>`"${String(v).replace(/"/g,'""')}"`;
   const csv=[cols.join(",")].concat(S.leads.slice().sort((a,b)=>a.ref<b.ref?-1:1).map(l=>cols.map(c=>q(get(l,c))).join(","))).join("\n");
-  try{await S.downloads.save({filename:`lead-desk-${new Date().toISOString().slice(0,10)}.csv`,data:new Blob([csv],{type:"text/csv"})})}catch(e){if(e?.code!=="cancelled")toast("Export didn't complete")}}
+  try{await S.downloads.save({filename:`lead-desk-${new Date().toISOString().slice(0,10)}.csv`,data:new Blob([csv],{type:"text/csv"})});window.__audit?.("exported","report","lead-desk.csv",`Exported all ${S.leads.length} leads to CSV`)}catch(e){if(e?.code!=="cancelled")toast("Export didn't complete")}}
 
 /* ---------- Accounts: product matrix (existing view) ---------- */
 function renderAcctMatrix(m){const prods=prodList().filter(p=>!p.repeatable).map(p=>p.name);const q=S.acctQ||"";
