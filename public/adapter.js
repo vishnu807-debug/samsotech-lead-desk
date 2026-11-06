@@ -109,6 +109,12 @@
     ME.displayName = data || ""; if (data) NAMES[ME.email] = data; else delete NAMES[ME.email];
     return ME.displayName;
   };
+  // Supervisor: move every lead of a name that isn't on the Sales engineer list to an existing engineer (supabase/15_merge.sql)
+  window.__mergeEngineer = async (from, to) => {
+    const { data, error } = await sb.rpc("merge_engineer", { p_old: from, p_new: to });
+    if (error) throw dbErr(error);
+    return data;
+  };
   // Supervisor: rename a product or a sales engineer everywhere it is used, in one database transaction
   window.__renameEverywhere = async (kind, from, to) => {
     const { data, error } = await sb.rpc("rename_everywhere", { p_kind: kind, p_old: from, p_new: to });

@@ -197,6 +197,11 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .achip{display:inline-block;font:600 11px var(--f-body);padding:2px 8px;border-radius:10px;background:var(--sunk);color:var(--muted);white-space:nowrap}
 .achip.a-created,.achip.a-sign{background:var(--ok-soft);color:var(--ok)}.achip.a-deleted,.achip.a-merged{background:var(--bad-soft);color:var(--bad)}
 .achip.a-restored{background:var(--ok-soft);color:var(--ok)}
+.dqform{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.dqname{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.pvx>td{background:var(--sunk);padding:8px 10px 12px}
+.pvt tfoot td{font-weight:700;border-top:2px solid var(--line)}
+.pvcar{display:inline-block;width:12px;color:var(--muted)}
 .chip.ups{background:var(--accent-soft);color:var(--accent)}
 .cfm{position:fixed;inset:0;background:rgba(10,16,24,.5);z-index:40;display:grid;place-items:center;padding:16px}
 .cfm>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;display:grid;gap:12px}
@@ -324,7 +329,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="bo" role="tab">Back office <span class="count" id="c-bo" hidden></span></button>
       <button data-tab="pipe" role="tab"><span class="tl">My pipeline</span> <span class="count" id="c-pipe" hidden></span></button>
       <button data-tab="meet" role="tab">Meetings</button>
-      <button data-tab="mgmt" role="tab">Management</button>
+      <button data-tab="mgmt" role="tab"><span class="tl">Management</span></button>
       <button data-tab="accts" role="tab">Accounts</button>
       <button data-tab="set" role="tab">Products &amp; settings</button>
       <button data-tab="audit" role="tab">Audit trail</button>
@@ -474,7 +479,7 @@ const PERMISSIONS=[
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
 const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
@@ -923,12 +928,14 @@ function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Inf
    ${can("lead.remove")&&(S.deletedLeads||[]).length?`<details class="panel"><summary style="cursor:pointer"><b>Deleted leads (${S.deletedLeads.length})</b> <span class="small muted">· kept for the audit trail, can be restored</span></summary>
     <div class="tw" style="margin-top:10px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status when deleted</th><th>Reason</th><th>Deleted by</th><th>When</th><th></th></tr></thead><tbody>
     ${S.deletedLeads.slice().sort((a,b)=>(a.deleted.at||"")<(b.deleted.at||"")?1:-1).map(l=>`<tr><td class="mono"><button class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td><td>${esc(l.deleted.prevStatus||l.status)}</td><td>${esc(l.deleted.reason||"—")}${l.deleted.note?`<div class="small muted">${esc(l.deleted.note)}</div>`:""}</td><td>${esc(l.deleted.by||"—")}</td><td style="white-space:nowrap">${fmtD(l.deleted.at)}</td><td><button type="button" class="btn sm" data-restore="${esc(l.id)}">Restore</button></td></tr>`).join("")}</tbody></table></div></details>`:""}
+   ${canFix()&&dataIssues().count?`<details class="panel" id="boDq" style="border-left:3px solid var(--warn)"${S.boDqOpen?" open":""}><summary style="cursor:pointer"><b>Data issues (${dataIssues().count})</b> <span class="small muted">· won leads without an order amount, names not on the engineer list, leads with two names. Supervisor and Lead Manager only.</span></summary><div style="margin-top:10px">${issuesHTML().html}</div></details>`:""}
    <div class="view" style="gap:10px">${q.length?q.map(qCard).join(""):`<div class="panel empty">${S.loaded.leads?"Nothing waiting. New leads appear here as soon as they are submitted.":"Loading the queue…"}</div>`}</div>
    <div class="grid2">
     <div class="panel"><h3>Open leads per sales engineer</h3>${Object.keys(load).length?`<div class="funnel">${Object.entries(load).sort((a,b)=>b[1]-a[1]).map(([n,c])=>{const mx=Math.max(...Object.values(load));return`<div class="frow"><span>${esc(n)}</span><div class="fbar"><i style="width:${c/mx*100}%"></i></div><span class="num">${c} open</span></div>`}).join("")}</div>`:`<p class="muted small">No leads assigned yet. Workload shows here so you can balance assignments.</p>`}</div>
     <div class="panel"><h3>Recently verified</h3>${recent.length?`<div class="alerts">${recent.map(l=>`<button class="alert" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span style="flex:1;min-width:0">${esc(l.accountName)} · ${esc(l.product)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span></button>`).join("")}</div>`:`<p class="muted small">Verified leads will be listed here.</p>`}</div>
    </div></section>`;
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
+  if($("#boDq")){bindIssues($("#boDq"));$("#boDq").ontoggle=e=>{S.boDqOpen=e.target.open}}
   m.querySelectorAll("[data-restore]").forEach(b=>b.onclick=()=>{const l=S.leadMap[b.dataset.restore];if(l){b.disabled=true;restoreLead(l)}});
   $("#unshare")?.addEventListener("click",async e=>{const b=e.currentTarget;const ls=sharedLeads();b.disabled=true;b.textContent="Moving…";let ok=0;
     for(const l of ls){try{if(await patch(l,{assignedTo:"",formerAssignee:l.assignedTo,preferred:"",assignedMailFor:""},`Was assigned to "${l.assignedTo}" (${sharedOwners(l.assignedTo).join(" and ")}); moved back to the queue to choose one engineer`,"New"))ok++}catch(err){}}
@@ -1737,8 +1744,123 @@ function orderTree(ls,x){const os=ls.filter(l=>l.assignedTo===x.name&&l.status==
    ${os.map(l=>{const v=orderVal(l);return`<button type="button" class="otr" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span class="ell"><b>${esc(l.accountName)}</b> <span class="muted small">${esc(l.country||"")}</span></span><span>${fmtD(wonOn(l))}</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span></span><span class="ell small">${esc(productsOf(l).join(", "))}</span><span class="num">${v?fmtAED(v):`<span class="muted" data-tip="Won, but no order amount was recorded">no amount</span>`}${v?dbar(v,mx,"--c-main"):""}</span><span class="num muted">${x.rev?fmtP(v/x.rev):"—"}</span></button>`}).join("")}
    <div class="otr otot"><span></span><span>${os.length} order${os.length===1?"":"s"}${x.noVal?` · ${x.noVal} without amount`:""}</span><span></span><span></span><span class="small muted">${x.inbOrders} inbound · ${x.outbOrders} outbound</span><span class="num"><b>${fmtAED(x.rev)}</b></span><span class="num muted">100%</span></div>
   </div></td></tr>`}
+/* ======================= DATA ISSUES (Supervisor, Lead Manager) =======================
+   The "About these numbers" notes, made fixable: won leads without an order amount, leads assigned to a
+   name that isn't on the Sales engineer list, and leads assigned to two people. All time, every lead. */
+const canFix=()=>can("lead.edit_all");
+function dataIssues(){const ls=S.leads.filter(l=>!["Duplicate","Rejected"].includes(l.status));
+  const noOrder=ls.filter(l=>l.status==="Won"&&!(l.order&&+l.order.aed>0)).sort((a,b)=>(wonAt(b)||"").localeCompare(wonAt(a)||""));
+  const zero=noOrder.filter(l=>!leadValue(l));
+  const known=new Set(spList(true).map(x=>nk(x.name)));const odd={};
+  ls.forEach(l=>{if(l.assignedTo&&!known.has(nk(l.assignedTo))&&!sharedOwners(l.assignedTo))(odd[l.assignedTo]=odd[l.assignedTo]||[]).push(l)});
+  const shared=sharedLeads();
+  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length}}
+const wonAt=l=>l.stageAt?.Won||l.order?.date||l.updatedAt||l.createdAt||"";
+function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:{}});const cur=Object.keys(S.settings.fx||{AED:1});const sp=spNames();
+  const sec1=`<div class="panel" id="dq-won"><div class="row" style="margin-bottom:6px"><h3>Won leads without an order amount</h3><span class="chip" style="${D.zero.length?"background:var(--bad-soft);color:var(--bad)":""}">${D.zero.length} with no revenue</span>${D.noOrder.length>D.zero.length?`<span class="chip">${D.noOrder.length-D.zero.length} using the quotation amount</span>`:""}</div>
+    <p class="small muted" style="margin:0 0 10px">These leads are Won but have no order value, so they count as an order with ${"no"} revenue (or the quotation amount stands in). Enter the order amount from the PO or invoice. The status stays Won.</p>
+    ${D.noOrder.length?`<div class="tw"><table><thead><tr><th>Ref</th><th>Property</th><th>Engineer</th><th>Won</th><th class="num">Quotation</th><th>Products</th><th></th></tr></thead><tbody>
+    ${D.noOrder.map(l=>{const op=st.open===l.id;const q=l.quote&&+l.quote.aed>0?l.quote:null;return`<tr${op?` class="xopen"`:""}><td class="mono"><button type="button" class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}<div class="small muted">${esc([l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></td><td>${esc(l.assignedTo||"—")}</td><td style="white-space:nowrap">${fmtD(wonAt(l))}</td>
+      <td class="num">${q?fmtAED(q.aed):`<span class="muted">—</span>`}</td><td class="small">${esc(productsOf(l).join(", "))}</td>
+      <td class="num">${canAct(l)?`<button type="button" class="btn sm ${op?"":"pri"}" data-dqo="${esc(l.id)}">${op?"Close":"Enter order amount"}</button>`:""}</td></tr>
+      ${op?`<tr class="xopen"><td colspan="7"><div class="dqform"><label class="f">Order amount <span class="req">*</span><input id="dq-v" type="number" min="0" step="0.01" inputmode="decimal" value="${q?esc(q.value??q.aed):""}"></label>
+        <label class="f">Currency<select id="dq-c">${opts(cur,q?.currency||"AED")}</select></label><label class="f">Order date<input id="dq-d" type="date" max="${todayISO()}" value="${esc((wonAt(l)||"").slice(0,10)||todayISO())}"></label>
+        <label class="f">PO / order no.<input id="dq-n"></label><div class="row" style="align-self:end"><button type="button" class="btn pri" id="dq-save" data-id="${esc(l.id)}">Save order</button>${q?`<button type="button" class="btn" id="dq-q">Use quoted amount</button>`:""}</div></div>
+        <div class="small" id="dq-msg" style="margin-top:6px">${q?`The quotation was ${fmtAED(q.aed)}${q.no?" ("+esc(q.no)+")":""}.`:""}</div></td></tr>`:""}`}).join("")}</tbody></table></div>`:`<p class="small" style="margin:0">All won leads have an order amount.</p>`}</div>`;
+  const sup=can("settings.manage");
+  const sec2=`<div class="panel" id="dq-names"><div class="row" style="margin-bottom:6px"><h3>Names not on the Sales engineer list</h3><span class="chip" style="${D.odd.length?"background:var(--warn-soft);color:var(--warn)":""}">${D.odd.length} name${D.odd.length===1?"":"s"}</span></div>
+    <p class="small muted" style="margin:0 0 10px">Leads assigned to these names are ranked separately from the engineers on the list. ${sup?"Merge the name into the right engineer (every lead, meeting and record moves in one step), add it to the list if it's a real engineer, or reassign leads one by one.":"Open each lead and use Reassign, or ask a Supervisor to merge the name."}</p>
+    ${D.odd.length?`<div style="display:grid;gap:10px">${D.odd.map(([n,ls])=>{const k=nk(n);const sh=!!st.show[k];const won=ls.filter(l=>l.status==="Won");return`<div class="dqname"><div class="row" style="gap:8px"><b style="font-size:14px">“${esc(n)}”</b><span class="small muted">${ls.length} lead${ls.length===1?"":"s"} · ${ls.filter(l=>OPEN.includes(l.status)).length} open · ${won.length} won${won.length?" · "+fmtAED(won.reduce((s,l)=>s+leadValue(l),0)):""}</span><span class="sp"></span>
+      <button type="button" class="btn sm" data-dqs="${esc(k)}" aria-expanded="${sh}">${sh?"Hide":"Show"} leads</button></div>
+      ${sup?`<div class="row" style="gap:8px;margin-top:8px"><label class="f" style="min-width:220px;flex:1">Merge into<select data-dqm="${esc(n)}">${opts(sp.filter(x=>nk(x)!==k),suggestEng(n),"Choose the engineer")}</select></label><button type="button" class="btn pri sm" data-dqmb="${esc(n)}" style="align-self:end">Merge</button><span class="small muted" style="align-self:end">or</span><button type="button" class="btn sm" data-dqadd="${esc(n)}" style="align-self:end">Add “${esc(n)}” to the list</button></div>`:""}
+      ${sh?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status</th><th class="num">Value</th><th>Generated by</th><th></th></tr></thead><tbody>${ls.map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td><td>${esc(l.generatedBy||"—")}</td><td class="num"><button type="button" class="btn sm" data-open="${esc(l.id)}">Open${can("lead.reassign")?" / reassign":""}</button></td></tr>`).join("")}</tbody></table></div>`:""}</div>`}).join("")}</div>`:`<p class="small" style="margin:0">Every lead is assigned to a name on the Sales engineer list.</p>`}</div>`;
+  const sec3=`<div class="panel" id="dq-shared"><div class="row" style="margin-bottom:6px"><h3>Leads assigned to two people</h3><span class="chip" style="${D.shared.length?"background:var(--warn-soft);color:var(--warn)":""}">${D.shared.length}</span>${D.shared.length&&S.tab!=="bo"&&can("page.backoffice")?`<span class="sp"></span><button type="button" class="btn sm" id="dq-bo">Fix in Back office</button>`:""}</div>
+    <p class="small muted" style="margin:0">${D.shared.length?`Combined names such as “${esc(D.shared[0].assignedTo)}”. Use “Move them to the queue” in the panel above to pick one engineer for each.`:"No lead is assigned to two people."}</p></div>`;
+  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}</div>`,D}}
+function suggestEng(n){const k=nk(n);const sp=spNames();return sp.find(x=>nk(x).split(" ")[0]===k.split(" ")[0])||sp.find(x=>nk(x).startsWith(k)||k.startsWith(nk(x)))||""}
+function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
+  m.querySelectorAll("[data-dqo]").forEach(b=>b.onclick=()=>{st.open=st.open===b.dataset.dqo?null:b.dataset.dqo;render();setTimeout(()=>$("#dq-v")?.focus(),0)});
+  m.querySelectorAll("[data-dqs]").forEach(b=>b.onclick=()=>{st.show[b.dataset.dqs]=!st.show[b.dataset.dqs];render()});
+  $("#dq-bo")?.addEventListener("click",()=>{S.tab="bo";try{history.replaceState(null,"","#bo")}catch(_){}render()});
+  $("#dq-q")?.addEventListener("click",()=>{const l=S.leadMap[st.open];if(!l?.quote)return;$("#dq-v").value=l.quote.value??l.quote.aed;$("#dq-c").value=l.quote.currency||"AED";if(l.quote.no&&!$("#dq-n").value)$("#dq-n").value=l.quote.no});
+  $("#dq-save")?.addEventListener("click",async e=>{const l=S.leadMap[e.currentTarget.dataset.id];if(!l)return;const v=+$("#dq-v").value,c=$("#dq-c").value,d=$("#dq-d").value;
+    if(!(v>0)){$("#dq-msg").innerHTML=`<span style="color:var(--bad)">Enter the order amount.</span>`;return}if(!d||d>todayISO()){$("#dq-msg").innerHTML=`<span style="color:var(--bad)">Pick the order date (not in the future).</span>`;return}
+    const o=Object.assign({},l.order||{},{value:v,currency:c,aed:toAED(v,c),date:d,no:$("#dq-n").value.trim()});e.currentTarget.disabled=true;
+    if(await patch(l,{order:o},`Order amount added from Data issues · ${fmtAED(o.aed)}${o.no?" · "+o.no:""}`)){st.open=null;render()}else e.currentTarget.disabled=false});
+  m.querySelectorAll("[data-dqadd]").forEach(b=>b.onclick=async()=>{const n=b.dataset.dqadd;const sps=spList(true);if(sps.some(x=>nk(x.name)===nk(n))){toast(`${n} is already on the list`);return}
+    try{await S.db.doc("config/settings").update({salespeople:sps.concat([{name:n,active:true}])});toast(`Added ${n} to the Sales engineer list`);render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}});
+  m.querySelectorAll("[data-dqmb]").forEach(b=>b.onclick=()=>{const n=b.dataset.dqmb;const to=m.querySelector(`[data-dqm="${CSS.escape(n)}"]`).value;if(!to){toast("Choose the engineer to merge into");return}
+    const ls=(S.allLeads||S.leads).filter(l=>[l.assignedTo,l.generatedBy,l.preferred,l.formerAssignee,l.territoryOwner].some(v=>v&&nk(v)===nk(n))||meetingsOf(l).some(x=>x.by&&nk(x.by)===nk(n)));
+    cfmOpen(`<h3>Merge “${esc(n)}” into ${esc(to)}?</h3><p class="small muted" style="margin:0">${ls.length} lead${ls.length===1?"":"s"} change: everywhere “${esc(n)}” appears as the assigned engineer, lead generator, meeting holder, preferred engineer or territory owner, it becomes <b>${esc(to)}</b>. Their revenue and orders then count for ${esc(to)}. One “Merged” entry listing the leads goes to the audit trail.</p>
+      <div class="small" id="mgMsg"></div><div class="row"><button type="button" class="btn pri" id="mgOk">Merge</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,
+    async()=>{$("#mgMsg").innerHTML=`<span class="muted"><span class="spin" aria-hidden="true"></span> Merging…</span>`;
+      try{const c=window.LD_HOSTED&&window.__mergeEngineer?await window.__mergeEngineer(n,to):await renameEverywhere("engineer",n,to);toast(`Merged “${n}” into ${to} · ${c} lead${c===1?"":"s"} updated`);render();return true}
+      catch(e){$("#mgMsg").innerHTML=`<span style="color:var(--bad)">${/merge_engineer|function|schema cache/i.test(e.message||"")?"Merging isn't set up yet. Run supabase/15_merge.sql in Supabase first.":"Couldn't merge: "+esc(e.message||e.code)}</span>`;return false}},"#mgOk")})}
+
+/* ======================= PRODUCTS (Supervisor: report.products) =======================
+   Every product with its leads, status and revenue. A lead with several products has one amount: it is shown in
+   full under each of its products, marked "shared", and the total row counts every lead once. */
+const PV_STATUS=[["","All statuses"],["open","Open (not on hold)"],["Assigned","Assigned"],["Meeting Done","Meeting done"],["Quotation Sent","Quotation sent"],["Won","Won"],["Lost","Lost"],["On Hold","On hold"]];
+function pvState(){return S.pv||(S.pv={status:"",cust:"",type:"",q:"",open:{}})}
+function productData(){const AF=af();const P=pvState();const custKeys=new Set(S.leads.filter(l=>l.status==="Won").map(accKey));
+  const ls=S.leads.filter(l=>!["Duplicate","Rejected"].includes(l.status)).filter(inPeriod)
+    .filter(l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(!AF.eng||l.assignedTo===AF.eng)&&(AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src))
+    .filter(l=>!P.status||(P.status==="open"?OPEN.includes(l.status)&&l.status!=="On Hold":l.status===P.status))
+    .filter(l=>!P.cust||(P.cust==="client")===custKeys.has(accKey(l)))
+    .filter(l=>!P.type||(P.type==="upsell")===isUpsell(l));
+  const q=nk(P.q);const G={};
+  const reached=(l,s)=>!!l.stageAt?.[s]||(s==="Meeting Done"?reachedMeeting(l):s==="Quotation Sent"?!!l.quote:false);
+  for(const l of ls)for(const p of productsOf(l)){if(q&&!nk(p).includes(q))continue;const o=G[p]||(G[p]={name:p,leads:[],n:0,open:0,meet:0,quoted:0,quotedV:0,won:0,rev:0,lost:0,hold:0,pipe:0,upRev:0,shared:0});
+    o.leads.push(l);o.n++;if(OPEN.includes(l.status)&&l.status!=="On Hold")o.open++;if(reached(l,"Meeting Done"))o.meet++;if(l.quote&&+l.quote.aed>0){o.quoted++;o.quotedV+=+l.quote.aed}
+    if(l.status==="Won"){o.won++;o.rev+=orderVal(l);if(isUpsell(l))o.upRev+=orderVal(l)}if(l.status==="Lost")o.lost++;if(l.status==="On Hold")o.hold++;
+    if(["Meeting Done","Quotation Sent"].includes(l.status))o.pipe+=leadValue(l);if(productsOf(l).length>1)o.shared++}
+  const rows=Object.values(G).map(o=>Object.assign(o,{conv:pct(o.won,o.n),aov:o.won?o.rev/o.won:0}));
+  const inc=ls.filter(l=>!q||productsOf(l).some(p=>nk(p).includes(q)));const wonL=inc.filter(l=>l.status==="Won");
+  const tot={n:inc.length,open:inc.filter(l=>OPEN.includes(l.status)&&l.status!=="On Hold").length,meet:inc.filter(l=>reached(l,"Meeting Done")).length,quoted:inc.filter(l=>l.quote&&+l.quote.aed>0).length,quotedV:inc.reduce((s,l)=>s+(l.quote&&+l.quote.aed>0?+l.quote.aed:0),0),
+    won:wonL.length,rev:wonL.reduce((s,l)=>s+orderVal(l),0),lost:inc.filter(l=>l.status==="Lost").length,hold:inc.filter(l=>l.status==="On Hold").length,pipe:inc.filter(l=>["Meeting Done","Quotation Sent"].includes(l.status)).reduce((s,l)=>s+leadValue(l),0),upRev:wonL.filter(isUpsell).reduce((s,l)=>s+orderVal(l),0)};
+  tot.conv=pct(tot.won,tot.n);tot.aov=tot.won?tot.rev/tot.won:0;return{rows,tot,ls:inc}}
+const PCOLS=[{k:"name",label:"Product"},{k:"n",label:"Leads",num:1},{k:"open",label:"Open",num:1},{k:"meet",label:"Meeting done",num:1,tip:"Reached a meeting or beyond"},{k:"quoted",label:"Quoted",num:1},{k:"quotedV",label:"Quoted value",num:1},
+  {k:"won",label:"Won",num:1},{k:"rev",label:"Won revenue",num:1},{k:"lost",label:"Lost",num:1},{k:"hold",label:"On hold",num:1},{k:"conv",label:"Conversion",num:1,tip:"Won ÷ leads"},{k:"aov",label:"Avg order",num:1},{k:"pipe",label:"Open pipeline",num:1,tip:"Value of leads at Meeting done or Quotation sent"},{k:"upRev",label:"Upsell revenue",num:1}];
+function productsHTML(){const P=pvState();const{rows,tot}=productData();const sr=sortRows("prod",rows,PCOLS,{k:"rev",d:-1});
+  const cell=(o,c)=>c.k==="name"?"":`<td class="num">${["quotedV","rev","aov","pipe","upRev"].includes(c.k)?(o[c.k]?fmtAED(o[c.k]):"—"):c.k==="conv"?fmtP(o[c.k]):fmtN(o[c.k])}</td>`;
+  const leadRows=o=>{const ls=o.leads.slice().sort((a,b)=>orderVal(b)-orderVal(a)||leadValue(b)-leadValue(a)||reqDate(b).localeCompare(reqDate(a)));const lim=ls.slice(0,200);
+    return`<tr class="pvx"><td colspan="${PCOLS.length}"><div class="tw"><table class="pvl"><thead><tr><th>Ref</th><th>Property</th><th>Location</th><th>Engineer</th><th>Lead generator</th><th>Status</th><th class="num">Quotation</th><th>Target date</th><th class="num">Order / revenue</th></tr></thead><tbody>
+     ${lim.map(l=>{const n=productsOf(l).length;return`<tr class="click" data-open="${esc(l.id)}"><td class="mono">${esc(l.ref)}${isUpsell(l)?` <span class="chip ups">Upsell</span>`:""}</td><td>${esc(l.accountName)}${n>1?`<div class="small muted">shared with ${n-1} other product${n>2?"s":""}</div>`:""}</td><td class="small">${esc([areaOf(l.country).country?COUNTRY_FULL[areaOf(l.country).country]||l.country:l.country,subLabel(l)].filter(Boolean).join(" · ")||"—")}</td>
+       <td>${esc(l.assignedTo||"—")}</td><td>${esc(isUpsell(l)?"— (upsell)":l.generatedBy||"—")}</td><td style="white-space:nowrap"><span class="${stCls(l.status)}">${esc(l.status)}</span><div class="small muted">${fmtD(l.stageAt?.[l.status]||l.updatedAt||l.createdAt)}</div></td>
+       <td class="num">${l.quote&&+l.quote.aed>0?fmtAED(l.quote.aed):"—"}</td><td>${l.quote?.targetDate?`<span style="${tgtOverdue(l)?"color:var(--bad);font-weight:600":""}">${fmtD(l.quote.targetDate)}</span>`:"—"}</td><td class="num">${l.status==="Won"?(orderVal(l)?`<b>${fmtAED(orderVal(l))}</b>`:`<span style="color:var(--bad)">no amount</span>`):leadValue(l)?`<span class="muted">${fmtAED(leadValue(l))}</span>`:"—"}</td></tr>`}).join("")}</tbody></table></div>${ls.length>200?`<p class="small muted" style="margin:6px 0 0">Showing the 200 highest-value of ${ls.length} leads. Narrow the filters to see the rest.</p>`:""}</td></tr>`};
+  return`<div class="view" style="gap:12px"><div class="panel afbar"><div class="fgrid">
+    <label class="f">Status<select id="pvS">${PV_STATUS.map(([v,t])=>`<option value="${v}"${P.status===v?" selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="f">Accounts<select id="pvC">${[["","Clients and prospects"],["client","Clients (have bought)"],["prospect","Prospects"]].map(([v,t])=>`<option value="${v}"${P.cust===v?" selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="f">Lead type<select id="pvT">${[["","Original and upsell"],["original","Original leads"],["upsell","Upsell leads"]].map(([v,t])=>`<option value="${v}"${P.type===v?" selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="f fsearch">Product<input id="pvQ" placeholder="Search a product" value="${esc(P.q)}"></label></div></div>
+   <div class="row"><p class="small muted" style="margin:0;flex:1;min-width:240px">A lead with several products has one amount. It is shown in full under each of its products and marked “shared”, so product rows can add up to more than the total. The total row counts every lead once and matches the rest of Management. Click a product to see its leads.</p>
+    ${can("lead.export")?`<button type="button" class="btn" id="pvX">Export to Excel</button>`:""}</div>
+   <div class="tw"><table class="pvt"><thead><tr>${PCOLS.map(c=>th("prod",c)).join("")}</tr></thead><tbody>
+    ${sr.map(o=>{const op=!!P.open[o.name];return`<tr class="click${op?" xopen":""}" data-pv="${esc(o.name)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(o.name)}</b>${o.shared?`<div class="small muted">${o.shared} shared lead${o.shared===1?"":"s"}</div>`:""}</td>${PCOLS.map(c=>cell(o,c)).join("")}</tr>${op?leadRows(o):""}`}).join("")||`<tr><td colspan="${PCOLS.length}" class="empty">No leads for these filters.</td></tr>`}
+   </tbody>${sr.length?`<tfoot><tr><td><b>All products</b><div class="small muted">each lead once</div></td>${PCOLS.map(c=>cell(tot,c)).join("")}</tr></tfoot>`:""}</table></div></div>`}
+function bindProducts(m){const P=pvState();
+  const set=(k,v)=>{P[k]=v;render()};$("#pvS")&&($("#pvS").onchange=e=>set("status",e.target.value));$("#pvC")&&($("#pvC").onchange=e=>set("cust",e.target.value));$("#pvT")&&($("#pvT").onchange=e=>set("type",e.target.value));
+  const qi=$("#pvQ");if(qi)qi.oninput=()=>{clearTimeout(qi.t);qi.t=setTimeout(()=>{P.q=qi.value;render();const i=$("#pvQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},300)};
+  m.querySelectorAll("[data-pv]").forEach(r=>r.onclick=e=>{if(e.target.closest("button"))return;P.open[r.dataset.pv]=!P.open[r.dataset.pv];render()});
+  m.querySelectorAll(".pvl [data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
+  $("#pvX")?.addEventListener("click",exportProducts)}
+async function exportProducts(){if(!can("lead.export")){toast("Your role can't export.");return}const b=$("#pvX");const lab=b?.textContent;if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing Excel…`}
+  try{const{rows,tot}=productData();const X=await loadXLSX();const wb=X.utils.book_new();const sr=rows.slice().sort((a,b)=>b.rev-a.rev);
+    const H=["Product","Leads","Open","Meeting done","Quoted","Quoted value (AED)","Won","Won revenue (AED)","Lost","On hold","Conversion %","Avg order (AED)","Open pipeline (AED)","Upsell revenue (AED)","Shared leads"];
+    const line=o=>[o.name,o.n,o.open,o.meet,o.quoted,Math.round(o.quotedV),o.won,Math.round(o.rev),o.lost,o.hold,Math.round(o.conv*1000)/10,Math.round(o.aov),Math.round(o.pipe),Math.round(o.upRev),o.shared??""];
+    const ws1=X.utils.aoa_to_sheet([H].concat(sr.map(line)).concat([line(Object.assign({name:"All products (each lead once)",shared:""},tot))]));ws1["!cols"]=H.map(h=>({wch:Math.max(12,h.length+2)}));ws1["!cols"][0]={wch:34};X.utils.book_append_sheet(wb,ws1,"Products");
+    const H2=["Product","Ref","Property","Country","Emirate / state","Engineer","Lead generator","Lead type","Status","Status date","Quotation (AED)","Target date","Order / revenue (AED)","Products on lead"];const L=[];
+    sr.forEach(o=>o.leads.forEach(l=>L.push([o.name,l.ref,l.accountName,l.country||"",subLabel(l)||"",l.assignedTo||"",isUpsell(l)?"":l.generatedBy||"",isUpsell(l)?"Upsell":"Original",l.status,(l.stageAt?.[l.status]||l.updatedAt||l.createdAt||"").slice(0,10),l.quote&&+l.quote.aed>0?Math.round(l.quote.aed):"",l.quote?.targetDate||"",l.status==="Won"?Math.round(orderVal(l)):"",productsOf(l).length])));
+    const ws2=X.utils.aoa_to_sheet([H2].concat(L));ws2["!cols"]=H2.map((h,i)=>({wch:[24,15,34,14,16,16,16,10,15,12,14,12,18,10][i]}));ws2["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:L.length,c:H2.length-1}})};X.utils.book_append_sheet(wb,ws2,"Leads by product");
+    const name=`LeadDesk_Products_${ymd(new Date())}.xlsx`;const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});window.__lastExport={name,size:blob.size,rows:L.length};
+    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+    window.__audit?.("exported","report",name,`Product report: ${sr.length} products, ${tot.n} leads`,{products:sr.length,leads:tot.n});toast(name+" is ready")}
+  catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code||"unknown error"))}finally{const nb=$("#pvX");if(nb){nb.disabled=false;nb.textContent=lab||"Export to Excel"}}}
+
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
-function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=S.mgView||"ov";
+const mgViews=()=>MG_VIEWS.concat(can("report.products")?[["prod","Products"]]:[]);
+function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
   const er=sortRows("eng",E,ecols,{k:"rev",d:-1});const topRev=E.slice().sort((a,b)=>b.rev-a.rev).slice(0,3).filter(x=>x.rev>0).map(x=>x.name);const mxRev=Math.max(1,...E.map(x=>x.rev));
@@ -1763,13 +1885,13 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
   const gaps=[];if(T.noVal)gaps.push(`${T.noVal} won lead${T.noVal===1?" has":"s have"} no order amount, so ${T.noVal===1?"it adds":"they add"} an order but no revenue.`);
   if(T.unassigned)gaps.push(`${T.unassigned} lead${T.unassigned===1?" is":"s are"} not assigned to an engineer and ${T.unassigned===1?"is":"are"} left out of engineer rankings.`);
   if(T.leads&&T.stageTracked/T.leads<.5)gaps.push(`Only ${fmtN(T.stageTracked)} of ${fmtN(T.leads)} leads have meeting and quotation stages recorded (leads imported from the Excel sheet only carry Assigned or Won), so "Converted" is understated until engineers log meetings in Lead Desk.`);
-  {const known=new Set(spNames().map(nk));const odd=E.filter(x=>!known.has(nk(x.name)));if(odd.length)gaps.push(`${odd.reduce((a,x)=>a+x.leads,0)} leads are assigned to ${odd.length} name${odd.length===1?"":"s"} not on the Sales engineer list (${odd.slice(0,4).map(x=>"“"+x.name+"”").join(", ")}${odd.length>4?"…":""}), so those leads are ranked separately. Reassign them, or use Hand over in Products & settings, to merge them into the right engineer.`)}
+  {const known=new Set(spList(true).map(x=>nk(x.name)));const odd=E.filter(x=>!known.has(nk(x.name))&&!sharedOwners(x.name));if(odd.length)gaps.push(`${odd.reduce((a,x)=>a+x.leads,0)} leads are assigned to ${odd.length} name${odd.length===1?"":"s"} not on the Sales engineer list (${odd.slice(0,4).map(x=>"“"+x.name+"”").join(", ")}${odd.length>4?"…":""}), so those leads are ranked separately. Reassign them, or use Hand over in Products & settings, to merge them into the right engineer.`)}
   if(!S.leads.some(l=>l.status==="Lost"))gaps.push(`No leads are marked Lost yet, so conversion is measured against all leads, not only closed ones.`);
   m.innerHTML=`<section class="view mg">
    <div class="vhead"><div><h2>Management</h2><p>Team performance and revenue. Every figure follows the filters.</p></div>
     <div class="row">${can("report.deck")?`<button class="btn pri" id="deckBtn" type="button" title="Builds a PowerPoint from the figures on this page, for the filters selected">Create presentation</button>`:""}${S.downloads&&can("lead.export")?`<button class="btn" id="csvBtn">Export leads CSV</button>`:""}</div></div>
    ${filterBar()}
-   <div class="mtabs" role="tablist" aria-label="Management views">${MG_VIEWS.map(([i,t])=>`<button type="button" role="tab" data-mv="${i}" aria-selected="${MV===i}" tabindex="${MV===i?0:-1}">${t}</button>`).join("")}</div>
+   <div class="mtabs" role="tablist" aria-label="Management views">${mgViews().map(([i,t])=>`<button type="button" role="tab" data-mv="${i}" aria-selected="${MV===i}" tabindex="${MV===i?0:-1}">${t}</button>`).join("")}</div>
    <div id="mg-ov" class="kpis k7">
     ${kpi("Engineers",fmtN(E.length),"with leads in period")}${kpi("Accounts",fmtN(T.accounts),`${fmtN(T.custAcc)} customers`)}${kpi("Leads",fmtN(T.leads),`${fmtN(S1.leads)} in · ${fmtN(S2.leads)} out`)}
     ${kpi("Orders closed",fmtN(T.orders),T.noVal?`${T.noVal} without amount`:"")}${kpi("Revenue",fmtAED(T.rev),"")}${kpi("Conversion",T.leads?fmtP(pct(T.orders,T.leads)):"—","orders ÷ leads")}${kpi("Revenue / account",fmtAED(T.accounts?T.rev/T.accounts:0),`${fmtAED(T.custAcc?T.rev/T.custAcc:0)} per customer`)}
@@ -1836,14 +1958,17 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     <div class="tw plain"><table><thead><tr><th>Emirate / state</th><th>Group</th><th>Owner</th><th style="min-width:150px">Leads</th><th class="num">Accounts</th><th class="num">Orders</th><th style="min-width:170px">Revenue</th><th class="num">Conversion</th></tr></thead><tbody>
      ${subs.map(x=>`<tr><td><b>${esc(x.n)}</b> <span class="small muted">${x.c}</span></td><td>${esc(x.g||"—")}</td><td>${x.n==="Not set"?`<span class="muted">—</span>`:esc(territoryOf(x.c,"",{c:x.c,n:x.n}).owner||"—")}</td><td><span class="mono">${x.leads}</span>${dbar(x.leads,mxSL,"--c-main")}</td><td class="num">${x.acc.size}</td><td class="num">${x.orders}</td><td><span class="mono">${fmtAED(x.rev)}</span>${dbar(x.rev,mxSR,"--c-main")}</td><td class="num">${fmtP(pct(x.orders,x.leads))}</td></tr>`).join("")}
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
-   ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}</div>`:""}
+   ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-ops" data-sec="ops"></div>
+   <div id="mg-prod" data-sec="prod"></div>
   </section>`;
   mgmtOps($("#mg-ops"));
+  if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
+  $("#goDq")?.addEventListener("click",()=>{S.tab="bo";S.boDqOpen=true;try{history.replaceState(null,"","#bo")}catch(_){}render();setTimeout(()=>$("#boDq")?.scrollIntoView({block:"start"}),0)});
   bindFilters(m);bindSort(m);
   m.querySelectorAll("[data-sec]").forEach(x=>{x.hidden=x.dataset.sec!==MV});
   const mt=m.querySelector(".mtabs");mt.onclick=e=>{const b=e.target.closest("[data-mv]");if(b){S.mgView=b.dataset.mv;render()}};
-  mt.onkeydown=e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;const i=MG_VIEWS.findIndex(v=>v[0]===MV);S.mgView=MG_VIEWS[(i+(e.key==="ArrowRight"?1:-1)+MG_VIEWS.length)%MG_VIEWS.length][0];render();m.querySelector('.mtabs [aria-selected="true"]')?.focus()};
+  mt.onkeydown=e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;const VV=mgViews();const i=VV.findIndex(v=>v[0]===MV);S.mgView=VV[(i+(e.key==="ArrowRight"?1:-1)+VV.length)%VV.length][0];render();m.querySelector('.mtabs [aria-selected="true"]')?.focus()};
   m.querySelectorAll("[data-xeng]").forEach(b=>b.onclick=()=>{const n=b.dataset.xeng;S.xEng=S.xEng||{};S.xEng[n]=!S.xEng[n];render()});
   $("#engZero")?.addEventListener("click",()=>{S.engZero=!S.engZero;render()});
   $("#xAll")?.addEventListener("click",()=>{const open=!E.every(x=>!x.orders||(S.xEng||{})[x.name]);S.xEng={};if(open)E.forEach(x=>{if(x.orders)S.xEng[x.name]=true});render()});
