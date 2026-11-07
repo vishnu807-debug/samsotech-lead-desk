@@ -202,6 +202,8 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .pvx>td{background:var(--sunk);padding:8px 10px 12px}
 .pvt tfoot td{font-weight:700;border-top:2px solid var(--line)}
 .pvcar{display:inline-block;width:12px;color:var(--muted)}
+/* the footprint view has its own filters and figures */
+.mg-v-fp>.panel.afbar,.mg-v-fp>#mg-ov{display:none}
 .chip.ups{background:var(--accent-soft);color:var(--accent)}
 .cfm{position:fixed;inset:0;background:rgba(10,16,24,.5);z-index:40;display:grid;place-items:center;padding:16px}
 .cfm>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;display:grid;gap:12px}
@@ -479,9 +481,9 @@ const PERMISSIONS=[
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
+const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
@@ -1548,7 +1550,7 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
    database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
 const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
 const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
-const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
+const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
 function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
 function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
   if(Array.isArray(v)){if(v.every(x=>typeof x!=="object"))return esc(v.join(", "));if(v.length&&v[0]&&v[0].date!==undefined)return esc(v.map(x=>[x.date,x.mode,x.type].filter(Boolean).join(" ")).join(" · "));return esc(v.length+" item(s)")}
@@ -1881,8 +1883,145 @@ async function exportProducts(){if(!can("lead.export")){toast("Your role can't e
     window.__audit?.("exported","report",name,`Product report: ${sr.length} products, ${tot.n} leads`,{products:sr.length,leads:tot.n});toast(name+" is ready")}
   catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code||"unknown error"))}finally{const nb=$("#pvX");if(nb){nb.disabled=false;nb.textContent=lab||"Export to Excel"}}}
 
+/* ======================= CUSTOMER FOOTPRINT (Management → Customer footprint) =======================
+   Client = an account with a Won lead in Lead Desk, or one the 2026 Excel history records as bought.
+   Prospect = an account with leads but no Won lead. Every account counts once. Deleted, Duplicate and Rejected leads never count.
+   Chains come from the hotel's brand name (editable list in Products & settings) or a Supervisor's manual choice. */
+const CHAIN_DEFAULT=[
+  ["Marriott","JW Marriott, Ritz-Carlton, Ritz Carlton, St Regis, St. Regis, Sheraton, Westin, Le Meridien, Le Méridien, W Hotel, W Dubai, W Abu Dhabi, W Doha, W Melbourne, Renaissance, Courtyard, Four Points, Aloft, Element, Autograph Collection, Tribute Portfolio, Delta Hotels, Luxury Collection, Edition, Moxy, Residence Inn, Fairfield, Bulgari, Marriott"],
+  ["Hilton","Waldorf Astoria, Conrad, Canopy by Hilton, Curio Collection, DoubleTree, Double Tree, Embassy Suites, Hampton by Hilton, Hilton Garden Inn, Homewood Suites, Tapestry Collection, LXR, Hilton"],
+  ["IHG","InterContinental, Intercontinental, Crowne Plaza, Holiday Inn, voco, Staybridge, Candlewood, Kimpton, Hotel Indigo, Even Hotels, Regent, Six Senses, Vignette"],
+  ["Accor","Raffles, Fairmont, Sofitel, Pullman, Swissotel, Swissôtel, Movenpick, Mövenpick, Novotel, Mercure, ibis, Adagio, MGallery, Grand Mercure, Banyan Tree, Rixos, Mantis, Tribe, Peppers, Mama Shelter"],
+  ["Hyatt","Park Hyatt, Grand Hyatt, Hyatt Regency, Hyatt Place, Hyatt Centric, Andaz, Alila, Thompson, Destination by Hyatt, Hyatt"],
+  ["Radisson","Radisson Blu, Radisson Collection, Radisson Red, Park Inn, Park Plaza, Country Inn, Radisson"],
+  ["Rotana","Rotana, Centro, Arjaan, Rayhaan, Edge Rotana"],
+  ["Jumeirah","Jumeirah, Burj Al Arab, Madinat Jumeirah"],
+  ["Emaar Hospitality","Address Hotels, Address Downtown, Address Sky View, Address Dubai, Palace Downtown, Vida, Rove"],
+  ["Millennium","Millennium, Copthorne, M Social, Leng's"],
+  ["Wyndham","Wyndham, Ramada, Days Inn, Super 8, Howard Johnson, Tryp, Dolce, La Quinta, Microtel, Wingate"],
+  ["Kempinski","Kempinski"],
+  ["Minor Hotels","Anantara, Avani, NH Collection, NH Hotel, nhow, Tivoli, Elewana, Oaks"],
+  ["Meliá","Melia, Meliá, ME by Melia, Gran Melia, Paradisus, INNSiDE, Sol by Melia"],
+  ["Shangri-La","Shangri-La, Shangri La, Kerry Hotel, Traders Hotel"],
+  ["Four Seasons","Four Seasons"],["Mandarin Oriental","Mandarin Oriental"],["Taj","Taj, Vivanta, SeleQtions"],["Oberoi","Oberoi, Trident"],
+  ["Barceló","Barcelo, Barceló, Occidental"],["Louvre Hotels","Golden Tulip, Royal Tulip, Tulip Inn, Campanile, Kyriad, Premiere Classe"],["Best Western","Best Western"],
+  ["Choice Hotels","Comfort Inn, Quality Inn, Clarion, Cambria, Sleep Inn, Econo Lodge"],["Citadines","Citadines, Ascott, Somerset"],["Dusit","Dusit"],["Kerzner","Atlantis, One&Only, One and Only, SIRO"],
+  ["Hospitality by Al Habtoor","Habtoor Palace, Al Habtoor"],["Wyndham Grand","Wyndham Grand"]].map(([name,b])=>({name,brands:b.split(",").map(x=>x.trim()).filter(Boolean)}));
+function chainList(){return(S.settings.chains&&S.settings.chains.length?S.settings.chains:CHAIN_DEFAULT)}
+let _chainIdx=null,_chainSig="";
+function chainIndex(){const L=chainList();const sig=JSON.stringify(L);if(_chainIdx&&sig===_chainSig)return _chainIdx;
+  const ix=[];for(const c of L)for(const b of c.brands||[]){const n=normTxt(b);if(n)ix.push([n,c.name])}ix.sort((a,b)=>b[0].length-a[0].length);_chainSig=sig;return _chainIdx=ix}
+/* {chain, how:"manual"|"detected"|"none"} */
+function chainOf(key,name){const o=(S.settings.chainOverrides||{})[key];if(o)return{chain:o,how:"manual"};const n=" "+normTxt(name)+" ";
+  for(const[b,c]of chainIndex()){if(b.length<=2){if(n.startsWith(" "+b+" "))return{chain:c,how:"detected"}}else if(n.includes(" "+b+" "))return{chain:c,how:"detected"}}return{chain:"Independent",how:"none"}}
+const ctryOf=c=>{const a=areaOf(c).country;return a||String(c||"").trim()||"Unknown"};
+const ctryName=c=>COUNTRY_FULL[c]||c;
+function fpState(){return S.fp||(S.fp={period:"all",region:"",ctryOpen:{},chainOpen:{},q:""})}
+function fpRange(p){const now=new Date();if(p==="year")return[now.getFullYear()+"-01-01","9999"];if(p==="12m")return[ymd(new Date(now.getTime()-365*864e5)),"9999"];if(p==="90d")return[ymd(new Date(now.getTime()-90*864e5)),"9999"];return["","9999"]}
+function fpData(){const P=fpState();const[from]=fpRange(P.period);const histOK=P.period==="all"||P.period==="year";
+  const A={};const all=allAccounts();
+  const acc=(k,name,country)=>A[k]||(A[k]={key:k,name:name||"(no name)",country:"",rawCountry:"",city:"",sub:"",region:"",leads:[],won:[],rev:0,prods:new Set(),last:"",lastWon:"",engs:{},histWon:false,histProds:new Set(),_d:""});
+  for(const l of S.leads){if(["Duplicate","Rejected"].includes(l.status))continue;const k=accKey(l);const a=acc(k,l.accountName);a.leads.push(l);
+    const d=reqDate(l);if(l.country&&d>=a._d){a._d=d;a.rawCountry=l.country;a.sub=subLabel(l);a.region=regionOf(l)}
+    if(l.assignedTo)a.engs[l.assignedTo]=(a.engs[l.assignedTo]||0)+1;
+    if(l.status==="Won"){const w=(wonAt(l)||"").slice(0,10);if(!from||w>=from){a.won.push(l);a.rev+=orderVal(l);productsOf(l).forEach(p=>a.prods.add(p));if(w>a.lastWon)a.lastWon=w}}}
+  for(const[k,x]of Object.entries(all)){const a=A[k]||(x.country||x.name?acc(k,x.name):null);if(!a)continue;if(!a.rawCountry)a.rawCountry=x.country||"";if(x.name&&a.name==="(no name)")a.name=x.name;
+    const r=S.registry[k];if(histOK&&r&&r.w){a.histWon=true;Object.keys(r.p||{}).forEach(p=>a.histProds.add(p))}}
+  for(const a of Object.values(A)){a.country=ctryOf(a.rawCountry);if(!a.region)a.region=guessRegion(a.rawCountry)||guessRegion(a.country)||"No region";
+    a.lead=a.won.length>0;a.client=a.lead||a.histWon;a.prospect=!a.client&&a.leads.length>0;a.eng=Object.entries(a.engs).sort((x,y)=>y[1]-x[1])[0]?.[0]||"";
+    if(!a.prods.size&&a.histWon)a.histProds.forEach(p=>a.prods.add(p));const c=chainOf(a.key,a.name);a.chain=c.chain;a.chainHow=c.how}
+  let accts=Object.values(A).filter(a=>a.client||a.leads.length);if(P.region)accts=accts.filter(a=>a.region===P.region);
+  return accts}
+function fpGroup(accts,keyF){const G={};for(const a of accts){const k=keyF(a);const g=G[k]||(G[k]={key:k,accts:[],clients:0,prospects:0,rev:0,orders:0,prods:{},chains:new Set(),countries:new Set(),fromLD:0,fromHist:0});
+  g.accts.push(a);if(a.client){g.clients++;if(a.lead)g.fromLD++;else g.fromHist++;a.prods.forEach(p=>g.prods[p]=(g.prods[p]||0)+1)}if(a.prospect)g.prospects++;g.rev+=a.rev;g.orders+=a.won.length;
+  if(a.chain!=="Independent"&&a.client)g.chains.add(a.chain);g.countries.add(a.country)}
+  return Object.values(G).map(g=>Object.assign(g,{n:g.accts.length,conv:pct(g.clients,g.accts.length),top:Object.entries(g.prods).sort((x,y)=>y[1]-x[1]).slice(0,3).map(x=>x[0]),nChains:g.chains.size,nCountries:g.countries.size}))}
+const FPC=[{k:"key",label:"Country"},{k:"region",label:"Region"},{k:"clients",label:"Clients",num:1},{k:"prospects",label:"Prospects",num:1},{k:"conv",label:"Conversion",num:1,tip:"Clients ÷ accounts"},{k:"rev",label:"Won revenue",num:1},{k:"orders",label:"Orders",num:1},{k:"top",label:"Top products sold"},{k:"nChains",label:"Chains",num:1,tip:"Hotel chains with clients in this country"}];
+const FPH=[{k:"key",label:"Chain"},{k:"n",label:"Hotels in Lead Desk",num:1,tip:"All accounts of this chain with leads or purchases"},{k:"clients",label:"Clients",num:1},{k:"prospects",label:"Prospects",num:1},{k:"nCountries",label:"Countries",num:1},{k:"rev",label:"Won revenue",num:1},{k:"top",label:"Products sold"}];
+function fpAcctRows(list,withChain){return`<div class="tw"><table class="pvl"><thead><tr><th>Account</th>${withChain?"<th>Chain</th>":"<th>Country</th>"}<th>City / area</th><th>Status</th><th>Products bought</th><th class="num">Revenue</th><th>Last won</th><th>Engineer</th></tr></thead><tbody>
+  ${list.sort((x,y)=>(y.client-x.client)||y.rev-x.rev||x.name.localeCompare(y.name)).map(a=>`<tr class="click" data-fpa="${esc(a.key)}"><td>${esc(a.name)}</td><td>${withChain?esc(a.chain)+(a.chainHow==="detected"?` <span class="small muted">(detected)</span>`:""):esc(ctryName(a.country))}</td><td class="small">${esc([a.sub,a.rawCountry&&normTxt(a.rawCountry)!==normTxt(a.country)&&normTxt(a.rawCountry)!==normTxt(ctryName(a.country))?a.rawCountry:""].filter(Boolean).join(" · ")||"—")}</td>
+    <td>${a.client?`<span class="chip" style="background:var(--ok-soft);color:var(--ok)">Client</span>${!a.lead?` <span class="small muted">2026 sheet</span>`:""}`:`<span class="chip">Prospect</span>`}</td><td class="small">${esc([...a.prods].join(", ")||"—")}</td><td class="num">${a.rev?fmtAED(a.rev):"—"}</td><td>${a.lastWon?fmtD(a.lastWon):"—"}</td><td>${esc(a.eng||"—")}</td></tr>`).join("")}</tbody></table></div>`}
+function footprintHTML(){const P=fpState();const accts=fpData();const q=nk(P.q);
+  const C=fpGroup(accts,a=>a.country).map(g=>Object.assign(g,{region:guessRegion(g.key)||g.accts[0]?.region||""}));const withClients=C.filter(g=>g.clients);
+  const H=fpGroup(accts,a=>a.chain);const chainsReg=H.filter(g=>g.key!=="Independent");const chainsCli=chainsReg.filter(g=>g.clients);const ind=H.find(g=>g.key==="Independent");
+  const clients=accts.filter(a=>a.client),pros=accts.filter(a=>a.prospect);
+  const cr=sortRows("fpc",C.filter(g=>!q||nk(g.key+" "+ctryName(g.key)).includes(q)),FPC,{k:"clients",d:-1});
+  const hr=sortRows("fph",H.filter(g=>!q||nk(g.key).includes(q)),FPH,{k:"clients",d:-1});const hrS=hr.filter(g=>g.key!=="Independent").concat(hr.filter(g=>g.key==="Independent"));
+  const cell=(o,c)=>c.k==="key"||c.k==="region"?"":c.k==="top"?`<td class="small">${esc(o.top.join(", ")||"—")}</td>`:`<td class="num">${c.k==="rev"?(o.rev?fmtAED(o.rev):"—"):c.k==="conv"?fmtP(o.conv):fmtN(o[c.k])}</td>`;
+  const top=withClients.slice().sort((a,b)=>b.clients-a.clients);const bars=top.slice(0,15).map(g=>({label:ctryName(g.key),v:g.clients,tip:`${ctryName(g.key)}: ${g.clients} client${g.clients===1?"":"s"}`}));
+  if(top.length>15)bars.push({label:`Other (${top.length-15} countries)`,v:top.slice(15).reduce((s,g)=>s+g.clients,0)});
+  const subRows=g=>{const sb=SUBDIV[g.key];if(!sb)return"";const S2=fpGroup(g.accts,a=>a.sub||"Not set").sort((a,b)=>b.clients-a.clients);
+    return S2.map(s=>`<tr class="fpsub"><td style="padding-left:28px">${esc(s.key)}</td><td class="small muted">${esc(sb.label)}</td>${FPC.map(c=>cell(s,c)).join("")}</tr>`).join("")};
+  const totC=fpGroup(accts,()=>"all")[0]||{clients:0,prospects:0,rev:0,orders:0,conv:0,top:[],nChains:0,n:0};
+  return`<div class="view" style="gap:14px">
+   <div class="panel afbar"><div class="fgrid">
+    <label class="f">Won in<select id="fpP">${[["all","All time"],["year","This year"],["12m","Last 12 months"],["90d","Last 90 days"]].map(([v,t])=>`<option value="${v}"${P.period===v?" selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="f">Region<select id="fpR">${opts(regionList(),P.region,"All regions")}</select></label>
+    <label class="f fsearch">Find<input id="fpQ" placeholder="Country or chain" value="${esc(P.q)}"></label></div></div>
+   <p class="small muted" style="margin:0">A <b>client</b> is an account with a Won lead in Lead Desk${P.period==="all"||P.period==="year"?", or one the 2026 Excel sheet records as bought":""}. A <b>prospect</b> has leads but nothing won. Each account counts once. Deleted, duplicate and rejected leads don't count.${P.period!=="all"&&P.period!=="year"?" The 2026 sheet has no dates, so it isn't used for this period.":""}</p>
+   <div class="kpis"><div class="kpi"><div class="l">Countries with clients</div><div class="v">${withClients.length}</div><div class="s">of ${C.filter(g=>g.key!=="Unknown").length} countries with accounts</div></div>
+    <div class="kpi"><div class="l">Clients</div><div class="v">${fmtN(clients.length)}</div><div class="s">${clients.filter(a=>a.lead).length} from Lead Desk · ${clients.filter(a=>!a.lead).length} from the 2026 sheet only</div></div>
+    <div class="kpi"><div class="l">Prospects</div><div class="v">${fmtN(pros.length)}</div><div class="s">accounts with leads, nothing won</div></div>
+    <div class="kpi"><div class="l">Hotel chains</div><div class="v">${chainsReg.length}</div><div class="s">${chainsReg.reduce((s,g)=>s+g.n,0)} hotels · ${chainsCli.length} chains are clients</div></div>
+    <div class="kpi"><div class="l">Independent with clients</div><div class="v">${ind?ind.clients:0}</div><div class="s">${ind?ind.n:0} independent / other accounts</div></div></div>
+   <div class="grid2" style="align-items:start"><div class="panel"><h3>Clients per country</h3><p class="small muted" style="margin:2px 0 10px">Top 15 countries by number of client accounts.</p>${hbars(bars,{fmt:fmtN,empty:"No clients for these filters."})}</div>
+    <div class="panel"><h3>Clients per chain</h3><p class="small muted" style="margin:2px 0 10px">Chains with the most client hotels.</p>${hbars(chainsCli.slice().sort((a,b)=>b.clients-a.clients).slice(0,15).map(g=>({label:g.key,v:g.clients,tip:`${g.key}: ${g.clients} client hotel${g.clients===1?"":"s"} of ${g.n}`})),{fmt:fmtN,empty:"No chain clients yet."})}</div></div>
+   <div class="panel"><div class="row" style="margin-bottom:8px"><h3>Clients by country</h3><span class="sp"></span>${can("lead.export")?`<button type="button" class="btn sm" id="fpX">Export to Excel</button>`:""}</div>
+    <div class="tw"><table class="pvt"><thead><tr>${FPC.map(c=>th("fpc",c)).join("")}</tr></thead><tbody>
+    ${cr.map(g=>{const op=!!P.ctryOpen[g.key];return`<tr class="click${op?" xopen":""}" data-fpc="${esc(g.key)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(ctryName(g.key))}</b></td><td class="small">${esc(g.region||"—")}</td>${FPC.map(c=>cell(g,c)).join("")}</tr>
+      ${op?subRows(g)+`<tr class="pvx"><td colspan="${FPC.length}">${fpAcctRows(g.accts.filter(a=>a.client),true)}${g.prospects?`<p class="small muted" style="margin:6px 0 0">${g.prospects} prospect account${g.prospects===1?"":"s"} not listed.</p>`:""}</td></tr>`:""}`}).join("")||`<tr><td colspan="${FPC.length}" class="empty">No accounts for these filters.</td></tr>`}
+    </tbody><tfoot><tr><td><b>All countries</b><div class="small muted">each account once</div></td><td></td>${FPC.map(c=>c.k==="nChains"?`<td class="num">${chainsCli.length}</td>`:cell(totC,c)).join("")}</tr></tfoot></table></div></div>
+   <div class="panel"><h3>Hotel chains</h3><p class="small muted" style="margin:2px 0 10px"><b>${chainsReg.length} chains</b> registered with <b>${fmtN(chainsReg.reduce((s,g)=>s+g.n,0))} hotels</b> in Lead Desk; ${chainsCli.length} of these chains are clients. The chain comes from the hotel's brand name${can("settings.manage")?" (correct it in Products & settings → Hotel chains)":""}.</p>
+    <div class="tw"><table class="pvt"><thead><tr>${FPH.map(c=>th("fph",c)).join("")}</tr></thead><tbody>
+    ${hrS.map(g=>{const op=!!P.chainOpen[g.key];return`<tr class="click${op?" xopen":""}" data-fph="${esc(g.key)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(g.key==="Independent"?"Independent / other":g.key)}</b></td>${FPH.map(c=>cell(g,c)).join("")}</tr>
+      ${op?`<tr class="pvx"><td colspan="${FPH.length}">${fpGroup(g.accts,a=>a.country).sort((a,b)=>b.clients-a.clients||b.n-a.n).map(cg=>`<div class="small" style="margin:8px 0 4px"><b>${esc(ctryName(cg.key))}</b> · ${cg.clients} client${cg.clients===1?"":"s"} of ${cg.n}</div>${fpAcctRows(cg.accts,false)}`).join("")}</td></tr>`:""}`}).join("")}
+    </tbody></table></div></div></div>`}
+function bindFootprint(m){const P=fpState();const set=(k,v)=>{P[k]=v;render()};
+  $("#fpP")&&($("#fpP").onchange=e=>set("period",e.target.value));$("#fpR")&&($("#fpR").onchange=e=>set("region",e.target.value));
+  const qi=$("#fpQ");if(qi)qi.oninput=()=>{clearTimeout(qi.t);qi.t=setTimeout(()=>{P.q=qi.value;render();const i=$("#fpQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},300)};
+  m.querySelectorAll("[data-fpc]").forEach(r=>r.onclick=()=>{P.ctryOpen[r.dataset.fpc]=!P.ctryOpen[r.dataset.fpc];render()});
+  m.querySelectorAll("[data-fph]").forEach(r=>r.onclick=()=>{P.chainOpen[r.dataset.fph]=!P.chainOpen[r.dataset.fph];render()});
+  m.querySelectorAll("[data-fpa]").forEach(r=>r.onclick=e=>{e.stopPropagation();const k=r.dataset.fpa;const ls=S.leads.filter(l=>accKey(l)===k).sort((a,b)=>(b.status==="Won")-(a.status==="Won")||reqDate(b).localeCompare(reqDate(a)));if(ls[0])openDrawer(ls[0].id);else toast("This account's purchase is in the 2026 sheet only; it has no lead in Lead Desk.")});
+  $("#fpX")?.addEventListener("click",exportFootprint)}
+async function exportFootprint(){if(!can("lead.export"))return;const b=$("#fpX");if(b){b.disabled=true;b.textContent="Preparing…"}
+  try{const accts=fpData();const X=await loadXLSX();const wb=X.utils.book_new();const P=fpState();
+    const C=fpGroup(accts,a=>a.country).sort((a,b)=>b.clients-a.clients);
+    const s1=[["Country","Region","Clients","Prospects","Conversion %","Won revenue (AED)","Orders","Top products sold","Chains with clients"]].concat(C.map(g=>[ctryName(g.key),guessRegion(g.key)||"",g.clients,g.prospects,Math.round(g.conv*1000)/10,Math.round(g.rev),g.orders,g.top.join(", "),g.nChains]));
+    const s2=[["Account","Country","Emirate / state","Chain","Chain source","Client source","Products bought","Won revenue (AED)","Orders","Last won","Engineer"]].concat(accts.filter(a=>a.client).sort((a,b)=>b.rev-a.rev).map(a=>[a.name,ctryName(a.country),a.sub||"",a.chain,a.chainHow==="manual"?"Set by Supervisor":a.chainHow==="detected"?"Detected from name":"",a.lead?"Lead Desk":"2026 sheet",[...a.prods].join(", "),Math.round(a.rev),a.won.length,a.lastWon||"",a.eng]));
+    const H=fpGroup(accts,a=>a.chain).sort((a,b)=>b.clients-a.clients);
+    const s3=[["Chain","Hotels in Lead Desk","Clients","Prospects","Countries","Won revenue (AED)","Products sold"]].concat(H.map(g=>[g.key,g.n,g.clients,g.prospects,g.nCountries,Math.round(g.rev),g.top.join(", ")]));
+    [[s1,"Countries"],[s2,"Client accounts"],[s3,"Chains"]].forEach(([d,n])=>{const ws=X.utils.aoa_to_sheet(d);ws["!cols"]=d[0].map((h,i)=>({wch:i===0?34:Math.max(12,h.length+2)}));X.utils.book_append_sheet(wb,ws,n)});
+    const name=`LeadDesk_Customer_Footprint_${ymd(new Date())}.xlsx`;const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+    window.__audit?.("exported","report",name,`Customer footprint: ${C.length} countries, ${s2.length-1} clients, ${H.length} chains (${P.period})`);toast(name+" is ready")}
+  catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code))}finally{const nb=$("#fpX");if(nb){nb.disabled=false;nb.textContent="Export to Excel"}}}
+/* Supervisor: Products & settings → Hotel chains */
+function chainsPanel(){if(!can("settings.manage"))return"";const L=chainList();const C=S.chainEd||(S.chainEd={q:""});
+  const accts=fpData();const big=accts.filter(a=>a.chain==="Independent").sort((a,b)=>b.client-a.client||b.leads.length-a.leads.length).slice(0,50);
+  const ov=Object.entries(S.settings.chainOverrides||{}).filter(([,c])=>c);const names=L.map(c=>c.name).sort((a,b)=>a.localeCompare(b));
+  return`<div class="panel" id="chainsPanel"><h3>Hotel chains</h3><p class="small muted" style="margin:2px 0 10px;max-width:90ch">Lead Desk finds a hotel's chain from the brand words in its name (longest match first). Edit the brand words below, add chains, or set a hotel's chain by hand; a hand-set chain always wins. Changes are recorded in the audit trail.</p>
+   <details><summary style="cursor:pointer"><b>Brand list</b> <span class="small muted">· ${L.length} chains, ${L.reduce((s,c)=>s+c.brands.length,0)} brand words</span></summary>
+    <div class="tw" style="margin-top:8px"><table><thead><tr><th style="width:200px">Chain</th><th>Brand words (comma separated)</th><th></th></tr></thead><tbody>
+    ${L.map((c,i)=>`<tr><td><input data-chn="${i}" value="${esc(c.name)}" maxlength="60"></td><td><input data-chb="${i}" value="${esc(c.brands.join(", "))}"></td><td><button type="button" class="btn sm" data-chdel="${i}">Remove</button></td></tr>`).join("")}
+    <tr><td><input id="chNewN" placeholder="New chain" maxlength="60"></td><td><input id="chNewB" placeholder="Brand words, e.g. Brand One, Brand Two"></td><td></td></tr></tbody></table></div>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn pri" id="chSave">Save brand list</button>${S.settings.chains?`<button type="button" class="btn" id="chReset">Restore the standard list</button>`:""}<span class="small" id="chMsg"></span></div></details>
+   <details style="margin-top:10px"${C.open?" open":""} id="chIndD"><summary style="cursor:pointer"><b>Accounts marked Independent</b> <span class="small muted">· the 50 largest, clients first</span></summary>
+    <div class="tw" style="margin-top:8px"><table><thead><tr><th>Account</th><th>Country</th><th>Status</th><th class="num">Leads</th><th style="width:240px">Chain</th></tr></thead><tbody>
+    ${big.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(ctryName(a.country))}</td><td>${a.client?"Client":"Prospect"}</td><td class="num">${a.leads.length}</td><td><select data-chset="${esc(a.key)}"><option value="">Independent</option>${names.map(n=>`<option>${esc(n)}</option>`).join("")}</select></td></tr>`).join("")||`<tr><td colspan="5" class="empty">No independent accounts.</td></tr>`}</tbody></table></div></details>
+   ${ov.length?`<details style="margin-top:10px"><summary style="cursor:pointer"><b>Set by hand (${ov.length})</b></summary><div class="tw" style="margin-top:8px"><table><thead><tr><th>Account</th><th>Chain</th><th></th></tr></thead><tbody>
+    ${ov.map(([k,c])=>`<tr><td>${esc(accts.find(a=>a.key===k)?.name||allAccounts()[k]?.name||k)}</td><td>${esc(c)}</td><td><button type="button" class="btn sm" data-chun="${esc(k)}">Use detection</button></td></tr>`).join("")}</tbody></table></div></details>`:""}</div>`}
+function bindChains(m){if(!$("#chainsPanel"))return;const saveS=async(b,msg)=>{try{await S.db.doc("config/settings").update(b);Object.assign(S.settings,b);toast(msg);render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}};
+  $("#chSave")?.addEventListener("click",()=>{const L=[];const seen=new Set();m.querySelectorAll("[data-chn]").forEach(i=>{const n=i.value.trim().replace(/\s+/g," ");const br=m.querySelector(`[data-chb="${i.dataset.chn}"]`).value.split(",").map(x=>x.trim()).filter(Boolean);if(n&&!seen.has(nk(n))){seen.add(nk(n));L.push({name:n,brands:[...new Set(br)]})}});
+    const nn=$("#chNewN").value.trim(),nb=$("#chNewB").value.split(",").map(x=>x.trim()).filter(Boolean);if(nn){if(seen.has(nk(nn))){$("#chMsg").innerHTML=`<span style="color:var(--bad)">${esc(nn)} is already in the list.</span>`;return}L.push({name:nn,brands:nb.length?nb:[nn]})}
+    saveS({chains:L},"Brand list saved")});
+  $("#chReset")?.addEventListener("click",()=>saveS({chains:null},"Standard brand list restored"));
+  m.querySelectorAll("[data-chdel]").forEach(b=>b.onclick=()=>{const L=chainList().filter((_,i)=>i!==+b.dataset.chdel);saveS({chains:L},"Chain removed")});
+  m.querySelectorAll("[data-chset]").forEach(s=>s.onchange=()=>{if(!s.value)return;S.chainEd.open=true;saveS({chainOverrides:Object.assign({},S.settings.chainOverrides||{},{[s.dataset.chset]:s.value})},"Chain set to "+s.value)});
+  m.querySelectorAll("[data-chun]").forEach(b=>b.onclick=()=>{const o=Object.assign({},S.settings.chainOverrides||{});o[b.dataset.chun]=null;saveS({chainOverrides:o},"Chain will be detected from the name")});
+  $("#chIndD")?.addEventListener("toggle",e=>{S.chainEd.open=e.target.open})}
+
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
-const mgViews=()=>MG_VIEWS.concat(can("report.products")?[["prod","Products"]]:[]);
+const mgViews=()=>MG_VIEWS.concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
@@ -1910,7 +2049,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
   if(T.leads&&T.stageTracked/T.leads<.5)gaps.push(`Only ${fmtN(T.stageTracked)} of ${fmtN(T.leads)} leads have meeting and quotation stages recorded (leads imported from the Excel sheet only carry Assigned or Won), so "Converted" is understated until engineers log meetings in Lead Desk.`);
   {const known=new Set(spList(true).map(x=>nk(x.name)));const odd=E.filter(x=>!known.has(nk(x.name))&&!sharedOwners(x.name));if(odd.length)gaps.push(`${odd.reduce((a,x)=>a+x.leads,0)} leads are assigned to ${odd.length} name${odd.length===1?"":"s"} not on the Sales engineer list (${odd.slice(0,4).map(x=>"“"+x.name+"”").join(", ")}${odd.length>4?"…":""}), so those leads are ranked separately. Reassign them, or use Hand over in Products & settings, to merge them into the right engineer.`)}
   if(!S.leads.some(l=>l.status==="Lost"))gaps.push(`No leads are marked Lost yet, so conversion is measured against all leads, not only closed ones.`);
-  m.innerHTML=`<section class="view mg">
+  m.innerHTML=`<section class="view mg mg-v-${MV}">
    <div class="vhead"><div><h2>Management</h2><p>Team performance and revenue. Every figure follows the filters.</p></div>
     <div class="row">${can("report.deck")?`<button class="btn pri" id="deckBtn" type="button" title="Builds a PowerPoint from the figures on this page, for the filters selected">Create presentation</button>`:""}${S.downloads&&can("lead.export")?`<button class="btn" id="csvBtn">Export leads CSV</button>`:""}</div></div>
    ${filterBar()}
@@ -1983,10 +2122,11 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-ops" data-sec="ops"></div>
-   <div id="mg-prod" data-sec="prod"></div>
+   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div>
   </section>`;
   mgmtOps($("#mg-ops"));
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
+  if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
   $("#goDq")?.addEventListener("click",()=>{S.tab="bo";S.boDqOpen=true;try{history.replaceState(null,"","#bo")}catch(_){}render();setTimeout(()=>$("#boDq")?.scrollIntoView({block:"start"}),0)});
   bindFilters(m);bindSort(m);
   m.querySelectorAll("[data-sec]").forEach(x=>{x.hidden=x.dataset.sec!==MV});
@@ -2231,6 +2371,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
   ${territoryPanel()}
   ${subTerrPanel()}
+  ${chainsPanel()}
   <div class="grid2">
    <div class="panel"><h3>Product catalog <span class="chip">${prods.filter(p=>p.active!==false).length} active</span></h3>
      <form class="row" id="addProd" style="margin-bottom:6px"><input id="np" placeholder="New product name" style="flex:1"><label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="npRep" style="width:auto">Repeatable</label><button class="btn pri">Add product</button></form>
@@ -2266,6 +2407,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
+  bindChains(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
