@@ -212,6 +212,11 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .qli{display:grid;gap:6px}.qlr{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
 .qtot{display:grid;gap:2px;justify-items:end;font-size:13px;margin-top:2px}.qtot>div{display:flex;gap:14px}.qtot span{color:var(--muted)}
 .chip.ups{background:var(--accent-soft);color:var(--accent)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.imdrop{display:grid;gap:8px;border:2px dashed var(--line);text-align:left}.imdrop.on{border-color:var(--accent);background:var(--accent-soft)}
+.imc{display:grid;gap:8px;padding:12px 14px}.imc.imoff{opacity:.62}.imh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.imb{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start}.imb>div{align-content:start}.imh .mono{white-space:nowrap}.imf{display:grid;gap:8px;align-content:start}.imf .f{min-width:0}
+@media(max-width:720px){.imb{grid-template-columns:1fr}}
 .cfm{position:fixed;inset:0;background:rgba(10,16,24,.5);z-index:40;display:grid;place-items:center;padding:16px}
 .cfm>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;display:grid;gap:12px}
 .cfm h3{margin:0}
@@ -1315,7 +1320,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
      <div class="row" style="margin-top:12px"><button class="btn pri" id="v-save" ${bad?"":""}>Verify and assign</button><button class="btn" id="v-info">Request info</button><button class="btn" id="v-dup">Duplicate</button><button class="btn bad" id="v-rej">Reject</button></div></div>`;
     $("#v-save").onclick=()=>{const who=$("#v-sp").value;if(!who){toast("Choose a sales engineer");return}const t=nowISO();
       const sub=S.vSub&&S.vSub.n?{subdivision:S.vSub.n}:{};S.vSubN=null;
-      patch(l,Object.assign({assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t},sub),`Verified and assigned to ${who}${sub.subdivision?" ("+sub.subdivision+")":""}`,"Assigned")};
+      patch(l,Object.assign({assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t},sub),`Verified and assigned to ${who}${sub.subdivision?" ("+sub.subdivision+")":""}${l.quote?" · quotation already sent":""}`,l.quote?"Quotation Sent":"Assigned")};
     $("#v-sub")?.addEventListener("change",e=>{S.vSubN=e.target.value;const o=territoryOf(l.country,l.region,{c:S.vSub.c,n:e.target.value}).owner;const keep=$("#v-sp").value;drawActions(l);if(o&&$("#v-sp"))$("#v-sp").value=o;else if($("#v-sp"))$("#v-sp").value=keep;$("#v-sp")?.dispatchEvent(new Event("change"))});
     $("#v-info").onclick=()=>{S.drawer.mode="info";drawActions(l)};$("#v-dup").onclick=()=>{S.drawer.mode="dup";drawActions(l)};$("#v-rej").onclick=()=>{S.drawer.mode="rej";drawActions(l)};
     const tw=()=>{const w=$("#v-sp").value,o=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);$("#v-terr").innerHTML=o&&w&&nk(w)!==nk(o)?`<div class="notice warn" style="padding:6px 10px">${esc(territoryOf(l.country,l.region,S.vSub||subOf(l)).area)} is ${esc(o)}'s territory. Assign to ${esc(w)} only if that's agreed.</div>`:""};$("#v-sp").addEventListener("change",tw);tw();return}}
@@ -2154,7 +2159,7 @@ async function saveRefs(next,msg){try{if(S.refsExists)await S.db.doc("config/ref
   catch(e){toast(/permission|42501|row-level/i.test(e.message||"")?"Only a Lead Manager or Supervisor can change reference sites (and supabase/18_focus.sql must be run).":"Couldn't save: "+(e.message||e.code))}}
 /* ---------- the Focus tab ---------- */
 function focusState(){const F=S.focus||(S.focus={eng:viewAll()?"":S.myEng,open:{act:true,fc:true,xs:true,ch:true,ref:false},refQ:"",refP:""});if(!viewAll())F.eng=S.myEng;return F}
-function renderFocus(m){const F=focusState();const eng=F.eng;const team=viewAll();const mine=l=>!eng||l.assignedTo===eng;const ls=S.leads.filter(l=>!l.deleted);
+function renderFocus(m){if(S.imp)return renderImport(m);const F=focusState();const eng=F.eng;const team=viewAll();const mine=l=>!eng||l.assignedTo===eng;const ls=S.leads.filter(l=>!l.deleted);
   const flagged=ls.filter(l=>mine(l)&&ruleFlags(l).length).sort((a,b)=>ruleFlags(b).length-ruleFlags(a).length||assignedOn(a).localeCompare(assignedOn(b)));
   const fcl=ls.filter(l=>mine(l)&&fcEligible(l)).sort((a,b)=>(a.quote?.targetDate||"9").localeCompare(b.quote?.targetDate||"9")||leadValue(b)-leadValue(a));
   const m0=ymKey(todayISO());const fr=forecastFor(ls.filter(mine),m0);const FT=fr.reduce((o,r)=>({c:o.c+r.commit,b:o.b+r.best}),{c:0,b:0});
@@ -2191,7 +2196,7 @@ function renderFocus(m){const F=focusState();const eng=F.eng;const team=viewAll(
     ${RF.map(v=>`<tr><td>${esc(v.name)}</td><td>${esc(ctryName(ctryOf(v.country)))}</td><td class="small">${esc(v.products.join(", "))}</td><td class="small">${esc(v.note||"—")}</td><td class="small">${fmtD(v.at)} · ${esc(v.by||"")}</td>${can("account.manage")?`<td class="num"><button type="button" class="btn sm" data-rfdel="${esc(v.key)}">Remove</button></td>`:""}</tr>`).join("")||`<tr><td colspan="6" class="empty">No reference sites${F.refP||F.refQ?" for these filters":" yet"}.</td></tr>`}</tbody></table></div>
     ${can("account.manage")?`<div class="dqform" style="margin-top:10px"><label class="f">Client hotel<select id="rfA">${opts(cli.map(a=>a.key),"","Choose a client")}</select></label><label class="f">Products<input id="rfPs" placeholder="Filled from what they bought"></label><label class="f">Contact / note<input id="rfN" maxlength="200" placeholder="e.g. GM Mr X happy to take calls"></label><div class="row" style="align-self:end"><button type="button" class="btn pri" id="rfAdd">Add reference</button></div></div>`:""}`;
   const fn=flagged.length;
-  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Focus</h2><p>${eng?esc(eng)+": ":""}what needs doing today, this month's forecast, and where to grow.</p></div>
+  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Focus</h2><p>${eng?esc(eng)+": ":""}what needs doing today, this month's forecast, and where to grow.</p></div>${can("lead.edit_all")||(can("lead.edit_own")&&S.myEng)?`<div class="row"><button type="button" class="btn" id="fImp" title="Add quotations that were emailed but not entered">Import quotations</button></div>`:""}
     ${team?`<div class="row"><label class="f fsm" style="min-width:200px">Engineer<select id="fEng"><option value="">Whole team</option>${sp.map(n=>`<option${n===eng?" selected":""}>${esc(n)}</option>`).join("")}</select></label></div>`:""}</div>
    <div class="kpis"><div class="kpi"><div class="l">Leads needing action</div><div class="v" style="${fn?"color:var(--bad)":""}">${fn}</div><div class="s">contact, meeting, next step or quiet</div></div>
     ${myTargetKpi(eng)}<div class="kpi"><div class="l">Commit ${ymLabel(m0,true)}</div><div class="v">${fmtAED(FT.c)}</div><div class="s">best case ${fmtAED(FT.b)}</div></div>
@@ -2203,7 +2208,7 @@ function renderFocus(m){const F=focusState();const eng=F.eng;const team=viewAll(
    ${sec("ch","Hotel chains to win",ch.reduce((s,c)=>s+c.open.length,0),chBody)}
    ${sec("ref","Reference sites",Object.keys(refs()).length,refBody)}</section>`;
   m.querySelectorAll("details.fsec").forEach(d=>d.ontoggle=()=>{F.open[d.dataset.sec]=d.open});
-  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});
+  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});$("#fImp")?.addEventListener("click",()=>{impState();render();scrollTo(0,0)});
   m.querySelectorAll("[data-feng]").forEach(r=>r.onclick=()=>{F.eng=r.dataset.feng;render();scrollTo(0,0)});
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{e.stopPropagation();openDrawer(b.dataset.open)});
   m.querySelectorAll("[data-flog]").forEach(b=>b.onclick=()=>{openDrawer(b.dataset.flog);S.drawer.mode="contact";drawDrawer()});
@@ -2287,7 +2292,7 @@ function myTargetKpi(eng){if(!eng)return"";const y=new Date().getFullYear();cons
 let PDFJS_P=null;
 function loadPDFJS(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);return PDFJS_P||(PDFJS_P=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
   s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)};s.onerror=()=>{PDFJS_P=null;rej(new Error("Couldn't load the PDF reader. Check the internet connection and try again."))};document.head.appendChild(s)}))}
-async function pdfLines(file){const lib=await loadPDFJS();const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const out=[];
+async function pdfLines(file){const lib=await loadPDFJS();const doc=await lib.getDocument({data:file instanceof Uint8Array?file.slice():new Uint8Array(await file.arrayBuffer())}).promise;const out=[];
   for(let p=1;p<=Math.min(doc.numPages,15);p++){const pg=await doc.getPage(p);const tc=await pg.getTextContent();const rows=[];
     for(const it of tc.items){if(!it.str||!it.str.trim())continue;const x=it.transform[4],y=it.transform[5];let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r)rows.push(r={y,items:[]});r.items.push({x,w:it.width||0,s:it.str})}
     rows.sort((a,b)=>b.y-a.y);let prev=null;
@@ -2310,7 +2315,7 @@ function parseQuote(L){const T=L.map(l=>l.t);const R={lines:[],totals:[],warn:[]
   if(!R.date){const i=idx(/\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}/i);if(i>=0)R.date=qrDate(T[i])}
   const ai=idx(/^\s*Kind\s*Att(n|ention)/i);
   if(qi>=0&&ai>qi){const blk=T.slice(qi+1,ai).map(s=>s.trim()).filter(Boolean);R.client=blk[0]||"";R.address=blk.slice(1);const last=blk[blk.length-1]||"";const c=areaOf(last).country||areaOf((last.split(",").pop()||"").trim()).country;R.country=c||""}
-  if(ai>=0){R.contact=(T[ai].match(/Kind\s*Att(?:n|ention)\.?\s*:?\s*(.+)/i)||[])[1]?.trim()||"";const nx=(T[ai+1]||"").trim();if(nx&&!/^(Subject|Reference|Dear)/i.test(nx)&&nx.length<70)R.title=nx}
+  if(ai>=0){R.contact=(T[ai].match(/Kind\s*Att(?:n|ention)\.?\s*:?\s*(.+)/i)||[])[1]?.trim()||"";const nx=(T[ai+1]||"").trim();if(nx&&!/^(Subject|Reference|Dear)/i.test(nx)&&nx.length<70&&nk(nx)!==nk(R.client||""))R.title=nx}
   const si=idx(/^\s*Subject\s*:/i);if(si>=0){let s=T[si].replace(/^\s*Subject\s*:\s*/i,"").trim();for(let i=si+1;i<si+3&&i<T.length;i++){const x=T[i].trim();if(!x||/^(Reference|Dear)/i.test(x))break;s+=" "+x}R.subject=s}
   const ci=idx(/Commercial\s+Proposal|Price\s+Schedule|Pricing/i);const from=ci>=0?ci:0;
   const curM=T.slice(from,from+8).join(" ").match(/\((USD|AED|EUR|GBP|SAR|INR|MYR|QAR|OMR|KWD|BHD|ZAR|[A-Z]{3})\)/);R.currency=curM?curM[1]:"";
@@ -2369,6 +2374,164 @@ function qpdfShow(l){const R=S.qpdf;const O=$("#qpdfOut");if(!R||!O)return;const
 function qpdfExtra(l){const R=S.qpdf;if(!R||R.leadId!==l.id)return{q:{},lead:{}};
   const q={lines:R.lines.map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})),source:"Salesforce PDF",createdBy:R.by||"",createdByTitle:R.byTitle||"",createdByEmail:R.byEmail||"",validUntil:R.validUntil||"",paymentTerms:R.payment||"",quoteContact:R.contact?{name:R.contact,title:R.title||""}:null,discount:R.discount||0,subject:R.subject||""};
   const lead={};if($("#qpdfCt")?.checked&&R.contact)lead.contact=Object.assign({},l.contact||{},{name:R.contact,title:R.title||(l.contact||{}).title||""});return{q,lead}}
+
+/* ======================= IMPORT QUOTATIONS FROM EMAIL (Focus → Import quotations) =======================
+   For quotations already emailed to clients but never entered. Saved Outlook emails (.msg), .eml files or the quote
+   PDFs are read on this device (SheetJS CFB for .msg, pdf.js for the PDF). Nothing is uploaded or stored: only the
+   figures are saved on the lead. Each quote is matched to a lead:
+     quote number already in Lead Desk → skipped · open lead for the same client → quotation added (Quotation Sent)
+     · no open lead → new outbound lead, waiting for Lead Manager approval, with the quotation on it.
+   Engineers import their own quotes; Lead Managers and Supervisors (lead.edit_all) import for anyone. */
+const impU16=b=>new TextDecoder("utf-16le").decode(b).replace(/\0+$/,"");
+const impU8=b=>new TextDecoder("windows-1252").decode(b).replace(/\0+$/,"");
+function msgParse(cfb){const F={};cfb.FullPaths.forEach((p,i)=>{const e=cfb.FileIndex[i];if(e&&e.type===2&&e.content)F[p.replace(/^[^\/]*\//,"")]=e.content instanceof Uint8Array?e.content:Uint8Array.from(e.content)});
+  const one=(root,hdr)=>{const str=id=>{const w=F[root+"__substg1.0_"+id+"001F"];if(w)return impU16(w).trim();const a=F[root+"__substg1.0_"+id+"001E"];return a?impU8(a).trim():""};
+    const sub=(d,id)=>{const w=F[d+"__substg1.0_"+id+"001F"];if(w)return impU16(w).trim();const a=F[d+"__substg1.0_"+id+"001E"];return a?impU8(a).trim():""};
+    const props=(d,h)=>{const b=F[d+"__properties_version1.0"];const o={};if(!b)return o;const dv=new DataView(b.buffer,b.byteOffset,b.byteLength);
+      for(let i=h;i+16<=b.length;i+=16){const type=dv.getUint16(i,true),id=dv.getUint16(i+2,true);o[id]={type,lo:dv.getUint32(i+8,true),hi:dv.getUint32(i+12,true)}}return o};
+    const ft=p=>p&&p.type===0x40?new Date((p.hi*4294967296+p.lo)/1e4-11644473600000):null;
+    const mail=(d,ids)=>{for(const id of ids){const v=sub(d,id);if(/@/.test(v)&&!/^\/o=/i.test(v))return v.toLowerCase()}return""};
+    const dirs=re=>[...new Set(Object.keys(F).filter(k=>k.startsWith(root)).map(k=>(k.slice(root.length).match(re)||[])[1]).filter(Boolean))].map(d=>root+d);
+    const top=props(root,hdr);const sent=ft(top[0x39])||ft(top[0x0E06]);
+    const rec=dirs(/^(__recip_version1\.0_#[0-9A-F]+\/)/i).map(d=>({name:sub(d,"3001"),email:mail(d,["39FE","5FF7","3003"]),type:(props(d,8)[0x0C15]||{}).lo||1})).filter(r=>r.email);
+    const att=[];dirs(/^(__attach_version1\.0_#[0-9A-F]+\/)/i).forEach(d=>{const data=F[d+"__substg1.0_37010102"];const name=sub(d,"3707")||sub(d,"3704");
+      if(data)att.push({name,mime:sub(d,"370E"),data});else if(Object.keys(F).some(k=>k.startsWith(d+"__substg1.0_3701000D/")))att.push(...one(d+"__substg1.0_3701000D/",24).att)});
+    return{subject:str("0037"),fromName:str("0C1A")||str("0042"),from:mail(root,["5D01","0C1F","0065"]),sent:sent&&!isNaN(sent)?sent.toISOString():"",to:rec.filter(r=>r.type===1),cc:rec.filter(r=>r.type===2),att}};
+  return one("",32)}
+function emlParse(txt){const split=raw=>{const i=raw.search(/\r?\n\r?\n/);const h=i<0?raw:raw.slice(0,i),b=i<0?"":raw.slice(i).replace(/^\r?\n\r?\n/,"");const H={};
+    h.replace(/\r?\n[ \t]+/g," ").split(/\r?\n/).forEach(l=>{const m=l.match(/^([\w-]+):\s*(.*)$/);if(m)H[m[1].toLowerCase()]=m[2]});return{H,b}};
+  const dec=s=>String(s||"").replace(/=\?([^?]+)\?([BQ])\?([^?]*)\?=/gi,(_,cs,e,t)=>{try{const bin=e.toUpperCase()==="B"?atob(t):t.replace(/_/g," ").replace(/=([0-9A-F]{2})/gi,(_,h)=>String.fromCharCode(parseInt(h,16)));return new TextDecoder(cs).decode(Uint8Array.from(bin,c=>c.charCodeAt(0)))}catch(x){return t}});
+  const addrs=s=>dec(s).split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(x=>{const m=x.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>/);return m?{name:m[1].trim(),email:m[2].trim().toLowerCase()}:{name:"",email:x.trim().toLowerCase()}}).filter(a=>/@/.test(a.email));
+  const top=split(txt);const att=[];
+  const walk=(p,depth)=>{if(depth>6)return;const ct=p.H["content-type"]||"text/plain";const bd=(ct.match(/boundary="?([^";]+)"?/i)||[])[1];
+    if(/^multipart\//i.test(ct)&&bd){p.b.split("--"+bd).slice(1).forEach(seg=>{if(!/^--/.test(seg))walk(split(seg.replace(/^\r?\n/,"")),depth+1)});return}
+    if(/^message\/rfc822/i.test(ct)){walk(split(p.b),depth+1);return}
+    const name=dec(((p.H["content-disposition"]||"").match(/filename="?([^";]+)"?/i)||[])[1]||(ct.match(/name="?([^";]+)"?/i)||[])[1]||"");
+    if((/application\/(pdf|octet-stream)/i.test(ct)&&/\.pdf$/i.test(name))||/application\/pdf/i.test(ct)){if(/base64/i.test(p.H["content-transfer-encoding"]||""))att.push({name,mime:"application/pdf",data:Uint8Array.from(atob(p.b.replace(/[^A-Za-z0-9+\/=]/g,"")),c=>c.charCodeAt(0))})}};
+  walk(top,0);const d=new Date(top.H.date||"");const fr=addrs(top.H.from||"")[0]||{};
+  return{subject:dec(top.H.subject||""),fromName:fr.name||"",from:fr.email||"",sent:isNaN(d)?"":d.toISOString(),to:addrs(top.H.to||""),cc:addrs(top.H.cc||""),att}}
+/* read one dropped file → one row per quotation PDF found */
+async function impRead(file){const n=file.name||"file";const base={file:n};
+  try{let em=null,pdfs=[];
+    if(/\.msg$/i.test(n)){const X=await loadXLSX();em=msgParse(X.CFB.read(new Uint8Array(await file.arrayBuffer()),{type:"array"}))}
+    else if(/\.eml$/i.test(n))em=emlParse(await file.text());
+    else if(/\.pdf$/i.test(n)||file.type==="application/pdf")pdfs=[{name:n,data:new Uint8Array(await file.arrayBuffer())}];
+    else return[Object.assign(base,{err:"Not an Outlook email (.msg), an .eml file or a PDF."})];
+    if(em)pdfs=em.att.filter(a=>/pdf/i.test(a.mime||"")||/\.pdf$/i.test(a.name||""));
+    if(!pdfs.length)return[Object.assign(base,{em,err:"No PDF quotation is attached to this email."})];
+    const out=[];for(const p of pdfs){let q;try{q=parseQuote(await pdfLines(p.data))}catch(e){out.push(Object.assign({},base,{em,pdf:p.name,err:"Couldn't read "+(p.name||"the PDF")+": "+(e.message||e)}));continue}
+      if(!q.no&&q.total==null&&!q.lines.length)continue;out.push(Object.assign({},base,{em,pdf:p.name,q}))}
+    return out.length?out:[Object.assign(base,{em,err:"The attached PDF doesn't look like a quotation (no quote number or total found)."})]}
+  catch(e){return[Object.assign(base,{err:"Couldn't read this file: "+(e.message||e)})]}}
+const impQN=s=>String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+function impDup(no){const k=impQN(no);if(!k)return null;return S.leads.find(l=>!l.deleted&&(impQN(l.quote?.no)===k||(l.quoteHistory||[]).some(h=>impQN(h.no)===k)))||null}
+function impEngFrom(r){const sp=spNames();const tries=[r.em?.fromName,r.q?.by].filter(Boolean);
+  for(const t of tries){const n=nk(t);const hit=sp.find(e=>nk(e)===n)||sp.find(e=>n.split(" ")[0]===nk(e).split(" ")[0]&&nk(e).split(" ")[0].length>2);if(hit)return hit}return""}
+function impAccount(r){const own=new Set([emailDomain(r.em?.from),emailDomain(S.myEmail)].filter(Boolean));
+  const ext=[...(r.em?.to||[]),...(r.em?.cc||[])].map(a=>a.email).filter(e=>emailDomain(e)&&!own.has(emailDomain(e)));
+  r.contactEmail=((r.em?.to||[]).find(a=>ext.includes(a.email))||{}).email||ext[0]||"";
+  for(const d of [...new Set(ext.map(emailDomain))]){const k=Object.keys(S.accounts).find(k=>!S.accounts[k].deleted&&S.accounts[k].domain===d)||S.leads.find(l=>!l.deleted&&emailDomain(l.contact?.email)===d)?.accountKey;if(k)return{key:k,by:"email address"}}
+  const f=findAccounts(r.q?.client||"",3)[0];if(f&&f.score>=.9)return{key:f.key,by:"client name"};return null}
+const impProducts=r=>{const ps=[...new Set((r.q?.lines||[]).map(x=>x.product).filter(Boolean))];if(!ps.length){const p=qrProduct(r.q?.subject||r.em?.subject||"");if(p)ps.push(p)}return ps};
+function impOpenLeads(r){if(!r.acc)return[];return S.leads.filter(l=>!l.deleted&&accKey(l)===r.acc.key&&OPEN.includes(l.status)&&canAct(l)&&(!r.eng||!l.assignedTo||l.assignedTo===r.eng||!isSales()))}
+function impAuto(r){if(r.err)return r;const fx=S.settings.fx||{AED:1};r.cur=fx[r.q.currency]?r.q.currency:"AED";r.curWarn=r.q.currency&&!fx[r.q.currency]?r.q.currency:"";r.amt=r.q.total;
+  r.eng=isSales()?S.myEng:impEngFrom(r);r.acc=impAccount(r);r.ps=impProducts(r);r.dup=impDup(r.q.no);
+  if(r.dup){r.match="skip";return r}
+  const ls=impOpenLeads(r);const ov=l=>productsOf(l).some(p=>r.ps.some(x=>nk(x)===nk(p)));
+  const best=ls.filter(ov).sort((a,b)=>(b.status==="Quotation Sent")-(a.status==="Quotation Sent")||(b.updatedAt||"").localeCompare(a.updatedAt||""))[0]||(ls.length===1?ls[0]:null);
+  r.match=best?best.id:"new";r.inc=true;return r}
+function impState(){return S.imp||(S.imp={rows:[],busy:0,tgt:"",fu:ymd(new Date(Date.now()+7*864e5)),done:false})}
+function impCheck(r){if(r.err||r.dup||r.match==="skip")return"";if(!(+r.amt>0))return"Enter the quoted amount.";if(!r.tgt)return"Set the target date (when you expect the order).";
+  if(r.q.date&&r.tgt<r.q.date)return"The target date can't be before the quotation date.";
+  if(r.match==="new"){if(!r.eng)return"Choose the sales engineer.";if(!r.ps.length)return"Choose the product.";const k=r.acc?r.acc.key:keyOf(r.q.client);
+    const bl=r.ps.filter(p=>productState(k,p).state==="blocked");if(bl.length)return`${r.acc?esc(allAccounts()[k]?.name||""):"This client"} already has an open lead for ${bl.join(", ")}. Add the quotation to that lead instead.`;if(!(r.q.client||r.acc))return"The client name is missing on the quotation."}
+  return""}
+function renderImport(m){const I=impState();const sp=spNames();const lm=!isSales();const rows=I.rows;
+  const ready=rows.filter(r=>r.inc&&!r.res&&!r.err&&!r.dup&&r.match!=="skip"&&!impCheck(r));const todo=rows.filter(r=>r.inc&&!r.res&&!r.err&&!r.dup&&r.match!=="skip");
+  const card=(r,i)=>{const q=r.q||{};const em=r.em;const chk=impCheck(r);const ls=r.err?[]:impOpenLeads(r);const acc=r.acc?allAccounts()[r.acc.key]:null;
+    const status=r.res?`<span class="chip ok">✓ ${esc(r.res)}</span>`:r.err?`<span class="chip bad">Can't import</span>`:r.dup?`<span class="chip">Already in Lead Desk</span>`:r.match==="skip"?`<span class="chip">Skipped</span>`:chk?`<span class="chip warn">Needs a detail</span>`:`<span class="chip ok">Ready</span>`;
+    const emBox=em?`<div class="small"><b>${esc((em.subject||"").replace(/^\s*((re|aw|fw|fwd|wg|tr)\s*:\s*)+/i,"")||"(no subject)")}</b></div><div class="small muted">From ${esc(em.fromName||em.from||"—")}${em.sent?" · sent "+fmtD(em.sent):""}${r.contactEmail?` · to ${esc(r.contactEmail)}`:""}</div>`:`<div class="small"><b>${esc(r.file)}</b></div>`;
+    if(r.err)return`<div class="imc panel" data-imr="${i}"><div class="imh"><span class="small mono muted">${esc(r.file)}</span>${status}</div>${emBox}<div class="notice bad" style="padding:6px 10px">${esc(r.err)}</div></div>`;
+    const dis=r.res||r.dup?" disabled":"";
+    const prodSel=!r.ps.length&&r.match==="new"?`<label class="f fsm">Product <span class="req">*</span><select data-imp="${i}">${opts(prodList(false).map(p=>p.name),"","Choose")}</select></label>`:"";
+    return`<div class="imc panel${r.res||r.dup||r.match==="skip"?" imoff":""}" data-imr="${i}">
+      <div class="imh"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-iminc="${i}"${r.inc&&!r.dup?" checked":""}${dis}> <span class="mono">${esc(q.no||"No quote number")}</span></label>${status}</div>
+      <div class="imb"><div style="display:grid;gap:6px;min-width:0">${emBox}
+        <div><b>${esc(q.client||"Client not found")}</b>${q.country?` <span class="small muted">· ${esc(q.country)}</span>`:""}<div class="small muted">${q.contact?esc(q.contact)+(q.title?" · "+esc(q.title):""):"No contact on the quote"}${q.date?" · quoted "+fmtD(q.date):""}${q.by?" · prepared by "+esc(q.by):""}</div></div>
+        <div class="small">${r.ps.length?r.ps.map(p=>`<span class="chip">${esc(p)}</span>`).join(" "):`<span class="muted">No product recognised</span>`} ${q.lines?.length?`<span class="muted">· ${q.lines.length} line${q.lines.length===1?"":"s"}</span>`:""}</div>
+        ${r.dup?`<div class="small muted">Quotation ${esc(q.no)} is already on <a href="#" data-imopen="${esc(r.dup.id)}" class="mono">${esc(r.dup.ref)}</a> (${esc(r.dup.accountName)}, ${esc(r.dup.status)}). Nothing to import.</div>`:""}
+        ${r.curWarn?`<div class="small" style="color:var(--warn)">Currency ${esc(r.curWarn)} isn't in the exchange-rate list. Choose the currency.</div>`:""}
+        ${(q.warn||[]).filter(w=>!/No product lines/.test(w)||!r.ps.length).map(w=>`<div class="small" style="color:var(--warn)">${esc(w)}</div>`).join("")}</div>
+       ${r.dup?"":`<div class="imf">
+        <div class="row" style="gap:6px;flex-wrap:nowrap"><label class="f fsm" style="flex:1">Quoted amount<input type="number" min="0" step="0.01" data-ima="${i}" value="${r.amt??""}"${dis}></label><label class="f fsm" style="width:86px">Currency<select data-imc="${i}"${dis}>${opts(Object.keys(S.settings.fx||{AED:1}),r.cur)}</select></label></div>
+        <div class="small muted" style="margin-top:-4px">${+r.amt>0?"= "+fmtAED(toAED(r.amt,r.cur)):""}</div>
+        <label class="f fsm">Lead<select data-imm="${i}"${dis}>${ls.map(l=>`<option value="${esc(l.id)}"${r.match===l.id?" selected":""}>Add to ${esc(l.ref)} · ${esc(productsOf(l).join(", "))} · ${esc(l.status)}${l.quote?" (replaces "+esc(l.quote.no||"current quote")+")":""}</option>`).join("")}
+          <option value="new"${r.match==="new"?" selected":""}>Create a new lead${lm?"":" (Lead Manager approves it)"}</option><option value="skip"${r.match==="skip"?" selected":""}>Don't import</option></select></label>
+        <div class="small muted" style="margin-top:-4px">${r.match==="new"?(acc?`Client found by ${esc(r.acc.by)}: ${esc(acc.name)}`:`New client: ${esc(q.client||"")}`):r.acc&&acc?`Matched ${esc(acc.name)} by ${esc(r.acc.by)}`:""}</div>
+        ${prodSel}
+        <label class="f fsm">Target date <span class="req">*</span><input type="date" data-imt="${i}" value="${esc(r.tgt||"")}"${q.date?` min="${esc(q.date)}"`:""}${dis}></label>
+        ${lm&&r.match==="new"?`<label class="f fsm">Sales engineer <span class="req">*</span><select data-ime="${i}"${dis}>${opts(sp,r.eng,"Choose")}</select></label>`:""}
+        ${chk&&!r.res&&r.inc&&r.match!=="skip"?`<div class="small" style="color:var(--bad)">${chk}</div>`:""}</div>`}</div></div>`};
+  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Import quotations</h2><p>For quotations already emailed to clients but not yet in Lead Desk.</p></div><div class="row"><button type="button" class="btn" id="imBack">Back to Focus</button></div></div>
+   <div class="panel imdrop" id="imDrop"><div><b>Drop saved Outlook emails here</b> <span class="muted">(.msg or .eml), or the quotation PDFs</span></div>
+    <div class="small muted">In Outlook, drag the sent email to your desktop (or File → Save As) to get a .msg file. You can drop several at once. Emails and PDFs are read on this device; they aren't uploaded or stored. Only the quotation figures are saved on the lead.</div>
+    <div class="row"><label class="btn pri" style="cursor:pointer">Choose files<input type="file" id="imIn" accept=".msg,.eml,.pdf,application/pdf,message/rfc822,application/vnd.ms-outlook" multiple hidden></label>${I.busy?`<span class="small">Reading ${I.busy} file${I.busy===1?"":"s"}…</span>`:""}</div></div>
+   ${rows.length?`<div class="panel" style="display:grid;gap:10px"><div class="row" style="gap:12px;align-items:end">
+      <label class="f fsm">Target date for all<input type="date" id="imTgt" value="${esc(I.tgt)}"></label><button type="button" class="btn" id="imTgtAll">Apply to all</button>
+      <label class="f fsm">Follow up on<input type="date" id="imFu" value="${esc(I.fu)}" min="${todayISO()}"></label><span class="sp"></span>
+      <button type="button" class="btn" id="imClr">Clear list</button><button type="button" class="btn pri" id="imGo"${ready.length&&ready.length===todo.length?"":" disabled"}>Import ${ready.length||""} quotation${ready.length===1?"":"s"}</button></div>
+     <div class="small muted">${rows.length} quotation${rows.length===1?"":"s"} read · ${rows.filter(r=>r.dup).length} already in Lead Desk · ${rows.filter(r=>!r.dup&&!r.err&&r.match!=="skip"&&r.match!=="new").length} to add to open leads · ${rows.filter(r=>!r.dup&&!r.err&&r.match==="new").length} new leads${todo.length>ready.length?` · <b style="color:var(--bad)">${todo.length-ready.length} need a detail</b>`:""}. Each imported quotation is logged as an email to the client on its sent date, with a follow-up on the date above.</div></div>
+    <div style="display:grid;gap:10px">${rows.map(card).join("")}</div>`:""}</section>`;
+  bindImport(m)}
+function bindImport(m){const I=impState();const R=i=>I.rows[+i];
+  $("#imBack").onclick=()=>{S.imp=null;render()};
+  const add=async files=>{files=[...files];if(!files.length)return;I.busy+=files.length;I.done=false;render();
+    for(const f of files){const rs=await impRead(f);rs.forEach(r=>{if(r.q&&I.rows.some(x=>x.q&&impQN(x.q.no)&&impQN(x.q.no)===impQN(r.q.no)))return;r.tgt=I.tgt||"";I.rows.push(impAuto(r))});I.busy--;render()}};
+  $("#imIn").onchange=e=>add(e.target.files);
+  const d=$("#imDrop");d.ondragover=e=>{e.preventDefault();d.classList.add("on")};d.ondragleave=()=>d.classList.remove("on");d.ondrop=e=>{e.preventDefault();d.classList.remove("on");add(e.dataTransfer.files)};
+  $("#imTgt")&&($("#imTgt").onchange=e=>{I.tgt=e.target.value});
+  $("#imTgtAll")?.addEventListener("click",()=>{I.tgt=$("#imTgt").value;if(!I.tgt){toast("Choose the target date first");return}I.rows.forEach(r=>{if(!r.res&&!r.dup&&!r.err&&(!r.q.date||I.tgt>=r.q.date))r.tgt=I.tgt});render()});
+  $("#imFu")&&($("#imFu").onchange=e=>{I.fu=e.target.value});
+  $("#imClr")?.addEventListener("click",()=>{S.imp=null;impState();render()});
+  m.querySelectorAll("[data-iminc]").forEach(x=>x.onchange=()=>{R(x.dataset.iminc).inc=x.checked;render()});
+  m.querySelectorAll("[data-ima]").forEach(x=>x.onchange=()=>{R(x.dataset.ima).amt=+x.value||0;render()});
+  m.querySelectorAll("[data-imc]").forEach(x=>x.onchange=()=>{const r=R(x.dataset.imc);r.cur=x.value;r.curWarn="";render()});
+  m.querySelectorAll("[data-imm]").forEach(x=>x.onchange=()=>{R(x.dataset.imm).match=x.value;render()});
+  m.querySelectorAll("[data-imt]").forEach(x=>x.onchange=()=>{R(x.dataset.imt).tgt=x.value;render()});
+  m.querySelectorAll("[data-ime]").forEach(x=>x.onchange=()=>{R(x.dataset.ime).eng=x.value;render()});
+  m.querySelectorAll("[data-imp]").forEach(x=>x.onchange=()=>{const r=R(x.dataset.imp);r.ps=x.value?[x.value]:[];render()});
+  m.querySelectorAll("[data-imopen]").forEach(a=>a.onclick=e=>{e.preventDefault();openDrawer(a.dataset.imopen)});
+  $("#imGo")?.addEventListener("click",async e=>{const fu=I.fu;if(!fu||fu<todayISO()){toast("Set a follow-up date from today onwards");return}e.currentTarget.disabled=true;let ok=0,bad=0;
+    for(const r of I.rows){if(!r.inc||r.res||r.err||r.dup||r.match==="skip"||impCheck(r))continue;try{r.res=await impSave(r,fu);ok++}catch(er){bad++;r.err=null;r.fail=er.message||er.code||String(er);toast("Couldn't import "+(r.q.no||r.file)+": "+r.fail)}}
+    toast(`${ok} quotation${ok===1?"":"s"} imported${bad?`, ${bad} failed`:""}`);render()})}
+async function impSave(r,fu){const q=r.q;const t=nowISO();const sent=r.em?.sent||t;const eng=r.match==="new"?r.eng:(S.leadMap[r.match]?.assignedTo||r.eng);
+  const o={value:+r.amt,currency:r.cur,aed:toAED(r.amt,r.cur),date:q.date||sent.slice(0,10),no:q.no||"",notes:(q.subject||r.em?.subject||"").slice(0,200),targetDate:r.tgt,
+    lines:(q.lines||[]).map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})),source:r.em?"Email import":"Salesforce PDF",
+    createdBy:q.by||"",createdByTitle:q.byTitle||"",createdByEmail:q.byEmail||"",validUntil:q.validUntil||"",paymentTerms:q.payment||"",quoteContact:q.contact?{name:q.contact,title:q.title||""}:null,discount:q.discount||0,subject:q.subject||"",
+    importedAt:t,...(r.em?{emailSent:r.em.sent||"",emailFrom:r.em.from||"",emailTo:r.contactEmail||""}:{})};
+  const ct={id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),at:sent,kind:"Email",note:`Quotation ${o.no} emailed${r.contactEmail?" to "+r.contactEmail:""}`,by:eng||actor()||"",byId:S.uid||null};
+  const fuAt=new Date(fu+"T10:00");const nx={nextFollowUp:fu+"T10:00",nextFollowUpAt:fuAt.toISOString(),followUpNote:`Follow up on quotation ${o.no}`,followUpRemindedFor:null};
+  const lg=`Quotation ${o.no} imported from ${r.em?"a saved email":"a PDF"}${r.em?` (sent ${fmtD(sent)} by ${r.em.fromName||r.em.from})`:""} · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`;
+  const entry=a=>({t,by:actor()||"",byId:S.uid||null,a});
+  if(r.match!=="new"){const l=S.leadMap[r.match];if(!l)throw new Error("That lead is no longer available");
+    const older=l.quote&&l.quote.date&&o.date&&o.date<l.quote.date;
+    const body={contacts:[...(l.contacts||[]),ct],updatedAt:t,log:[...(l.log||[]),entry(lg+(older?" · older than the current quotation, kept in the history":""))]};
+    if(older)body.quoteHistory=[...(l.quoteHistory||[]),Object.assign({},o,{replacedAt:t})];
+    else{body.quote=o;if(l.quote)body.quoteHistory=[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:t})]}
+    if(!l.firstContactAt||l.firstContactAt>sent)body.firstContactAt=sent;
+    if(!l.nextFollowUp||fuOverdue(l))Object.assign(body,nx);
+    if(!older&&!["New","Info Needed","Quotation Sent"].includes(l.status)){body.status="Quotation Sent";body.stageAt=Object.assign({},l.stageAt||{},{"Quotation Sent":sent<t?sent:t})}
+    if(r.contactEmail&&!(l.contact||{}).email)body.contact=Object.assign({},l.contact||{},{email:r.contactEmail},(l.contact||{}).name?{}:{name:q.contact||"",title:q.title||""});
+    await S.db.doc("leads/"+l.id).update(body);return`Added to ${l.ref}`}
+  const A=r.acc?allAccounts()[r.acc.key]:null;const key=A?A.key:keyOf(q.client);const name=A?A.name:q.client.trim();const country=(q.country||A?.country||"").trim();
+  const aref=S.db.doc("accounts/"+key);const ex=await aref.get();
+  if(!ex.exists||(ex.data().deleted&&!ex.data().mergedInto))await aref.set({name,key,country,city:"",group:"",region:"",domain:emailDomain(r.contactEmail),createdAt:t,createdBy:S.uid||null,fromSheet:!!S.registry[key]});
+  const ref=await nextRef();const ps=r.ps.slice();const mine=isSales();
+  await S.db.doc("leads/"+ref).set({ref,accountKey:key,accountName:name,country,contact:{name:q.contact||"",title:q.title||"",email:r.contactEmail||"",phone:""},products:ps,product:ps.join(", "),
+    category:"Outbound",source:"Email import",generatedBy:eng,department:"Sales",rooms:null,pms:"",timeline:"",preferred:eng,territoryOwner:"",notes:`Quotation ${o.no} was emailed${r.em?.sent?" on "+fmtD(r.em.sent):""} before it was entered in Lead Desk.`,
+    requirementDate:o.date,region:"",subdivision:"",status:"New",assignedTo:mine?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},
+    quote:o,contacts:[ct],firstContactAt:sent,...nx,log:[entry(`Lead created from an imported quotation · ${ps.join(", ")} · for ${eng}`),entry(lg)]});
+  return`Created ${ref}${mine?" · waiting for approval":""}`}
 
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
 const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
