@@ -205,6 +205,12 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 /* the footprint view has its own filters and figures */
 .mg-v-fp>.panel.afbar,.mg-v-fp>#mg-ov,.mg-v-tg>.panel.afbar,.mg-v-tg>#mg-ov{display:none}
 .tgbar{height:4px;background:var(--sunk);border-radius:2px;margin-top:4px;overflow:hidden}.tgbar>span{display:block;height:100%}
+.qpdf{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
+.qpdfres{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--sunk)}
+.qpdfres .kv{display:grid;gap:4px}.qpdfres .kv>div{display:grid;grid-template-columns:120px 1fr;gap:8px;font-size:13px}.qpdfres .kv>div>span:first-child{color:var(--muted)}
+.qlines td,.qlines th{font-size:12.5px}
+.qli{display:grid;gap:6px}.qlr{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
+.qtot{display:grid;gap:2px;justify-items:end;font-size:13px;margin-top:2px}.qtot>div{display:flex;gap:14px}.qtot span{color:var(--muted)}
 .chip.ups{background:var(--accent-soft);color:var(--accent)}
 .cfm{position:fixed;inset:0;background:rgba(10,16,24,.5);z-index:40;display:grid;place-items:center;padding:16px}
 .cfm>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;display:grid;gap:12px}
@@ -1042,7 +1048,8 @@ function quoteRow(l){const q=l.quote;if(!q)return"";const od=tgtOverdue(l);const
   const tgt=S.drawer?.mode==="qtarget"&&canT?`<span class="row" style="gap:6px;margin-top:4px"><input type="date" id="qtIn" min="${esc(q.date||"")}" value="${esc(q.targetDate||"")}" style="width:auto"><button type="button" class="btn sm pri" id="qtSave">Save</button><button type="button" class="btn sm" id="qtX">Cancel</button></span>`
     :`<span style="display:block;margin-top:2px">Target date: ${q.targetDate?`<b style="${od?"color:var(--bad)":""}">${fmtD(q.targetDate)}</b>${od?` · ${Math.floor(days(q.targetDate+"T23:59:59"))} days past`:""}`:`<span class="muted">not recorded</span>`}${canT?` <button type="button" class="btn sm" id="qTgt" style="margin-left:6px">${q.targetDate?"Change":"Set"} target date</button>`:""}</span>`;
   const hist=(l.quoteHistory||[]).slice().reverse();
-  return`<div><span>Quotation</span><span><b>${fmtAED(q.aed)}</b>${q.currency&&q.currency!=="AED"?` <span class="muted">(${esc(q.currency)} ${fmtN(q.value)})</span>`:""} · ${fmtD(q.date)}${q.no?` · <span class="mono">${esc(q.no)}</span>`:""}${q.notes?` · ${esc(q.notes)}`:""}${tgt}
+  return`<div><span>Quotation</span><span><b>${fmtAED(q.aed)}</b>${q.currency&&q.currency!=="AED"?` <span class="muted">(${esc(q.currency)} ${fmtN(q.value)})</span>`:""} · ${fmtD(q.date)}${q.no?` · <span class="mono">${esc(q.no)}</span>`:""}${q.notes?` · ${esc(q.notes)}`:""}${q.createdBy||q.validUntil?`<span class="small muted" style="display:block">${q.createdBy?"Prepared by "+esc(q.createdBy):""}${q.createdBy&&q.validUntil?" · ":""}${q.validUntil?"valid until "+fmtD(q.validUntil):""}${q.source?" · from "+esc(q.source):""}</span>`:""}${tgt}
+    ${(q.lines||[]).length?`<details class="small" style="margin-top:4px"><summary style="cursor:pointer">${q.lines.length} line item${q.lines.length===1?"":"s"}</summary><div class="tw" style="margin-top:4px"><table class="qlines"><tbody>${q.lines.map(x=>`<tr><td>${esc(x.item)}${x.product?`<div class="muted">${esc(x.product)}</div>`:""}</td><td class="num">${fmtN(x.qty)} × ${fmtN(x.unit)}</td><td class="num">${fmtN(x.total)}</td></tr>`).join("")}</tbody></table></div></details>`:""}
     ${hist.length?`<span class="qhist small muted">${hist.map(h=>`<span>Earlier: ${fmtAED(h.aed)} · ${fmtD(h.date)}${h.no?" · "+esc(h.no):""} · target ${h.targetDate?fmtD(h.targetDate):"not recorded"}</span>`).join("")}</span>`:""}</span></div>`}
 /* Supervisor: correct a meeting date on a won lead. Only the date changes; status, amounts, owner and incentive stay as they are. */
 function wonMeetingDate(l,mid){if(!can("meeting.edit_won")||l.status!=="Won")return;const m=meetingsOf(l).find(x=>x.id===mid);if(!m)return;
@@ -1272,7 +1279,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     return{m:{id:"m"+Date.now().toString(36),date,mode,type:$("#mt-type").value,products,notes,by:$("#mt-by")?.value||actor()||l.assignedTo||"",byId:S.uid||null,at:nowISO()}}};
   const meetBody=(m)=>{const lp=productsOf(l);const add=m.products.filter(n=>!lp.includes(n));const body={meetings:[...meetingsOf(l).map(({legacy,...x})=>x),m]};
     if(add.length){const all=lp.concat(add);body.products=all;body.product=all.join(", ")}return{body,add}};
-  const amountForm=(title,withNo,noLabel,withMeet,withTarget)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withMeet?meetFields():""}
+  const amountForm=(title,withNo,noLabel,withMeet,withTarget)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withTarget?qpdfBlock():""}${withMeet?meetFields():""}
     <div class="grid3"><label class="f">Amount <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,"AED")}</select></label><label class="f">Date<input id="a-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
     ${withNo?`<div class="grid2"><label class="f">${noLabel}<input id="a-no"></label>${withTarget?`<label class="f">Target date <span class="req">*</span><input id="a-tgt" type="date" min="${todayISO()}" value="${esc(withTarget===true?"":withTarget)}"><span class="small muted" style="font-weight:400">When the client is expected to decide</span></label>`:""}</div>`:""}<label class="f">Notes<input id="a-notes"></label>${withTarget?nextFields(l):""}<div class="small muted" id="a-aed"></div>
     <div class="row"><button class="btn pri" id="a-save">Save</button><button class="btn" id="a-cancel">Cancel</button></div></div></div>`;
@@ -1282,6 +1289,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       if($("#a-tgt")){const t=$("#a-tgt").value;if(!t){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Enter the target date. Every quotation needs one.</span>`;$("#a-tgt").focus();return}
         if(o.date&&t<o.date){$("#a-aed").innerHTML=`<span style="color:var(--bad)">The target date can't be before the quotation date.</span>`;return}o.targetDate=t}
       const nx=field==="quote"?readNext():{body:{}};if(nx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
+      if(field==="quote"){const qx=qpdfExtra(l);Object.assign(o,qx.q);Object.assign(nx.body,qx.lead);S.qpdf=null}
       if(field==="quote"&&l.quote){await patch(l,{...nx.body,quote:o,quoteHistory:[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]},`Quotation revised · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="quote"){await patch(l,{...nx.body,quote:o},`${msg} · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="meeting"){const r=readMeet(o.date,o.notes);if(r.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
@@ -1328,7 +1336,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const{body,add}=meetBody(r.m);let ex="";try{ex=await meetProducts(l,r.m,body,add)}catch(e){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">Couldn't create the upsell lead (${esc(e.code||e.message)}).</span>`;return}
       Object.assign(body,nx.body);await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${nx.txt||""}`)};return}
-  if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);bindAmount("quote","Quotation Sent","Quotation sent");return}
+  if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);bindAmount("quote","Quotation Sent","Quotation sent");bindQpdf(l);return}
   if(mode==="won"){A.innerHTML=amountForm("Order closed · order value",true,"PO / order number");bindAmount("order","Won","Order won");return}
   if(mode==="lost"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Mark as lost</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="l-r">${opts(["Price","Went with competitor","No budget","No response","Project cancelled","Not a fit","Other"],"","Choose")}</select></label><label class="f">Details / competitor<input id="l-n"></label><div class="row"><button class="btn bad" id="l-save">Mark lost</button><button class="btn" id="l-cancel">Cancel</button></div></div></div>`;
     $("#l-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#l-save").onclick=()=>{const r=$("#l-r").value;if(!r)return;patch(l,{lost:{reason:r,notes:$("#l-n").value.trim(),date:nowISO()}},"Lost: "+r,"Lost")};return}
@@ -1564,7 +1572,7 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
    database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
 const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
 const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
-const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
+const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",lines:"Quotation lines",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
 function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
 function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
   if(Array.isArray(v)){if(v.every(x=>typeof x!=="object"))return esc(v.join(", "));if(v.length&&v[0]&&v[0].date!==undefined)return esc(v.map(x=>[x.date,x.mode,x.type].filter(Boolean).join(" ")).join(" · "));return esc(v.length+" item(s)")}
@@ -2272,6 +2280,95 @@ function bindTargets(m){const T=tgState();$("#tgY")&&($("#tgY").onchange=e=>{T.y
 /* engineer's own progress, for the Focus tab */
 function myTargetKpi(eng){if(!eng)return"";const y=new Date().getFullYear();const tg=tgEng(y,eng);if(!tg)return"";const a=tgActuals(y).E[eng]?.v||0;const p=a/tg;
   return`<div class="kpi"><div class="l">${y} target</div><div class="v" style="color:${p>=1?"var(--ok)":p>=0.7?"var(--warn)":"var(--bad)"}">${(p*100).toFixed(1)}%</div><div class="s">${fmtAED(a)} of ${fmtAED(tg)}</div></div>`}
+
+/* ======================= READ A SALESFORCE QUOTATION (PDF) =======================
+   The PDF is read in the browser (pdf.js, loaded only when needed) and never uploaded or stored.
+   It fills the quotation form; the user checks the figures and saves as usual. */
+let PDFJS_P=null;
+function loadPDFJS(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);return PDFJS_P||(PDFJS_P=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+  s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)};s.onerror=()=>{PDFJS_P=null;rej(new Error("Couldn't load the PDF reader. Check the internet connection and try again."))};document.head.appendChild(s)}))}
+async function pdfLines(file){const lib=await loadPDFJS();const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const out=[];
+  for(let p=1;p<=Math.min(doc.numPages,15);p++){const pg=await doc.getPage(p);const tc=await pg.getTextContent();const rows=[];
+    for(const it of tc.items){if(!it.str||!it.str.trim())continue;const x=it.transform[4],y=it.transform[5];let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r)rows.push(r={y,items:[]});r.items.push({x,w:it.width||0,s:it.str})}
+    rows.sort((a,b)=>b.y-a.y);let prev=null;
+    for(const r of rows){r.items.sort((a,b)=>a.x-b.x);let t="",end=null;for(const i of r.items){if(end!=null){const g=i.x-end;t+=g>12?"   ":g>1.5?" ":""}t+=i.s;end=i.x+i.w}
+      out.push({p,y:r.y,gap:prev==null||prev.p!==p?99:prev.y-r.y,t:t.replace(/\s+$/,"")});prev={p,y:r.y}}}
+  return out}
+const QR_MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,sept:9,oct:10,nov:11,dec:12};
+function qrDate(s){let m=String(s||"").match(/(\d{1,2})[\s\-]+([A-Za-z]{3,9})[\s\-,]+(\d{4})/);if(m&&QR_MON[m[2].slice(0,4).toLowerCase()]||m&&QR_MON[m[2].slice(0,3).toLowerCase()]){const mo=QR_MON[m[2].slice(0,4).toLowerCase()]||QR_MON[m[2].slice(0,3).toLowerCase()];return`${m[3]}-${String(mo).padStart(2,"0")}-${m[1].padStart(2,"0")}`}
+  m=String(s||"").match(/(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;return""}
+const qrNum=s=>{const neg=/^\(.*\)$/.test(String(s).trim())||/^-/.test(String(s).trim());const v=parseFloat(String(s).replace(/[()\-,\s]/g,""));return isNaN(v)?null:(neg?-v:v)};
+/* item text → Lead Desk product (most specific first; only products that exist in the catalog are used) */
+const QR_RULES=[[/accessor|adaptor|adapter|cable|stylus|\bstand\b/i,"Hardware (iPad / Tablet)"],[/\bohip\b/i,"OHIP Integration / Migration"],[/\bedocs?\b/i,"eDOCS"],[/vmobile|mobile check-?in/i,"vMobile / Mobile Check-in"],
+  [/\bereg\b|regcard|digital folio/i,"eREG"],[/kiosk/i,"easyKIOSK"],[/tap\s*&?\s*smile/i,"Tap & Smile"],[/check-?out\s*box/i,"Check-out Box"],[/drop\s*box/i,"Dropbox"],[/samsosign/i,"SamsoSign"],[/\bengage\b/i,"Engage"],[/\bmirror\b/i,"Mirror"],
+  [/e-?invoic/i,"e-Invoicing"],[/opera cloud migration/i,"OPERA Cloud Migration"],[/server migration/i,"Server Migration"],[/opera interface/i,"OPERA Interface"],[/\bamc\b|annual maintenance/i,"AMC Renewal"],[/passport|id[\s\/-]*card|id scann|scanner/i,"Passport / ID Scanner"],[/\bvicas\b/i,"VICAS"]];
+function qrProduct(text){const cat=prodList(true).map(p=>p.name);const has=n=>cat.find(c=>nk(c)===nk(n));
+  if(/install|training|freight|insurance|travel|shipping/i.test(text)&&!/licen|app\b|module|interface|system/i.test(text))return"";
+  for(const[re,p]of QR_RULES)if(re.test(text)&&has(p))return has(p);const t=nk(text);return cat.find(c=>nk(c).length>3&&t.includes(nk(c)))||""}
+function parseQuote(L){const T=L.map(l=>l.t);const R={lines:[],totals:[],warn:[]};const idx=(re,from=0)=>{for(let i=from;i<T.length;i++)if(re.test(T[i]))return i;return-1};
+  let qi=idx(/Quote\s*(Number|No\.?|#)/i);if(qi>=0){const m=T[qi].match(/Quote\s*(?:Number|No\.?|#)\s*:?\s*([A-Z]{1,5}[-\s]?\d{2,4}\s*[\/\-]\s*\d+(?:[-\/]\d+)?|[A-Z0-9][A-Z0-9\-\/]{3,})/i);if(m)R.no=m[1].replace(/\s/g,"");R.date=qrDate(T[qi])}
+  if(!R.date){const i=idx(/\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}/i);if(i>=0)R.date=qrDate(T[i])}
+  const ai=idx(/^\s*Kind\s*Att(n|ention)/i);
+  if(qi>=0&&ai>qi){const blk=T.slice(qi+1,ai).map(s=>s.trim()).filter(Boolean);R.client=blk[0]||"";R.address=blk.slice(1);const last=blk[blk.length-1]||"";const c=areaOf(last).country||areaOf((last.split(",").pop()||"").trim()).country;R.country=c||""}
+  if(ai>=0){R.contact=(T[ai].match(/Kind\s*Att(?:n|ention)\.?\s*:?\s*(.+)/i)||[])[1]?.trim()||"";const nx=(T[ai+1]||"").trim();if(nx&&!/^(Subject|Reference|Dear)/i.test(nx)&&nx.length<70)R.title=nx}
+  const si=idx(/^\s*Subject\s*:/i);if(si>=0){let s=T[si].replace(/^\s*Subject\s*:\s*/i,"").trim();for(let i=si+1;i<si+3&&i<T.length;i++){const x=T[i].trim();if(!x||/^(Reference|Dear)/i.test(x))break;s+=" "+x}R.subject=s}
+  const ci=idx(/Commercial\s+Proposal|Price\s+Schedule|Pricing/i);const from=ci>=0?ci:0;
+  const curM=T.slice(from,from+8).join(" ").match(/\((USD|AED|EUR|GBP|SAR|INR|MYR|QAR|OMR|KWD|BHD|ZAR|[A-Z]{3})\)/);R.currency=curM?curM[1]:"";
+  const MONEY="\\(?-?[\\d,]+\\.\\d{2}\\)?";const totRe=new RegExp(`^\\s*(.*?(?:Total|VAT|Tax|Freight|Insurance|Discount|Net\\s+Price|Shipping|Delivery).*?)\\s{2,}(${MONEY})\\s*$`,"i");
+  let te=-1;for(let i=from+1;i<T.length;i++){if(totRe.test(T[i])&&!/^\s*\d{1,3}\s{2,}/.test(T[i])){te=i;break}}
+  const rowRe=new RegExp(`^\\s*(\\d{1,3})(?:\\s+(.*?))?\\s{2,}(${MONEY})(?:\\s+(${MONEY}))?\\s+(\\d+(?:\\.\\d+)?)\\s+(${MONEY})\\s*$`);
+  if(te>0){let st=from+1;while(st<te&&(/(Sl\b|Item\(s\)|Unit\s*Price|Total\s*Price\s*$|^\s*No\.|Qty|^\s*\((USD|AED|EUR|GBP|[A-Z]{3})\)\s*$)/i.test(T[st])||!T[st].trim()))st++;
+    const gaps=L.slice(st,te).map(l=>l.gap).filter(g=>g>0&&g<40).sort((a,b)=>a-b);const lh=gaps[Math.floor(gaps.length*0.3)]||11;
+    const blocks=[];let cur=[];for(let i=st;i<te;i++){if(cur.length&&L[i].gap>lh*1.55){blocks.push(cur);cur=[]}cur.push(i)}if(cur.length)blocks.push(cur);
+    for(const b of blocks){const rows=b.filter(i=>rowRe.test(T[i]));if(!rows.length)continue;
+      rows.forEach((ri,k)=>{const m=T[ri].match(rowRe);const part=rows.length===1?b:b.filter(i=>i>=(k?rows[k-1]+1:b[0])&&i<=(k<rows.length-1?ri:b[b.length-1]));
+        const moneyDesc=m[2]&&/^\(?[\d,]+\.\d{2}\)?$/.test(m[2].trim());const txt=part.map(i=>i===ri?(moneyDesc?"":m[2]||""):T[i]).map(s=>s.trim()).filter(Boolean);
+        const std=moneyDesc?qrNum(m[2]):qrNum(m[3]),spl=moneyDesc?qrNum(m[3]):(m[4]?qrNum(m[4]):null),qty=qrNum(m[5]),tot=qrNum(m[6]);
+        const title=txt[0]||`Item ${m[1]}`;const desc=txt.slice(1).join(" ");R.lines.push({sl:+m[1],item:title,desc,list:std,unit:spl!=null?spl:std,qty,total:tot,product:qrProduct(title)||qrProduct(desc)})})}
+    for(let i=te;i<Math.min(T.length,te+14);i++){const m=T[i].match(totRe);if(m)R.totals.push({label:m[1].trim().replace(/\s{2,}/g," "),amount:qrNum(m[2])});else if(R.totals.length&&/Validity|Price Terms|Payment/i.test(T[i]))break}}
+  const net=[...R.totals].reverse().find(t=>/net|grand/i.test(t.label))||[...R.totals].reverse().find(t=>/total/i.test(t.label));R.total=net?net.amount:null;
+  const sub=R.totals.find(t=>/^total/i.test(t.label));const lineSum=R.lines.reduce((s,x)=>s+(x.total||0),0);const extras=R.totals.filter(t=>/freight|insurance|shipping|delivery/i.test(t.label)&&R.totals.indexOf(t)<R.totals.indexOf(sub)).reduce((s,t)=>s+t.amount,0);
+  R.lineCheck=sub?Math.abs(lineSum+extras-sub.amount)<0.6:null;if(R.lines.length&&R.lineCheck===false)R.warn.push(`The line items add up to ${fmtN(lineSum+extras)}, but the quotation's total is ${fmtN(sub.amount)}. Check the lines.`);
+  const disc=R.totals.find(t=>/discount/i.test(t.label));if(disc)R.discount=Math.abs(disc.amount);
+  const vi=idx(/Validity\s+of\s+(the\s+)?offer/i);if(vi>=0){const d=+(T[vi].match(/(\d+)\s*Days/i)||[])[1];if(d&&R.date){const x=new Date(R.date+"T00:00:00");x.setDate(x.getDate()+d);R.validUntil=ymd(x);R.validDays=d}}
+  const pi=idx(/^\s*Payment\s+terms/i);if(pi>=0)R.payment=T[pi].replace(/^\s*Payment\s+terms\s*:?\s*/i,"").trim();
+  const bi=idx(/best\s+regards|kind\s+regards|^\s*regards,?\s*$|yours\s+(sincerely|faithfully)/i);if(bi>=0){const nx=T.slice(bi+1,bi+8).map(s=>s.trim()).filter(Boolean);R.by=nx[0]||"";if(nx[1]&&!/@|^(Email|Mobile|Phone|Tel)/i.test(nx[1]))R.byTitle=nx[1];
+    const em=nx.join(" ").match(/[\w.+-]+@[\w-]+\.[\w.]+/);if(em)R.byEmail=em[0]}
+  if(!R.no)R.warn.push("No quote number found.");if(R.total==null)R.warn.push("No total found. Enter the amount yourself.");if(!R.lines.length)R.warn.push("No product lines found in a price table.");
+  return R}
+/* the panel inside the quotation form */
+function qpdfBlock(){return`<div class="qpdf"><label class="btn" style="cursor:pointer"><input type="file" id="qpdfIn" accept="application/pdf,.pdf" hidden>Read from Salesforce PDF</label><span class="small muted">Fills this form from the quotation. The PDF is read on this device only and isn't uploaded or stored.</span></div><div id="qpdfOut"></div>`}
+function bindQpdf(l){const inp=$("#qpdfIn");if(!inp)return;S.qpdf=null;
+  inp.onchange=async()=>{const f=inp.files[0];if(!f)return;const O=$("#qpdfOut");if(f.size>15e6){O.innerHTML=`<div class="notice bad">That file is too large to read (over 15 MB).</div>`;return}
+    O.innerHTML=`<p class="small muted"><span class="spin" aria-hidden="true"></span> Reading ${esc(f.name)}…</p>`;
+    try{const R=parseQuote(await pdfLines(f));R.file=f.name;R.leadId=l.id;S.qpdf=R;qpdfFill(l,R);qpdfShow(l)}
+    catch(e){console.error(e);S.qpdf=null;O.innerHTML=`<div class="notice bad">Couldn't read this PDF: ${esc(e.message||String(e))}. You can still type the quotation in.</div>`}finally{inp.value=""}}}
+function qpdfFill(l,R){const set=(id,v)=>{const e=$(id);if(e&&v!=null&&v!=="")e.value=v};
+  if(R.total!=null)set("#a-val",R.total);const cs=$("#a-cur");if(cs&&R.currency){if(![...cs.options].some(o=>o.value===R.currency))R.warn.push(`Currency ${R.currency} isn't in the exchange-rate list (Products & settings). Choose the currency yourself.`);else cs.value=R.currency}
+  if(R.date&&R.date<=todayISO())set("#a-date",R.date);set("#a-no",R.no);if(R.subject&&!$("#a-notes").value)set("#a-notes",R.subject.slice(0,200));
+  ["#a-val","#a-cur"].forEach(id=>$(id)?.dispatchEvent(new Event("input",{bubbles:true})));$("#a-cur")?.dispatchEvent(new Event("change",{bubbles:true}))}
+function qpdfShow(l){const R=S.qpdf;const O=$("#qpdfOut");if(!R||!O)return;const cur=R.currency||"";const cat=prodList(true).map(p=>p.name);
+  const same=R.client&&(nk(R.client).includes(nk(l.accountName).split(" ")[0])||nk(l.accountName).includes(nk(R.client).split(" ")[0]));
+  const lp=new Set(productsOf(l).map(nk));const extra=[...new Set(R.lines.map(x=>x.product).filter(Boolean))].filter(p=>!lp.has(nk(p)));
+  const ct=l.contact||{};const newCt=R.contact&&nk(R.contact)!==nk(ct.name||"");
+  O.innerHTML=`<div class="qpdfres"><div class="row" style="margin-bottom:6px"><b>Read from ${esc(R.file)}</b><span class="sp"></span><button type="button" class="btn sm" id="qpdfClr">Clear</button></div>
+   ${R.warn.map(w=>`<div class="notice warn small" style="margin-bottom:6px">${esc(w)}</div>`).join("")}
+   <div class="kv"><div><span>Client</span><span>${esc(R.client||"—")}${R.country?` · ${esc(ctryName(R.country))}`:""}${R.client&&!same?` <span class="late">Lead is for ${esc(l.accountName)}</span>`:""}</span></div>
+    <div><span>Contact</span><span>${esc(R.contact||"—")}${R.title?` · ${esc(R.title)}`:""}${newCt?`<label class="small" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" id="qpdfCt" style="width:auto"${ct.name?"":" checked"}> Use as the lead's contact${ct.name?` (now ${esc(ct.name)})`:""}</label>`:""}</span></div>
+    <div><span>Quote number</span><span class="mono">${esc(R.no||"—")}</span></div><div><span>Quote date</span><span>${R.date?fmtD(R.date):"—"}${R.validUntil?` · valid ${R.validDays} days, until ${fmtD(R.validUntil)}`:""}</span></div>
+    <div><span>Created by</span><span>${esc(R.by||"—")}${R.byTitle?` · ${esc(R.byTitle)}`:""}${R.byEmail?` · ${esc(R.byEmail)}`:""}</span></div>${R.payment?`<div><span>Payment terms</span><span>${esc(R.payment)}</span></div>`:""}</div>
+   ${R.lines.length?`<div class="qli" style="margin-top:8px">${R.lines.map((x,i)=>`<div class="qlr"><div class="row" style="gap:8px;align-items:flex-start;flex-wrap:nowrap"><span class="muted" style="min-width:18px">${x.sl}</span><div style="flex:1;min-width:0"><b title="${esc(x.desc||"")}">${esc(x.item)}</b>
+      <div class="row" style="gap:8px;margin-top:4px"><select data-qlp="${i}" aria-label="Lead Desk product for line ${x.sl}" style="max-width:240px;padding:4px 6px;font-size:12.5px"><option value="">— Service / other</option>${cat.map(c=>`<option${c===x.product?" selected":""}>${esc(c)}</option>`).join("")}</select>
+      <span class="small">${fmtN(x.qty)} × ${fmtN(x.unit)}${x.list&&x.unit!==x.list?` <s class="muted">${fmtN(x.list)}</s>`:""}</span></div></div><b class="num" style="white-space:nowrap">${esc(cur)} ${fmtN(x.total)}</b></div></div>`).join("")}
+     <div class="qtot">${R.totals.map(t=>`<div><span>${esc(t.label)}</span><b>${t.amount<0?"("+fmtN(-t.amount)+")":fmtN(t.amount)}</b></div>`).join("")}</div></div>
+    ${R.lineCheck?`<p class="small" style="color:var(--ok);margin:4px 0 0">✓ The line items add up to the quotation total.</p>`:""}`:""}
+   ${extra.length?`<p class="small muted" style="margin:6px 0 0">This quotation includes ${esc(extra.join(", "))}, which ${extra.length===1?"isn't":"aren't"} on this lead. Add ${extra.length===1?"it":"them"} with “Add or remove products” if needed (after a meeting this creates an upsell lead).</p>`:""}
+   <p class="small muted" style="margin:6px 0 0">Amount, currency, date, quote number and notes above have been filled in. Check them, add the target date and next step, then save.</p></div>`;
+  $("#qpdfClr").onclick=()=>{S.qpdf=null;O.innerHTML=""};O.querySelectorAll("[data-qlp]").forEach(s=>s.onchange=()=>{R.lines[+s.dataset.qlp].product=s.value})}
+/* what gets saved with the quotation (and the lead's contact, if ticked) */
+function qpdfExtra(l){const R=S.qpdf;if(!R||R.leadId!==l.id)return{q:{},lead:{}};
+  const q={lines:R.lines.map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})),source:"Salesforce PDF",createdBy:R.by||"",createdByTitle:R.byTitle||"",createdByEmail:R.byEmail||"",validUntil:R.validUntil||"",paymentTerms:R.payment||"",quoteContact:R.contact?{name:R.contact,title:R.title||""}:null,discount:R.discount||0,subject:R.subject||""};
+  const lead={};if($("#qpdfCt")?.checked&&R.contact)lead.contact=Object.assign({},l.contact||{},{name:R.contact,title:R.title||(l.contact||{}).title||""});return{q,lead}}
 
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
 const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
