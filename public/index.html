@@ -203,7 +203,8 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .pvt tfoot td{font-weight:700;border-top:2px solid var(--line)}
 .pvcar{display:inline-block;width:12px;color:var(--muted)}
 /* the footprint view has its own filters and figures */
-.mg-v-fp>.panel.afbar,.mg-v-fp>#mg-ov{display:none}
+.mg-v-fp>.panel.afbar,.mg-v-fp>#mg-ov,.mg-v-tg>.panel.afbar,.mg-v-tg>#mg-ov{display:none}
+.tgbar{height:4px;background:var(--sunk);border-radius:2px;margin-top:4px;overflow:hidden}.tgbar>span{display:block;height:100%}
 .chip.ups{background:var(--accent-soft);color:var(--accent)}
 .cfm{position:fixed;inset:0;background:rgba(10,16,24,.5);z-index:40;display:grid;place-items:center;padding:16px}
 .cfm>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;display:grid;gap:12px}
@@ -330,6 +331,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="new" role="tab">New lead</button>
       <button data-tab="bo" role="tab">Back office <span class="count" id="c-bo" hidden></span></button>
       <button data-tab="pipe" role="tab"><span class="tl">My pipeline</span> <span class="count" id="c-pipe" hidden></span></button>
+      <button data-tab="focus" role="tab"><span class="tl">Focus</span> <span class="count" id="c-focus" hidden></span></button>
       <button data-tab="meet" role="tab">Meetings</button>
       <button data-tab="mgmt" role="tab"><span class="tl">Management</span></button>
       <button data-tab="accts" role="tab">Accounts</button>
@@ -476,22 +478,22 @@ const S={settings:DEFAULTS,registry:{},history:null,accounts:{},leads:[],leadMap
 const ROLES=["supervisor","leadmanager","management","sales"];
 const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales"};
 const PERMISSIONS=[
- ["page.leads","Leads tab: lead form and lead list","Pages"],["page.backoffice","Back office queue","Pages"],["page.pipelines","Pipelines","Pages"],
+ ["page.leads","Leads tab: lead form and lead list","Pages"],["page.backoffice","Back office queue","Pages"],["page.pipelines","Pipelines","Pages"],["page.focus","Focus (needs action, forecast call, cross-sell)","Pages"],
  ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],["page.audit","Audit trail (who did what, when)","Pages"],
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint"], "sales": ["page.leads", "page.pipelines", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
+const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "targets.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
 function permsFor(role){if(role==="supervisor")return PERMISSIONS.map(x=>x[0]);const def=DEFAULT_PERMS[role]||[];if(!(S.perms&&Array.isArray(S.perms[role])))return def;
   const known=Array.isArray(S.permsKnown)?S.permsKnown:PERMS_V1;return S.perms[role].concat(def.filter(p=>!known.includes(p)))}
 const can=perm=>!!S.role&&permsFor(S.role).includes(perm);
-const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
-const LANDING=["bo","mgmt","pipe","meet","new","accts","set","audit"];
+const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
+const LANDING=["bo","mgmt","pipe","focus","meet","new","accts","set","audit"];
 const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet"};   // first page after sign-in
 const homeTab=()=>{const a=allowedTabs();return a.includes(HOME[S.role])?HOME[S.role]:a[0]};
 const allowedTabs=()=>LANDING.filter(t=>can(TAB_PERM[t]));
@@ -586,6 +588,8 @@ async function boot(){
   db.doc("config/users").onSnapshot(s=>{S.users=s.exists?(s.data().members||{}):{};const before=S.role+"|"+S.myEng;S.usersLoaded=true;computeRole();if(before!==S.role+"|"+S.myEng)render();else softRender()},e=>{S.usersLoaded=true;computeRole();render();errH(e)});
   db.doc("config/permissions").onSnapshot(s=>{S.perms=s.exists?(s.data().roles||null):null;S.permsKnown=s.exists?(s.data().known||null):null;render()},()=>{});
   db.doc("config/settings").onSnapshot(s=>{if(s.exists)S.settings=Object.assign({},DEFAULTS,s.data());softRender()},errH);
+  S.db.doc("config/targets").onSnapshot(s=>{S.targetsExists=s.exists;S.targetsDoc=s.exists?s.data():{years:{}};softRender()},()=>{S.targetsDoc={years:{}}});
+  S.db.doc("config/references").onSnapshot(s=>{S.refsExists=s.exists;S.refs=s.exists?s.data():{refs:{}};softRender()},()=>{S.refs={refs:{}}});
   db.doc("history/2026").get().then(s=>{if(s.exists){S.history=s.data();softRender()}}).catch(()=>{});
   Promise.all(["accounts-1","accounts-2"].map(id=>db.doc("registry/"+id).get())).then(ss=>{ss.forEach(s=>s.exists&&Object.assign(S.registry,s.data().a||{}));softRender()}).catch(()=>{});
   db.collection("accounts").onSnapshot(q=>{S.accounts={};q.docs.forEach(d=>S.accounts[d.id]=d.data());S.loaded.accounts=true;softRender()},errH);
@@ -620,7 +624,7 @@ function renderInner(){const m=$("#main");
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&$("#tabs").scrollWidth>$("#tabs").clientWidth){const t=$("#tabs");t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2)}
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
-({new:renderNew,bo:renderBO,pipe:renderPipe,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
+({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
 function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
@@ -633,7 +637,7 @@ function notifyNewLeads(){if(!S.myEng||!S.loaded.leads||!S.role)return;const ids
   const fresh=S.newSeenIds?ids.filter(i=>!S.newSeenIds.has(i)):ids;
   if(fresh.length){const l=S.leadMap[fresh[0]];toast(fresh.length===1?`New lead assigned to you: ${l.accountName} (${l.ref}). See My pipeline.`:`${fresh.length} new leads assigned to you. See My pipeline.`)}
   S.newSeenIds=new Set(ids)}
-function updateCounts(){notifyNewLeads();const np=newForMe().length,cp=$("#c-pipe");if(cp){cp.hidden=!np;cp.textContent=np;cp.title=np+" new lead"+(np===1?"":"s")+" assigned to you"}if(!can("page.backoffice")){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
+function updateCounts(){notifyNewLeads();{const cf=$("#c-focus");if(cf){const n=S.leads.filter(l=>(viewAll()||isMine(l))&&ruleFlags(l).length).length;cf.hidden=!n;cf.textContent=n;cf.title=n+" lead"+(n===1?"":"s")+" needing action"}}const np=newForMe().length,cp=$("#c-pipe");if(cp){cp.hidden=!np;cp.textContent=np;cp.title=np+" new lead"+(np===1?"":"s")+" assigned to you"}if(!can("page.backoffice")){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
 
 /* ======================= 1. NEW LEAD (any department) ======================= */
 function renderNew(m){
@@ -995,7 +999,7 @@ function newLeadsPanel(mine){const ls=mine.filter(isNewForMe).sort((a,b)=>b.assi
 const COL_CAP=25;
 function lcard(l){const stale=l.status==="Assigned"&&days(l.assignedAt)>(S.settings.slaContactDays||3);const urgent=stale&&days(l.assignedAt)<=60;const qst=l.status==="Quotation Sent"&&days(l.stageAt?.["Quotation Sent"])>(S.settings.quoteStaleDays||14);
   const fu=fuOpen(l)&&fuDue(l)<=new Date(new Date().setHours(23,59,59,999));
-  return`<button class="lc" data-open="${esc(l.id)}"><span class="row" style="gap:6px"><span class="mono muted">${esc(l.ref)}</span><span class="sp"></span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span>${isUpsell(l)?`<span class="chip ups">Upsell</span>`:""}${isNewForMe(l)?`<span class="chip newl">New</span>`:""}</span>
+  return`<button class="lc" data-open="${esc(l.id)}"><span class="row" style="gap:6px"><span class="mono muted">${esc(l.ref)}</span><span class="sp"></span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span>${flagChips(l)}${isUpsell(l)?`<span class="chip ups">Upsell</span>`:""}${isNewForMe(l)?`<span class="chip newl">New</span>`:""}</span>
    <b style="font-size:13.5px">${esc(l.accountName)}</b><span class="small muted">${esc(regionOf(l))} · received ${fmtD(reqDate(l))}</span><span class="small muted">${esc(l.product)}${viewAll()&&S.me==="__all"?" · "+esc(l.assignedTo):""}</span>
    ${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
    ${urgent?`<span class="late">No meeting yet · assigned ${Math.floor(days(l.assignedAt))} days ago</span>`:stale?`<span class="small muted">No meeting logged · ${Math.floor(days(l.assignedAt))} days</span>`:""}${qst?`<span class="late">Quote open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days</span>`:""}${l.status==="Quotation Sent"&&l.quote?.targetDate?(tgtOverdue(l)?`<span class="late">Target ${fmtD(l.quote.targetDate)} passed</span>`:`<span class="small muted">Target ${fmtD(l.quote.targetDate)}</span>`):""}${fu?`<span class="late">Follow-up ${esc(fuLabel(l))}</span>`:fuOpen(l)?`<span class="small muted">Follow-up ${esc(fuLabel(l))}</span>`:""}</button>`}
@@ -1092,6 +1096,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
    <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span><span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
    <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
    ${l.deleted?`<div class="notice bad" style="display:grid;gap:6px"><b>This lead was deleted on ${fmtD(l.deleted.at)} by ${esc(l.deleted.by||"someone")}.</b><span>Reason: ${esc(l.deleted.reason||"—")}${l.deleted.note?" · "+esc(l.deleted.note):""}. It is hidden from every list, count and report. Its details and history are kept.</span>${can("lead.remove")?`<span><button type="button" class="btn sm" id="restoreLead">Restore this lead</button></span>`:""}</div>`:""}
+   ${ruleFlags(l).length?`<div class="notice warn" style="display:grid;gap:2px"><b>Needs action</b>${ruleFlags(l).map(f=>`<span class="small">${esc(f.t)}</span>`).join("")}</div>`:""}
    <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
    <div class="panel" style="padding:14px" id="detPanel">${(can("lead.edit_fields")||canAct(l))&&!l.deleted?`<div class="row" style="margin:-2px 0 8px"><span class="small muted">Lead details</span><span class="sp"></span><button type="button" class="btn sm" id="editAll">Edit details</button></div>`:""}<div class="timeline">
      <div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>
@@ -1105,6 +1110,9 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      <div><span>Assigned to</span><span>${l.assignedTo?`<b>${esc(l.assignedTo)}</b> · ${fmtD(l.assignedAt)}${l.priority?" · "+esc(l.priority)+" priority":""}`:"Not assigned"}</span></div>
      ${money(l.meeting,"Deal estimate")}
      ${meetingsOf(l).length?`<div><span>Meetings (${meetingsOf(l).length})</span><span style="display:grid;gap:4px">${meetingsOf(l).slice().sort((a,b)=>a.date<b.date?1:-1).map(x=>`<span>${fmtD(x.date)} · ${x.mode?`<span class="chip ${x.mode==="Onsite"?"m-site":"m-on"}">${esc(x.mode)}</span>`:`<span class="chip">mode not recorded</span>`} ${esc(x.type||"")}<br><span class="small muted">${esc((x.products||[]).join(", "))}${x.notes?" · "+esc(x.notes):""}${x.by?" · "+esc(x.by):""}</span>${(x.dateChanges||[]).length?`<span class="small muted">Date changed ${x.dateChanges.map(d=>`from ${fmtD(d.from)} to ${fmtD(d.to)} by ${esc(d.by||"—")} on ${fmtD(d.at)}`).join("; ")}</span>`:""}${l.status==="Won"&&can("meeting.edit_won")&&!l.deleted&&x.id?`<span><button type="button" class="btn sm" data-mdate="${esc(x.id)}">Change date</button></span>`:""}</span>`).join("")}</span></div>`:""}${quoteRow(l)}${money(l.order,"Order")}
+     ${(l.contacts||[]).length?`<div><span>Contacts</span><span style="display:grid;gap:3px">${l.contacts.slice(-5).reverse().map(c=>`<span>${fmtD(c.at)} · <b>${esc(c.kind)}</b>${c.note?" · "+esc(c.note):""} <span class="small muted">· ${esc(c.by||"")}</span></span>`).join("")}${l.contacts.length>5?`<span class="small muted">${l.contacts.length-5} earlier in Activity</span>`:""}</span></div>`:""}
+     ${fcEligible(l)?`<div><span>Forecast</span><span>${(()=>{const f=fcOf(l);return`<b>${FC_LABEL[f.cat]}</b>${f.month&&f.cat!=="omit"?" · "+ymLabel(f.month):""}${l.forecast?` <span class="small muted">· set ${fmtD(l.forecast.at)} by ${esc(l.forecast.by||"")}</span>`:` <span class="small muted">· not set yet</span>`}`})()}${canAct(l)?` <button type="button" class="btn sm" id="fcEdit" style="margin-left:6px">Change</button>`:""}</span></div>`:""}
+     ${OPEN.includes(l.status)&&refsFor(l).length?`<div><span>Reference sites</span><span style="display:grid;gap:3px">${refsFor(l).map(v=>`<span>${esc(v.name)} <span class="small muted">· ${esc(ctryName(ctryOf(v.country)))} · ${esc(v.products.join(", "))}${v.note?" · "+esc(v.note):""}</span></span>`).join("")}</span></div>`:""}
      ${(l.statusChanges||[]).length?`<div><span>Status changes</span><span style="display:grid;gap:3px">${l.statusChanges.map(c=>`<span>${esc(c.from)} → <b>${esc(c.to)}</b> · ${fmtD(c.at)} · ${esc(c.by||"—")}<br><span class="small muted">${esc(c.reason||"")}${c.order?` · order ${fmtAED(c.order.aed)}${c.order.no?" ("+esc(c.order.no)+")":""} kept in history`:""}</span></span>`).join("")}</span></div>`:""}
      ${l.lost?`<div><span>Lost reason</span><span>${esc(l.lost.reason)}${l.lost.notes?" · "+esc(l.lost.notes):""}</span></div>`:""}
      ${l.dupOf?`<div><span>Duplicate of</span><span class="mono">${esc(l.dupOf)}</span></div>`:""}
@@ -1123,6 +1131,9 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
   fillNames();drawDetails(l);drawProdArea(l);drawActions(l);drawDelArea(l);
   $("#restoreLead")?.addEventListener("click",()=>restoreLead(l));
+  $("#fcEdit")?.addEventListener("click",()=>{const f=fcOf(l);cfmOpen(`<h3>Forecast for ${esc(l.ref)}</h3><p class="small muted" style="margin:0">${esc(l.accountName)} · ${leadValue(l)?fmtAED(leadValue(l)):"no amount yet"}</p>
+    <label class="f">Forecast<select id="fcC">${FC_CATS.map(([v,t])=>`<option value="${v}"${f.cat===v?" selected":""}>${t}</option>`).join("")}</select></label><label class="f">Month<select id="fcMo"><option value="">—</option>${[...new Set(fcMonths().concat(f.month?[f.month]:[]))].map(mm=>`<option value="${mm}"${f.month===mm?" selected":""}>${ymLabel(mm)}</option>`).join("")}</select></label>
+    <div class="row"><button type="button" class="btn pri" id="fcOk">Save</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,async()=>{const c=$("#fcC").value;let mm=$("#fcMo").value;if((c==="commit"||c==="best")&&!mm)mm=ymKey(l.quote?.targetDate)||ymKey(todayISO());return await setForecast(l,c,mm)},"#fcOk")});
   document.querySelectorAll(".drawer [data-goto]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.goto));
   $("#qTgt")?.addEventListener("click",()=>{S.drawer.mode="qtarget";drawDrawer()});
   $("#qtSave")?.addEventListener("click",async()=>{const v=$("#qtIn").value;if(!v){toast("Pick the target date");return}if(v===l.quote.targetDate){S.drawer.mode=null;drawDrawer();return}
@@ -1263,15 +1274,16 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     if(add.length){const all=lp.concat(add);body.products=all;body.product=all.join(", ")}return{body,add}};
   const amountForm=(title,withNo,noLabel,withMeet,withTarget)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withMeet?meetFields():""}
     <div class="grid3"><label class="f">Amount <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,"AED")}</select></label><label class="f">Date<input id="a-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
-    ${withNo?`<div class="grid2"><label class="f">${noLabel}<input id="a-no"></label>${withTarget?`<label class="f">Target date <span class="req">*</span><input id="a-tgt" type="date" min="${todayISO()}" value="${esc(withTarget===true?"":withTarget)}"><span class="small muted" style="font-weight:400">When the client is expected to decide</span></label>`:""}</div>`:""}<label class="f">Notes<input id="a-notes"></label><div class="small muted" id="a-aed"></div>
+    ${withNo?`<div class="grid2"><label class="f">${noLabel}<input id="a-no"></label>${withTarget?`<label class="f">Target date <span class="req">*</span><input id="a-tgt" type="date" min="${todayISO()}" value="${esc(withTarget===true?"":withTarget)}"><span class="small muted" style="font-weight:400">When the client is expected to decide</span></label>`:""}</div>`:""}<label class="f">Notes<input id="a-notes"></label>${withTarget?nextFields(l):""}<div class="small muted" id="a-aed"></div>
     <div class="row"><button class="btn pri" id="a-save">Save</button><button class="btn" id="a-cancel">Cancel</button></div></div></div>`;
   const bindAmount=(field,status,msg)=>{const upd=()=>{const v=+$("#a-val").value;$("#a-aed").textContent=v?"= "+fmtAED(toAED(v,$("#a-cur").value)):""};$("#a-val").oninput=upd;$("#a-cur").onchange=upd;$("#a-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};
     $("#a-save").onclick=async()=>{const v=+$("#a-val").value;if(!(v>0)){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Enter the amount. It's required at this stage.</span>`;return}
       const c=$("#a-cur").value;const o={value:v,currency:c,aed:toAED(v,c),date:$("#a-date").value,notes:$("#a-notes").value.trim()};if($("#a-no"))o.no=$("#a-no").value.trim();
       if($("#a-tgt")){const t=$("#a-tgt").value;if(!t){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Enter the target date. Every quotation needs one.</span>`;$("#a-tgt").focus();return}
         if(o.date&&t<o.date){$("#a-aed").innerHTML=`<span style="color:var(--bad)">The target date can't be before the quotation date.</span>`;return}o.targetDate=t}
-      if(field==="quote"&&l.quote){await patch(l,{quote:o,quoteHistory:[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]},`Quotation revised · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
-      if(field==="quote"){await patch(l,{quote:o},`${msg} · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
+      const nx=field==="quote"?readNext():{body:{}};if(nx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
+      if(field==="quote"&&l.quote){await patch(l,{...nx.body,quote:o,quoteHistory:[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]},`Quotation revised · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
+      if(field==="quote"){await patch(l,{...nx.body,quote:o},`${msg} · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="meeting"){const r=readMeet(o.date,o.notes);if(r.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
         o.mode=r.m.mode;const{body,add}=meetBody(r.m);body.meeting=o;await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")} · estimate ${fmtAED(o.aed)}${add.length?" · products added: "+add.join(", "):""}`,status);return}
       await patch(l,{[field]:o},`${msg} · ${fmtAED(o.aed)}`,status)}};
@@ -1301,20 +1313,21 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     const tw=()=>{const w=$("#v-sp").value,o=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);$("#v-terr").innerHTML=o&&w&&nk(w)!==nk(o)?`<div class="notice warn" style="padding:6px 10px">${esc(territoryOf(l.country,l.region,S.vSub||subOf(l)).area)} is ${esc(o)}'s territory. Assign to ${esc(w)} only if that's agreed.</div>`:""};$("#v-sp").addEventListener("change",tw);tw();return}}
   if(mode==="meet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Meeting done</h3><div style="display:grid;gap:10px">${meetFields()}
       <label class="f" style="max-width:220px">Meeting date <span class="req">*</span><input id="md-date" type="date" max="${todayISO()}" value="${todayISO()}"></label>
-      <label class="f">Meeting notes<textarea id="md-notes" rows="3" placeholder="Who attended, what was discussed, agreed next step"></textarea></label><div class="small" id="md-msg"></div>
+      <label class="f">Meeting notes<textarea id="md-notes" rows="3" placeholder="Who attended, what was discussed, agreed next step"></textarea></label>${nextFields(l)}<div class="small" id="md-msg"></div>
       <div class="row"><button class="btn pri" id="md-save">Save meeting</button><button class="btn" id="md-x">Cancel</button><span class="small muted">The amount is entered with the quotation.</span></div></div></div>`;
     bindMeet();$("#md-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
-    $("#md-save").onclick=async()=>{const r=readMeet($("#md-date").value,$("#md-notes").value.trim());if(r.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
+    $("#md-save").onclick=async()=>{const r=readMeet($("#md-date").value,$("#md-notes").value.trim());if(r.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const{body,add}=meetBody(r.m);let ex="";try{ex=await meetProducts(l,r.m,body,add)}catch(e){$("#md-msg").innerHTML=`<span style="color:var(--bad)">Couldn't create the upsell lead (${esc(e.code||e.message)}).</span>`;return}
-      await patch(l,body,`Meeting done · ${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}`,"Meeting Done")};return}
+      Object.assign(body,nx.body);await patch(l,body,`Meeting done · ${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${nx.txt||""}`,"Meeting Done")};return}
+  if(mode==="contact"&&OPEN.includes(l.status)){A.innerHTML=contactForm(l);bindContact(l);return}
   if(mode==="logmeet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log a meeting</h3><div style="display:grid;gap:10px">${meetFields()}
       <label class="f" style="max-width:220px">Meeting date <span class="req">*</span><input id="lm-date" type="date" max="${todayISO()}" value="${todayISO()}"></label>
-      <label class="f">Notes<input id="lm-notes" placeholder="What was discussed, next step"></label><div class="small" id="lm-msg"></div>
+      <label class="f">Notes<input id="lm-notes" placeholder="What was discussed, next step"></label>${OPEN.includes(l.status)?nextFields(l):""}<div class="small" id="lm-msg"></div>
       <div class="row"><button class="btn pri" id="lm-save">Save meeting</button><button class="btn" id="lm-x">Cancel</button></div></div></div>`;
     bindMeet();$("#lm-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
-    $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
+    $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const{body,add}=meetBody(r.m);let ex="";try{ex=await meetProducts(l,r.m,body,add)}catch(e){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">Couldn't create the upsell lead (${esc(e.code||e.message)}).</span>`;return}
-      await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}`)};return}
+      Object.assign(body,nx.body);await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${nx.txt||""}`)};return}
   if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);bindAmount("quote","Quotation Sent","Quotation sent");return}
   if(mode==="won"){A.innerHTML=amountForm("Order closed · order value",true,"PO / order number");bindAmount("order","Won","Order won");return}
   if(mode==="lost"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Mark as lost</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="l-r">${opts(["Price","Went with competitor","No budget","No response","Project cancelled","Not a fit","Other"],"","Choose")}</select></label><label class="f">Details / competitor<input id="l-n"></label><div class="row"><button class="btn bad" id="l-save">Mark lost</button><button class="btn" id="l-cancel">Cancel</button></div></div></div>`;
@@ -1336,6 +1349,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
   if(mode==="reassign"){const o=ownerOf(l);A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Reassign</h3><div class="row"><select id="re-sp" style="flex:1">${opts(sp,o&&nk(o)!==nk(l.assignedTo)?o:l.assignedTo)}</select><button class="btn pri" id="re-save">Reassign</button><button class="btn" id="re-cancel">Cancel</button></div>${o?`<div class="small muted" style="margin-top:6px">Territory owner: <b>${esc(o)}</b></div>`:""}</div>`;
     $("#re-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#re-save").onclick=()=>{const w=$("#re-sp").value;patch(l,{assignedTo:w,assignedAt:nowISO()},`Reassigned from ${l.assignedTo} to ${w}`)};return}
   const s=l.status;const b=[];
+  if(OPEN.includes(s))b.push(`<button class="btn ${s==="Assigned"&&!firstTouch(l)?"pri":""}" data-m="contact">Log contact</button>`);
   if(["Assigned","On Hold"].includes(s)&&!meetingsOf(l).length)b.push(`<button class="btn pri" data-m="meet">Meeting done</button>`);
   if((meetingsOf(l).length||["Meeting Done","Quotation Sent","Won"].includes(s))&&(OPEN.includes(s)||s==="Won"))b.push(`<button class="btn ${s==="On Hold"?"pri":""}" data-m="logmeet">Log a meeting</button>`);
   if(["Assigned","Meeting Done","On Hold"].includes(s))b.push(`<button class="btn ${s==="Meeting Done"?"pri":""}" data-m="quote">Quotation sent</button>`);
@@ -1550,7 +1564,7 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
    database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
 const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
 const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
-const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
+const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
 function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
 function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
   if(Array.isArray(v)){if(v.every(x=>typeof x!=="object"))return esc(v.join(", "));if(v.length&&v[0]&&v[0].date!==undefined)return esc(v.map(x=>[x.date,x.mode,x.type].filter(Boolean).join(" ")).join(" · "));return esc(v.length+" item(s)")}
@@ -1973,7 +1987,7 @@ function footprintHTML(){const P=fpState();const accts=fpData();const q=nk(P.q);
     </tbody><tfoot><tr><td><b>All countries</b><div class="small muted">each account once</div></td><td></td>${FPC.map(c=>c.k==="nChains"?`<td class="num">${chainsCli.length}</td>`:cell(totC,c)).join("")}</tr></tfoot></table></div></div>
    <div class="panel"><h3>Hotel chains</h3><p class="small muted" style="margin:2px 0 10px"><b>${chainsReg.length} chains</b> registered with <b>${fmtN(chainsReg.reduce((s,g)=>s+g.n,0))} hotels</b> in Lead Desk; ${chainsCli.length} of these chains are clients. The chain comes from the hotel's brand name${can("settings.manage")?" (correct it in Products & settings → Hotel chains)":""}.</p>
     <div class="tw"><table class="pvt"><thead><tr>${FPH.map(c=>th("fph",c)).join("")}</tr></thead><tbody>
-    ${hrS.map(g=>{const op=!!P.chainOpen[g.key];return`<tr class="click${op?" xopen":""}" data-fph="${esc(g.key)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(g.key==="Independent"?"Independent / other":g.key)}</b></td>${FPH.map(c=>cell(g,c)).join("")}</tr>
+    ${hrS.map(g=>{const op=!!P.chainOpen[g.key];return`<tr class="click${op?" xopen":""}" data-fph="${esc(g.key)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(g.key==="Independent"?"Independent / other":g.key)}</b>${(S.settings.chainOwners||{})[g.key]?`<div class="small muted">Owner: ${esc(S.settings.chainOwners[g.key])}</div>`:""}</td>${FPH.map(c=>cell(g,c)).join("")}</tr>
       ${op?`<tr class="pvx"><td colspan="${FPH.length}">${fpGroup(g.accts,a=>a.country).sort((a,b)=>b.clients-a.clients||b.n-a.n).map(cg=>`<div class="small" style="margin:8px 0 4px"><b>${esc(ctryName(cg.key))}</b> · ${cg.clients} client${cg.clients===1?"":"s"} of ${cg.n}</div>${fpAcctRows(cg.accts,false)}`).join("")}</td></tr>`:""}`}).join("")}
     </tbody></table></div></div></div>`}
 function bindFootprint(m){const P=fpState();const set=(k,v)=>{P[k]=v;render()};
@@ -2005,6 +2019,8 @@ function chainsPanel(){if(!can("settings.manage"))return"";const L=chainList();c
     ${L.map((c,i)=>`<tr><td><input data-chn="${i}" value="${esc(c.name)}" maxlength="60"></td><td><input data-chb="${i}" value="${esc(c.brands.join(", "))}"></td><td><button type="button" class="btn sm" data-chdel="${i}">Remove</button></td></tr>`).join("")}
     <tr><td><input id="chNewN" placeholder="New chain" maxlength="60"></td><td><input id="chNewB" placeholder="Brand words, e.g. Brand One, Brand Two"></td><td></td></tr></tbody></table></div>
     <div class="row" style="margin-top:8px"><button type="button" class="btn pri" id="chSave">Save brand list</button>${S.settings.chains?`<button type="button" class="btn" id="chReset">Restore the standard list</button>`:""}<span class="small" id="chMsg"></span></div></details>
+   <details style="margin-top:10px" id="chOwnD"${C.own?" open":""}><summary style="cursor:pointer"><b>Chain owners</b> <span class="small muted">· the engineer responsible for winning each chain (shown in their Focus tab)</span></summary>
+    <div class="tw" style="margin-top:8px"><table><thead><tr><th>Chain</th><th style="width:260px">Owner</th></tr></thead><tbody>${names.map(n=>`<tr><td>${esc(n)}</td><td><select data-chown="${esc(n)}"><option value="">No owner</option>${spNames().map(e=>`<option${(S.settings.chainOwners||{})[n]===e?" selected":""}>${esc(e)}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div></details>
    <details style="margin-top:10px"${C.open?" open":""} id="chIndD"><summary style="cursor:pointer"><b>Accounts marked Independent</b> <span class="small muted">· the 50 largest, clients first</span></summary>
     <div class="tw" style="margin-top:8px"><table><thead><tr><th>Account</th><th>Country</th><th>Status</th><th class="num">Leads</th><th style="width:240px">Chain</th></tr></thead><tbody>
     ${big.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(ctryName(a.country))}</td><td>${a.client?"Client":"Prospect"}</td><td class="num">${a.leads.length}</td><td><select data-chset="${esc(a.key)}"><option value="">Independent</option>${names.map(n=>`<option>${esc(n)}</option>`).join("")}</select></td></tr>`).join("")||`<tr><td colspan="5" class="empty">No independent accounts.</td></tr>`}</tbody></table></div></details>
@@ -2018,10 +2034,247 @@ function bindChains(m){if(!$("#chainsPanel"))return;const saveS=async(b,msg)=>{t
   m.querySelectorAll("[data-chdel]").forEach(b=>b.onclick=()=>{const L=chainList().filter((_,i)=>i!==+b.dataset.chdel);saveS({chains:L},"Chain removed")});
   m.querySelectorAll("[data-chset]").forEach(s=>s.onchange=()=>{if(!s.value)return;S.chainEd.open=true;saveS({chainOverrides:Object.assign({},S.settings.chainOverrides||{},{[s.dataset.chset]:s.value})},"Chain set to "+s.value)});
   m.querySelectorAll("[data-chun]").forEach(b=>b.onclick=()=>{const o=Object.assign({},S.settings.chainOverrides||{});o[b.dataset.chun]=null;saveS({chainOverrides:o},"Chain will be detected from the name")});
-  $("#chIndD")?.addEventListener("toggle",e=>{S.chainEd.open=e.target.open})}
+  $("#chIndD")?.addEventListener("toggle",e=>{S.chainEd.open=e.target.open});$("#chOwnD")?.addEventListener("toggle",e=>{S.chainEd.own=e.target.open});
+  m.querySelectorAll("[data-chown]").forEach(s=>s.onchange=()=>{S.chainEd.own=true;saveS({chainOwners:Object.assign({},S.settings.chainOwners||{},{[s.dataset.chown]:s.value||null})},s.value?`${s.dataset.chown} owner: ${s.value}`:`${s.dataset.chown} has no owner`)})}
+
+/* month helpers ("YYYY-MM") */
+const MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const ymKey=d=>(d||"").slice(0,7);
+const addMonths=(ym,n)=>{const[y,m]=ym.split("-").map(Number);const d=new Date(y,m-1+n,1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")};
+const ymLabel=(ym,short)=>{if(!ym)return"";const[y,m]=ym.split("-").map(Number);return(short?MON[m-1].slice(0,3):MON[m-1])+" "+y};
+/* ======================= FOCUS: activity rules, forecast, growing clients =======================
+   1. Activity rules: first contact within N working days, first meeting within N days, every open lead has a next step,
+      nothing goes quiet for more than N days. Applies to leads assigned on or after the rules' start date.
+   2. Forecast: each deal is Commit, Best case, Pipeline or Omit for a month. The commit "as of" the cut-off day of the
+      month is compared with what closed, so forecast accuracy is measured per engineer.
+   3. Grow clients: cross-sell targets (client hotels × products they don't have), chain owners, reference sites. */
+const RULE_DEF={contactDays:2,meetingDays:14,staleDays:14,from:"2026-11-01",cutoff:5};
+const PROB_DEF={"Assigned":10,"Meeting Done":25,"Quotation Sent":50,"On Hold":10};
+const FC_CATS=[["commit","Commit"],["best","Best case"],["pipeline","Pipeline"],["omit","Omit"]];
+const FC_LABEL=Object.fromEntries(FC_CATS);
+const CONTACT_KINDS=["Call","Email","WhatsApp","Visit"];
+const RULED=["Assigned","Meeting Done","Quotation Sent"];
+const rules=()=>Object.assign({},RULE_DEF,S.settings.rules||{});
+const stageProb=()=>Object.assign({},PROB_DEF,S.settings.stageProb||{});
+function workDaysBetween(a,b){let d=new Date(a);d.setHours(0,0,0,0);const e=new Date(b);e.setHours(0,0,0,0);let n=0;let g=0;while(d<e&&g++<4000){d.setDate(d.getDate()+1);const w=d.getDay();if(w!==0&&w!==6)n++}return n}   // Mon–Fri
+const assignedOn=l=>l.assignedAt||l.verifiedAt||l.createdAt||"";
+function firstTouch(l){const t=(l.contacts||[]).map(c=>c.at).concat(meetingsOf(l).map(m=>m.date)).filter(Boolean).sort();return t[0]||""}
+function lastTouch(l){const t=(l.contacts||[]).map(c=>c.at).concat(meetingsOf(l).map(m=>m.date),[l.quote?.date,l.lastFollowUpDone,l.stageAt?.["Meeting Done"],l.stageAt?.["Quotation Sent"],assignedOn(l)]).filter(Boolean).sort();return t[t.length-1]||""}
+function ruleFlags(l){if(l.deleted||!RULED.includes(l.status)||!l.assignedTo)return[];const R=rules();const at=assignedOn(l);if(!at||at.slice(0,10)<R.from)return[];
+  const F=[],now=new Date(),wd=workDaysBetween(at,now);
+  if(l.status==="Assigned"&&!firstTouch(l)&&wd>R.contactDays)F.push({k:"contact",t:`No contact ${wd} working days after assignment (target ${R.contactDays})`,s:"No contact"});
+  if(l.status==="Assigned"&&!meetingsOf(l).length){const d=Math.floor(days(at));if(d>R.meetingDays)F.push({k:"meeting",t:`No meeting ${d} days after assignment (target ${R.meetingDays})`,s:"No meeting"})}
+  if(!l.nextFollowUp){if(wd>R.contactDays||firstTouch(l))F.push({k:"next",t:"No next step scheduled",s:"No next step"})}else if(fuOverdue(l))F.push({k:"overdue",t:`Next step overdue (${fuLabel(l)})`,s:"Next step overdue"});
+  const sd=Math.floor(days(lastTouch(l)));if(sd>R.staleDays)F.push({k:"stale",t:`No activity for ${sd} days (limit ${R.staleDays})`,s:`Quiet ${sd}d`});
+  return F}
+const flagChips=l=>ruleFlags(l).map(f=>`<span class="late" title="${esc(f.t)}">${esc(f.s)}</span>`).join("");
+/* the "next step" every update must leave behind */
+function nextDefault(){const d=new Date();let n=0;while(n<2){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)n++}d.setHours(10,0,0,0);return localInput(d)}
+const nextFields=l=>`<div class="grid2"><label class="f">Next step on <span class="req">*</span><input id="nx-at" type="datetime-local" min="${localInput(new Date()).slice(0,10)}T00:00" value="${esc(l.nextFollowUp&&fuDue(l)>new Date()?localInput(fuDue(l)):nextDefault())}"></label>
+  <label class="f">Next step<input id="nx-n" maxlength="200" placeholder="e.g. Send revised quote, call the GM" value="${esc(l.nextFollowUp&&fuDue(l)>new Date()?l.followUpNote||"":"")}"></label></div>`;
+function readNext(){const v=$("#nx-at")?.value;if(v===undefined)return{body:{}};if(!v)return{err:"Set the date of the next step."};const at=new Date(v);if(isNaN(at))return{err:"The next-step date isn't valid."};if(at<new Date(Date.now()-6e4))return{err:"The next step must be in the future."};
+  const n=$("#nx-n").value.trim();return{body:{nextFollowUp:v,nextFollowUpAt:at.toISOString(),followUpNote:n,followUpRemindedFor:null},txt:` · next: ${at.toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}${n?" "+n:""}`}}
+/* quick "Log contact" (call, email, WhatsApp, visit) */
+function contactForm(l){return`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log contact</h3><div style="display:grid;gap:10px">
+   <div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">How<span class="seg" id="ct-k">${CONTACT_KINDS.map((k,i)=>`<button type="button" data-v="${k}" aria-pressed="${i===0}">${k}</button>`).join("")}</span></div>
+   <label class="f">What happened<input id="ct-n" maxlength="300" placeholder="e.g. Spoke to FOM, interested in kiosks, wants a demo"></label>${nextFields(l)}<div class="small" id="ct-msg"></div>
+   <div class="row"><button class="btn pri" id="ct-save">Save</button><button class="btn" id="ct-x">Cancel</button>${l.status==="Assigned"&&!meetingsOf(l).length?`<span class="small muted">Held a meeting? Use “Meeting done” instead.</span>`:""}</div></div></div>`}
+function bindContact(l){let kind=CONTACT_KINDS[0];$("#ct-k").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{kind=b.dataset.v;$("#ct-k").querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  $("#ct-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#ct-n").focus();
+  $("#ct-save").onclick=async()=>{const nx=readNext();if(nx.err){$("#ct-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}const t=nowISO();const note=$("#ct-n").value.trim();
+    const body=Object.assign({contacts:[...(l.contacts||[]),{id:"c"+Date.now().toString(36),at:t,kind,note,by:actor()||S.myName||"",byId:S.uid||null}]},l.firstContactAt?{}:{firstContactAt:t},nx.body);
+    $("#ct-save").disabled=true;if(!await patch(l,body,`${kind}${note?": "+note:""}${nx.txt}`))$("#ct-save").disabled=false}}
+/* ---------- forecast ---------- */
+const fcEligible=l=>!l.deleted&&["Meeting Done","Quotation Sent","On Hold"].includes(l.status);
+const fcOf=l=>l.forecast||{cat:"pipeline",month:ymKey(l.quote?.targetDate)||""};
+const fcMonths=()=>{const m0=ymKey(todayISO());return[0,1,2,3,4,5].map(i=>addMonths(m0,i))};
+async function setForecast(l,cat,month){const t=nowISO();const by=actor()||S.myName||"";const f={cat,month:month||"",at:t,by};
+  return patch(l,{forecast:f,forecastHist:[...(l.forecastHist||[]),{cat,month:month||"",amt:leadValue(l),at:t,by}]},`Forecast: ${FC_LABEL[cat]}${month&&cat!=="omit"?" for "+ymLabel(month):""}`)}
+const cutoffISO=m=>new Date(`${m}-${String(rules().cutoff).padStart(2,"0")}T23:59:59`).toISOString();
+function commitAt(l,m){const c=cutoffISO(m);const h=(l.forecastHist||[]).filter(x=>x.at<=c);const x=h[h.length-1];return x&&x.cat==="commit"&&x.month===m?(+x.amt||leadValue(l)):0}
+function forecastFor(ls,m){const P=stageProb();const R={};const row=e=>R[e]||(R[e]={e,commit:0,best:0,weighted:0,n:0});
+  ls.filter(l=>!l.deleted&&RULED.concat(["On Hold"]).includes(l.status)).forEach(l=>{const f=fcOf(l);if(f.cat==="omit")return;const mm=f.month||ymKey(l.quote?.targetDate);if(mm!==m)return;const v=leadValue(l);const r=row(l.assignedTo||"Unassigned");r.n++;
+    if(f.cat==="commit"){r.commit+=v;r.best+=v}else if(f.cat==="best")r.best+=v;r.weighted+=v*(P[l.status]||0)/100});
+  ls.filter(l=>l.status==="Won"&&ymKey(wonAt(l))===m).forEach(l=>{const r=row(l.assignedTo||"Unassigned");r.won=(r.won||0)+orderVal(l)});
+  return Object.values(R).sort((a,b)=>b.commit-a.commit||b.best-a.best||b.weighted-a.weighted)}
+function accuracy(ls,m){const R={};const row=e=>R[e]||(R[e]={e,committed:0,closed:0,won:0,n:0,nWon:0});
+  ls.forEach(l=>{const c=commitAt(l,m);if(c){const r=row(l.assignedTo||"Unassigned");r.committed+=c;r.n++;if(l.status==="Won"&&ymKey(wonAt(l))===m){r.closed+=orderVal(l);r.nWon++}}
+    if(l.status==="Won"&&ymKey(wonAt(l))===m)row(l.assignedTo||"Unassigned").won+=orderVal(l)});
+  return Object.values(R).filter(r=>r.committed||r.won).sort((a,b)=>b.committed-a.committed||b.won-a.won)}
+function forecastPanel(){const F=S.fcv||(S.fcv={m:ymKey(todayISO()),acc:addMonths(ymKey(todayISO()),-1)});const ls=S.leads;const rows=forecastFor(ls,F.m);const T=rows.reduce((o,r)=>({c:o.c+r.commit,b:o.b+r.best,w:o.w+r.weighted,won:o.won+(r.won||0)}),{c:0,b:0,w:0,won:0});
+  const accM=[1,2,3,4,5,6].map(i=>addMonths(ymKey(todayISO()),-i));const A=accuracy(ls,F.acc);const AT=A.reduce((o,r)=>({c:o.c+r.committed,cl:o.cl+r.closed,w:o.w+r.won}),{c:0,cl:0,w:0});const P=stageProb();
+  const pc=v=>v==null?"—":Math.round(v*100)+"%";
+  return`<div class="panel" id="fcPanel"><div class="row" style="margin-bottom:6px"><h3>Forecast</h3><span class="sp"></span><label class="f fsm" style="min-width:160px">Month<select id="fcM">${fcMonths().map(m=>`<option value="${m}"${m===F.m?" selected":""}>${ymLabel(m)}</option>`).join("")}</select></label></div>
+   <p class="small muted" style="margin:0 0 10px">Each engineer marks their deals Commit or Best case in the Focus tab. Weighted pipeline = deal value × stage probability (${Object.entries(P).map(([k,v])=>k+" "+v+"%").join(", ")}). Deals without a forecast month use the quotation target date.</p>
+   <div class="kpis" style="margin-bottom:10px"><div class="kpi"><div class="l">Commit</div><div class="v">${fmtAED(T.c)}</div></div><div class="kpi"><div class="l">Best case</div><div class="v">${fmtAED(T.b)}</div><div class="s">includes commit</div></div><div class="kpi"><div class="l">Weighted pipeline</div><div class="v">${fmtAED(T.w)}</div></div><div class="kpi"><div class="l">Won so far</div><div class="v">${fmtAED(T.won)}</div><div class="s">${ymLabel(F.m)}</div></div></div>
+   <div class="tw"><table><thead><tr><th>Engineer</th><th class="num">Deals</th><th class="num">Commit</th><th class="num">Best case</th><th class="num">Weighted</th><th class="num">Won so far</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${esc(r.e)}</td><td class="num">${r.n}</td><td class="num">${r.commit?fmtAED(r.commit):"—"}</td><td class="num">${r.best?fmtAED(r.best):"—"}</td><td class="num">${r.weighted?fmtAED(r.weighted):"—"}</td><td class="num">${r.won?fmtAED(r.won):"—"}</td></tr>`).join("")||`<tr><td colspan="6" class="empty">No deals forecast for ${ymLabel(F.m)}.</td></tr>`}</tbody>
+    ${rows.length?`<tfoot><tr><td><b>Total</b></td><td class="num">${rows.reduce((s,r)=>s+r.n,0)}</td><td class="num">${fmtAED(T.c)}</td><td class="num">${fmtAED(T.b)}</td><td class="num">${fmtAED(T.w)}</td><td class="num">${fmtAED(T.won)}</td></tr></tfoot>`:""}</table></div>
+   <div class="row" style="margin:16px 0 6px"><h3>Forecast accuracy</h3><span class="sp"></span><label class="f fsm" style="min-width:160px">Month<select id="fcA">${accM.map(m=>`<option value="${m}"${m===F.acc?" selected":""}>${ymLabel(m)}</option>`).join("")}</select></label></div>
+   <p class="small muted" style="margin:0 0 10px">Commit = what each engineer had committed by the ${rules().cutoff}${["","st","nd","rd"][rules().cutoff]||"th"} of the month. Accuracy = committed deals that closed ÷ committed.</p>
+   <div class="tw"><table><thead><tr><th>Engineer</th><th class="num">Committed</th><th class="num">Closed from commit</th><th class="num">Accuracy</th><th class="num">All orders won</th></tr></thead><tbody>
+    ${A.map(r=>`<tr><td>${esc(r.e)}</td><td class="num">${r.committed?fmtAED(r.committed):"—"}</td><td class="num">${r.closed?fmtAED(r.closed):"—"}</td><td class="num"><b style="color:${r.committed?(r.closed/r.committed>=0.8?"var(--ok)":r.closed/r.committed>=0.5?"var(--warn)":"var(--bad)"):"inherit"}">${r.committed?pc(r.closed/r.committed):"—"}</b></td><td class="num">${r.won?fmtAED(r.won):"—"}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">No commits or orders in ${ymLabel(F.acc)}.</td></tr>`}</tbody>
+    ${A.length?`<tfoot><tr><td><b>Team</b></td><td class="num">${fmtAED(AT.c)}</td><td class="num">${fmtAED(AT.cl)}</td><td class="num">${AT.c?pc(AT.cl/AT.c):"—"}</td><td class="num">${fmtAED(AT.w)}</td></tr></tfoot>`:""}</table></div></div>`}
+function bindForecastPanel(){$("#fcM")&&($("#fcM").onchange=e=>{S.fcv.m=e.target.value;render()});$("#fcA")&&($("#fcA").onchange=e=>{S.fcv.acc=e.target.value;render()})}
+/* team view of the activity rules */
+function rulesTeam(ls){const R=rules();const E={};const row=e=>E[e]||(E[e]={e,n:0,contacted:0,contactedOK:0,met:0,metOK:0,noNext:0,stale:0,overdue:0,flagged:0,ttc:[]});
+  ls.filter(l=>!l.deleted&&l.assignedTo&&assignedOn(l).slice(0,10)>=R.from&&!["Duplicate","Rejected","New","Info Needed"].includes(l.status)).forEach(l=>{const r=row(l.assignedTo);r.n++;const at=assignedOn(l),ft=firstTouch(l);
+    if(ft){r.contacted++;const wd=workDaysBetween(at,ft);r.ttc.push(wd);if(wd<=R.contactDays)r.contactedOK++}
+    const m=meetingsOf(l).map(x=>x.date).filter(Boolean).sort()[0];if(m){r.met++;if(days(at)-days(m)<=R.meetingDays)r.metOK++}
+    const F=ruleFlags(l);if(F.length)r.flagged++;F.forEach(f=>{if(f.k==="next")r.noNext++;if(f.k==="stale")r.stale++;if(f.k==="overdue")r.overdue++})});
+  return Object.values(E).map(r=>Object.assign(r,{avg:r.ttc.length?r.ttc.reduce((a,b)=>a+b,0)/r.ttc.length:null})).sort((a,b)=>b.flagged-a.flagged||b.n-a.n)}
+const backlog=ls=>ls.filter(l=>!l.deleted&&RULED.includes(l.status)&&assignedOn(l).slice(0,10)<rules().from&&days(lastTouch(l))>rules().staleDays);
+/* ---------- grow clients ---------- */
+function clientAccounts(){const A={};S.leads.forEach(l=>{if(l.deleted||["Duplicate","Rejected"].includes(l.status))return;const k=accKey(l);const a=A[k]||(A[k]={key:k,name:l.accountName||"(no name)",country:l.country||"",leads:[],won:[],owner:"",ownerAt:""});a.leads.push(l);
+  if(l.status==="Won"){a.won.push(l);const w=wonAt(l);if(w>=a.ownerAt){a.ownerAt=w;a.owner=l.assignedTo||""}}});return Object.values(A).filter(a=>a.won.length)}
+function crossSell(eng){const act=prodList(false).map(p=>p.name);const out=[];
+  for(const a of clientAccounts()){if(eng&&a.owner!==eng)continue;const have=new Set();a.leads.forEach(l=>{if(l.status!=="Lost")productsOf(l).forEach(p=>have.add(nk(p)))});
+    const miss=act.filter(p=>!have.has(nk(p))&&productState(a.key,p).state!=="blocked");if(miss.length)out.push(Object.assign({},a,{bought:[...new Set(a.won.flatMap(productsOf))],miss,rev:a.won.reduce((s,l)=>s+orderVal(l),0)}))}
+  return out.sort((a,b)=>b.rev-a.rev)}
+async function createCrossSell(a,p,eng){const src=a.leads.slice().sort((x,y)=>(y.createdAt||"").localeCompare(x.createdAt||""))[0];const t=nowISO();const ref=await nextRef();
+  const doc={ref,accountKey:src.accountKey,accountName:src.accountName,country:src.country||"",region:src.region||"",subdivision:src.subdivision||"",contact:src.contact||{},products:[p],product:p,category:"Outbound",source:"Cross-sell",department:"Sales",
+    generatedBy:eng,preferred:eng,assignedTo:isSales()?eng:"",status:"New",priority:"Medium",createdAt:t,createdBy:S.uid||null,requirementDate:todayISO(),notes:`Cross-sell: client already uses ${[...new Set(a.won.flatMap(productsOf))].join(", ")}.`,
+    log:[{t,by:actor()||S.myName||"",byId:S.uid||null,a:`Cross-sell lead created from the Focus tab for ${eng}`}]};
+  await S.db.doc("leads/"+ref).set(doc);return ref}
+const chainOwners=()=>S.settings.chainOwners||{};
+function chainOpps(eng){const own=Object.entries(chainOwners()).filter(([,e])=>e&&(!eng||e===eng)).map(([c])=>c);if(!own.length)return[];const acc=fpData();
+  return own.map(c=>{const hs=acc.filter(a=>a.chain===c);return{c,owner:chainOwners()[c],hotels:hs.length,clients:hs.filter(a=>a.client),open:hs.filter(a=>!a.client)}}).sort((a,b)=>b.open.length-a.open.length)}
+const refs=()=>Object.fromEntries(Object.entries((S.refs&&S.refs.refs)||{}).filter(([,v])=>v&&v.name));
+function refsFor(l){const ps=new Set(productsOf(l).map(nk));const c=ctryOf(l.country),r=regionOf(l);return Object.entries(refs()).map(([k,v])=>Object.assign({key:k},v)).filter(v=>v.products.some(p=>ps.has(nk(p))))
+  .map(v=>Object.assign(v,{score:(ctryOf(v.country)===c?2:0)+((guessRegion(v.country)||"")===r?1:0)})).filter(v=>v.score>0).sort((a,b)=>b.score-a.score).slice(0,3)}
+async function saveRefs(next,msg){try{if(S.refsExists)await S.db.doc("config/references").update({refs:next});else{await S.db.doc("config/references").set({refs:next});S.refsExists=true}S.refs={refs:next};toast(msg);render()}
+  catch(e){toast(/permission|42501|row-level/i.test(e.message||"")?"Only a Lead Manager or Supervisor can change reference sites (and supabase/18_focus.sql must be run).":"Couldn't save: "+(e.message||e.code))}}
+/* ---------- the Focus tab ---------- */
+function focusState(){const F=S.focus||(S.focus={eng:viewAll()?"":S.myEng,open:{act:true,fc:true,xs:true,ch:true,ref:false},refQ:"",refP:""});if(!viewAll())F.eng=S.myEng;return F}
+function renderFocus(m){const F=focusState();const eng=F.eng;const team=viewAll();const mine=l=>!eng||l.assignedTo===eng;const ls=S.leads.filter(l=>!l.deleted);
+  const flagged=ls.filter(l=>mine(l)&&ruleFlags(l).length).sort((a,b)=>ruleFlags(b).length-ruleFlags(a).length||assignedOn(a).localeCompare(assignedOn(b)));
+  const fcl=ls.filter(l=>mine(l)&&fcEligible(l)).sort((a,b)=>(a.quote?.targetDate||"9").localeCompare(b.quote?.targetDate||"9")||leadValue(b)-leadValue(a));
+  const m0=ymKey(todayISO());const fr=forecastFor(ls.filter(mine),m0);const FT=fr.reduce((o,r)=>({c:o.c+r.commit,b:o.b+r.best}),{c:0,b:0});
+  const xs=crossSell(eng);const ch=chainOpps(eng);const RT=team&&!eng?rulesTeam(ls):null;const bl=team&&!eng?backlog(ls):[];const sp=spNames();
+  const sec=(k,title,count,body,extra="")=>`<details class="panel fsec" data-sec="${k}"${F.open[k]?" open":""}><summary><b>${title}</b>${count!=null?` <span class="count"${count?"":` style="background:var(--sunk);color:var(--muted)"`}>${count}</span>`:""}${extra}</summary><div style="margin-top:10px">${body}</div></details>`;
+  const R=rules();
+  const actBody=(RT?`<div class="tw" style="margin-bottom:12px"><table><thead><tr><th>Engineer</th><th class="num">Leads since ${fmtD(R.from)}</th><th class="num">Contacted in ${R.contactDays} working days</th><th class="num">Avg days to contact</th><th class="num">Meeting in ${R.meetingDays} days</th><th class="num">No next step</th><th class="num">Next step overdue</th><th class="num">Quiet ${R.staleDays}+ days</th><th class="num">Leads needing action</th></tr></thead><tbody>
+      ${RT.map(r=>`<tr class="click" data-feng="${esc(r.e)}"><td>${esc(r.e)}</td><td class="num">${r.n}</td><td class="num">${r.n?Math.round(r.contactedOK/r.n*100)+"%":"—"}</td><td class="num">${r.avg==null?"—":r.avg.toFixed(1)}</td><td class="num">${r.n?Math.round(r.metOK/r.n*100)+"%":"—"}</td><td class="num">${r.noNext||"—"}</td><td class="num">${r.overdue||"—"}</td><td class="num">${r.stale||"—"}</td><td class="num"><b style="${r.flagged?"color:var(--bad)":""}">${r.flagged}</b></td></tr>`).join("")||`<tr><td colspan="9" class="empty">No leads assigned since ${fmtD(R.from)} yet.</td></tr>`}</tbody></table></div>
+      ${bl.length?`<p class="small" style="margin:0 0 10px"><b>${fmtN(bl.length)} older leads</b> (assigned before ${fmtD(R.from)}) have had no activity for ${R.staleDays}+ days. Review them with each engineer: work them, put them on hold, or close them as Lost.</p>`:""}`:"")
+    +(flagged.length?`<div class="tw"><table><thead><tr><th>Lead</th><th>Property</th>${eng?"":"<th>Engineer</th>"}<th>Stage</th><th>What's missing</th><th>Next step</th><th></th></tr></thead><tbody>
+      ${flagged.slice(0,60).map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}<div class="small muted">${esc(productsOf(l).join(", "))}</div></td>${eng?"":`<td>${esc(l.assignedTo)}</td>`}<td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td>${ruleFlags(l).map(f=>`<div class="small" style="color:var(--bad)">${esc(f.t)}</div>`).join("")}</td>
+        <td class="small">${l.nextFollowUp?esc(fuLabel(l))+(l.followUpNote?" · "+esc(l.followUpNote):""):"—"}</td><td class="num" style="white-space:nowrap">${canAct(l)?`<button type="button" class="btn sm pri" data-flog="${esc(l.id)}">Log contact</button> `:""}<button type="button" class="btn sm" data-open="${esc(l.id)}">Open</button></td></tr>`).join("")}</tbody></table></div>${flagged.length>60?`<p class="small muted">Showing 60 of ${flagged.length}.</p>`:""}`
+    :`<p class="small" style="margin:0">Nothing needs action${eng?" for "+esc(eng):""}. Every lead assigned since ${fmtD(R.from)} has been contacted on time and has a next step.</p>`);
+  const fcBody=`<p class="small muted" style="margin:0 0 10px">Mark each deal for the month you expect the order: <b>Commit</b> (you're confident), <b>Best case</b> (possible), <b>Pipeline</b> (not this time) or <b>Omit</b>. What's committed by the ${R.cutoff}${["","st","nd","rd"][R.cutoff]||"th"} of each month is compared with what closes.</p>
+    ${fcl.length?`<div class="tw"><table><thead><tr><th>Lead</th><th>Property</th>${eng?"":"<th>Engineer</th>"}<th>Stage</th><th class="num">Value</th><th>Target date</th><th>Forecast</th><th>Month</th></tr></thead><tbody>
+    ${fcl.map(l=>{const f=fcOf(l);const ok=canAct(l);return`<tr><td class="mono"><button type="button" class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td>${eng?"":`<td>${esc(l.assignedTo||"—")}</td>`}<td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td>
+      <td>${l.quote?.targetDate?`<span style="${tgtOverdue(l)?"color:var(--bad)":""}">${fmtD(l.quote.targetDate)}</span>`:"—"}</td>
+      <td><select data-fcc="${esc(l.id)}"${ok?"":" disabled"} aria-label="Forecast for ${esc(l.ref)}">${FC_CATS.map(([v,t])=>`<option value="${v}"${f.cat===v?" selected":""}>${t}</option>`).join("")}</select></td>
+      <td><select data-fcm="${esc(l.id)}"${ok?"":" disabled"} aria-label="Month for ${esc(l.ref)}"><option value="">—</option>${[...new Set(fcMonths().concat(f.month?[f.month]:[]))].map(mm=>`<option value="${mm}"${f.month===mm?" selected":""}>${ymLabel(mm,true)}</option>`).join("")}</select></td></tr>`}).join("")}</tbody></table></div>`:`<p class="small" style="margin:0">No deals at Meeting done or Quotation sent.</p>`}`;
+  const xsBody=xs.length?`<p class="small muted" style="margin:0 0 10px">Client hotels${eng?" you own":""} and the active products they don't have yet (none open on another lead). Creating a lead sends it to the Lead Manager to approve, like any outbound lead.</p>
+    <div class="tw"><table><thead><tr><th>Client</th>${eng?"":"<th>Owner</th>"}<th>Already has</th><th class="num">Revenue</th><th>Could also buy</th></tr></thead><tbody>
+    ${xs.slice(0,40).map(a=>`<tr><td>${esc(a.name)}<div class="small muted">${esc(ctryName(ctryOf(a.country)))}</div></td>${eng?"":`<td>${esc(a.owner||"—")}</td>`}<td class="small">${esc(a.bought.join(", "))}</td><td class="num">${fmtAED(a.rev)}</td>
+      <td><div class="row" style="gap:4px">${a.miss.slice(0,8).map(p=>`<button type="button" class="btn sm" data-xs="${esc(a.key)}" data-xp="${esc(p)}" title="Create a cross-sell lead for ${esc(p)}">+ ${esc(p)}</button>`).join("")}${a.miss.length>8?`<span class="small muted">+${a.miss.length-8} more</span>`:""}</div></td></tr>`).join("")}</tbody></table></div>${xs.length>40?`<p class="small muted">Showing the 40 largest clients of ${xs.length}.</p>`:""}`
+    :`<p class="small" style="margin:0">No client hotels${eng?" owned by "+esc(eng):""} with products left to offer.</p>`;
+  const chBody=ch.length?ch.map(c=>`<div class="dqname" style="margin-bottom:10px"><div class="row"><b>${esc(c.c)}</b><span class="small muted">${eng?"":"Owner "+esc(c.owner)+" · "}${c.hotels} hotels in Lead Desk · ${c.clients.length} clients · ${c.open.length} not yet clients</span></div>
+     ${c.open.length?`<div class="tw" style="margin-top:6px"><table><thead><tr><th>Hotel</th><th>Country</th><th>Lead status</th><th>Engineer</th><th>Reference in this chain</th></tr></thead><tbody>${c.open.slice(0,25).map(a=>{const st=a.leads.length?a.leads.slice().sort((x,y)=>reqDate(y).localeCompare(reqDate(x)))[0]:null;
+       return`<tr${st?` class="click" data-open="${esc(st.id)}"`:""}><td>${esc(a.name)}</td><td>${esc(ctryName(a.country))}</td><td>${st?`<span class="${stCls(st.status)}">${esc(st.status)}</span>`:`<span class="muted">No lead yet</span>`}</td><td>${esc(a.eng||"—")}</td><td class="small">${esc(c.clients.find(x=>refs()[x.key])?.name||c.clients[0]?.name||"—")}</td></tr>`}).join("")}</tbody></table></div>${c.open.length>25?`<p class="small muted">Showing 25 of ${c.open.length}.</p>`:""}`:""}</div>`).join("")
+    :`<p class="small" style="margin:0">${eng?esc(eng)+" doesn't own a hotel chain.":"No chain owners yet."} ${can("settings.manage")?"Set chain owners in Products & settings → Hotel chains.":"A Supervisor sets chain owners in Products & settings."}</p>`;
+  const RF=Object.entries(refs()).map(([k,v])=>Object.assign({key:k},v)).filter(v=>(!F.refP||v.products.some(p=>nk(p)===nk(F.refP)))&&(!F.refQ||nk(v.name+" "+v.country).includes(nk(F.refQ)))).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
+  const cli=clientAccounts().filter(a=>!refs()[a.key]).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||"")));
+  const refBody=`<p class="small muted" style="margin:0 0 10px">Happy clients who will take a call from a prospect, by product and country. The lead drawer suggests references for the same product in the same country or region.</p>
+    <div class="row" style="margin-bottom:8px"><label class="f fsm">Product<select id="rfP">${opts(prodList(true).map(p=>p.name),F.refP,"All products")}</select></label><label class="f fsearch" style="min-width:200px">Find<input id="rfQ" value="${esc(F.refQ)}" placeholder="Hotel or country"></label></div>
+    <div class="tw"><table><thead><tr><th>Hotel</th><th>Country</th><th>Products they vouch for</th><th>Contact / note</th><th>Added</th>${can("account.manage")?"<th></th>":""}</tr></thead><tbody>
+    ${RF.map(v=>`<tr><td>${esc(v.name)}</td><td>${esc(ctryName(ctryOf(v.country)))}</td><td class="small">${esc(v.products.join(", "))}</td><td class="small">${esc(v.note||"—")}</td><td class="small">${fmtD(v.at)} · ${esc(v.by||"")}</td>${can("account.manage")?`<td class="num"><button type="button" class="btn sm" data-rfdel="${esc(v.key)}">Remove</button></td>`:""}</tr>`).join("")||`<tr><td colspan="6" class="empty">No reference sites${F.refP||F.refQ?" for these filters":" yet"}.</td></tr>`}</tbody></table></div>
+    ${can("account.manage")?`<div class="dqform" style="margin-top:10px"><label class="f">Client hotel<select id="rfA">${opts(cli.map(a=>a.key),"","Choose a client")}</select></label><label class="f">Products<input id="rfPs" placeholder="Filled from what they bought"></label><label class="f">Contact / note<input id="rfN" maxlength="200" placeholder="e.g. GM Mr X happy to take calls"></label><div class="row" style="align-self:end"><button type="button" class="btn pri" id="rfAdd">Add reference</button></div></div>`:""}`;
+  const fn=flagged.length;
+  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Focus</h2><p>${eng?esc(eng)+": ":""}what needs doing today, this month's forecast, and where to grow.</p></div>
+    ${team?`<div class="row"><label class="f fsm" style="min-width:200px">Engineer<select id="fEng"><option value="">Whole team</option>${sp.map(n=>`<option${n===eng?" selected":""}>${esc(n)}</option>`).join("")}</select></label></div>`:""}</div>
+   <div class="kpis"><div class="kpi"><div class="l">Leads needing action</div><div class="v" style="${fn?"color:var(--bad)":""}">${fn}</div><div class="s">contact, meeting, next step or quiet</div></div>
+    ${myTargetKpi(eng)}<div class="kpi"><div class="l">Commit ${ymLabel(m0,true)}</div><div class="v">${fmtAED(FT.c)}</div><div class="s">best case ${fmtAED(FT.b)}</div></div>
+    <div class="kpi"><div class="l">Cross-sell targets</div><div class="v">${xs.reduce((s,a)=>s+a.miss.length,0)}</div><div class="s">across ${xs.length} client hotels</div></div>
+    <div class="kpi"><div class="l">Chain hotels to win</div><div class="v">${ch.reduce((s,c)=>s+c.open.length,0)}</div><div class="s">${ch.length} chain${ch.length===1?"":"s"}${eng?" owned":""}</div></div></div>
+   ${sec("act","Needs action",fn,actBody,`<span class="small muted"> · first contact in ${R.contactDays} working days, meeting in ${R.meetingDays} days, always a next step, never quiet more than ${R.staleDays} days</span>`)}
+   ${sec("fc",`Forecast call · ${ymLabel(m0)}`,fcl.length,fcBody)}
+   ${sec("xs","Cross-sell targets",xs.length,xsBody)}
+   ${sec("ch","Hotel chains to win",ch.reduce((s,c)=>s+c.open.length,0),chBody)}
+   ${sec("ref","Reference sites",Object.keys(refs()).length,refBody)}</section>`;
+  m.querySelectorAll("details.fsec").forEach(d=>d.ontoggle=()=>{F.open[d.dataset.sec]=d.open});
+  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});
+  m.querySelectorAll("[data-feng]").forEach(r=>r.onclick=()=>{F.eng=r.dataset.feng;render();scrollTo(0,0)});
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{e.stopPropagation();openDrawer(b.dataset.open)});
+  m.querySelectorAll("[data-flog]").forEach(b=>b.onclick=()=>{openDrawer(b.dataset.flog);S.drawer.mode="contact";drawDrawer()});
+  m.querySelectorAll("[data-fcc],[data-fcm]").forEach(s=>s.onchange=async()=>{const id=s.dataset.fcc||s.dataset.fcm;const l=S.leadMap[id];if(!l)return;const f=fcOf(l);
+    const cat=m.querySelector(`[data-fcc="${CSS.escape(id)}"]`).value;let mm=m.querySelector(`[data-fcm="${CSS.escape(id)}"]`).value;if((cat==="commit"||cat==="best")&&!mm){mm=ymKey(l.quote?.targetDate)||m0}
+    if(cat===f.cat&&mm===(f.month||"")&&l.forecast)return;s.disabled=true;await setForecast(l,cat,mm)});
+  m.querySelectorAll("[data-xs]").forEach(b=>b.onclick=()=>{const a=crossSell(eng).find(x=>x.key===b.dataset.xs)||crossSell("").find(x=>x.key===b.dataset.xs);const p=b.dataset.xp;if(!a)return;const owner=eng||a.owner||S.myEng;
+    cfmOpen(`<h3>Create a cross-sell lead?</h3><p class="small" style="margin:0"><b>${esc(a.name)}</b> · ${esc(p)} · for ${esc(owner)}</p><p class="small muted" style="margin:0">The client already uses ${esc(a.bought.join(", "))}. The new outbound lead goes to the Lead Manager to approve.</p><div class="small" id="xsMsg"></div>
+      <div class="row"><button type="button" class="btn pri" id="xsOk">Create lead</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,
+    async()=>{try{const ref=await createCrossSell(a,p,owner);toast(`Lead ${ref} created for ${p}`);return true}catch(e){$("#xsMsg").innerHTML=`<span style="color:var(--bad)">Couldn't create the lead: ${esc(e.message||e.code)}</span>`;return false}},"#xsOk")});
+  $("#rfP")&&($("#rfP").onchange=e=>{F.refP=e.target.value;render()});const rq=$("#rfQ");if(rq)rq.oninput=()=>{clearTimeout(rq.t);rq.t=setTimeout(()=>{F.refQ=rq.value;render();const i=$("#rfQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},300)};
+  $("#rfA")&&($("#rfA").onchange=e=>{const a=clientAccounts().find(x=>x.key===e.target.value);if(a)$("#rfPs").value=[...new Set(a.won.flatMap(productsOf))].join(", ")});
+  $("#rfAdd")?.addEventListener("click",()=>{const k=$("#rfA").value;const a=clientAccounts().find(x=>x.key===k);if(!a){toast("Choose a client hotel");return}const ps=$("#rfPs").value.split(",").map(x=>x.trim()).filter(Boolean);if(!ps.length){toast("Add at least one product");return}
+    saveRefs(Object.assign({},refs(),{[k]:{name:a.name,country:a.country,products:ps,note:$("#rfN").value.trim(),by:actor()||S.myName||"",at:nowISO()}}),`${a.name} added as a reference site`)});
+  m.querySelectorAll("[data-rfdel]").forEach(b=>b.onclick=()=>{const n=Object.assign({},refs());n[b.dataset.rfdel]=null;saveRefs(n,"Reference site removed")})}
+/* Supervisor settings: activity rules, stage probabilities, forecast cut-off */
+function rulesPanel(){if(!can("settings.manage"))return"";const R=rules(),P=stageProb();
+  return`<div class="panel" id="rulesPanel"><h3>Activity rules and forecast</h3><p class="small muted" style="margin:2px 0 10px;max-width:90ch">Leads that break these rules are flagged on pipeline cards, in the lead and in the Focus tab, for the engineer and their managers. Working days are Monday to Friday.</p>
+   <div class="fgrid"><label class="f fsm">First contact within (working days)<input id="ru-c" type="number" min="1" max="30" value="${R.contactDays}"></label><label class="f fsm">First meeting within (days)<input id="ru-m" type="number" min="1" max="90" value="${R.meetingDays}"></label>
+    <label class="f fsm">Flag as quiet after (days)<input id="ru-s" type="number" min="3" max="120" value="${R.staleDays}"></label><label class="f fsm">Apply to leads assigned from<input id="ru-f" type="date" value="${esc(R.from)}"></label></div>
+   <div class="fgrid" style="margin-top:10px">${Object.keys(PROB_DEF).map(k=>`<label class="f fsm">${k} probability %<input data-prob="${esc(k)}" type="number" min="0" max="100" value="${P[k]}"></label>`).join("")}<label class="f fsm">Commit counts as of day<input id="ru-cut" type="number" min="1" max="28" value="${R.cutoff}"></label></div>
+   <div class="row" style="margin-top:10px"><button type="button" class="btn pri" id="ruSave">Save rules</button></div></div>`}
+function bindRules(){$("#ruSave")?.addEventListener("click",async()=>{const v=id=>Math.round(+$(id).value);const r={contactDays:v("#ru-c"),meetingDays:v("#ru-m"),staleDays:v("#ru-s"),from:$("#ru-f").value||RULE_DEF.from,cutoff:Math.min(28,Math.max(1,v("#ru-cut")))};
+  if(!(r.contactDays>0&&r.meetingDays>0&&r.staleDays>0)){toast("Enter numbers above zero");return}const p={};document.querySelectorAll("[data-prob]").forEach(i=>p[i.dataset.prob]=Math.min(100,Math.max(0,Math.round(+i.value||0))));
+  try{await S.db.doc("config/settings").update({rules:r,stageProb:p});Object.assign(S.settings,{rules:r,stageProb:p});toast("Rules saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}})}
+
+/* ======================= SALES TARGETS (Management → Targets) =======================
+   config/targets = {years:{"2026":{total, months:[12], engineers:{name:amount}}}}. Set by Management and Supervisor
+   (permission targets.manage); read by everyone (engineers see their own progress in Focus).
+   Actual = order value of Won leads by won date. Engineer actuals follow the upsell credit setting, like every engineer figure. */
+const tgYear=y=>((S.targetsDoc&&S.targetsDoc.years)||{})[y]||{};
+const tgMonths=y=>{const t=tgYear(y);const m=(t.months||[]).map(Number);return m.length===12&&m.some(v=>v>0)?m:Array(12).fill((+t.total||0)/12)};
+const tgEng=(y,n)=>+((tgYear(y).engineers||{})[n]||0);
+const wonIn=(l,from,to)=>{if(l.status!=="Won")return false;const w=ymKey(wonAt(l));return w>=from&&w<=to};
+function tgActuals(y){const ls=S.leads;const Y=String(y);const mon=MON.map((_,i)=>{const k=Y+"-"+String(i+1).padStart(2,"0");return ls.filter(l=>wonIn(l,k,k)).reduce((s,l)=>s+orderVal(l),0)});
+  const E={};ls.forEach(l=>{if(l.status==="Won"&&l.assignedTo&&ymKey(wonAt(l)).startsWith(Y+"-")&&engCredit(l)){const o=E[l.assignedTo]||(E[l.assignedTo]={v:0,n:0,mon:Array(12).fill(0)});const v=orderVal(l);o.v+=v;o.n++;o.mon[+ymKey(wonAt(l)).slice(5)-1]+=v}});return{mon,E}}
+function tgState(){return S.tgv||(S.tgv={y:new Date().getFullYear(),edit:false})}
+function targetsHTML(){const T=tgState();const y=T.y;const t=tgYear(y);const mt=tgMonths(y);const A=tgActuals(y);const canE=can("targets.manage");const now=new Date();const curM=now.getFullYear()===y?now.getMonth():(y<now.getFullYear()?11:-1);
+  const tot=+t.total||mt.reduce((a,b)=>a+b,0);const ytdT=mt.slice(0,curM+1).reduce((a,b)=>a+b,0),ytdA=A.mon.slice(0,curM+1).reduce((a,b)=>a+b,0),yrA=A.mon.reduce((a,b)=>a+b,0);
+  const engs=[...new Set(spNames().concat(Object.keys(t.engineers||{}).filter(n=>+t.engineers[n]>0)).concat(Object.keys(A.E)))];
+  const rows=engs.map(n=>{const tg=tgEng(y,n),a=A.E[n]?.v||0;const left=Math.max(0,tg-a);const monthsLeft=Math.max(1,12-Math.max(curM,0));return{n,tg,a,n2:A.E[n]?.n||0,pct:tg?a/tg:null,left,run:tg&&curM<11?left/monthsLeft:0}}).sort((a,b)=>b.tg-a.tg||b.a-a.a);
+  const engSum=rows.reduce((s,r)=>s+r.tg,0);const pc=v=>v==null?"—":(v*100).toFixed(1)+"%";const col=v=>v==null?"":v>=1?"var(--ok)":v>=0.7?"var(--warn)":"var(--bad)";
+  const inp=(id,v,attr="")=>`<input ${id} type="number" min="0" step="1000" inputmode="numeric" value="${v?Math.round(v):""}" placeholder="0" style="text-align:right;width:130px;padding:5px 8px"${attr}>`;
+  const yrs=[now.getFullYear()-1,now.getFullYear(),now.getFullYear()+1];const E=T.edit&&canE;
+  return`<div class="view" style="gap:14px">
+   <div class="row"><label class="f fsm" style="min-width:120px">Year<select id="tgY">${yrs.map(v=>`<option${v===y?" selected":""}>${v}</option>`).join("")}</select></label><span class="sp"></span>
+    ${canE?(E?`<button type="button" class="btn pri" id="tgSave">Save targets</button><button type="button" class="btn" id="tgX">Cancel</button>`:`<button type="button" class="btn pri" id="tgE">Edit targets</button>`):""}</div>
+   ${!tot&&!engSum?`<div class="notice warn">No sales targets for ${y} yet.${canE?" Click <b>Edit targets</b> to set the company target, the monthly split and each engineer's target.":" Management or a Supervisor sets them here."}</div>`:""}
+   <div class="kpis"><div class="kpi"><div class="l">${y} company target</div><div class="v">${tot?fmtAED(tot):"—"}</div><div class="s">${engSum?`engineers' targets add up to ${fmtAED(engSum)}`:"no engineer targets"}</div></div>
+    <div class="kpi"><div class="l">Booked ${y}</div><div class="v">${fmtAED(yrA)}</div><div class="s" style="color:${col(tot?yrA/tot:null)}">${tot?pc(yrA/tot)+" of the year":""}</div></div>
+    <div class="kpi"><div class="l">Year to date</div><div class="v" style="color:${col(ytdT?ytdA/ytdT:null)}">${ytdT?pc(ytdA/ytdT):"—"}</div><div class="s">${fmtAED(ytdA)} of ${fmtAED(ytdT)} target to ${curM>=0?MON[curM]:"—"}</div></div>
+    <div class="kpi"><div class="l">Still to book</div><div class="v">${tot?fmtAED(Math.max(0,tot-yrA)):"—"}</div><div class="s">${tot&&curM<11&&curM>=0?fmtAED(Math.max(0,tot-yrA)/Math.max(1,12-curM))+` a month for ${12-curM} month${12-curM===1?"":"s"} (${MON[curM].slice(0,3)}–Dec)`:""}</div></div></div>
+   ${E?`<div class="panel"><h3>Company target ${y}</h3><div class="row" style="margin-top:8px"><label class="f">Yearly target (AED)${inp('id="tgT"',tot)}</label><button type="button" class="btn" id="tgSplit" style="align-self:end">Split evenly across months</button>${engSum?`<button type="button" class="btn" id="tgFromEng" style="align-self:end">Use the engineers' total (${fmtAED(engSum)})</button>`:""}</div></div>`:""}
+   <div style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,760px),1fr));align-items:start">
+    <div class="panel"><h3>By engineer</h3><p class="small muted" style="margin:2px 0 10px">Booked = order value of their Won leads in ${y}${S.settings.upsellCredit===false?" (upsell leads not counted, as set in Products & settings)":""}.</p>
+     <div class="tw"><table><thead><tr><th>Engineer</th><th class="num">Target (AED)</th><th class="num">Booked</th><th class="num">Achieved</th><th class="num">Still to book</th>${curM<11?`<th class="num">Needed / month</th>`:""}</tr></thead><tbody>
+     ${rows.map(r=>`<tr><td>${esc(r.n)}</td><td class="num">${E?inp(`data-tge="${esc(r.n)}"`,r.tg):r.tg?fmtAED(r.tg):"—"}</td><td class="num">${r.a?fmtAED(r.a):"—"}<div class="small muted">${r.n2?r.n2+" order"+(r.n2===1?"":"s"):""}</div></td>
+       <td class="num"><b style="color:${col(r.pct)}">${pc(r.pct)}</b>${r.pct!=null?`<div class="tgbar"><span style="width:${Math.min(100,r.pct*100)}%;background:${col(r.pct)}"></span></div>`:""}</td><td class="num">${r.tg?fmtAED(r.left):"—"}</td>${curM<11?`<td class="num">${r.run?fmtAED(r.run):"—"}</td>`:""}</tr>`).join("")}</tbody>
+     <tfoot><tr><td><b>Team</b></td><td class="num">${engSum?fmtAED(engSum):"—"}</td><td class="num">${fmtAED(rows.reduce((s,r)=>s+r.a,0))}</td><td class="num">${engSum?pc(rows.reduce((s,r)=>s+r.a,0)/engSum):"—"}</td><td class="num">${engSum?fmtAED(rows.reduce((s,r)=>s+r.left,0)):"—"}</td>${curM<11?"<td></td>":""}</tr></tfoot></table></div></div>
+    <div class="panel"><h3>By month</h3><p class="small muted" style="margin:2px 0 10px">Company target and orders booked each month, with the running total.</p>
+     <div class="tw"><table><thead><tr><th>Month</th><th class="num">Target (AED)</th><th class="num">Booked</th><th class="num">Achieved</th><th class="num">Cumulative booked</th></tr></thead><tbody>
+     ${(()=>{let c=0;return MON.map((m,i)=>{const fut=i>curM;c+=A.mon[i];const p=mt[i]?A.mon[i]/mt[i]:null;return`<tr${fut?` style="color:var(--muted)"`:""}><td>${m}</td><td class="num">${E?inp(`data-tgm="${i}"`,mt[i]):mt[i]?fmtAED(mt[i]):"—"}</td><td class="num">${fut?"":A.mon[i]?fmtAED(A.mon[i]):"—"}</td><td class="num">${fut||p==null?"":`<b style="color:${col(p)}">${pc(p)}</b>`}</td><td class="num">${fut?"":fmtAED(c)}</td></tr>`}).join("")})()}</tbody>
+     <tfoot><tr><td><b>Total</b></td><td class="num">${fmtAED(mt.reduce((a,b)=>a+b,0))}</td><td class="num">${fmtAED(yrA)}</td><td class="num">${tot?pc(yrA/tot):"—"}</td><td></td></tr></tfoot></table></div></div></div></div>`}
+function bindTargets(m){const T=tgState();$("#tgY")&&($("#tgY").onchange=e=>{T.y=+e.target.value;T.edit=false;render()});
+  $("#tgE")?.addEventListener("click",()=>{T.edit=true;render()});$("#tgX")?.addEventListener("click",()=>{T.edit=false;render()});
+  $("#tgSplit")?.addEventListener("click",()=>{const v=+$("#tgT").value||0;m.querySelectorAll("[data-tgm]").forEach(i=>i.value=v?Math.round(v/12):"")});
+  $("#tgFromEng")?.addEventListener("click",()=>{let s=0;m.querySelectorAll("[data-tge]").forEach(i=>s+=+i.value||0);$("#tgT").value=Math.round(s)});
+  $("#tgSave")?.addEventListener("click",async e=>{const y=String(T.y);const months=[...m.querySelectorAll("[data-tgm]")].map(i=>Math.max(0,Math.round(+i.value||0)));const engineers={};m.querySelectorAll("[data-tge]").forEach(i=>engineers[i.dataset.tge]=Math.max(0,Math.round(+i.value||0)));
+    let total=Math.max(0,Math.round(+$("#tgT").value||0));const ms=months.reduce((a,b)=>a+b,0);if(!total&&ms)total=ms;
+    if(total&&ms&&Math.abs(ms-total)>12){toast(`The months add up to ${fmtAED(ms)}, not the yearly ${fmtAED(total)}. Use “Split evenly” or adjust the months.`);return}
+    const years=Object.assign({},(S.targetsDoc&&S.targetsDoc.years)||{},{[y]:{total,months,engineers,by:actor()||S.myName||"",at:nowISO()}});e.currentTarget.disabled=true;
+    try{if(S.targetsExists)await S.db.doc("config/targets").update({years});else{await S.db.doc("config/targets").set({years});S.targetsExists=true}S.targetsDoc={years};T.edit=false;toast(`Sales targets for ${y} saved`);render()}
+    catch(er){e.currentTarget.disabled=false;toast(/permission|42501|row-level/i.test(er.message||"")?"You can't change targets yet: run supabase/19_targets.sql in Supabase.":"Couldn't save: "+(er.message||er.code))}})}
+/* engineer's own progress, for the Focus tab */
+function myTargetKpi(eng){if(!eng)return"";const y=new Date().getFullYear();const tg=tgEng(y,eng);if(!tg)return"";const a=tgActuals(y).E[eng]?.v||0;const p=a/tg;
+  return`<div class="kpi"><div class="l">${y} target</div><div class="v" style="color:${p>=1?"var(--ok)":p>=0.7?"var(--warn)":"var(--bad)"}">${(p*100).toFixed(1)}%</div><div class="s">${fmtAED(a)} of ${fmtAED(tg)}</div></div>`}
 
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
-const mgViews=()=>MG_VIEWS.concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
+const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
@@ -2122,11 +2375,12 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-ops" data-sec="ops"></div>
-   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div>
+   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div>
   </section>`;
   mgmtOps($("#mg-ops"));
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
   if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
+  if(MV==="tg"){const x=$("#mg-tg");x.innerHTML=targetsHTML();bindTargets(x)}
   $("#goDq")?.addEventListener("click",()=>{S.tab="bo";S.boDqOpen=true;try{history.replaceState(null,"","#bo")}catch(_){}render();setTimeout(()=>$("#boDq")?.scrollIntoView({block:"start"}),0)});
   bindFilters(m);bindSort(m);
   m.querySelectorAll("[data-sec]").forEach(x=>{x.hidden=x.dataset.sec!==MV});
@@ -2186,10 +2440,11 @@ function mgmtOps(m){const AF=af();const inReg=l=>(!AF.region||regionOf(l)===AF.r
     ${Object.entries(rep).sort((a,b)=>b[1].v-a[1].v).map(([n,o])=>`<tr><td>${esc(n)}</td><td class="num">${o.a}</td><td class="num">${o.open}</td><td class="num" style="${o.stale?"color:var(--bad);font-weight:600":""}">${o.stale}</td><td class="num">${o.meet}</td><td class="num">${o.quote}</td><td class="num">${o.ttq.length?(o.ttq.reduce((a,b)=>a+b,0)/o.ttq.length).toFixed(1):"—"}</td><td class="num">${o.won}</td><td class="num">${fmtAED(o.v)}</td><td class="num">${o.won+o.lost?Math.round(o.won/(o.won+o.lost)*100)+"%":"—"}</td></tr>`).join("")||`<tr><td colspan="10" class="empty">No assigned leads in this period.</td></tr>`}</tbody></table></div></div>
    <div class="grid2"><div><h3 style="margin-bottom:8px">Top lead generators</h3><div class="tw"><table><thead><tr><th>Generated by</th><th class="num">Leads</th><th class="num">Won</th><th class="num">Won value</th><th class="num">Incentive ${S.settings.incentivePct||0}%</th></tr></thead><tbody>${gen.map(([n,o])=>`<tr><td>${esc(n)}</td><td class="num">${o.n}</td><td class="num">${o.won}</td><td class="num">${fmtAED(o.wonV)}</td><td class="num">${fmtAED(o.wonV*inc)}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">No leads yet.</td></tr>`}</tbody></table></div></div>
    <div><h3 style="margin-bottom:8px">By product</h3>${grpTable(grp(l=>productsOf(l)).slice(0,12),"Product",false)}<p class="small muted" style="margin:6px 0 0">A lead with several products counts under each of them.</p></div></div>
+   ${forecastPanel()}
    ${upsellPanel(valid)}
    ${baseline()}
   </div>`;
-  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open))}
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));bindForecastPanel()}
 /* New business vs upsell, and the meeting engineers' upsell credit */
 function upsellPanel(valid){const up=valid.filter(isUpsell),nb=valid.filter(l=>!isUpsell(l));const wv=a=>a.filter(l=>l.status==="Won").reduce((s,l)=>s+leadValue(l),0);
   const pct=S.settings.upsellIncentivePct||0,on=S.settings.upsellCredit!==false;const E={};
@@ -2372,6 +2627,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   ${territoryPanel()}
   ${subTerrPanel()}
   ${chainsPanel()}
+  ${rulesPanel()}
   <div class="grid2">
    <div class="panel"><h3>Product catalog <span class="chip">${prods.filter(p=>p.active!==false).length} active</span></h3>
      <form class="row" id="addProd" style="margin-bottom:6px"><input id="np" placeholder="New product name" style="flex:1"><label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="npRep" style="width:auto">Repeatable</label><button class="btn pri">Add product</button></form>
@@ -2407,7 +2663,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);
+  bindChains(m);bindRules();
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
