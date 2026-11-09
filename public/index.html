@@ -7,6 +7,7 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head><body>
 
+<script>try{var t=localStorage.getItem("ld-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -212,7 +213,9 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .qli{display:grid;gap:6px}.qlr{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
 .qtot{display:grid;gap:2px;justify-items:end;font-size:13px;margin-top:2px}.qtot>div{display:flex;gap:14px}.qtot span{color:var(--muted)}
 .chip.ups{background:var(--accent-soft);color:var(--accent)}
-.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.iface{font:500 11.5px var(--f-body);padding:2px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent);white-space:nowrap;display:inline-block;margin:1px 2px 1px 0}.iface.sa{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
+.pmsf{display:grid;gap:8px}.pmsif{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}
 .imdrop{display:grid;gap:8px;border:2px dashed var(--line);text-align:left}.imdrop.on{border-color:var(--accent);background:var(--accent-soft)}
 .imc{display:grid;gap:8px;padding:12px 14px}.imc.imoff{opacity:.62}.imh{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .imb{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start}.imb>div{align-content:start}.imh .mono{white-space:nowrap}.imf{display:grid;gap:8px;align-content:start}.imf .f{min-width:0}
@@ -254,6 +257,11 @@ button.otr::before{content:"";position:absolute;left:-14px;top:50%;width:10px;bo
 .acn{display:grid;line-height:1.15;font-size:12.5px}.acn span{color:var(--muted);font-size:11px}
 .acm{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:6px;min-width:220px;display:grid}
 .acm button{all:unset;cursor:pointer;padding:8px 10px;border-radius:6px;font-size:13.5px}.acm button:hover,.acm button:focus-visible{background:var(--accent-soft);color:var(--accent)}
+.thm{padding:8px 10px 6px;border-top:1px solid var(--line);margin-top:4px}.thm .l{font-size:12px;color:var(--muted);margin-bottom:6px}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--sunk);border-radius:10px;padding:3px}
+.acm .seg3 button{text-align:center;padding:7px 4px;border-radius:8px;font-size:12.5px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:3px}
+.acm .seg3 button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);font-weight:600;box-shadow:inset 0 0 0 1px var(--accent)}
+.seg3 svg{width:16px;height:16px}
 .stepper{display:inline-flex;gap:4px;align-items:center}.stepper .btn{padding-inline:10px}
 .emptyst{display:grid;gap:6px;padding:28px}.emptyst p{margin:0;max-width:60ch}
 .quiet{padding:10px 14px;border:1px dashed var(--line);border-radius:10px}
@@ -496,7 +504,7 @@ const PERMISSIONS=[
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],
  ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "targets.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
+const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "targets.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
@@ -630,7 +638,8 @@ function renderInner(){const m=$("#main");
   document.querySelectorAll("#tabs button").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab);b.tabIndex=b.dataset.tab===S.tab?0:-1});
   const pt=document.querySelector('#tabs [data-tab="pipe"] .tl');pt.textContent=!viewAll()?"My pipeline":can("lead.edit_all")?"Pipelines":"Team pipeline";document.querySelector('#tabs [data-tab="new"]').textContent=can("lead.create")||can("lead.create_own_outbound")?"Leads":"Leads";
   $("#who").innerHTML=`<details class="acctm"><summary aria-label="Account: ${esc(S.myName||"")}, ${esc(ROLE_LABEL[S.role])}"><span class="av" aria-hidden="true">${esc((myLabel()||"?").trim().charAt(0).toUpperCase())}</span><span class="acn"><b>${esc(myLabel())}</b><span>${esc(ROLE_LABEL[S.role])}</span></span></summary>
-    <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button><button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}</div></details>`;
+    <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button><button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}${themeSeg()}</div></details>`;
+  bindTheme();
   $("#dnMenu")?.addEventListener("click",()=>{$("#who details")?.removeAttribute("open");openDisplayName()});
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&$("#tabs").scrollWidth>$("#tabs").clientWidth){const t=$("#tabs");t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2)}
   $("#banner").querySelector("[data-perm]")?.remove();
@@ -698,7 +707,7 @@ function renderNew(m){
     <div class="panel"><h3>5 · Qualification</h3>
       <div style="display:grid;gap:12px">
         <div class="grid2"><label class="f">Rooms<input id="f-rooms" type="number" min="0" inputmode="numeric"></label>
-        <label class="f">PMS<select id="f-pms">${opts(["OPERA Cloud","OPERA 5 / V5","Protel","Mews","Cloudbeds","Other","Unknown"],"","Choose")}</select></label></div>
+        <label class="f">Hotel PMS <span class="req">*</span><select id="f-pms">${opts(pmsCfg().list.concat([PMS_UNKNOWN]),"","Choose")}</select></label></div>
         <label class="f">Expected timeline<select id="f-when">${opts(["Within 1 month","1–3 months","3–6 months","6+ months","Not known"],"","Choose")}</select></label>
         ${sales?`<div class="small muted">Assigned to <b>${esc(S.myEng)}</b></div>`:`<label class="f">Preferred sales engineer<select id="f-pref">${opts(spNames(),"","Let back office decide")}</select></label>`}
         <label class="f">Requirement / notes<textarea id="f-notes" placeholder="What did the client ask for? Any deadline, competitor or compliance driver?"></textarea></label>
@@ -866,7 +875,7 @@ function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
       const near=findAccounts(q,3).filter(h=>h.score>=0.8);
       if(near.length&&!f.confirmNew){f.confirmNew=q;sg.innerHTML=`<div style="padding:10px 12px" class="small"><b style="color:var(--warn)">Similar accounts found.</b> Pick one if it's the same property:</div>`+near.map(h=>`<button type="button" data-k="${esc(h.key)}"><b>${esc(h.name)}</b> <span class="small muted">${esc(h.country||"")}</span></button>`).join("")+`<button type="button" class="new" data-new="1">It's a different property — create “${esc(q)}”</button>`;return}
       f.account={isNew:true,key:keyOf(q),name:q,country:"",city:"",group:"",hist:{}}}
-    else{const a=allAccounts()[b.dataset.k];f.account=Object.assign({isNew:false},a);loadLocks(a.key).then(()=>{if(S.form===f)drawProducts()})}
+    else{const a=allAccounts()[b.dataset.k];f.account=Object.assign({isNew:false},a);loadLocks(a.key).then(()=>{if(S.form===f)drawProducts()});const ap=accountPms(a.key),fp=$("#f-pms");if(ap&&fp&&!fp.value){if(![...fp.options].some(o=>o.value===ap))fp.add(new Option(ap,ap));fp.value=ap}}
     f.confirmNew=null;drawAcctBox();drawProducts();syncRegion()};
 }
 document.addEventListener("click",e=>{if(!e.target.closest(".ta")){const sg=document.getElementById("sugg");if(sg)sg.hidden=true}});
@@ -888,6 +897,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(v("f-cemail")&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("f-cemail")))errs.push("Check the email address");
   if(!f.products.length)errs.push("Select at least one product");
   if(!f.category)errs.push("Choose Inbound or Outbound");
+  if(!v("f-pms")&&f.products.some(p=>!prodNoPms(p)))errs.push("Choose the hotel's PMS (or “Not known yet”)");
   if(!v("f-source"))errs.push("Choose the source channel");
   if(!v("f-genby"))errs.push("Add who generated the lead");
   if(!v("f-reqdate"))errs.push("Add the date the requirement came in");else if(v("f-reqdate")>todayISO())errs.push("The requirement date can't be in the future");
@@ -945,7 +955,7 @@ function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Inf
    ${can("lead.remove")&&(S.deletedLeads||[]).length?`<details class="panel"><summary style="cursor:pointer"><b>Deleted leads (${S.deletedLeads.length})</b> <span class="small muted">· kept for the audit trail, can be restored</span></summary>
     <div class="tw" style="margin-top:10px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status when deleted</th><th>Reason</th><th>Deleted by</th><th>When</th><th></th></tr></thead><tbody>
     ${S.deletedLeads.slice().sort((a,b)=>(a.deleted.at||"")<(b.deleted.at||"")?1:-1).map(l=>`<tr><td class="mono"><button class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td><td>${esc(l.deleted.prevStatus||l.status)}</td><td>${esc(l.deleted.reason||"—")}${l.deleted.note?`<div class="small muted">${esc(l.deleted.note)}</div>`:""}</td><td>${esc(l.deleted.by||"—")}</td><td style="white-space:nowrap">${fmtD(l.deleted.at)}</td><td><button type="button" class="btn sm" data-restore="${esc(l.id)}">Restore</button></td></tr>`).join("")}</tbody></table></div></details>`:""}
-   ${canFix()&&dataIssues().count?`<details class="panel" id="boDq" style="border-left:3px solid var(--warn)"${S.boDqOpen?" open":""}><summary style="cursor:pointer"><b>Data issues (${dataIssues().count})</b> <span class="small muted">· won leads without an order amount, names not on the engineer list, leads with two names. Supervisor and Lead Manager only.</span></summary><div style="margin-top:10px">${issuesHTML().html}</div></details>`:""}
+   ${canFix()&&dataIssues().count?`<details class="panel" id="boDq" style="border-left:3px solid var(--warn)"${S.boDqOpen?" open":""}><summary style="cursor:pointer"><b>Data issues (${dataIssues().count})</b> <span class="small muted">· won leads without an order amount or a PMS, names not on the engineer list, leads with two names. Supervisor and Lead Manager only.</span></summary><div style="margin-top:10px">${issuesHTML().html}</div></details>`:""}
    <div class="view" style="gap:10px">${q.length?q.map(qCard).join(""):`<div class="panel empty">${S.loaded.leads?"Nothing waiting. New leads appear here as soon as they are submitted.":"Loading the queue…"}</div>`}</div>
    <div class="grid2">
     <div class="panel"><h3>Open leads per sales engineer</h3>${Object.keys(load).length?`<div class="funnel">${Object.entries(load).sort((a,b)=>b[1]-a[1]).map(([n,c])=>{const mx=Math.max(...Object.values(load));return`<div class="frow"><span>${esc(n)}</span><div class="fbar"><i style="width:${c/mx*100}%"></i></div><span class="num">${c} open</span></div>`}).join("")}</div>`:`<p class="muted small">No leads assigned yet. Workload shows here so you can balance assignments.</p>`}</div>
@@ -1018,7 +1028,7 @@ function lcard(l){const stale=l.status==="Assigned"&&days(l.assignedAt)>(S.setti
 /* ======================= LEAD DRAWER (back office + sales) ======================= */
 function openDrawer(id){if(!S.drawer)S.drawerFrom=document.activeElement;S.drawer={id,mode:null};S.vSubN=null;drawDrawer();const l=S.leadMap[id];if(l&&isNewForMe(l))markSeen([l])}
 function closeDrawer(){S.drawer=null;$("#drawerHost").innerHTML="";const f=S.drawerFrom;S.drawerFrom=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}}
-function refreshDrawer(){if(!S.drawer)return;if(!S.drawer.mode)drawDrawer()}
+function refreshDrawer(){if(!S.drawer)return;if(!S.drawer.mode&&!S.drawer.pmsEdit)drawDrawer()}
 /* ======================= UPSELL LEADS =======================
    A product added to an approved lead at or after a meeting becomes a separate "Upsell" lead, linked to the original
    and assigned to the engineer who held the meeting. The original lead keeps its products, engineer and lead generator,
@@ -1131,6 +1141,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      ${l.nextFollowUp?`<div><span>Next follow-up</span><span><b style="${fuOverdue(l)?"color:var(--bad)":""}">${esc(fuDue(l).toLocaleString("en-GB",{weekday:"short",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</b>${fuOverdue(l)?" · overdue":""}${l.followUpNote?"<br>"+esc(l.followUpNote):""}</span></div>`:""}
    </div></div>
    ${inBO&&ch.length?`<div class="view" style="gap:4px">${ch.map(c=>`<div class="notice ${c.lvl}" style="padding:6px 10px">${esc(c.msg)}</div>`).join("")}</div>`:""}
+   <div id="pmsArea"></div>
    <div id="prodArea"></div>
    <div id="actArea"></div>
    <div id="delArea"></div>
@@ -1141,7 +1152,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $(".drawer").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...e.currentTarget.querySelectorAll("button,input,select,textarea,a[href]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeDrawer()};
   document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer)closeDrawer()};
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
-  fillNames();drawDetails(l);drawProdArea(l);drawActions(l);drawDelArea(l);
+  fillNames();drawDetails(l);drawPms(l);drawProdArea(l);drawActions(l);drawDelArea(l);
   $("#restoreLead")?.addEventListener("click",()=>restoreLead(l));
   $("#fcEdit")?.addEventListener("click",()=>{const f=fcOf(l);cfmOpen(`<h3>Forecast for ${esc(l.ref)}</h3><p class="small muted" style="margin:0">${esc(l.accountName)} · ${leadValue(l)?fmtAED(leadValue(l)):"no amount yet"}</p>
     <label class="f">Forecast<select id="fcC">${FC_CATS.map(([v,t])=>`<option value="${v}"${f.cat===v?" selected":""}>${t}</option>`).join("")}</select></label><label class="f">Month<select id="fcMo"><option value="">—</option>${[...new Set(fcMonths().concat(f.month?[f.month]:[]))].map(mm=>`<option value="${mm}"${f.month===mm?" selected":""}>${ymLabel(mm)}</option>`).join("")}</select></label>
@@ -1294,12 +1305,13 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       if($("#a-tgt")){const t=$("#a-tgt").value;if(!t){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Enter the target date. Every quotation needs one.</span>`;$("#a-tgt").focus();return}
         if(o.date&&t<o.date){$("#a-aed").innerHTML=`<span style="color:var(--bad)">The target date can't be before the quotation date.</span>`;return}o.targetDate=t}
       const nx=field==="quote"?readNext():{body:{}};if(nx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
+      const pmx=field==="quote"||field==="order"?pmsFromForm(l):{body:{}};if(pmx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(pmx.err)}</span>`;$("#ap-pms")?.focus();return}Object.assign(nx.body,pmx.body);
       if(field==="quote"){const qx=qpdfExtra(l);Object.assign(o,qx.q);Object.assign(nx.body,qx.lead);S.qpdf=null}
       if(field==="quote"&&l.quote){await patch(l,{...nx.body,quote:o,quoteHistory:[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]},`Quotation revised · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="quote"){await patch(l,{...nx.body,quote:o},`${msg} · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="meeting"){const r=readMeet(o.date,o.notes);if(r.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
         o.mode=r.m.mode;const{body,add}=meetBody(r.m);body.meeting=o;await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")} · estimate ${fmtAED(o.aed)}${add.length?" · products added: "+add.join(", "):""}`,status);return}
-      await patch(l,{[field]:o},`${msg} · ${fmtAED(o.aed)}`,status)}};
+      await patch(l,{[field]:o,...nx.body},`${msg} · ${fmtAED(o.aed)}${pmx.txt||""}`,status)}};
   if(inBO){
     if(!isBO()&&mode!=="logmeet"){A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px"><div class="notice warn">Waiting for a Lead Manager to approve this lead.${canAct(l)?" You can already log meetings on it.":""}</div>${canAct(l)?`<div><button class="btn pri" data-m="logmeet">Log a meeting</button></div>`:""}</div>`;
       A.querySelector("[data-m]")?.addEventListener("click",()=>{S.drawer.mode="logmeet";drawActions(l)});return}
@@ -1341,8 +1353,8 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const{body,add}=meetBody(r.m);let ex="";try{ex=await meetProducts(l,r.m,body,add)}catch(e){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">Couldn't create the upsell lead (${esc(e.code||e.message)}).</span>`;return}
       Object.assign(body,nx.body);await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${nx.txt||""}`)};return}
-  if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);bindAmount("quote","Quotation Sent","Quotation sent");bindQpdf(l);return}
-  if(mode==="won"){A.innerHTML=amountForm("Order closed · order value",true,"PO / order number");bindAmount("order","Won","Order won");return}
+  if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);pmsInject(l,A);bindAmount("quote","Quotation Sent","Quotation sent");bindQpdf(l);return}
+  if(mode==="won"){A.innerHTML=amountForm("Order closed · order value",true,"PO / order number");pmsInject(l,A);bindAmount("order","Won","Order won");return}
   if(mode==="lost"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Mark as lost</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="l-r">${opts(["Price","Went with competitor","No budget","No response","Project cancelled","Not a fit","Other"],"","Choose")}</select></label><label class="f">Details / competitor<input id="l-n"></label><div class="row"><button class="btn bad" id="l-save">Mark lost</button><button class="btn" id="l-cancel">Cancel</button></div></div></div>`;
     $("#l-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#l-save").onclick=()=>{const r=$("#l-r").value;if(!r)return;patch(l,{lost:{reason:r,notes:$("#l-n").value.trim(),date:nowISO()}},"Lost: "+r,"Lost")};return}
   if(mode==="unwin"&&l.status==="Won"&&can("lead.status_override")){const T=wonTargets(l);
@@ -1806,7 +1818,7 @@ function dataIssues(){const ls=S.leads.filter(l=>!["Duplicate","Rejected"].inclu
   const known=new Set(spList(true).map(x=>nk(x.name)));const odd={};
   ls.forEach(l=>{if(l.assignedTo&&!known.has(nk(l.assignedTo))&&!sharedOwners(l.assignedTo))(odd[l.assignedTo]=odd[l.assignedTo]||[]).push(l)});
   const shared=sharedLeads();
-  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length}}
+  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length}}
 const wonAt=l=>l.stageAt?.Won||l.order?.date||l.updatedAt||l.createdAt||"";
 function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:{}});const cur=Object.keys(S.settings.fx||{AED:1});const sp=spNames();
   const sec1=`<div class="panel" id="dq-won"><div class="row" style="margin-bottom:6px"><h3>Won leads without an order amount</h3><span class="chip" style="${D.zero.length?"background:var(--bad-soft);color:var(--bad)":""}">${D.zero.length} with no revenue</span>${D.noOrder.length>D.zero.length?`<span class="chip">${D.noOrder.length-D.zero.length} using the quotation amount</span>`:""}</div>
@@ -1828,9 +1840,9 @@ function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:
       ${sh?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status</th><th class="num">Value</th><th>Generated by</th><th></th></tr></thead><tbody>${ls.map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td><td>${esc(l.generatedBy||"—")}</td><td class="num"><button type="button" class="btn sm" data-open="${esc(l.id)}">Open${can("lead.reassign")?" / reassign":""}</button></td></tr>`).join("")}</tbody></table></div>`:""}</div>`}).join("")}</div>`:`<p class="small" style="margin:0">Every lead is assigned to a name on the Sales engineer list.</p>`}</div>`;
   const sec3=`<div class="panel" id="dq-shared"><div class="row" style="margin-bottom:6px"><h3>Leads assigned to two people</h3><span class="chip" style="${D.shared.length?"background:var(--warn-soft);color:var(--warn)":""}">${D.shared.length}</span>${D.shared.length&&S.tab!=="bo"&&can("page.backoffice")?`<span class="sp"></span><button type="button" class="btn sm" id="dq-bo">Fix in Back office</button>`:""}</div>
     <p class="small muted" style="margin:0">${D.shared.length?`Combined names such as “${esc(D.shared[0].assignedTo)}”. Use “Move them to the queue” in the panel above to pick one engineer for each.`:"No lead is assigned to two people."}</p></div>`;
-  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}</div>`,D}}
+  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}</div>`,D}}
 function suggestEng(n){const k=nk(n);const sp=spNames();return sp.find(x=>nk(x).split(" ")[0]===k.split(" ")[0])||sp.find(x=>nk(x).startsWith(k)||k.startsWith(nk(x)))||""}
-function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});
+function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});bindPmsIssues(m);
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
   m.querySelectorAll("[data-dqo]").forEach(b=>b.onclick=()=>{st.open=st.open===b.dataset.dqo?null:b.dataset.dqo;render();setTimeout(()=>$("#dq-v")?.focus(),0)});
   m.querySelectorAll("[data-dqs]").forEach(b=>b.onclick=()=>{st.show[b.dataset.dqs]=!st.show[b.dataset.dqs];render()});
@@ -1874,7 +1886,7 @@ function productData(){const AF=af();const P=pvState();const custKeys=new Set(S.
   tot.conv=pct(tot.won,tot.n);tot.aov=tot.won?tot.rev/tot.won:0;return{rows,tot,ls:inc}}
 const PCOLS=[{k:"name",label:"Product"},{k:"n",label:"Leads",num:1},{k:"open",label:"Open",num:1},{k:"meet",label:"Meeting done",num:1,tip:"Reached a meeting or beyond"},{k:"quoted",label:"Quoted",num:1},{k:"quotedV",label:"Quoted value",num:1},
   {k:"won",label:"Won",num:1},{k:"rev",label:"Won revenue",num:1},{k:"lost",label:"Lost",num:1},{k:"hold",label:"On hold",num:1},{k:"conv",label:"Conversion",num:1,tip:"Won ÷ leads"},{k:"aov",label:"Avg order",num:1},{k:"pipe",label:"Open pipeline",num:1,tip:"Value of leads at Meeting done or Quotation sent"},{k:"upRev",label:"Upsell revenue",num:1}];
-function productsHTML(){const P=pvState();const{rows,tot}=productData();const sr=sortRows("prod",rows,PCOLS,{k:"rev",d:-1});
+function productsHTML(){const P=pvState();const{rows,tot,ls:pls}=productData();const sr=sortRows("prod",rows,PCOLS,{k:"rev",d:-1});
   const cell=(o,c)=>c.k==="name"?"":`<td class="num">${["quotedV","rev","aov","pipe","upRev"].includes(c.k)?(o[c.k]?fmtAED(o[c.k]):"—"):c.k==="conv"?fmtP(o[c.k]):fmtN(o[c.k])}</td>`;
   const leadRows=o=>{const ls=o.leads.slice().sort((a,b)=>orderVal(b)-orderVal(a)||leadValue(b)-leadValue(a)||reqDate(b).localeCompare(reqDate(a)));const lim=ls.slice(0,200);
     return`<tr class="pvx"><td colspan="${PCOLS.length}"><div class="tw"><table class="pvl"><thead><tr><th>Ref</th><th>Property</th><th>Location</th><th>Engineer</th><th>Lead generator</th><th>Status</th><th class="num">Quotation</th><th>Target date</th><th class="num">Order / revenue</th></tr></thead><tbody>
@@ -1890,13 +1902,13 @@ function productsHTML(){const P=pvState();const{rows,tot}=productData();const sr
     ${can("lead.export")?`<button type="button" class="btn" id="pvX">Export to Excel</button>`:""}</div>
    <div class="tw"><table class="pvt"><thead><tr>${PCOLS.map(c=>th("prod",c)).join("")}</tr></thead><tbody>
     ${sr.map(o=>{const op=!!P.open[o.name];return`<tr class="click${op?" xopen":""}" data-pv="${esc(o.name)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(o.name)}</b>${o.shared?`<div class="small muted">${o.shared} shared lead${o.shared===1?"":"s"}</div>`:""}</td>${PCOLS.map(c=>cell(o,c)).join("")}</tr>${op?leadRows(o):""}`}).join("")||`<tr><td colspan="${PCOLS.length}" class="empty">No leads for these filters.</td></tr>`}
-   </tbody>${sr.length?`<tfoot><tr><td><b>All products</b><div class="small muted">each lead once</div></td>${PCOLS.map(c=>cell(tot,c)).join("")}</tr></tfoot>`:""}</table></div></div>`}
+   </tbody>${sr.length?`<tfoot><tr><td><b>All products</b><div class="small muted">each lead once</div></td>${PCOLS.map(c=>cell(tot,c)).join("")}</tr></tfoot>`:""}</table></div>${pmsReport(pls)}</div>`}
 function bindProducts(m){const P=pvState();
   const set=(k,v)=>{P[k]=v;render()};$("#pvS")&&($("#pvS").onchange=e=>set("status",e.target.value));$("#pvC")&&($("#pvC").onchange=e=>set("cust",e.target.value));$("#pvT")&&($("#pvT").onchange=e=>set("type",e.target.value));
   const qi=$("#pvQ");if(qi)qi.oninput=()=>{clearTimeout(qi.t);qi.t=setTimeout(()=>{P.q=qi.value;render();const i=$("#pvQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},300)};
   m.querySelectorAll("[data-pv]").forEach(r=>r.onclick=e=>{if(e.target.closest("button"))return;P.open[r.dataset.pv]=!P.open[r.dataset.pv];render()});
   m.querySelectorAll(".pvl [data-open]").forEach(r=>r.onclick=()=>openDrawer(r.dataset.open));
-  $("#pvX")?.addEventListener("click",exportProducts)}
+  $("#pvX")?.addEventListener("click",exportProducts);bindPmsReport()}
 async function exportProducts(){if(!can("lead.export")){toast("Your role can't export.");return}const b=$("#pvX");const lab=b?.textContent;if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing Excel…`}
   try{const{rows,tot}=productData();const X=await loadXLSX();const wb=X.utils.book_new();const sr=rows.slice().sort((a,b)=>b.rev-a.rev);
     const H=["Product","Leads","Open","Meeting done","Quoted","Quoted value (AED)","Won","Won revenue (AED)","Lost","On hold","Conversion %","Avg order (AED)","Open pipeline (AED)","Upsell revenue (AED)","Shared leads"];
@@ -2439,10 +2451,11 @@ function impAuto(r){if(r.err)return r;const fx=S.settings.fx||{AED:1};r.cur=fx[r
   if(r.dup){r.match="skip";return r}
   const ls=impOpenLeads(r);const ov=l=>productsOf(l).some(p=>r.ps.some(x=>nk(x)===nk(p)));
   const best=ls.filter(ov).sort((a,b)=>(b.status==="Quotation Sent")-(a.status==="Quotation Sent")||(b.updatedAt||"").localeCompare(a.updatedAt||""))[0]||(ls.length===1?ls[0]:null);
-  r.match=best?best.id:"new";r.inc=true;return r}
+  r.match=best?best.id:"new";r.inc=true;r.pms=(best&&pmsOf(best))||accountPms(r.acc?.key)||"";return r}
 function impState(){return S.imp||(S.imp={rows:[],busy:0,tgt:"",fu:ymd(new Date(Date.now()+7*864e5)),done:false})}
 function impCheck(r){if(r.err||r.dup||r.match==="skip")return"";if(!(+r.amt>0))return"Enter the quoted amount.";if(!r.tgt)return"Set the target date (when you expect the order).";
   if(r.q.date&&r.tgt<r.q.date)return"The target date can't be before the quotation date.";
+  if(r.ps.some(p=>!prodNoPms(p))&&!isRealPms(r.pms))return"Choose the hotel's PMS.";
   if(r.match==="new"){if(!r.eng)return"Choose the sales engineer.";if(!r.ps.length)return"Choose the product.";const k=r.acc?r.acc.key:keyOf(r.q.client);
     const bl=r.ps.filter(p=>productState(k,p).state==="blocked");if(bl.length)return`${r.acc?esc(allAccounts()[k]?.name||""):"This client"} already has an open lead for ${bl.join(", ")}. Add the quotation to that lead instead.`;if(!(r.q.client||r.acc))return"The client name is missing on the quotation."}
   return""}
@@ -2469,6 +2482,7 @@ function renderImport(m){const I=impState();const sp=spNames();const lm=!isSales
           <option value="new"${r.match==="new"?" selected":""}>Create a new lead${lm?"":" (Lead Manager approves it)"}</option><option value="skip"${r.match==="skip"?" selected":""}>Don't import</option></select></label>
         <div class="small muted" style="margin-top:-4px">${r.match==="new"?(acc?`Client found by ${esc(r.acc.by)}: ${esc(acc.name)}`:`New client: ${esc(q.client||"")}`):r.acc&&acc?`Matched ${esc(acc.name)} by ${esc(r.acc.by)}`:""}</div>
         ${prodSel}
+        <label class="f fsm">Hotel PMS <span class="req">*</span><select data-impms="${i}"${dis}>${opts(pmsCfg().list,r.pms||"","Choose")}</select></label>
         <label class="f fsm">Target date <span class="req">*</span><input type="date" data-imt="${i}" value="${esc(r.tgt||"")}"${q.date?` min="${esc(q.date)}"`:""}${dis}></label>
         ${lm&&r.match==="new"?`<label class="f fsm">Sales engineer <span class="req">*</span><select data-ime="${i}"${dis}>${opts(sp,r.eng,"Choose")}</select></label>`:""}
         ${chk&&!r.res&&r.inc&&r.match!=="skip"?`<div class="small" style="color:var(--bad)">${chk}</div>`:""}</div>`}</div></div>`};
@@ -2498,6 +2512,7 @@ function bindImport(m){const I=impState();const R=i=>I.rows[+i];
   m.querySelectorAll("[data-imc]").forEach(x=>x.onchange=()=>{const r=R(x.dataset.imc);r.cur=x.value;r.curWarn="";render()});
   m.querySelectorAll("[data-imm]").forEach(x=>x.onchange=()=>{R(x.dataset.imm).match=x.value;render()});
   m.querySelectorAll("[data-imt]").forEach(x=>x.onchange=()=>{R(x.dataset.imt).tgt=x.value;render()});
+  m.querySelectorAll("[data-impms]").forEach(x=>x.onchange=()=>{R(x.dataset.impms).pms=x.value;render()});
   m.querySelectorAll("[data-ime]").forEach(x=>x.onchange=()=>{R(x.dataset.ime).eng=x.value;render()});
   m.querySelectorAll("[data-imp]").forEach(x=>x.onchange=()=>{const r=R(x.dataset.imp);r.ps=x.value?[x.value]:[];render()});
   m.querySelectorAll("[data-imopen]").forEach(a=>a.onclick=e=>{e.preventDefault();openDrawer(a.dataset.imopen)});
@@ -2521,6 +2536,7 @@ async function impSave(r,fu){const q=r.q;const t=nowISO();const sent=r.em?.sent|
     if(!l.firstContactAt||l.firstContactAt>sent)body.firstContactAt=sent;
     if(!l.nextFollowUp||fuOverdue(l))Object.assign(body,nx);
     if(!older&&!["New","Info Needed","Quotation Sent"].includes(l.status)){body.status="Quotation Sent";body.stageAt=Object.assign({},l.stageAt||{},{"Quotation Sent":sent<t?sent:t})}
+    if(isRealPms(r.pms)&&r.pms!==l.pms)body.pms=r.pms;
     if(r.contactEmail&&!(l.contact||{}).email)body.contact=Object.assign({},l.contact||{},{email:r.contactEmail},(l.contact||{}).name?{}:{name:q.contact||"",title:q.title||""});
     await S.db.doc("leads/"+l.id).update(body);return`Added to ${l.ref}`}
   const A=r.acc?allAccounts()[r.acc.key]:null;const key=A?A.key:keyOf(q.client);const name=A?A.name:q.client.trim();const country=(q.country||A?.country||"").trim();
@@ -2528,11 +2544,140 @@ async function impSave(r,fu){const q=r.q;const t=nowISO();const sent=r.em?.sent|
   if(!ex.exists||(ex.data().deleted&&!ex.data().mergedInto))await aref.set({name,key,country,city:"",group:"",region:"",domain:emailDomain(r.contactEmail),createdAt:t,createdBy:S.uid||null,fromSheet:!!S.registry[key]});
   const ref=await nextRef();const ps=r.ps.slice();const mine=isSales();
   await S.db.doc("leads/"+ref).set({ref,accountKey:key,accountName:name,country,contact:{name:q.contact||"",title:q.title||"",email:r.contactEmail||"",phone:""},products:ps,product:ps.join(", "),
-    category:"Outbound",source:"Email import",generatedBy:eng,department:"Sales",rooms:null,pms:"",timeline:"",preferred:eng,territoryOwner:"",notes:`Quotation ${o.no} was emailed${r.em?.sent?" on "+fmtD(r.em.sent):""} before it was entered in Lead Desk.`,
+    category:"Outbound",source:"Email import",generatedBy:eng,department:"Sales",rooms:null,pms:r.pms||"",timeline:"",preferred:eng,territoryOwner:"",notes:`Quotation ${o.no} was emailed${r.em?.sent?" on "+fmtD(r.em.sent):""} before it was entered in Lead Desk.`,
     requirementDate:o.date,region:"",subdivision:"",status:"New",assignedTo:mine?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},
     quote:o,contacts:[ct],firstContactAt:sent,...nx,log:[entry(`Lead created from an imported quotation · ${ps.join(", ")} · for ${eng}`),entry(lg)]});
   return`Created ${ref}${mine?" · waiting for approval":""}`}
 
+/* ======================= PMS INTEGRATIONS =======================
+   config/settings: pmsList (PMS names), pmsIfaces (interface methods), pmsCols (PMS shown as their own column),
+   pmsMatrix {product: {pms: [methods], "*": [methods for any other PMS]}} ([] = not supported, product missing = not set),
+   products[].noPms (not tied to the hotel's PMS).
+   Lead: pms (the hotel's PMS, required) and pmsIface {product: method}. A hotel has one PMS: it is suggested from the
+   hotel's other leads and can be applied to all of them. */
+const PMS_UNKNOWN="Not known yet";
+const pmsCfg=()=>{const s=S.settings||{};return{list:(s.pmsList&&s.pmsList.length?s.pmsList:["OPERA Cloud","OPERA 5 / V5","Protel","Mews","Cloudbeds","Other"]),
+  ifaces:(s.pmsIfaces&&s.pmsIfaces.length?s.pmsIfaces:["OHIP","OWS","OXI","FIAS","Standalone","Vendor API","File export"]),cols:(s.pmsCols||[]),matrix:s.pmsMatrix||{}}};
+const isRealPms=v=>!!v&&!/^(unknown|not known)/i.test(String(v).trim());
+const prodNoPms=p=>!!(prodList(true).find(x=>nk(x.name)===nk(p))||{}).noPms;
+const prodStandalone=p=>!!(prodList(true).find(x=>nk(x.name)===nk(p))||{}).standalone;
+const pmsProducts=l=>productsOf(l).filter(p=>!prodNoPms(p));
+function pmsMethods(p,pms){const M=pmsCfg().matrix;const k=Object.keys(M).find(x=>nk(x)===nk(p)&&M[x]);if(!k||!isRealPms(pms))return null;const row=M[k]||{};
+  const c=Object.keys(row).find(x=>x!=="*"&&nk(x)===nk(pms));const m=(c?(row[c]||[]):(row["*"]||[])).slice();if(prodStandalone(p)&&!m.some(x=>nk(x)==="standalone"))m.push("Standalone");return m}
+function accountPms(key){if(!key)return"";const a=S.accounts[key];let best=null;
+  for(const l of S.leads)if(!l.deleted&&accKey(l)===key&&isRealPms(l.pms)&&(!best||(l.updatedAt||l.createdAt||"")>(best.updatedAt||best.createdAt||"")))best=l;
+  return best?best.pms:(a&&isRealPms(a.pms)?a.pms:"")}
+const pmsOf=l=>isRealPms(l.pms)?l.pms:"";
+function ifaceOf(l,p){const v=(l.pmsIface||{})[p];if(v)return v;const m=pmsMethods(p,l.pms);return m&&m.length===1?m[0]:""}
+function pmsWarn(pms,ps){const bad=ps.filter(p=>{const m=pmsMethods(p,pms);return m&&!m.length});return bad.length?`${bad.join(", ")} ${bad.length>1?"aren't":"isn't"} listed as working with ${pms}. Check with Support before quoting.`:""}
+/* PMS + interface fields (used in the lead drawer, the quotation/order forms and the import) */
+function pmsFields(pre,pms,ps,cur){const C=pmsCfg();const list=C.list.includes(pms)||!isRealPms(pms)?C.list:C.list.concat([pms]);
+  return`<div class="pmsf" data-pmsf="${pre}"><label class="f">Hotel PMS <span class="req">*</span><select id="${pre}-pms">${opts(list,isRealPms(pms)?pms:"","Choose")}</select></label>
+   ${isRealPms(pms)&&ps.length?`<div class="pmsif">${ps.map(p=>{const m=pmsMethods(p,pms);const o=m==null?C.ifaces:m;const v=(cur||{})[p]||(o.length===1?o[0]:"");
+     return`<label class="f fsm">${esc(p)} · interface${m&&!m.length?` <span style="color:var(--warn)">· not listed for ${esc(pms)}</span>`:""}<select data-pmsi="${esc(p)}">${opts(m&&!m.length?C.ifaces:o,v,o.length===1?null:"Interface")}</select></label>`}).join("")}</div>`:""}
+   ${isRealPms(pms)?(w=>w?`<div class="notice warn" style="padding:6px 10px">${esc(w)}</div>`:"")(pmsWarn(pms,ps)):""}</div>`}
+function pmsRead(pre,root){root=root||document;const pms=(root.querySelector(`#${pre}-pms`)||{}).value||"";const it={};root.querySelectorAll(`[data-pmsf="${pre}"] [data-pmsi]`).forEach(s=>{if(s.value)it[s.dataset.pmsi]=s.value});return{pms,iface:it}}
+function bindPmsFields(pre,ps,cur,root,onChange){root=root||document;const sel=root.querySelector(`#${pre}-pms`);if(!sel)return;
+  sel.onchange=()=>{const box=root.querySelector(`[data-pmsf="${pre}"]`);const keep=pmsRead(pre,root).iface;box.outerHTML=pmsFields(pre,sel.value,ps,Object.assign({},cur||{},keep));bindPmsFields(pre,ps,Object.assign({},cur||{},keep),root,onChange);onChange&&onChange(sel.value)}}
+/* lead drawer: PMS integration */
+function drawPms(l){const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);const hp=pmsProducts(l);const ed=S.drawer.pmsEdit&&canAct(l)&&!l.deleted;const pms=pmsOf(l);const sug=!pms?accountPms(accKey(l)):"";
+  if(ed){A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px"><h3>PMS integration</h3>${pmsFields("lp",pms||sug,hp,l.pmsIface)}
+    <label class="f">PMS version / notes<input id="lp-note" value="${esc(l.pmsNote||"")}" placeholder="e.g. OPERA Cloud 23.4, hosted by Oracle"></label>
+    ${ps.length>hp.length?`<div class="small muted">${esc(ps.filter(prodNoPms).join(", "))}: not tied to the hotel's PMS.</div>`:""}
+    <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="lp-all" checked style="width:auto"> Use this PMS on the hotel's other open leads that have none or a different one</label>
+    <div class="small" id="lp-msg"></div><div class="row"><button type="button" class="btn pri" id="lp-save">Save</button><button type="button" class="btn" id="lp-x">Cancel</button></div></div>`;
+    bindPmsFields("lp",hp,l.pmsIface,A);$("#lp-x").onclick=()=>{S.drawer.pmsEdit=false;drawPms(l)};
+    $("#lp-save").onclick=async e=>{const r=pmsRead("lp",A);if(!isRealPms(r.pms)){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">Choose the hotel's PMS.</span>`;return}e.currentTarget.disabled=true;
+      const note=$("#lp-note").value.trim();const ch=r.pms!==l.pms;const ok=await patch(l,{pms:r.pms,pmsIface:r.iface,pmsNote:note},`PMS: ${r.pms}${Object.keys(r.iface).length?" · "+Object.entries(r.iface).map(([p,m])=>p+" via "+m).join(", "):""}`);
+      if(!ok){e.currentTarget.disabled=false;return}S.drawer.pmsEdit=false;
+      if(ch&&$("#lp-all")?.checked){const others=S.leads.filter(x=>x.id!==l.id&&!x.deleted&&accKey(x)===accKey(l)&&OPEN.includes(x.status)&&canAct(x)&&x.pms!==r.pms);let n=0;
+        for(const x of others){try{await S.db.doc("leads/"+x.id).update({pms:r.pms,pmsIface:null,updatedAt:nowISO(),log:[...(x.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS set to ${r.pms} (same hotel as ${l.ref})`}]});n++}catch(_){}}
+        if(n)toast(`PMS also set on ${n} other open lead${n===1?"":"s"} for this hotel`)}}
+    return}
+  const rows=hp.map(p=>{const m=pmsMethods(p,pms);const i=ifaceOf(l,p);return`<tr><td>${esc(p)}</td><td>${i?`<span class="iface${i==="Standalone"?" sa":""}">${esc(i)}</span>`:pms?`<span class="muted">not set</span>`:"—"}${m&&!m.length?` <span class="small" style="color:var(--warn)">not listed for ${esc(pms)}</span>`:""}</td></tr>`}).join("");
+  A.innerHTML=`<div class="panel" style="padding:14px"><div class="row"><h3>PMS integration</h3>${pms?`<span class="chip">${esc(pms)}</span>`:`<span class="chip warn">PMS not recorded</span>`}<span class="sp"></span>${canAct(l)&&!l.deleted?`<button type="button" class="btn sm${pms?"":" pri"}" id="lp-e">${pms?"Edit":"Add PMS"}</button>`:""}</div>
+    ${!pms&&sug?`<div class="small" style="margin-top:6px">This hotel's other leads use <b>${esc(sug)}</b>.</div>`:""}
+    ${pms&&hp.length?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Product</th><th>Interface</th></tr></thead><tbody>${rows}</tbody></table></div>`:""}
+    ${l.pmsNote?`<div class="small muted" style="margin-top:6px">${esc(l.pmsNote)}</div>`:""}</div>`;
+  $("#lp-e")?.addEventListener("click",()=>{S.drawer.pmsEdit=true;drawPms(l)})}
+/* quotation and order forms: ask for the PMS when it isn't recorded yet */
+function pmsInject(l,A){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||pmsMethods(p,l.pms)==null))return;const box=A.querySelector(".panel")||A;const sug=pmsOf(l)||accountPms(accKey(l));
+  const h=document.createElement("div");h.id="aPms";h.style.cssText="display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)";
+  h.innerHTML=`<div class="small"><b>PMS integration</b> · required from Quotation sent onwards${sug&&!pmsOf(l)?` (suggested from this hotel's other leads)`:""}</div>${pmsFields("ap",sug,pmsProducts(l),l.pmsIface)}`;
+  const t=box.querySelector("h3");t?t.after(h):box.prepend(h);bindPmsFields("ap",pmsProducts(l),l.pmsIface,h)}
+function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead("ap",h);if(!isRealPms(r.pms))return{err:"Choose the hotel's PMS (PMS integration)."};
+  const it=Object.assign({},l.pmsIface||{},r.iface);return{body:{pms:r.pms,pmsIface:it},txt:` · PMS ${r.pms}`}}
+/* Back office → Data issues: won leads without a PMS */
+function noPmsWon(){return S.leads.filter(l=>!l.deleted&&l.status==="Won"&&!pmsOf(l)&&pmsProducts(l).length).sort((a,b)=>(wonAt(b)||"").localeCompare(wonAt(a)||""))}
+function pmsIssuesHTML(){const L=noPmsWon();const C=pmsCfg();const lim=L.slice(0,150);
+  return`<div class="panel" id="dq-pms"><div class="row" style="margin-bottom:6px"><h3>Won leads without a PMS</h3><span class="chip" style="${L.length?"background:var(--warn-soft);color:var(--warn)":""}">${L.length}</span></div>
+   <p class="small muted" style="margin:0 0 10px">Record the hotel's PMS so Management can compare products by PMS and interface. Choosing it here also fills the hotel's other leads that have none. Open a lead to set the interface per product.</p>
+   ${L.length?`<div class="tw"><table><thead><tr><th>Ref</th><th>Property</th><th>Engineer</th><th>Won</th><th>Products</th><th>PMS</th></tr></thead><tbody>
+   ${lim.map(l=>{const sug=accountPms(accKey(l));return`<tr><td class="mono"><button type="button" class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}<div class="small muted">${esc(l.country||"")}</div></td><td>${esc(l.assignedTo||"—")}</td><td style="white-space:nowrap">${fmtD(wonAt(l))}</td><td class="small">${esc(pmsProducts(l).join(", "))}</td>
+     <td>${canAct(l)?`<select data-dqpms="${esc(l.id)}" style="min-width:150px">${opts(C.list,sug,"Choose")}</select>`:"—"}</td></tr>`}).join("")}</tbody></table></div>${L.length>150?`<p class="small muted">Showing the 150 most recent of ${L.length}.</p>`:""}`:`<p class="small" style="margin:0">Every won lead has its PMS recorded.</p>`}</div>`}
+function bindPmsIssues(m){m.querySelectorAll("[data-dqpms]").forEach(s=>s.onchange=async()=>{const l=S.leadMap[s.dataset.dqpms];const v=s.value;if(!l||!v)return;s.disabled=true;
+  const same=S.leads.filter(x=>x.id!==l.id&&!x.deleted&&accKey(x)===accKey(l)&&!pmsOf(x)&&canAct(x));
+  if(await patch(l,{pms:v},`PMS recorded: ${v} (Data issues)`)){let n=0;for(const x of same){try{await S.db.doc("leads/"+x.id).update({pms:v,updatedAt:nowISO(),log:[...(x.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS recorded: ${v} (same hotel as ${l.ref})`}]});n++}catch(_){}}
+    if(n)toast(`${v} also recorded on ${n} other lead${n===1?"":"s"} for ${l.accountName}`);render()}else s.disabled=false})}
+/* Management → Products: by PMS and interface */
+function pmsReport(ls){const P=pvState();const C=pmsCfg();const plist=[...new Set(ls.flatMap(pmsProducts))].sort((a,b)=>a.localeCompare(b));const prod=P.pmsP&&plist.includes(P.pmsP)?P.pmsP:"";const g=P.pmsG||"both";
+  const pairs=[];ls.forEach(l=>pmsProducts(l).forEach(p=>{if(!prod||p===prod)pairs.push({l,p,pms:pmsOf(l)||"Not recorded",i:pmsOf(l)?(ifaceOf(l,p)||"Not set"):"—"})}));
+  const G={};pairs.forEach(x=>{const k=g==="pms"?x.pms:g==="iface"?x.i:x.pms+"\u0001"+x.i;const o=G[k]||(G[k]={pms:x.pms,i:x.i,n:0,won:0,rev:0,open:0,ids:new Set()});o.n++;if(x.l.status==="Won"){o.won++;o.rev+=orderVal(x.l)}if(OPEN.includes(x.l.status)&&x.l.status!=="On Hold")o.open++});
+  const rows=Object.values(G).sort((a,b)=>(a.pms==="Not recorded")-(b.pms==="Not recorded")||b.rev-a.rev||b.n-a.n);
+  const rec=rows.filter(r=>r.pms!=="Not recorded");const T={n:pairs.length,won:pairs.filter(x=>x.l.status==="Won").length,rev:pairs.filter(x=>x.l.status==="Won").reduce((s,x)=>s+orderVal(x.l),0),open:pairs.filter(x=>OPEN.includes(x.l.status)&&x.l.status!=="On Hold").length};
+  const lead=new Set(pairs.map(x=>x.l.id)).size,leadRec=new Set(pairs.filter(x=>x.pms!=="Not recorded").map(x=>x.l.id)).size;
+  const bw=rec.filter(r=>r.n>=3).sort((a,b)=>b.won/b.n-a.won/a.n)[0],br=rec.slice().sort((a,b)=>b.rev-a.rev)[0];
+  const lab=r=>g==="iface"?r.i:g==="pms"?r.pms:r.pms+" · "+r.i;const chip=v=>v&&!["—","Not set"].includes(v)?`<span class="iface${v==="Standalone"?" sa":""}">${esc(v)}</span>`:`<span class="muted">${esc(v)}</span>`;
+  const won=ls.filter(l=>l.status==="Won");const cols=[...new Set(won.map(l=>pmsOf(l)).filter(Boolean))].sort((a,b)=>C.list.indexOf(a)-C.list.indexOf(b));
+  const mp=[...new Set(won.flatMap(pmsProducts))].map(p=>{const r={p,c:{},nr:0};won.forEach(l=>{if(!pmsProducts(l).includes(p))return;const v=pmsOf(l);if(v)r.c[v]=(r.c[v]||0)+1;else r.nr++});r.t=Object.values(r.c).reduce((a,b)=>a+b,0)+r.nr;return r}).sort((a,b)=>b.t-a.t);
+  return`<div class="panel" id="pmsRep"><div class="row" style="align-items:end"><div style="flex:1;min-width:220px"><h3>By PMS and interface</h3><p class="small muted" style="margin:2px 0 0">Same filters as above. Each lead counts once per product, with its full value.</p></div>
+    <label class="f fsm">Product<select id="pmsP"><option value="">All products</option>${plist.map(p=>`<option${p===prod?" selected":""}>${esc(p)}</option>`).join("")}</select></label>
+    <label class="f fsm">Group by<select id="pmsG">${[["both","PMS and interface"],["pms","PMS"],["iface","Interface"]].map(([v,t])=>`<option value="${v}"${g===v?" selected":""}>${t}</option>`).join("")}</select></label></div>
+   <div class="kpis" style="margin:12px 0"><div class="kpi"><div class="l">Best win rate</div><div class="v">${bw?fmtP(bw.won/bw.n):"—"}</div><div class="s">${bw?esc(lab(bw)):"needs 3+ leads with a PMS"}</div></div>
+    <div class="kpi"><div class="l">Most revenue</div><div class="v">${br&&br.rev?fmtAED(br.rev):"—"}</div><div class="s">${br&&br.rev?esc(lab(br)):""}</div></div>
+    <div class="kpi"><div class="l">PMS recorded</div><div class="v" style="${lead&&leadRec/lead<.8?"color:var(--warn)":""}">${lead?fmtP(leadRec/lead):"—"}</div><div class="s">${fmtN(leadRec)} of ${fmtN(lead)} leads${lead&&leadRec<lead?" · fill in the rest in Back office → Data issues":""}</div></div></div>
+   <div class="tw"><table><thead><tr>${g!=="iface"?"<th>PMS</th>":""}${g!=="pms"?"<th>Interface</th>":""}<th class="num">Leads</th><th class="num">Won</th><th class="num">Win rate</th><th class="num">Revenue</th><th class="num">Avg order</th><th class="num">Open</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr>${g!=="iface"?`<td>${r.pms==="Not recorded"?`<span class="muted">Not recorded</span>`:esc(r.pms)}</td>`:""}${g!=="pms"?`<td>${chip(r.i)}</td>`:""}<td class="num">${fmtN(r.n)}</td><td class="num">${fmtN(r.won)}</td><td class="num">${fmtP(r.n?r.won/r.n:0)}</td><td class="num">${r.rev?fmtAED(r.rev):"—"}</td><td class="num">${r.won&&r.rev?fmtAED(r.rev/r.won):"—"}</td><td class="num">${fmtN(r.open)}</td></tr>`).join("")||`<tr><td colspan="8" class="empty">No leads for these filters.</td></tr>`}</tbody>
+    ${rows.length?`<tfoot><tr><td${g==="both"?' colspan="2"':""}><b>Total</b></td><td class="num">${fmtN(T.n)}</td><td class="num">${fmtN(T.won)}</td><td class="num">${fmtP(T.n?T.won/T.n:0)}</td><td class="num">${fmtAED(T.rev)}</td><td class="num">${T.won?fmtAED(T.rev/T.won):"—"}</td><td class="num">${fmtN(T.open)}</td></tr></tfoot>`:""}</table></div>
+   ${mp.length?`<h3 style="margin-top:16px">Won orders: product × PMS</h3><div class="tw" style="margin-top:8px"><table><thead><tr><th>Product</th>${cols.map(c=>`<th class="num">${esc(c)}</th>`).join("")}<th class="num">Not recorded</th></tr></thead><tbody>
+    ${mp.map(r=>`<tr><td>${esc(r.p)}</td>${cols.map(c=>`<td class="num">${r.c[c]||"—"}</td>`).join("")}<td class="num muted">${r.nr||"—"}</td></tr>`).join("")}</tbody></table></div>`:""}</div>`}
+function bindPmsReport(){const P=pvState();$("#pmsP")&&($("#pmsP").onchange=e=>{P.pmsP=e.target.value;render()});$("#pmsG")&&($("#pmsG").onchange=e=>{P.pmsG=e.target.value;render()})}
+/* Products & settings (Supervisor): the compatibility matrix */
+function pmsPanel(){if(!can("settings.manage"))return"";const C=pmsCfg();const ed=!!S.pmsEd;const prods=prodList(false);const cols=C.cols.filter(c=>C.list.includes(c)).concat(["*"]);const colName=c=>c==="*"?"Any other PMS":c;
+  const cell=(p,c)=>{const k=Object.keys(C.matrix).find(x=>nk(x)===nk(p.name)&&C.matrix[x]);const row=k?C.matrix[k]:null;let v=row?(c==="*"?row["*"]:(row[Object.keys(row).find(x=>x!=="*"&&nk(x)===nk(c))]??row["*"])):null;
+    if(ed)return`<td><input data-pmx="${esc(p.name)}" data-pmc="${esc(c)}" value="${esc(row?(c==="*"?(row["*"]||[]):(row[Object.keys(row).find(x=>x!=="*"&&nk(x)===nk(c))]||[])).join(", "):"")}" placeholder="—" list="pmsIfL" style="min-width:120px"${p.noPms?" disabled":""}></td>`;
+    if(p.noPms)return`<td class="muted small">—</td>`;if(!row)return`<td class="muted small">${p.standalone?`<span class="iface sa">Standalone</span> `:""}not set</td>`;
+    if(p.standalone&&!(v||[]).some(x=>nk(x)==="standalone"))v=(v||[]).concat(["Standalone"]);
+    return`<td>${(v||[]).length?v.map(x=>`<span class="iface${x==="Standalone"?" sa":""}">${esc(x)}</span>`).join(" "):`<span class="muted">—</span>`}</td>`};
+  return`<div class="panel" id="pmsPanel"><div class="row"><h3>PMS integrations</h3><span class="sp"></span>${ed?`<button type="button" class="btn pri" id="pmSave">Save</button><button type="button" class="btn" id="pmX">Cancel</button>`:`<button type="button" class="btn pri" id="pmE">Edit</button>`}</div>
+   <p class="small muted" style="margin:6px 0 12px">Which PMS each product works with, and how. <span class="iface">blue</span> interface to the PMS · <span class="iface sa">grey</span> Standalone (no PMS link) · — not supported · “not set” means no rule yet. Products with “Standalone always allowed” can run without the PMS interface whatever the hotel’s PMS; interfacing is the client’s choice. Sales see the allowed interfaces on each lead and a warning when a product isn't listed for the hotel's PMS.${ed?" Type the methods separated by commas; leave a cell empty for “not supported”, or the whole row empty for “not set”.":""}</p>
+   ${ed?`<div class="grid3" style="margin-bottom:12px"><label class="f">PMS list<input id="pm-list" value="${esc(C.list.join(", "))}"></label><label class="f">Interface methods<input id="pm-if" value="${esc(C.ifaces.join(", "))}"></label><label class="f">PMS with their own column<input id="pm-cols" value="${esc(C.cols.join(", "))}"></label></div><datalist id="pmsIfL">${C.ifaces.map(x=>`<option value="${esc(x)}">`).join("")}</datalist>`:""}
+   <div class="tw"><table><thead><tr><th>Product</th>${cols.map(c=>`<th>${esc(colName(c))}</th>`).join("")}${ed?"<th>Standalone always allowed</th><th>Not PMS-related</th>":""}</tr></thead><tbody>
+   ${prods.map(p=>`<tr><td><b>${esc(p.name)}</b>${p.noPms&&!ed?`<div class="small muted">not PMS-related</div>`:""}</td>${cols.map(c=>cell(p,c)).join("")}${ed?`<td><input type="checkbox" data-pms1="${esc(p.name)}"${p.standalone?" checked":""} style="width:auto"></td><td><input type="checkbox" data-pmn="${esc(p.name)}"${p.noPms?" checked":""} style="width:auto"></td>`:""}</tr>`).join("")}</tbody></table></div>
+   ${ed?"":`<p class="small muted" style="margin:10px 0 0">PMS list: ${esc(C.list.join(", "))}. Interface methods: ${esc(C.ifaces.join(", "))}.</p>`}</div>`}
+function bindPmsPanel(m){if(!$("#pmsPanel"))return;$("#pmE")?.addEventListener("click",()=>{S.pmsEd=true;render()});$("#pmX")?.addEventListener("click",()=>{S.pmsEd=false;render()});
+  m.querySelectorAll("[data-pmn]").forEach(c=>c.onchange=()=>m.querySelectorAll(`[data-pmx="${CSS.escape(c.dataset.pmn)}"]`).forEach(i=>i.disabled=c.checked));
+  $("#pmSave")?.addEventListener("click",async e=>{const sp=v=>[...new Set(String(v||"").split(",").map(x=>x.trim()).filter(Boolean))];const list=sp($("#pm-list").value);let ifaces=sp($("#pm-if").value);const cols=sp($("#pm-cols").value).filter(c=>list.some(x=>nk(x)===nk(c)));
+    if(!list.length||!ifaces.length){toast("The PMS list and interface methods can't be empty");return}
+    const M={};const byP={};m.querySelectorAll("[data-pmx]").forEach(i=>{(byP[i.dataset.pmx]=byP[i.dataset.pmx]||[]).push(i)});
+    for(const[p,ins]of Object.entries(byP)){if(ins.every(i=>!i.value.trim()))continue;const row={};ins.forEach(i=>{const v=sp(i.value);v.forEach(x=>{if(!ifaces.some(y=>nk(y)===nk(x)))ifaces.push(x)});row[i.dataset.pmc]=v.map(x=>ifaces.find(y=>nk(y)===nk(x))||x)});M[p]=row}
+    const old=pmsCfg().matrix;Object.keys(old).forEach(p=>{if(!M[p])M[p]=byP[p]?null:old[p]});
+    const noP=new Set([...m.querySelectorAll("[data-pmn]")].filter(c=>c.checked).map(c=>c.dataset.pmn));const sa=new Set([...m.querySelectorAll("[data-pms1]")].filter(c=>c.checked).map(c=>c.dataset.pms1));const products=prodList(true).map(x=>Object.assign({},x,{noPms:noP.has(x.name)},m.querySelector(`[data-pms1="${CSS.escape(x.name)}"]`)?{standalone:sa.has(x.name)}:{}));
+    e.currentTarget.disabled=true;try{await S.db.doc("config/settings").update({pmsList:list,pmsIfaces:ifaces,pmsCols:cols,pmsMatrix:M,products});Object.assign(S.settings,{pmsList:list,pmsIfaces:ifaces,pmsCols:cols,pmsMatrix:M,products});S.pmsEd=false;toast("PMS integrations saved");render()}
+    catch(er){e.currentTarget.disabled=false;toast("Couldn't save: "+(er.message||er.code))}})}
+
+/* ======================= THEME (account menu) =======================
+   Light / Dark / Device, remembered on this device (localStorage "ld-theme"). "Device" follows the OS setting. */
+const TH_IC={light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  auto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>'};
+function themeGet(){try{const t=localStorage.getItem("ld-theme");return t==="light"||t==="dark"?t:"auto"}catch(e){return document.documentElement.getAttribute("data-theme")||"auto"}}
+function themeSet(t){try{if(t==="auto")localStorage.removeItem("ld-theme");else localStorage.setItem("ld-theme",t)}catch(e){}
+  if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t)}
+function themeSeg(){const c=themeGet();const b=(k,t)=>`<button type="button" data-theme-set="${k}" aria-pressed="${c===k}">${TH_IC[k]}${t}</button>`;
+  return`<div class="thm"><div class="l">Theme</div><div class="seg3" role="group" aria-label="Theme">${b("light","Light")}${b("dark","Dark")}${b("auto","Device")}</div></div>`}
+function bindTheme(){document.querySelectorAll("[data-theme-set]").forEach(x=>x.addEventListener("click",e=>{e.stopPropagation();themeSet(x.dataset.themeSet);
+  document.querySelectorAll("[data-theme-set]").forEach(y=>y.setAttribute("aria-pressed",String(y===x)))}))}
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
 const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
@@ -2888,6 +3033,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   ${subTerrPanel()}
   ${chainsPanel()}
   ${rulesPanel()}
+  ${pmsPanel()}
   <div class="grid2">
    <div class="panel"><h3>Product catalog <span class="chip">${prods.filter(p=>p.active!==false).length} active</span></h3>
      <form class="row" id="addProd" style="margin-bottom:6px"><input id="np" placeholder="New product name" style="flex:1"><label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="npRep" style="width:auto">Repeatable</label><button class="btn pri">Add product</button></form>
@@ -2923,7 +3069,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindRules();
+  bindChains(m);bindRules();bindPmsPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
