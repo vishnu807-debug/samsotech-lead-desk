@@ -154,7 +154,11 @@ td.num .rk{margin:0}
 tr.top td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
 tr.tot td{background:var(--sunk);font-weight:600}
 .pbt{font:600 10.5px var(--f-body);letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px;white-space:nowrap}.pbt-software{background:var(--accent-soft);color:var(--accent)}.pbt-hardware{background:var(--warn-soft);color:var(--warn)}.pbt-interface{background:var(--sunk);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.pbt-service{background:var(--ok-soft);color:var(--ok)}
-tr.pbg td{background:var(--sunk);font-weight:600}td.sub{padding-left:22px}.del{text-decoration:line-through;color:var(--muted)}.nowrap{white-space:nowrap}
+tr.pbg td{background:var(--sunk);font-weight:600}
+.linkbtn{all:unset;cursor:pointer;color:var(--ink)}.linkbtn:hover b,.linkbtn:focus-visible b{color:var(--accent);text-decoration:underline}
+.gbar{height:9px;border-radius:6px;background:var(--sunk);overflow:hidden;display:flex}.gbar i{display:block;height:100%}
+.gfun{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.gfun button{all:unset;cursor:pointer;background:var(--sunk);border-radius:10px;padding:8px 10px;display:grid;gap:2px}.gfun button b{font-size:20px}.gfun button span{font-size:11.5px;color:var(--muted)}.gfun button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+@media(max-width:640px){.gfun{grid-template-columns:repeat(4,minmax(0,1fr))}.gml td:nth-child(3),.gml th:nth-child(3){display:none}}td.sub{padding-left:22px}.del{text-decoration:line-through;color:var(--muted)}.nowrap{white-space:nowrap}
 .pbp{padding:12px 14px;margin-top:10px}.pbrow{display:grid;grid-template-columns:minmax(0,1fr) 70px auto auto;gap:8px;align-items:center}.pbqc+.pbqc{border-top:1px solid var(--line);margin-top:10px}
 @media(max-width:560px){.pbrow{grid-template-columns:minmax(0,1fr) 64px;}.pbrow .num{grid-column:1}}
 .subnav{display:flex;gap:6px;flex-wrap:wrap}
@@ -355,6 +359,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="bo" role="tab">Back office <span class="count" id="c-bo" hidden></span></button>
       <button data-tab="pipe" role="tab"><span class="tl">My pipeline</span> <span class="count" id="c-pipe" hidden></span></button>
       <button data-tab="focus" role="tab"><span class="tl">Focus</span> <span class="count" id="c-focus" hidden></span></button>
+      <button data-tab="mine" role="tab">My leads</button>
       <button data-tab="meet" role="tab">Meetings</button>
       <button data-tab="mgmt" role="tab"><span class="tl">Management</span></button>
       <button data-tab="accts" role="tab">Accounts</button>
@@ -506,21 +511,21 @@ const PERMISSIONS=[
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.generators","Lead generators: leads by who brought them in, and their status (Management → Lead generators)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "targets.manage", "pricing.view", "pricing.approve"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
+const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "targets.manage", "pricing.view", "pricing.approve"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
 function permsFor(role){if(role==="supervisor")return PERMISSIONS.map(x=>x[0]);const def=DEFAULT_PERMS[role]||[];if(!(S.perms&&Array.isArray(S.perms[role])))return def;
   const known=Array.isArray(S.permsKnown)?S.permsKnown:PERMS_V1;return S.perms[role].concat(def.filter(p=>!known.includes(p)))}
 const can=perm=>!!S.role&&permsFor(S.role).includes(perm);
-const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
-const LANDING=["bo","mgmt","pipe","focus","meet","new","accts","set","audit"];
+const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",mine:"page.mine",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
+const LANDING=["bo","mgmt","pipe","focus","mine","meet","new","accts","set","audit"];
 const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet"};   // first page after sign-in
 const homeTab=()=>{const a=allowedTabs();return a.includes(HOME[S.role])?HOME[S.role]:a[0]};
-const allowedTabs=()=>LANDING.filter(t=>can(TAB_PERM[t]));
+const allowedTabs=()=>LANDING.filter(t=>t==="mine"?!!(typeof myGen==="function"&&myGen()):can(TAB_PERM[t]));
 const viewAll=()=>can("lead.view_all");
 const isMine=l=>!!S.myEng&&nk(l.assignedTo)===nk(S.myEng);
 const isSales=()=>!can("lead.create")&&can("lead.create_own_outbound");   // outbound-only lead form
@@ -651,7 +656,7 @@ function renderInner(){const m=$("#main");
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&$("#tabs").scrollWidth>$("#tabs").clientWidth){const t=$("#tabs");t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2)}
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
-({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
+({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
 function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
@@ -927,7 +932,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
     const ref=await nextRef();const t=nowISO();const ps=f.products.slice();
     await S.db.doc("leads/"+ref).set({ref,accountKey:a.key,accountName:a.name,country:(a.country||S.accounts[a.key]?.country||"").trim(),
         contact:{name:v("f-cname"),title:v("f-ctitle"),email:v("f-cemail"),phone:v("f-cphone")},products:ps,product:ps.join(", "),category:sales?"Outbound":f.category,source:v("f-source"),
-        generatedBy:sales?S.myEng:v("f-genby"),department:sales?"Sales":v("f-dept"),rooms:+v("f-rooms")||null,pms:v("f-pms"),timeline:v("f-when"),preferred:sales?(terr.owner||S.myEng):v("f-pref"),territoryOwner:terr.owner||"",notes:v("f-notes"),
+        generatedBy:sales?S.myEng:v("f-genby"),department:sales?"Sales":(v("f-dept")||((genOf({generatedBy:v("f-genby")})||{}).dept||"")),rooms:+v("f-rooms")||null,pms:v("f-pms"),timeline:v("f-when"),preferred:sales?(terr.owner||S.myEng):v("f-pref"),territoryOwner:terr.owner||"",notes:v("f-notes"),
         requirementDate:v("f-reqdate"),region:v("f-region"),subdivision:formSub()?.n||"",
         status:"New",assignedTo:sales&&ownLead?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},histRepeat:ps.some(p=>productState(a.key,p).state==="hist"),
         ...((f.mNotes||"").trim()?{meetings:[{id:"m"+Date.now().toString(36),date:f.mDate,mode:f.mMode,type:"New lead meeting",products:ps,notes:f.mNotes.trim(),by:actor()||v("f-genby"),byId:S.uid||null,at:t}]}:{}),
@@ -2928,8 +2933,94 @@ function pbUploadHTML(){const U=pbState().up;const c=k=>U.rows.filter(r=>k==="er
      <td>${r.err?`<span class="chip bad">Error: ${esc(r.err)}</span>`:`<span class="chip ${r.res==="New"?"ok":"warn"}">${r.res}</span>`}</td></tr>`).join("")||`<tr><td colspan="6" class="muted">Nothing new or changed.</td></tr>`}</tbody></table></div>
    <div class="row"><span class="small muted">Rows with errors are skipped. The rest are saved as drafts for approval.</span><span class="sp"></span><button type="button" class="btn" id="pbUpX">Cancel</button><button type="button" class="btn pri" id="pbUpOk"${ok?"":" disabled"}>Save ${ok} row${ok===1?"":"s"} as draft</button></div></div>`}
 
+/* ======================= LEAD GENERATORS (Management → Lead generators, and "My leads") =======================
+   settings.generators = [{name, dept, aliases:[], email}] (Products & settings → Lead generators).
+   A lead belongs to a generator when its "Generated by" matches the name or an alias (case and spacing ignored,
+   first name enough). The department comes from that list, else from the lead. Nothing on the leads is changed.
+   "My leads" appears for a signed-in person linked to a generator (by sign-in email or display name).
+   Generator credit follows the existing rule: upsell leads stay with the engineer, not the generator. */
+const genList=()=>Array.isArray(S.settings.generators)?S.settings.generators:[];
+const genNames=x=>[x.name].concat(x.aliases||[]).map(nk).filter(Boolean);
+function genOf(l){const g=nk(l.generatedBy||"");if(!g)return null;const f=g.split(" ")[0];
+  for(const x of genList()){const ns=genNames(x);if(ns.includes(g)||ns.some(n=>!n.includes(" ")&&n===f))return x}return null}
+const genName=l=>{const x=genOf(l);return x?x.name:(String(l.generatedBy||"").trim()||"(not recorded)")};
+const genDept=l=>{const x=genOf(l);return(x&&x.dept)||l.department||"Not set"};
+function myGen(){const e=String(S.myEmail||"").toLowerCase();const dn=nk(S.myName||"");
+  return genList().find(x=>x.email&&String(x.email).toLowerCase()===e)||genList().find(x=>dn&&genNames(x).includes(dn))||null}
+const GEN_B=[["wait","Waiting approval"],["asg","Assigned"],["meet","Meeting"],["quote","Quoted"],["won","Won"],["lost","Lost / dup."]];
+function genBucket(l){const s=l.status;if(s==="Won")return"won";if(["Lost","Duplicate","Rejected"].includes(s))return"lost";if(s==="Quotation Sent")return"quote";if(s==="Meeting Done")return"meet";if(["New","Info Needed"].includes(s))return"wait";return"asg"}
+function genStats(ls){const o={n:0,wonV:0,pipe:0};GEN_B.forEach(([k])=>o[k]=0);ls.forEach(l=>{o.n++;const b=genBucket(l);o[b]++;if(b==="won")o.wonV+=orderVal(l);if(b==="meet"||b==="quote")o.pipe+=leadValue(l)});
+  const dec=o.won+o.lost-ls.filter(l=>["Duplicate","Rejected"].includes(l.status)).length;o.conv=o.n?o.won/o.n:null;o.inc=o.wonV*((+S.settings.incentivePct||0)/100);return o}
+function genScope(){const AF=af();return S.leads.filter(l=>!l.deleted&&!isUpsell(l)).filter(inPeriod).filter(l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src))}
+function genState(){const has=genList().some(x=>x.dept==="Marketing");return S.genv||(S.genv={dept:has?"Marketing":"",sel:""})}
+const genChip=b=>`<span class="chip ${b==="won"?"ok":b==="lost"?"bad":b==="wait"?"warn":""}">${esc((GEN_B.find(x=>x[0]===b)||[])[1]||b)}</span>`;
+function genLeadRows(ls,showGen){return ls.map(l=>{const b=genBucket(l);const amt=b==="won"?orderVal(l):(l.quote&&+l.quote.aed)||0;
+  return`<tr><td><b>${esc(l.accountName||"")}</b><div class="small muted"><span class="mono">${esc(l.ref)}</span> · ${esc(productsOf(l).join(", "))} · ${fmtD(l.createdAt||reqDate(l))}${showGen?" · by "+esc(genName(l)):""}</div></td>
+   <td>${genChip(b)}${amt?`<div class="small muted">${fmtAED(amt)}</div>`:l.status==="Lost"&&l.lost?.reason?`<div class="small muted">${esc(l.lost.reason)}</div>`:""}</td><td>${esc(l.assignedTo||"—")}</td><td class="num"><button type="button" class="btn sm" data-open="${esc(l.id)}">Open</button></td></tr>`}).join("")}
+function generatorsHTML(){const G=genState();const ls=genScope();const deps=[...new Set((S.settings.departments||[]).concat(genList().map(x=>x.dept).filter(Boolean)))];
+  const inD=l=>!G.dept||genDept(l)===G.dept;const mine=ls.filter(inD);const by={};mine.forEach(l=>{const n=genName(l);(by[n]=by[n]||{dept:genDept(l),ls:[]}).ls.push(l)});
+  const rows=Object.entries(by).map(([n,o])=>Object.assign(genStats(o.ls),{name:n,dept:o.dept,ls:o.ls})).sort((a,b)=>b.wonV-a.wonV||b.n-a.n);
+  const all=genStats(ls),D=genStats(mine);const pc=(a,b)=>b?Math.round(a/b*100)+"%":"—";const p1=v=>v==null?"—":(v*100).toFixed(1)+"%";const inc=+S.settings.incentivePct||0;
+  const sel=G.sel&&by[G.sel]?G.sel:"";const S1=sel?by[sel].ls:[];
+  const mon={};S1.forEach(l=>{const k=ymKey(l.createdAt||reqDate(l));const o=mon[k]||(mon[k]={ls:[]});o.ls.push(l)});
+  const kp=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;const lab=G.dept||"all departments";
+  return`<div class="view" style="gap:14px">
+   <div class="row" style="gap:10px;align-items:end"><label class="f fsm">Department<select id="genD"><option value="">All departments</option>${deps.map(d=>`<option${d===G.dept?" selected":""}>${esc(d)}</option>`).join("")}</select></label>
+    <span class="small muted" style="flex:1;min-width:200px">Leads by the person who generated them, and where they are now. Follows the period, region and lead-source filters. Upsell leads stay with the engineer.</span><button type="button" class="btn" id="genX">Export Excel</button></div>
+   ${!genList().length?`<div class="notice warn">No lead generators are set up yet. A Supervisor adds them (with their department) in Products &amp; settings → Lead generators.</div>`:""}
+   <div class="kpis">${kp(`Leads from ${esc(lab)}`,fmtN(D.n),G.dept?`${pc(D.n,all.n)} of all ${fmtN(all.n)} leads`:"in the period")}${kp("Won",fmtN(D.won),`${p1(D.conv)} conversion${G.dept?` (company ${p1(all.conv)})`:""}`)}
+    ${kp(`Revenue from ${esc(lab)} leads`,fmtAED(D.wonV),G.dept?`${pc(D.wonV,all.wonV)} of revenue`:"won orders")}${kp("Open pipeline",fmtAED(D.pipe),`${fmtN(D.meet+D.quote)} lead${D.meet+D.quote===1?"":"s"} at meeting or quotation`)}</div>
+   <div class="panel"><div class="tw"><table><thead><tr><th>Generated by</th><th class="num">Leads</th>${GEN_B.map(([,t])=>`<th class="num">${t}</th>`).join("")}<th class="num">Conversion</th><th class="num">Revenue</th><th class="num">Incentive ${inc}%</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr${r.name===sel?` style="background:var(--accent-soft)"`:""}><td><button type="button" class="linkbtn" data-gen="${esc(r.name)}"><b>${esc(r.name)}</b></button><div class="small muted">${esc(r.dept)}</div></td><td class="num">${fmtN(r.n)}</td>${GEN_B.map(([k])=>`<td class="num">${r[k]?fmtN(r[k]):"—"}</td>`).join("")}<td class="num">${p1(r.conv)}</td><td class="num">${r.wonV?fmtAED(r.wonV):"—"}</td><td class="num">${r.inc?fmtAED(r.inc):"—"}</td></tr>`).join("")||`<tr><td colspan="${GEN_B.length+5}" class="empty">No leads from ${esc(lab)} in this period.</td></tr>`}</tbody>
+    ${rows.length>1?`<tfoot><tr><td><b>Total</b></td><td class="num">${fmtN(D.n)}</td>${GEN_B.map(([k])=>`<td class="num">${fmtN(D[k])}</td>`).join("")}<td class="num">${p1(D.conv)}</td><td class="num">${fmtAED(D.wonV)}</td><td class="num">${fmtAED(D.inc)}</td></tr></tfoot>`:""}</table></div>
+    <p class="small muted" style="margin-top:8px">Click a name to see each of their leads. Incentive uses the lead generator incentive % in Products &amp; settings.</p></div>
+   ${sel?`<div class="panel" id="genSel"><div class="row"><h3>${esc(sel)} · ${fmtN(S1.length)} lead${S1.length===1?"":"s"}</h3><span class="sp"></span><button type="button" class="btn sm" data-gen="">Close</button></div>
+    <div class="tw" style="margin-top:8px"><table><thead><tr><th>Month</th><th class="num">Leads</th><th class="num">Won</th><th class="num">Revenue</th><th style="min-width:160px">Status today</th></tr></thead><tbody>
+    ${Object.keys(mon).sort().reverse().map(k=>{const s=genStats(mon[k].ls);const w=x=>s.n?x/s.n*100:0;return`<tr><td>${ymLabel(k)}</td><td class="num">${s.n}</td><td class="num">${s.won||"—"}</td><td class="num">${s.wonV?fmtAED(s.wonV):"—"}</td>
+      <td><div class="gbar" title="won ${s.won} · meeting/quoted ${s.meet+s.quote} · waiting/assigned ${s.wait+s.asg} · lost/dup. ${s.lost}"><i style="width:${w(s.won)}%;background:var(--ok)"></i><i style="width:${w(s.meet+s.quote)}%;background:var(--accent)"></i><i style="width:${w(s.wait+s.asg)}%;background:var(--warn)"></i><i style="width:${w(s.lost)}%;background:var(--line)"></i></div></td></tr>`}).join("")}</tbody></table></div>
+    <p class="small muted" style="margin:6px 0 10px"><span style="color:var(--ok)">■</span> won · <span style="color:var(--accent)">■</span> meeting or quoted · <span style="color:var(--warn)">■</span> waiting or assigned · <span style="color:var(--muted)">■</span> lost or duplicate</p>
+    <div class="tw"><table><thead><tr><th>Lead</th><th>Status</th><th>Engineer</th><th></th></tr></thead><tbody>${genLeadRows(S1.slice().sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||"")),false)}</tbody></table></div></div>`:""}</div>`}
+function bindGenerators(m){const G=genState();$("#genD").onchange=e=>{G.dept=e.target.value;G.sel="";render()};
+  m.querySelectorAll("[data-gen]").forEach(b=>b.onclick=()=>{G.sel=b.dataset.gen===G.sel?"":b.dataset.gen;render();if(G.sel)setTimeout(()=>$("#genSel")?.scrollIntoView({block:"start",behavior:"smooth"}),50)});
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{e.preventDefault();openDrawer(b.dataset.open)});
+  $("#genX").onclick=async()=>{let X;try{X=await loadXLSX()}catch(e){toast("Couldn't load the spreadsheet tool.");return}const ls=genScope().filter(l=>!G.dept||genDept(l)===G.dept);const by={};ls.forEach(l=>(by[genName(l)]=by[genName(l)]||[]).push(l));
+    const S1=[["Generated by","Department","Leads"].concat(GEN_B.map(x=>x[1])).concat(["Conversion %","Revenue (AED)","Incentive (AED)"])].concat(Object.entries(by).map(([n,L])=>{const s=genStats(L);return[n,genDept(L[0]),s.n].concat(GEN_B.map(([k])=>s[k])).concat([s.conv==null?"":Math.round(s.conv*1000)/10,Math.round(s.wonV),Math.round(s.inc)])}));
+    const S2=[["Generated by","Department","Ref","Hotel","Country","Products","Created","Status","Engineer","Quotation (AED)","Order (AED)"]].concat(ls.map(l=>[genName(l),genDept(l),l.ref,l.accountName||"",l.country||"",productsOf(l).join(", "),(l.createdAt||"").slice(0,10),l.status,l.assignedTo||"",Math.round(+(l.quote&&l.quote.aed)||0)||"",l.status==="Won"?Math.round(orderVal(l)):""]));
+    const wb=X.utils.book_new();X.utils.book_append_sheet(wb,X.utils.aoa_to_sheet(S1),"Summary");X.utils.book_append_sheet(wb,X.utils.aoa_to_sheet(S2),"Leads");
+    const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});const name=`lead-generators-${(G.dept||"all").toLowerCase().replace(/[^a-z0-9]+/g,"-")}-${todayISO()}.xlsx`;
+    window.__lastExport={name,rows:S2.length-1};const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}}
+/* ---------- "My leads" tab for a linked lead generator ---------- */
+function renderMine(m){const g=myGen();if(!g){m.innerHTML=`<section class="view"><div class="notice">Your sign-in isn't linked to a lead generator yet. A Supervisor links it in Products &amp; settings → Lead generators.</div></section>`;return}
+  const M=S.minev||(S.minev={f:""});const all=S.leads.filter(l=>!l.deleted&&!isUpsell(l)&&genOf(l)===g).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  const y=String(new Date().getFullYear());const st=genStats(all),yr=genStats(all.filter(l=>l.status==="Won"&&ymKey(wonAt(l)).startsWith(y)));
+  const co=genStats(S.leads.filter(l=>!l.deleted&&!isUpsell(l)));const list=M.f?all.filter(l=>genBucket(l)===M.f):all;
+  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>My leads</h2><p>Leads you brought in${g.dept?` (${esc(g.dept)})`:""} and where they are now</p></div>${can("page.leads")?`<button type="button" class="btn pri" id="mNew">+ New lead</button>`:""}</div>
+   <div class="gfun"><button type="button" data-mf=""${!M.f?' aria-pressed="true"':""}><b>${fmtN(st.n)}</b><span>Generated</span></button>${GEN_B.map(([k,t])=>`<button type="button" data-mf="${k}"${M.f===k?' aria-pressed="true"':""}><b>${fmtN(st[k])}</b><span>${t}</span></button>`).join("")}</div>
+   <div class="kpis"><div class="kpi"><div class="l">Won revenue ${y}</div><div class="v">${fmtAED(yr.wonV)}</div><div class="s">${+S.settings.incentivePct?`incentive ${fmtAED(yr.inc)} (${S.settings.incentivePct}%)`:"won orders this year"}</div></div>
+    <div class="kpi"><div class="l">Conversion</div><div class="v">${st.conv==null?"—":(st.conv*100).toFixed(1)+"%"}</div><div class="s">company ${co.conv==null?"—":(co.conv*100).toFixed(1)+"%"}</div></div>
+    <div class="kpi"><div class="l">Open pipeline</div><div class="v">${fmtAED(st.pipe)}</div><div class="s">${fmtN(st.meet+st.quote)} at meeting or quotation</div></div></div>
+   <div class="panel" style="padding:0"><div class="tw"><table class="gml"><thead><tr><th>Lead</th><th>Status</th><th>Engineer</th><th></th></tr></thead><tbody>${genLeadRows(list,false)||`<tr><td colspan="4" class="empty">No leads here yet.</td></tr>`}</tbody></table></div></div></section>`;
+  $("#mNew")?.addEventListener("click",()=>{S.tab="new";render();scrollTo(0,0)});
+  m.querySelectorAll("[data-mf]").forEach(b=>b.onclick=()=>{M.f=b.dataset.mf;render()});
+  m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open))}
+/* ---------- Products & settings → Lead generators ---------- */
+function genPanel(){if(!can("settings.manage"))return"";const ed=!!S.genEd;const L=ed?S.genEd:genList();const deps=S.settings.departments||[];const mem=Object.entries(S.users||{}).map(([k,u])=>(u&&u.email)||k).filter(e=>/@/.test(e)).sort();
+  const cnt=x=>S.leads.filter(l=>!l.deleted&&genOf(l)===x).length;
+  return`<div class="panel" id="genPanel"><div class="row"><h3>Lead generators</h3><span class="sp"></span>${ed?`<button type="button" class="btn" id="gnAdd">Add person</button><button type="button" class="btn" id="gnX">Cancel</button><button type="button" class="btn pri" id="gnS">Save</button>`:`<button type="button" class="btn pri" id="gnE">Edit</button>`}</div>
+   <p class="small muted" style="margin:4px 0 10px">People who bring in leads, with their department. Leads are matched by "Generated by" (name or other spellings). Linking a sign-in gives that person a <b>My leads</b> tab with the leads they generated.</p>
+   <div class="tw"><table><thead><tr><th>Name</th><th>Department</th><th>Other spellings</th><th>Sign-in</th><th class="num">Leads</th>${ed?"<th></th>":""}</tr></thead><tbody>
+   ${L.map((x,i)=>ed?`<tr data-gi="${i}"><td><input data-g="name" value="${esc(x.name||"")}" style="min-width:120px"></td><td><select data-g="dept">${opts(deps,x.dept||"","Choose")}</select></td><td><input data-g="aliases" value="${esc((x.aliases||[]).join(", "))}" placeholder="e.g. Pratiba, Pratibha K"></td>
+      <td><select data-g="email"><option value="">Not linked</option>${mem.map(e=>`<option${e===x.email?" selected":""}>${esc(e)}</option>`).join("")}</select></td><td class="num">${x.name?cnt(x):""}</td><td><button type="button" class="btn sm" data-gdel="${i}" aria-label="Remove">✕</button></td></tr>`
+     :`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.dept||"—")}</td><td class="small">${esc((x.aliases||[]).join(", ")||"—")}</td><td class="small">${esc(x.email||"not linked")}</td><td class="num">${fmtN(cnt(x))}</td></tr>`).join("")||`<tr><td colspan="6" class="muted">No lead generators yet.</td></tr>`}</tbody></table></div></div>`}
+function bindGenPanel(m){if(!$("#genPanel"))return;const read=()=>[...m.querySelectorAll("[data-gi]")].map(r=>({name:r.querySelector('[data-g="name"]').value.trim(),dept:r.querySelector('[data-g="dept"]').value,aliases:r.querySelector('[data-g="aliases"]').value.split(",").map(s=>s.trim()).filter(Boolean),email:r.querySelector('[data-g="email"]').value}));
+  $("#gnE")?.addEventListener("click",()=>{S.genEd=genList().map(x=>Object.assign({aliases:[]},x));render()});$("#gnX")?.addEventListener("click",()=>{S.genEd=null;render()});
+  $("#gnAdd")?.addEventListener("click",()=>{S.genEd=read().concat([{name:"",dept:"Marketing",aliases:[],email:""}]);render()});
+  m.querySelectorAll("[data-gdel]").forEach(b=>b.onclick=()=>{const L=read();L.splice(+b.dataset.gdel,1);S.genEd=L;render()});
+  $("#gnS")?.addEventListener("click",async e=>{const L=read().filter(x=>x.name);const dup=L.find((x,i)=>L.findIndex(y=>nk(y.name)===nk(x.name))!==i);if(dup){toast(`${dup.name} is listed twice`);return}
+    e.currentTarget.disabled=true;try{await S.db.doc("config/settings").update({generators:L});S.settings.generators=L;S.genEd=null;toast("Lead generators saved");render()}catch(er){e.currentTarget.disabled=false;toast("Couldn't save: "+(er.message||er.code))}})}
+
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
-const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(canPB()?[["pb","Price book"]]:[]);
+const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(can("report.generators")?[["gen","Lead generators"]]:[]).concat(canPB()?[["pb","Price book"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
@@ -3030,12 +3121,13 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-ops" data-sec="ops"></div>
-   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div>
+   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div><div id="mg-gen" data-sec="gen"></div>
   </section>`;
   mgmtOps($("#mg-ops"));
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
   if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
   if(MV==="tg"){const x=$("#mg-tg");x.innerHTML=targetsHTML();bindTargets(x)}
+  if(MV==="gen"){const x=$("#mg-gen");x.innerHTML=generatorsHTML();bindGenerators(x)}
   if(MV==="pb"){const x=$("#mg-pb");x.innerHTML=priceBookHTML();bindPriceBook(x)}
   $("#goDq")?.addEventListener("click",()=>{S.tab="bo";S.boDqOpen=true;try{history.replaceState(null,"","#bo")}catch(_){}render();setTimeout(()=>$("#boDq")?.scrollIntoView({block:"start"}),0)});
   bindFilters(m);bindSort(m);
@@ -3285,6 +3377,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   ${chainsPanel()}
   ${rulesPanel()}
   ${pmsPanel()}
+  ${genPanel()}
   <div class="grid2">
    <div class="panel"><h3>Product catalog <span class="chip">${prods.filter(p=>p.active!==false).length} active</span></h3>
      <form class="row" id="addProd" style="margin-bottom:6px"><input id="np" placeholder="New product name" style="flex:1"><label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="npRep" style="width:auto">Repeatable</label><button class="btn pri">Add product</button></form>
@@ -3320,7 +3413,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindRules();bindPmsPanel(m);
+  bindChains(m);bindRules();bindPmsPanel(m);bindGenPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
