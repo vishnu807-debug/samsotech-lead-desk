@@ -153,6 +153,10 @@ td.num .dbar{margin-left:auto;max-width:120px}
 td.num .rk{margin:0}
 tr.top td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
 tr.tot td{background:var(--sunk);font-weight:600}
+.pbt{font:600 10.5px var(--f-body);letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px;white-space:nowrap}.pbt-software{background:var(--accent-soft);color:var(--accent)}.pbt-hardware{background:var(--warn-soft);color:var(--warn)}.pbt-interface{background:var(--sunk);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.pbt-service{background:var(--ok-soft);color:var(--ok)}
+tr.pbg td{background:var(--sunk);font-weight:600}td.sub{padding-left:22px}.del{text-decoration:line-through;color:var(--muted)}.nowrap{white-space:nowrap}
+.pbp{padding:12px 14px;margin-top:10px}.pbrow{display:grid;grid-template-columns:minmax(0,1fr) 70px auto auto;gap:8px;align-items:center}.pbqc+.pbqc{border-top:1px solid var(--line);margin-top:10px}
+@media(max-width:560px){.pbrow{grid-template-columns:minmax(0,1fr) 64px;}.pbrow .num{grid-column:1}}
 .subnav{display:flex;gap:6px;flex-wrap:wrap}
 .subgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}.subg{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .subr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-top:1px solid var(--line);font-size:13px}.subr:first-of-type{border-top:0}.mg td b,.tw.acct td:nth-child(3){white-space:nowrap}
@@ -503,8 +507,9 @@ const PERMISSIONS=[
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],
  ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "targets.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
+const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "targets.manage", "pricing.view", "pricing.approve"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
@@ -608,6 +613,8 @@ async function boot(){
   db.doc("config/permissions").onSnapshot(s=>{S.perms=s.exists?(s.data().roles||null):null;S.permsKnown=s.exists?(s.data().known||null):null;render()},()=>{});
   db.doc("config/settings").onSnapshot(s=>{if(s.exists)S.settings=Object.assign({},DEFAULTS,s.data());softRender()},errH);
   S.db.doc("config/targets").onSnapshot(s=>{S.targetsExists=s.exists;S.targetsDoc=s.exists?s.data():{years:{}};softRender()},()=>{S.targetsDoc={years:{}}});
+  S.db.doc("config/pricebook").onSnapshot(s=>{S.pbExists=s.exists;S.pb=s.exists?s.data():{items:[]};S.pbStamp=(S.pbStamp||0)+1;softRender()},()=>{S.pb=null});
+  S.db.doc("config/linerules").onSnapshot(s=>{S.lrExists=s.exists;S.lr=s.exists?s.data():{rules:[]};S.pbStamp=(S.pbStamp||0)+1;softRender()},()=>{S.lr={rules:[]}});
   S.db.doc("config/references").onSnapshot(s=>{S.refsExists=s.exists;S.refs=s.exists?s.data():{refs:{}};softRender()},()=>{S.refs={refs:{}}});
   db.doc("history/2026").get().then(s=>{if(s.exists){S.history=s.data();softRender()}}).catch(()=>{});
   Promise.all(["accounts-1","accounts-2"].map(id=>db.doc("registry/"+id).get())).then(ss=>{ss.forEach(s=>s.exists&&Object.assign(S.registry,s.data().a||{}));softRender()}).catch(()=>{});
@@ -1141,7 +1148,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      ${l.nextFollowUp?`<div><span>Next follow-up</span><span><b style="${fuOverdue(l)?"color:var(--bad)":""}">${esc(fuDue(l).toLocaleString("en-GB",{weekday:"short",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</b>${fuOverdue(l)?" · overdue":""}${l.followUpNote?"<br>"+esc(l.followUpNote):""}</span></div>`:""}
    </div></div>
    ${inBO&&ch.length?`<div class="view" style="gap:4px">${ch.map(c=>`<div class="notice ${c.lvl}" style="padding:6px 10px">${esc(c.msg)}</div>`).join("")}</div>`:""}
-   <div id="pmsArea"></div>
+   <div id="pmsArea"></div><div id="pbArea"></div>
    <div id="prodArea"></div>
    <div id="actArea"></div>
    <div id="delArea"></div>
@@ -1152,7 +1159,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $(".drawer").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...e.currentTarget.querySelectorAll("button,input,select,textarea,a[href]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeDrawer()};
   document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer)closeDrawer()};
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
-  fillNames();drawDetails(l);drawPms(l);drawProdArea(l);drawActions(l);drawDelArea(l);
+  fillNames();drawDetails(l);drawPms(l);drawPricing(l);drawProdArea(l);drawActions(l);drawDelArea(l);
   $("#restoreLead")?.addEventListener("click",()=>restoreLead(l));
   $("#fcEdit")?.addEventListener("click",()=>{const f=fcOf(l);cfmOpen(`<h3>Forecast for ${esc(l.ref)}</h3><p class="small muted" style="margin:0">${esc(l.accountName)} · ${leadValue(l)?fmtAED(leadValue(l)):"no amount yet"}</p>
     <label class="f">Forecast<select id="fcC">${FC_CATS.map(([v,t])=>`<option value="${v}"${f.cat===v?" selected":""}>${t}</option>`).join("")}</select></label><label class="f">Month<select id="fcMo"><option value="">—</option>${[...new Set(fcMonths().concat(f.month?[f.month]:[]))].map(mm=>`<option value="${mm}"${f.month===mm?" selected":""}>${ymLabel(mm)}</option>`).join("")}</select></label>
@@ -1306,7 +1313,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
         if(o.date&&t<o.date){$("#a-aed").innerHTML=`<span style="color:var(--bad)">The target date can't be before the quotation date.</span>`;return}o.targetDate=t}
       const nx=field==="quote"?readNext():{body:{}};if(nx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const pmx=field==="quote"||field==="order"?pmsFromForm(l):{body:{}};if(pmx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(pmx.err)}</span>`;$("#ap-pms")?.focus();return}Object.assign(nx.body,pmx.body);
-      if(field==="quote"){const qx=qpdfExtra(l);Object.assign(o,qx.q);Object.assign(nx.body,qx.lead);S.qpdf=null}
+      if(field==="quote"){const qx=qpdfExtra(l);Object.assign(o,qx.q);Object.assign(nx.body,qx.lead);S.qpdf=null;pbQuoteLines(l,o)}
       if(field==="quote"&&l.quote){await patch(l,{...nx.body,quote:o,quoteHistory:[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]},`Quotation revised · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="quote"){await patch(l,{...nx.body,quote:o},`${msg} · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
       if(field==="meeting"){const r=readMeet(o.date,o.notes);if(r.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
@@ -1875,10 +1882,10 @@ function productData(){const AF=af();const P=pvState();const custKeys=new Set(S.
     .filter(l=>!P.type||(P.type==="upsell")===isUpsell(l));
   const q=nk(P.q);const G={};
   const reached=(l,s)=>!!l.stageAt?.[s]||(s==="Meeting Done"?reachedMeeting(l):s==="Quotation Sent"?!!l.quote:false);
-  for(const l of ls)for(const p of productsOf(l)){if(q&&!nk(p).includes(q))continue;const o=G[p]||(G[p]={name:p,leads:[],n:0,open:0,meet:0,quoted:0,quotedV:0,won:0,rev:0,lost:0,hold:0,pipe:0,upRev:0,shared:0});
-    o.leads.push(l);o.n++;if(OPEN.includes(l.status)&&l.status!=="On Hold")o.open++;if(reached(l,"Meeting Done"))o.meet++;if(l.quote&&+l.quote.aed>0){o.quoted++;o.quotedV+=+l.quote.aed}
-    if(l.status==="Won"){o.won++;o.rev+=orderVal(l);if(isUpsell(l))o.upRev+=orderVal(l)}if(l.status==="Lost")o.lost++;if(l.status==="On Hold")o.hold++;
-    if(["Meeting Done","Quotation Sent"].includes(l.status))o.pipe+=leadValue(l);if(productsOf(l).length>1)o.shared++}
+  for(const l of ls)for(const p of pbProdsOf(l)){if(q&&!nk(p).includes(q))continue;const sh=pbShare(l,p);const o=G[p]||(G[p]={name:p,leads:[],n:0,open:0,meet:0,quoted:0,quotedV:0,won:0,rev:0,lost:0,hold:0,pipe:0,upRev:0,shared:0});
+    o.leads.push(l);o.n++;if(OPEN.includes(l.status)&&l.status!=="On Hold")o.open++;if(reached(l,"Meeting Done"))o.meet++;if(l.quote&&+l.quote.aed>0){o.quoted++;o.quotedV+=+l.quote.aed*sh}
+    if(l.status==="Won"){o.won++;o.rev+=orderVal(l)*sh;if(isUpsell(l))o.upRev+=orderVal(l)*sh}if(l.status==="Lost")o.lost++;if(l.status==="On Hold")o.hold++;
+    if(["Meeting Done","Quotation Sent"].includes(l.status))o.pipe+=leadValue(l)*sh;if(pbProdsOf(l).length>1)o.shared++}
   const rows=Object.values(G).map(o=>Object.assign(o,{conv:pct(o.won,o.n),aov:o.won?o.rev/o.won:0}));
   const inc=ls.filter(l=>!q||productsOf(l).some(p=>nk(p).includes(q)));const wonL=inc.filter(l=>l.status==="Won");
   const tot={n:inc.length,open:inc.filter(l=>OPEN.includes(l.status)&&l.status!=="On Hold").length,meet:inc.filter(l=>reached(l,"Meeting Done")).length,quoted:inc.filter(l=>l.quote&&+l.quote.aed>0).length,quotedV:inc.reduce((s,l)=>s+(l.quote&&+l.quote.aed>0?+l.quote.aed:0),0),
@@ -1898,7 +1905,7 @@ function productsHTML(){const P=pvState();const{rows,tot,ls:pls}=productData();c
     <label class="f">Accounts<select id="pvC">${[["","Clients and prospects"],["client","Clients (have bought)"],["prospect","Prospects"]].map(([v,t])=>`<option value="${v}"${P.cust===v?" selected":""}>${t}</option>`).join("")}</select></label>
     <label class="f">Lead type<select id="pvT">${[["","Original and upsell"],["original","Original leads"],["upsell","Upsell leads"]].map(([v,t])=>`<option value="${v}"${P.type===v?" selected":""}>${t}</option>`).join("")}</select></label>
     <label class="f fsearch">Product<input id="pvQ" placeholder="Search a product" value="${esc(P.q)}"></label></div></div>
-   <div class="row"><p class="small muted" style="margin:0;flex:1;min-width:240px">A lead with several products has one amount. It is shown in full under each of its products and marked “shared”, so product rows can add up to more than the total. The total row counts every lead once and matches the rest of Management. Click a product to see its leads.</p>
+   <div class="row"><p class="small muted" style="margin:0;flex:1;min-width:240px">A lead with several products (“shared”) is split between them by its approved quotation lines, or equally when it has none, so product amounts add up to the total. The total row counts every lead once and matches the rest of Management. Click a product to see its leads.</p>
     ${can("lead.export")?`<button type="button" class="btn" id="pvX">Export to Excel</button>`:""}</div>
    <div class="tw"><table class="pvt"><thead><tr>${PCOLS.map(c=>th("prod",c)).join("")}</tr></thead><tbody>
     ${sr.map(o=>{const op=!!P.open[o.name];return`<tr class="click${op?" xopen":""}" data-pv="${esc(o.name)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(o.name)}</b>${o.shared?`<div class="small muted">${o.shared} shared lead${o.shared===1?"":"s"}</div>`:""}</td>${PCOLS.map(c=>cell(o,c)).join("")}</tr>${op?leadRows(o):""}`}).join("")||`<tr><td colspan="${PCOLS.length}" class="empty">No leads for these filters.</td></tr>`}
@@ -2521,7 +2528,7 @@ function bindImport(m){const I=impState();const R=i=>I.rows[+i];
     toast(`${ok} quotation${ok===1?"":"s"} imported${bad?`, ${bad} failed`:""}`);render()})}
 async function impSave(r,fu){const q=r.q;const t=nowISO();const sent=r.em?.sent||t;const eng=r.match==="new"?r.eng:(S.leadMap[r.match]?.assignedTo||r.eng);
   const o={value:+r.amt,currency:r.cur,aed:toAED(r.amt,r.cur),date:q.date||sent.slice(0,10),no:q.no||"",notes:(q.subject||r.em?.subject||"").slice(0,200),targetDate:r.tgt,
-    lines:(q.lines||[]).map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})),source:r.em?"Email import":"Salesforce PDF",
+    lines:pbMapLines((q.lines||[]).map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total}))),source:r.em?"Email import":"Salesforce PDF",
     createdBy:q.by||"",createdByTitle:q.byTitle||"",createdByEmail:q.byEmail||"",validUntil:q.validUntil||"",paymentTerms:q.payment||"",quoteContact:q.contact?{name:q.contact,title:q.title||""}:null,discount:q.discount||0,subject:q.subject||"",
     importedAt:t,...(r.em?{emailSent:r.em.sent||"",emailFrom:r.em.from||"",emailTo:r.contactEmail||""}:{})};
   const ct={id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),at:sent,kind:"Email",note:`Quotation ${o.no} emailed${r.contactEmail?" to "+r.contactEmail:""}`,by:eng||actor()||"",byId:S.uid||null};
@@ -2678,8 +2685,251 @@ function themeSeg(){const c=themeGet();const b=(k,t)=>`<button type="button" dat
   return`<div class="thm"><div class="l">Theme</div><div class="seg3" role="group" aria-label="Theme">${b("light","Light")}${b("dark","Dark")}${b("auto","Device")}</div></div>`}
 function bindTheme(){document.querySelectorAll("[data-theme-set]").forEach(x=>x.addEventListener("click",e=>{e.stopPropagation();themeSet(x.dataset.themeSet);
   document.querySelectorAll("[data-theme-set]").forEach(y=>y.setAttribute("aria-pressed",String(y===x)))}))}
+/* ======================= PRICE BOOK AND QUOTE-LINE LEARNING (Management → Price book) =======================
+   config/pricebook = {items:[{id,product,name,type,unit,yearly,pms,iface,cur,active,v:[{on,re,min,bands,from,st,by,at,okBy,okAt}]}]}
+     type: software | hardware | interface | service · unit: pc | user | property | unit | once | room
+     each price change is a new version (st "draft"); Management or a Supervisor approves it (st "ok").
+   config/linerules = {rules:[{id,key,it,by,at,on}]}: quote wording → price item, applied automatically next time.
+   Quote lines carry m = {it, st:"auto"|"ok"|"wait", by, at}; it = item id, "x:discount" or "x:other".
+   Permissions: pricing.view (see prices), pricing.approve (approve prices and lines, teach rules), pricing.manage (edit).
+   Database: 21_pricing.sql hides the price book from everyone else and lets approvers change only approval fields. */
+const PB_UNITS={pc:"Per front-desk PC",user:"Per user",property:"Per property",unit:"Per unit",once:"One-time per property",room:"Per room, yearly minimum"};
+const PB_TYPES={software:"Software",hardware:"Hardware",interface:"Interface",service:"Service"};
+const PB_X={"x:discount":"Not a product: discount","x:other":"Not a product: freight, VAT, travel…"};
+const canPB=()=>can("pricing.view")||can("pricing.approve")||can("pricing.manage");
+const pbAll=()=>(S.pb&&Array.isArray(S.pb.items))?S.pb.items:[];
+const pbItems=()=>pbAll().filter(i=>i.active!==false);
+const pbItem=id=>pbAll().find(i=>i.id===id);
+const pbKey=s=>String(s||"").toLowerCase().replace(/scanning/g,"scanner").replace(/[^a-z0-9&]+/g," ").trim();
+const pbRules=()=>((S.lr&&S.lr.rules)||[]).filter(r=>r.on!==false);
+const pbProducts=()=>[...new Set(prodList(false).map(p=>p.name).concat(["PMS interface","Services"]))];
+function pbVer(it,date){const d=String(date||todayISO()).slice(0,10);const vs=(it&&it.v||[]).filter(v=>v.st==="ok"&&(v.from||"")<=d);
+  vs.sort((a,b)=>(a.from||"").localeCompare(b.from||"")||(a.okAt||a.at||"").localeCompare(b.okAt||b.at||""));return vs[vs.length-1]||null}
+const pbDraft=it=>(it.v||[]).find(v=>v.st==="draft")||null;
+const pbBandsTxt=b=>(b||[]).map(([to,r])=>(to>=99999?"*":to)+":"+r).join(", ");
+function pbBandsParse(t){t=String(t||"").trim();if(!t)return[];const out=[];for(const p of t.split(/[,;\n]+/)){const m=p.trim().match(/^(\*|\d+)\s*[:=]\s*(\d+(?:\.\d+)?)$/);if(!m)return null;out.push([m[1]==="*"?99999:+m[1],+m[2]])}return out.sort((a,b)=>a[0]-b[0])}
+const pbRate=(v,rooms)=>{const b=v.bands||[];for(const [to,r] of b)if(rooms<=to)return r;return b.length?b[b.length-1][1]:+v.on||0};
+/* standard amount for one item: {amt (AED), note} or null when there is no approved price */
+function pbStd(it,qty,ctx){const v=pbVer(it,ctx.date);if(!v)return null;const remote=/remote/i.test(ctx.mode||"");const price=remote&&v.re!=null&&v.re!==""?+v.re:+v.on||0;const cur=it.cur||"AED";
+  if(it.unit==="room"){const r=+ctx.rooms||0;const rate=pbRate(v,r);const raw=r*rate;const amt=Math.max(+v.min||0,raw);
+    return{amt:toAED(amt,cur),note:r?`${fmtN(r)} rooms × ${fmtN(rate)} = ${fmtN(raw)}${raw<(+v.min||0)?` → yearly minimum ${fmtN(+v.min)}`:""}`:`rooms not recorded → yearly minimum ${fmtN(+v.min||0)}`}}
+  if(it.unit==="once")return{amt:toAED(price,cur),note:"one-time per property"};
+  return{amt:toAED(price*(+qty||1),cur),note:""}}
+/* effective mapping of a quote line: saved approval, else a rule, else nothing */
+function pbMapOf(x){if(x&&x.m&&x.m.st&&x.m.st!=="wait"&&x.m.it)return x.m;const k=pbKey(x&&x.item);const r=k&&pbRules().find(r=>r.key===k);return r?{it:r.it,st:"auto",rule:r.id}:null}
+function pbMapLines(lines){return(lines||[]).map(x=>{if(x.m&&x.m.st==="ok")return x;const m=pbMapOf(Object.assign({},x,{m:null}));return Object.assign({},x,{m:m||{st:"wait"}})})}
+const pbPending=l=>(l.quote&&Array.isArray(l.quote.lines)?l.quote.lines:[]).filter(x=>!pbMapOf(x));
+const pbYearly=it=>!!(it&&(it.yearly||it.unit==="room"));
+/* revenue share of a product on a lead: by approved lines; leads without matched lines split equally */
+function pbShares(l){if(l._pbs&&l._pbs.k===S.pbStamp)return l._pbs.v;const ps=productsOf(l);const lines=(l.quote&&l.quote.lines)||[];const by={};let tot=0,extra=0;
+  for(const x of lines){const m=pbMapOf(x);const t=Math.max(0,+x.total||0);if(!m||String(m.it).startsWith("x:")||!t)continue;const it=pbItem(m.it);if(!it)continue;
+    if(it.product==="PMS interface"||it.product==="Services"){extra+=t;continue}by[it.product]=(by[it.product]||0)+t;tot+=t}
+  let v;if(tot>0){v={};Object.keys(by).forEach(p=>v[p]=by[p]/tot)}else{v={};ps.forEach(p=>v[p]=1/Math.max(1,ps.length))}
+  try{Object.defineProperty(l,"_pbs",{value:{k:S.pbStamp,v},configurable:true,enumerable:false,writable:true})}catch(e){}return v}
+const pbShare=(l,p)=>pbShares(l)[p]||0;
+const pbProdsOf=l=>[...new Set(productsOf(l).concat(Object.keys(pbShares(l))))];
+/* best guess for an unmatched line (shown to the approver) */
+function pbSuggest(x){const k=pbKey(x.item);if(/\bdiscount\b/.test(k))return"x:discount";if(/\b(freight|shipping|vat|travel|courier)\b/.test(k))return"x:other";
+  const W=new Set(k.split(" ").filter(w=>w.length>2));let best="",bs=0;
+  for(const it of pbItems()){const iw=new Set(pbKey(it.name+" "+it.product).split(" ").filter(w=>w.length>2));let s=0;iw.forEach(w=>{if(W.has(w))s+=w.length>4?2:1});
+    if(W.has("ohip")!==(it.unit==="room"&&it.iface==="OHIP"))s-=4;if(/install|training/.test(k)&&it.type==="service")s+=3;if(x.product&&it.product===x.product)s+=2;
+    if(/accessor|cable|stand|stylus|adapter|adaptor/.test(k)&&it.type!=="hardware")s-=2;if(s>bs){bs=s;best=it.id}}
+  return bs>=3?best:""}
+const pbOpts=(sel,withX=true)=>{const by={};pbItems().forEach(it=>(by[it.product]=by[it.product]||[]).push(it));
+  return`<option value="">Choose…</option>${withX?Object.entries(PB_X).map(([k,t])=>`<option value="${k}"${sel===k?" selected":""}>${t}</option>`).join(""):""}${Object.keys(by).sort().map(p=>`<optgroup label="${esc(p)}">${by[p].map(it=>`<option value="${esc(it.id)}"${sel===it.id?" selected":""}>${esc(it.name)} · ${esc(PB_UNITS[it.unit]||it.unit)}</option>`).join("")}</optgroup>`).join("")}`};
+const pbName=it=>pbKey(it.name).includes(pbKey(it.product).split(" ")[0])?it.name:it.product+" · "+it.name;
+const pbChip=t=>`<span class="pbt pbt-${t}">${PB_TYPES[t]||t}</span>`;
+async function pbSave(items,msg){const doc={items};try{if(S.pbExists)await S.db.doc("config/pricebook").update(doc);else{await S.db.doc("config/pricebook").set(doc);S.pbExists=true}S.pb=doc;S.pbStamp=(S.pbStamp||0)+1;if(msg)toast(msg);render();return true}
+  catch(e){toast(/permission|42501|row-level|Supervisor/i.test(e.message||"")?(e.message&&/Supervisor/.test(e.message)?e.message:"You can't change the price book. Run supabase/21_pricing.sql, or ask a Supervisor."):"Couldn't save: "+(e.message||e.code));return false}}
+async function pbSaveRules(rules){try{if(S.lrExists)await S.db.doc("config/linerules").update({rules});else{await S.db.doc("config/linerules").set({rules});S.lrExists=true}S.lr={rules};S.pbStamp=(S.pbStamp||0)+1;return true}catch(e){toast("Couldn't save the line rules: "+(e.message||e.code));return false}}
+async function pbApproveLines(l,lines){if(window.__approveQuoteLines)return window.__approveQuoteLines(l.id,lines);
+  await S.db.doc("leads/"+l.id).update({quote:Object.assign({},l.quote,{lines}),updatedAt:nowISO()})}
+
+/* ---------- lead drawer: Products and pricing ---------- */
+function pbLeadRows(l){const q=l.quote||{};const lines=Array.isArray(q.lines)?q.lines:[];const cur=q.currency||"AED";const ctx={date:q.date,rooms:l.rooms,mode:l.implMode||q.mode||""};const seen=new Set();
+  return lines.map(x=>{const m=pbMapOf(x);const it=m&&!String(m.it).startsWith("x:")?pbItem(m.it):null;const quoted=toAED(+x.total||0,cur);let std=null;
+    if(it&&canPB()){const once=it.unit==="once";std=once&&seen.has(it.id)?{amt:0,note:"already charged once for this property"}:pbStd(it,x.qty,ctx);if(once)seen.add(it.id)}
+    return{x,m,it,quoted,std,yearly:pbYearly(it)}})}
+function drawPricing(l){const A=$("#pbArea");if(!A)return;const q=l.quote;const hasLines=q&&Array.isArray(q.lines)&&q.lines.length;const canE=canAct(l)&&!l.deleted;
+  const ed=S.drawer.pbEdit&&canE;const v=n=>n==null||n===""?"—":fmtN(+n);
+  if(!hasLines&&!l.pcs&&!l.users&&!l.implMode&&!(canPB()&&canE&&OPEN.includes(l.status))){A.innerHTML="";return}
+  const rows=hasLines?pbLeadRows(l):[];const grp=(f,label)=>{const R=rows.filter(f);if(!R.length)return"";const st=R.reduce((s,r)=>s+(r.std?r.std.amt:0),0),qt=R.reduce((s,r)=>s+r.quoted,0);const allStd=R.every(r=>r.std);
+    return`<tr class="pbg"><td colspan="${canPB()?5:3}">${label}</td></tr>${R.map(r=>{const d=r.std&&r.std.amt?(r.quoted-r.std.amt)/r.std.amt:null;
+      const sub=[r.it&&pbKey(r.x.item)!==pbKey(r.it.name)?esc(r.x.item):"",!r.it&&!r.m?"waiting for approval":"",r.std&&r.std.note?esc(r.std.note):""].filter(Boolean).join(" · ");
+      return`<tr><td><div>${r.it?esc(pbName(r.it)):r.m?esc(PB_X[r.m.it]||"—"):`<span class="muted">${esc(r.x.item)}</span>`} ${r.it?pbChip(r.it.type):""}</div>${sub?`<div class="small muted">${sub}</div>`:""}</td>
+      <td class="num">${r.x.qty!=null?fmtN(r.x.qty):""}</td>${canPB()?`<td class="num">${r.std?fmtAED(r.std.amt):r.it?`<span class="small muted">no price</span>`:""}</td>`:""}<td class="num">${fmtAED(r.quoted)}</td>${canPB()?`<td class="num"${d!=null&&d<-.0005?` style="color:var(--warn)"`:""}>${d==null?"":(d*100).toFixed(1)+"%"}</td>`:""}</tr>`}).join("")}
+      <tr class="tot"><td>${label} total</td><td></td>${canPB()?`<td class="num">${allStd?fmtAED(st):"—"}</td>`:""}<td class="num">${fmtAED(qt)}</td>${canPB()?`<td class="num">${allStd&&st?((qt-st)/st*100).toFixed(1)+"%":""}</td>`:""}</tr>`};
+  const pend=hasLines?pbPending(l).length:0;
+  A.innerHTML=`<div class="panel pbp"><div class="row"><b>Products and pricing</b><span class="sp"></span>${canE?`<button type="button" class="btn sm" id="pb-e">${ed?"Close":"Edit quantities"}</button>`:""}${canPB()&&canE&&OPEN.includes(l.status)?`<button type="button" class="btn sm" id="pb-b">Build quote from price book</button>`:""}</div>
+   <div class="row small" style="gap:14px;margin-top:4px"><span>Front-desk PCs <b>${v(l.pcs)}</b></span><span>Users <b>${v(l.users)}</b></span><span>Rooms <b>${v(l.rooms)}</b></span><span>Implementation <b>${esc(l.implMode||"—")}</b></span></div>
+   ${ed?`<div class="grid2" style="margin-top:8px"><label class="f fsm">Front-desk PCs<input id="pb-pcs" type="number" min="0" step="1" value="${esc(l.pcs??"")}"></label><label class="f fsm">Users<input id="pb-us" type="number" min="0" step="1" value="${esc(l.users??"")}"></label>
+     <label class="f fsm">Rooms<input id="pb-rm" type="number" min="0" step="1" value="${esc(l.rooms??"")}"></label><label class="f fsm">Implementation<select id="pb-md">${opts(["Onsite","Remote"],l.implMode||"","Not set")}</select></label></div><div class="row" style="margin-top:6px"><button type="button" class="btn pri sm" id="pb-s">Save</button></div>`:""}
+   ${hasLines?`<div class="tw" style="margin-top:8px"><table class="pbtab"><thead><tr><th>Item</th><th class="num">Qty</th>${canPB()?`<th class="num">Standard</th>`:""}<th class="num">Quoted</th>${canPB()?`<th class="num">Diff.</th>`:""}</tr></thead><tbody>
+     ${grp(r=>r.it&&!r.yearly,"One-time")}${grp(r=>r.it&&r.yearly,"Yearly")}${grp(r=>!r.it,"Not a product or not matched")}</tbody></table></div>
+     <div class="small muted" style="margin-top:6px">From quotation ${esc(q.no||"")}${pend?` · <b style="color:var(--warn)">${pend} line${pend===1?"":"s"} waiting for approval</b>`:" · all lines matched"}${canPB()?" · standard = approved price book on the quote date":""}</div>`:`<div class="small muted" style="margin-top:6px">No quotation lines yet. They're filled in when a quotation is read from a PDF or email${canPB()?", or built from the price book":""}.</div>`}</div>`;
+  $("#pb-e")?.addEventListener("click",()=>{S.drawer.pbEdit=!S.drawer.pbEdit;drawPricing(l)});
+  $("#pb-s")?.addEventListener("click",async e=>{const n=id=>{const x=$(id).value;return x===""?null:Math.max(0,Math.round(+x))};const body={pcs:n("#pb-pcs"),users:n("#pb-us"),rooms:n("#pb-rm"),implMode:$("#pb-md").value||null,updatedAt:nowISO(),
+      log:[...(l.log||[]),{t:nowISO(),by:actor()||"",byId:S.uid||null,a:`Quantities: ${n("#pb-pcs")??"—"} PCs · ${n("#pb-us")??"—"} users · ${n("#pb-rm")??"—"} rooms · ${$("#pb-md").value||"implementation not set"}`}]};
+    e.currentTarget.disabled=true;try{await S.db.doc("leads/"+l.id).update(body);S.drawer.pbEdit=false;toast("Saved")}catch(er){e.currentTarget.disabled=false;toast("Couldn't save: "+(er.message||er.code))}});
+  $("#pb-b")?.addEventListener("click",()=>{S.pbBuild={leadId:l.id,rows:pbBuildStart(l)};drawBuilder(l)})}
+/* ---------- build a quote from the price book ---------- */
+function pbBuildStart(l){const rows=[];const ps=productsOf(l);const pcs=+l.pcs||1;const pms=typeof pmsOf==="function"?pmsOf(l):"";
+  const real=pms&&(typeof isRealPms!=="function"||isRealPms(pms));ps.forEach(p=>{const sw=pbItems().filter(i=>i.product===p&&i.type==="software");const pick=sw.find(i=>real?/\bpms\b/i.test(i.name)&&!/vicas/i.test(i.name):/standalone/i.test(i.name))||sw[0];if(pick)rows.push({it:pick.id,qty:pick.unit==="pc"?pcs:1});const hw=pbItems().filter(i=>i.product===p&&i.type==="hardware");if(hw.length&&pick&&pick.unit==="pc"){const h=hw.find(i=>pbVer(i))||hw[0];rows.push({it:h.id,qty:pcs})}
+    if(pms==="OPERA Cloud"){const oh=pbItems().find(i=>i.product===p&&i.unit==="room");if(oh)rows.push({it:oh.id,qty:1})}});
+  if(/OPERA 5|V5/i.test(pms)){const want=Object.values(l.pmsIface||{});const ifs=pbItems().filter(i=>i.type==="interface"&&i.unit==="once"&&/OPERA 5|V5/i.test(i.pms||""));const f=ifs.find(i=>want.includes(i.iface))||ifs[0];if(f)rows.push({it:f.id,qty:1})}
+  const sv=pbItems().find(i=>i.type==="service");if(sv)rows.push({it:sv.id,qty:1});return rows.length?rows:[{it:"",qty:1}]}
+function drawBuilder(l){const B=S.pbBuild;if(!B||B.leadId!==l.id)return;const A=$("#actArea");if(!A)return;const ctx={date:todayISO(),rooms:l.rooms,mode:l.implMode};const seen=new Set();
+  const calc=B.rows.map(r=>{const it=pbItem(r.it);if(!it)return null;if(it.unit==="once"){if(seen.has(it.id))return{amt:0,note:"already counted"};seen.add(it.id)}return pbStd(it,r.qty,ctx)});
+  const tot=calc.reduce((s,c)=>s+(c?c.amt:0),0),yr=B.rows.reduce((s,r,i)=>s+(pbYearly(pbItem(r.it))&&calc[i]?calc[i].amt:0),0);
+  A.innerHTML=`<div class="panel" style="display:grid;gap:8px"><b>Build quote from price book</b><div class="small muted">Approved prices today · ${esc(l.implMode||"Onsite")} · ${l.rooms?fmtN(l.rooms)+" rooms":"rooms not recorded"}. Change items and quantities, then use the amount in the quotation.</div>
+   ${B.rows.map((r,i)=>{const it=pbItem(r.it);const c=calc[i];return`<div class="pbrow"><select data-bi="${i}">${pbOpts(r.it,false)}</select><input type="number" min="0" step="1" data-bq="${i}" value="${esc(r.qty)}"${it&&["once","room"].includes(it.unit)?" disabled":""} aria-label="Quantity">
+     <div class="num small" style="min-width:96px">${c?fmtAED(c.amt):it?`<span class="muted">no price</span>`:""}${c&&c.note?`<div class="muted" style="font-size:11px">${esc(c.note)}</div>`:""}</div><button type="button" class="btn sm" data-bx="${i}" aria-label="Remove">✕</button></div>`}).join("")}
+   <div class="row"><button type="button" class="btn sm" id="bAdd">+ Add item</button><span class="sp"></span><span>${yr?`Yearly ${fmtAED(yr)} · `:""}<b>Total ${fmtAED(tot)}</b></span></div>
+   <div class="row"><button type="button" class="btn pri" id="bUse"${tot>0?"":" disabled"}>Use in quotation</button><button type="button" class="btn" id="bX">Cancel</button></div></div>`;
+  A.querySelectorAll("[data-bi]").forEach(s=>s.onchange=()=>{const r=B.rows[+s.dataset.bi];r.it=s.value;const it=pbItem(r.it);if(it&&["once","room"].includes(it.unit))r.qty=1;else if(it&&it.unit==="pc"&&!r.qty)r.qty=+l.pcs||1;drawBuilder(l)});
+  A.querySelectorAll("[data-bq]").forEach(s=>s.onchange=()=>{B.rows[+s.dataset.bq].qty=Math.max(0,Math.round(+s.value||0));drawBuilder(l)});
+  A.querySelectorAll("[data-bx]").forEach(b=>b.onclick=()=>{B.rows.splice(+b.dataset.bx,1);if(!B.rows.length)B.rows.push({it:"",qty:1});drawBuilder(l)});
+  $("#bAdd").onclick=()=>{B.rows.push({it:"",qty:+l.pcs||1});drawBuilder(l)};$("#bX").onclick=()=>{S.pbBuild=null;drawActions(l)};
+  $("#bUse").onclick=()=>{B.total=Math.round(tot);B.lines=B.rows.map((r,i)=>{const it=pbItem(r.it);if(!it||!calc[i])return null;return{item:it.name,product:it.product,qty:r.qty,unit:calc[i].amt/(+r.qty||1),list:calc[i].amt/(+r.qty||1),total:calc[i].amt,m:{it:it.id,st:"ok",by:actor()||S.myName||"",at:nowISO()}}}).filter(Boolean);
+    S.drawer.mode="quote";drawActions(l);const val=$("#a-val");if(val){val.value=B.total;const c=$("#a-cur");if(c)c.value="AED";val.dispatchEvent(new Event("input"));toast("Amount filled in from the price book. Add the target date and next step, then save.")}}}
+/* quote save: keep built lines, map read lines with the rules */
+function pbQuoteLines(l,o){if(S.pbBuild&&S.pbBuild.leadId===l.id&&S.pbBuild.lines&&!(o.lines&&o.lines.length)&&Math.abs((+o.aed||0)-S.pbBuild.total)<1){o.lines=S.pbBuild.lines;o.source=o.source||"Price book"}S.pbBuild=null;if(o.lines)o.lines=pbMapLines(o.lines);return o}
+
+/* ---------- Management → Price book ---------- */
+function pbState(){return S.pbv||(S.pbv={edit:"",up:null,open:{}})}
+function pbInsights(){const won=S.leads.filter(l=>l.status==="Won"&&!l.deleted&&inPeriod(l));const T={software:0,hardware:0,interface:0,service:0};let rev=0,yr=0,one=0,dq=0,ds=0,nq=0;const HW={},OPT={};
+  for(const l of won){const ov=orderVal(l);rev+=ov;const R=l.quote&&Array.isArray(l.quote.lines)?pbLeadRows(l):[];const mapped=R.filter(r=>r.it);const sum=mapped.reduce((s,r)=>s+r.quoted,0);
+    if(!sum){one+=ov;continue}const k=ov/sum;mapped.forEach(r=>{const v=r.quoted*k;T[r.it.type]=(T[r.it.type]||0)+v;if(r.yearly)yr+=v;else one+=v});
+    const hwOnly=mapped.every(r=>r.it.type==="hardware");mapped.filter(r=>r.it.type==="hardware").forEach(r=>{const h=HW[r.it.name]||(HW[r.it.name]={u:0,sol:0,only:0,v:0});const u=+r.x.qty||1;h.u+=u;h[hwOnly?"only":"sol"]+=u;h.v+=r.quoted*k});
+    mapped.filter(r=>r.it.type==="software"&&r.it.unit==="pc").forEach(r=>{const o=OPT[r.it.id]||(OPT[r.it.id]={it:r.it,n:0,pcs:0,v:0});o.n++;o.pcs+=+r.x.qty||0;o.v+=r.quoted*k});
+    if(canPB()){const S2=mapped.filter(r=>r.std&&r.std.amt);if(S2.length){nq++;dq+=S2.reduce((s,r)=>s+r.quoted,0);ds+=S2.reduce((s,r)=>s+r.std.amt,0)}}}
+  return{rev,yr,one,T,HW,OPT,disc:ds?(ds-dq)/ds:null,nq,lines:won.filter(l=>l.quote&&(l.quote.lines||[]).some(x=>pbMapOf(x))).length,n:won.length}}
+function priceBookHTML(){const P=pbState();const man=can("pricing.manage"),app=can("pricing.approve")||man;const items=pbAll();const I=pbInsights();
+  const waiting=app?S.leads.filter(l=>!l.deleted&&pbPending(l).length).sort((a,b)=>(b.quote.date||"").localeCompare(a.quote.date||"")):[];
+  const drafts=items.filter(it=>pbDraft(it)).length;const by={};items.forEach(it=>(by[it.product]=by[it.product]||[]).push(it));
+  const vtxt=v=>v?`${v.on!=null&&v.on!==""?fmtN(+v.on):"—"}`:"—";
+  const row=it=>{const a=pbVer(it),d=pbDraft(it);const st=d?`<span class="chip warn">Draft${a?" (change)":""}</span>`:a?`<span class="chip ok">Approved</span>`:`<span class="chip">No price</span>`;const cur=d||a;
+    const ed=P.edit===it.id&&man;
+    return`<tr${it.active===false?` style="opacity:.55"`:""}><td class="sub">${esc(it.name)}${it.pms?`<div class="small muted">${esc(it.pms)}${it.iface?" · "+esc(it.iface):""}</div>`:""}</td><td>${pbChip(it.type)}</td><td>${esc(PB_UNITS[it.unit]||it.unit)}${it.yearly&&it.unit!=="room"?" · yearly":""}</td>
+     <td class="num">${cur?(d&&a&&d.on!==a.on?`<span class="del">${vtxt(a)}</span> `:"")+vtxt(cur):"—"}${it.unit==="room"&&cur?`<div class="small muted">per room · min ${fmtN(+cur.min||0)}${cur.bands&&cur.bands.length?" · bands "+esc(pbBandsTxt(cur.bands)):""}</div>`:""}</td>
+     <td class="num">${cur&&cur.re!=null&&cur.re!==""?fmtN(+cur.re):"—"}</td><td>${cur&&cur.from?fmtD(cur.from):"—"}</td><td>${st}</td>
+     <td class="nowrap">${man?`<button type="button" class="btn sm" data-pbe="${esc(it.id)}">${ed?"Close":"Edit"}</button>`:""}${app&&d?` <button type="button" class="btn sm pri" data-pba="${esc(it.id)}">Approve</button>`:""}</td></tr>
+     ${ed?`<tr class="pbed"><td colspan="8">${pbEditForm(it)}</td></tr>`:""}`};
+  const kp=(l,v,s,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v"${c?` style="color:${c}"`:""}>${v}</div><div class="s">${s}</div></div>`;
+  return`<div class="view" style="gap:14px">
+   <div class="kpis">${kp("Won revenue",fmtAED(I.rev),`${I.n} orders · ${I.lines} with matched quote lines`)}${kp("One-time",fmtAED(I.one),"licences, hardware, interfaces, services")}${kp("Yearly (recurring)",fmtAED(I.yr),"OHIP and subscriptions")}
+    ${kp("Avg discount vs price book",I.disc==null?"—":(I.disc*100).toFixed(1)+"%",I.nq?`on ${I.nq} orders with approved prices`:"needs approved prices and matched lines",I.disc>0.1?"var(--warn)":"")}</div>
+   ${app?`<div class="panel" id="pbQ"><div class="row"><h3>Quote lines to approve ${waiting.length?`<span class="chip warn">${waiting.reduce((s,l)=>s+pbPending(l).length,0)}</span>`:""}</h3><span class="sp"></span><span class="small muted">Matched lines become rules, so the same wording is recognised automatically next time.</span></div>
+     ${waiting.length?waiting.slice(0,P.allQ?999:8).map(l=>pbQuoteCard(l)).join("")+(waiting.length>8&&!P.allQ?`<button type="button" class="btn" id="pbAllQ">Show all ${waiting.length} quotations</button>`:""):`<div class="small muted" style="margin-top:6px">Nothing waiting. Every quotation line read from a PDF or email is matched.</div>`}</div>`:""}
+   <div class="panel"><div class="row" style="gap:8px"><h3>Price book</h3><span class="sp"></span><button type="button" class="btn" id="pbTpl">Download price sheet</button>${man?`<label class="btn" style="cursor:pointer">Upload price sheet<input type="file" id="pbUp" accept=".xlsx,.xls,.csv" hidden></label><button type="button" class="btn" id="pbAdd">Add item</button>`:""}${app&&drafts?`<button type="button" class="btn pri" id="pbAll">Approve ${drafts} draft${drafts===1?"":"s"}</button>`:""}</div>
+    <p class="small muted" style="margin:4px 0 10px">Standard prices in AED. A new or changed price is a draft until Management or a Supervisor approves it; the old price is kept, and quotes already sent aren't recalculated.</p>
+    ${P.up?pbUploadHTML():""}${P.edit==="new"&&man?`<div class="panel" style="margin-bottom:10px">${pbEditForm(null)}</div>`:""}
+    <div class="tw"><table class="pbbook"><thead><tr><th>Item</th><th>Type</th><th>Pricing unit</th><th class="num">Onsite / price</th><th class="num">Remote</th><th>Valid from</th><th>Status</th><th></th></tr></thead><tbody>
+    ${Object.keys(by).sort((a,b)=>(a==="PMS interface"||a==="Services")-(b==="PMS interface"||b==="Services")||a.localeCompare(b)).map(p=>`<tr class="pbg"><td colspan="8">${esc(p)}</td></tr>${by[p].map(row).join("")}`).join("")||`<tr><td colspan="8" class="muted">No price items yet. Run supabase/21_pricing.sql, or add items.</td></tr>`}</tbody></table></div></div>
+   <div class="grid2" style="align-items:start">
+    <div class="panel"><h3>Licences by option</h3><p class="small muted" style="margin:2px 0 8px">Won orders in the period, per-PC licences from matched quote lines.</p><div class="tw"><table><thead><tr><th>Licence</th><th class="num">Orders</th><th class="num">PCs</th><th class="num">Revenue</th></tr></thead><tbody>
+     ${Object.values(I.OPT).sort((a,b)=>b.v-a.v).map(o=>`<tr><td>${esc(o.it.product)} · ${esc(o.it.name.replace(/^Licence · /,""))}</td><td class="num">${o.n}</td><td class="num">${fmtN(o.pcs)}</td><td class="num">${fmtAED(o.v)}</td></tr>`).join("")||`<tr><td colspan="4" class="muted">No matched licence lines yet.</td></tr>`}</tbody></table></div></div>
+    <div class="panel"><h3>Hardware sold</h3><p class="small muted" style="margin:2px 0 8px">Units on won orders: with a solution, or hardware-only orders.</p><div class="tw"><table><thead><tr><th>Model</th><th class="num">Units</th><th class="num">With a solution</th><th class="num">Hardware only</th><th class="num">Revenue</th></tr></thead><tbody>
+     ${Object.entries(I.HW).sort((a,b)=>b[1].v-a[1].v).map(([n,h])=>`<tr><td>${esc(n)}</td><td class="num">${fmtN(h.u)}</td><td class="num">${fmtN(h.sol)}</td><td class="num">${fmtN(h.only)}</td><td class="num">${fmtAED(h.v)}</td></tr>`).join("")||`<tr><td colspan="5" class="muted">No matched hardware lines yet.</td></tr>`}</tbody></table></div></div></div>
+   ${app?`<details class="panel" id="pbR"><summary><b>Line rules</b> <span class="small muted">· ${pbRules().length} active</span></summary><div class="tw" style="margin-top:8px"><table><thead><tr><th>Quote wording</th><th>Matched to</th><th>Taught by</th><th></th></tr></thead><tbody>
+     ${((S.lr&&S.lr.rules)||[]).map(r=>{const it=pbItem(r.it);return`<tr${r.on===false?` style="opacity:.55"`:""}><td class="mono small">${esc(r.key)}</td><td>${it?esc(it.product+" · "+it.name):esc(PB_X[r.it]||r.it)}</td><td class="small">${esc(r.by||"")} ${r.at?fmtD(r.at):""}</td><td><button type="button" class="btn sm" data-pbr="${esc(r.id)}">${r.on===false?"Switch on":"Switch off"}</button></td></tr>`}).join("")||`<tr><td colspan="4" class="muted">No rules yet. They're created when you approve quote lines with "Remember" ticked.</td></tr>`}</tbody></table></div></details>`:""}</div>`}
+function pbQuoteCard(l){const q=l.quote;const cur=q.currency||"AED";const P=pbState();const sel=P.sel||(P.sel={});const lines=q.lines||[];
+  return`<div class="pbqc" data-pbq="${esc(l.id)}"><div class="small" style="margin:10px 0 6px"><a href="#" data-open="${esc(l.id)}" class="mono">${esc(l.ref)}</a> · <b>${esc(q.no||"Quotation")}</b> · ${esc(l.accountName||"")} · ${esc(cur)} ${fmtN(+q.value||0)} · ${esc(l.assignedTo||l.preferred||"")}${typeof pmsOf==="function"&&pmsOf(l)?` · PMS ${esc(pmsOf(l))}`:""}${q.date?" · "+fmtD(q.date):""}</div>
+   <div class="tw"><table><thead><tr><th>Quote line</th><th class="num">Qty</th><th class="num">Amount</th><th>Price item</th><th>Remember</th></tr></thead><tbody>
+   ${lines.map((x,i)=>{const m=pbMapOf(x);const k=l.id+"|"+i;const v=sel[k]!==undefined?sel[k]:m?m.it:pbSuggest(x);
+     return m?`<tr style="opacity:.7"><td>${esc(x.item)} <span class="chip ok">${m.st==="ok"?"approved":"auto-matched"}</span></td><td class="num">${x.qty!=null?fmtN(x.qty):""}</td><td class="num">${esc(cur)} ${fmtN(+x.total||0)}</td><td class="small">${esc(pbItem(m.it)?.name||PB_X[m.it]||m.it)}</td><td class="small muted">${m.st==="ok"?"":"rule"}</td></tr>`
+     :`<tr><td>${esc(x.item)}${x.product?`<div class="small muted">read as ${esc(x.product)}</div>`:""}</td><td class="num">${x.qty!=null?fmtN(x.qty):""}</td><td class="num">${esc(cur)} ${fmtN(+x.total||0)}</td><td><select data-pbl="${esc(k)}" style="max-width:320px">${pbOpts(v)}${can("pricing.manage")?`<option value="new">+ New price item from this line…</option>`:""}</select></td><td><input type="checkbox" data-pbk="${esc(k)}" checked aria-label="Remember this wording"></td></tr>`}).join("")}</tbody></table></div>
+   <div class="row" style="margin-top:6px"><span class="sp"></span><button type="button" class="btn pri sm" data-pbok="${esc(l.id)}">Approve lines</button></div></div>`}
+function pbEditForm(it){const d=it?(pbDraft(it)||pbVer(it)||{}):{};const T=it||{type:"software",unit:"pc",product:"",name:"",yearly:false};
+  return`<div class="pbform" data-pbf="${esc(it?it.id:"new")}"><div class="grid2">
+   <label class="f fsm">Product<select data-f="product">${opts(pbProducts(),T.product,"Choose")}</select></label><label class="f fsm">Item name<input data-f="name" value="${esc(T.name)}"></label>
+   <label class="f fsm">Type<select data-f="type">${Object.entries(PB_TYPES).map(([k,t])=>`<option value="${k}"${T.type===k?" selected":""}>${t}</option>`).join("")}</select></label>
+   <label class="f fsm">Pricing unit<select data-f="unit">${Object.entries(PB_UNITS).map(([k,t])=>`<option value="${k}"${T.unit===k?" selected":""}>${t}</option>`).join("")}</select></label>
+   <label class="f fsm">Onsite price / price (AED)<input data-f="on" type="number" min="0" step="0.01" value="${esc(d.on??"")}"></label><label class="f fsm">Remote price (blank = same)<input data-f="re" type="number" min="0" step="0.01" value="${esc(d.re??"")}"></label>
+   <label class="f fsm">Yearly minimum (per-room items)<input data-f="min" type="number" min="0" step="1" value="${esc(d.min??"")}"></label><label class="f fsm">Room bands, e.g. 150:30, 400:25, *:20<input data-f="bands" value="${esc(pbBandsTxt(d.bands))}"></label>
+   <label class="f fsm">PMS (interface items)<input data-f="pms" value="${esc(T.pms||"")}" list="pbPmsL"></label><label class="f fsm">Interface<input data-f="iface" value="${esc(T.iface||"")}"></label>
+   <label class="f fsm">Valid from<input data-f="from" type="date" value="${esc(d.st==="draft"&&d.from?d.from:todayISO())}"></label>
+   <label class="f fsm" style="flex-direction:row;align-items:center;gap:8px;margin-top:18px"><input type="checkbox" data-f="yearly"${T.yearly?" checked":""}> Billed yearly</label></div>
+   <datalist id="pbPmsL">${(typeof pmsCfg==="function"?pmsCfg().list:[]).map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
+   <div class="row" style="margin-top:8px">${it?`<label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-f="active"${it.active!==false?" checked":""}> In use</label>`:""}<span class="sp"></span><button type="button" class="btn" data-pbcx>Cancel</button><button type="button" class="btn pri" data-pbsv="${esc(it?it.id:"new")}">Save as draft</button></div></div>`}
+function pbReadForm(box){const g=k=>box.querySelector(`[data-f="${k}"]`);const num=k=>{const v=g(k).value;return v===""?null:+v};
+  const bands=pbBandsParse(g("bands").value);if(bands===null)return{err:"Room bands: write them like 150:30, 400:25, *:20"};
+  const f={product:g("product").value,name:g("name").value.trim(),type:g("type").value,unit:g("unit").value,yearly:g("yearly").checked,pms:g("pms").value.trim(),iface:g("iface").value.trim(),active:g("active")?g("active").checked:true,
+    on:num("on"),re:num("re"),min:num("min"),bands,from:g("from").value||todayISO()};
+  if(!f.product)return{err:"Choose the product."};if(!f.name)return{err:"Enter the item name."};return f}
+const pbNewId=()=>"i"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+function pbApplyVersion(it,f,by){const cur=pbDraft(it)||pbVer(it)||{};const same=["on","re","min"].every(k=>(cur[k]??null)===(f[k]??null))&&JSON.stringify(cur.bands||[])===JSON.stringify(f.bands||[])&&(cur.from||"")===(f.from||"");
+  if(same||f.on==null)return it.v||[];const v={on:f.on,re:f.re,min:f.min,bands:f.bands,from:f.from,st:"draft",by,at:nowISO()};return(it.v||[]).filter(x=>x.st!=="draft").concat([v])}
+function bindPriceBook(m){const P=pbState();const man=can("pricing.manage");const me=actor()||S.myName||"";
+  m.querySelectorAll("[data-open]").forEach(a=>a.onclick=e=>{e.preventDefault();openDrawer(a.dataset.open)});
+  $("#pbAllQ")?.addEventListener("click",()=>{P.allQ=true;render()});
+  m.querySelectorAll("[data-pbe]").forEach(b=>b.onclick=()=>{P.edit=P.edit===b.dataset.pbe?"":b.dataset.pbe;render()});
+  $("#pbAdd")?.addEventListener("click",()=>{P.edit=P.edit==="new"?"":"new";render()});
+  m.querySelectorAll("[data-pbcx]").forEach(b=>b.onclick=()=>{P.edit="";render()});
+  m.querySelectorAll("[data-pbsv]").forEach(b=>b.onclick=async()=>{const f=pbReadForm(b.closest("[data-pbf]"));if(f.err){toast(f.err);return}const id=b.dataset.pbsv;
+    const items=pbAll().map(x=>Object.assign({},x));let it=id==="new"?null:items.find(x=>x.id===id);
+    if(!it){it={id:pbNewId(),cur:"AED",v:[]};items.push(it)}Object.assign(it,{product:f.product,name:f.name,type:f.type,unit:f.unit,yearly:f.yearly,pms:f.pms,iface:f.iface,active:f.active});it.v=pbApplyVersion(it,f,me);
+    b.disabled=true;if(await pbSave(items,f.on==null?"Item saved (no price yet)":"Saved as draft. It's used once approved.")){P.edit=""}else b.disabled=false});
+  const approve=async ids=>{const items=pbAll().map(x=>{if(!ids.includes(x.id))return x;return Object.assign({},x,{v:(x.v||[]).map(v=>v.st==="draft"?Object.assign({},v,{st:"ok",okBy:me,okAt:nowISO()}):v)})});await pbSave(items,`${ids.length} price${ids.length===1?"":"s"} approved`)};
+  m.querySelectorAll("[data-pba]").forEach(b=>b.onclick=()=>approve([b.dataset.pba]));
+  $("#pbAll")?.addEventListener("click",()=>approve(pbAll().filter(x=>pbDraft(x)).map(x=>x.id)));
+  m.querySelectorAll("[data-pbl]").forEach(s=>s.onchange=async()=>{const k=s.dataset.pbl;if(s.value==="new"){const [lid,i]=k.split("|");const l=S.leadMap[lid];const x=l.quote.lines[+i];
+      const qty=+x.qty||1;const unitP=toAED(+x.unit||+x.list||((+x.total||0)/qty),l.quote.currency||"AED");const it={id:pbNewId(),product:x.product&&pbProducts().includes(x.product)?x.product:(productsOf(l)[0]||"Services"),name:x.item,type:/scanner|accessor|ipad|tablet|kiosk|printer|hardware/i.test(x.item)?"hardware":/ohip|interface|ows|fias|oxi/i.test(x.item)?"interface":/install|training|support|amc|hosting/i.test(x.item)?"service":"software",
+        unit:/per room|ohip/i.test(x.item)?"room":qty>1?"pc":"property",yearly:/annual|yearly|subscription|hosting/i.test(x.item),cur:"AED",active:true,v:[{on:Math.round(unitP*100)/100,re:null,min:null,bands:[],from:todayISO(),st:"draft",by:me,at:nowISO(),note:"from "+(l.quote.no||"quotation")}]};
+      if(await pbSave(pbAll().concat([it]),"New draft price item added from the quote line. Check its product and unit in the price book.")){(P.sel||(P.sel={}))[k]=it.id;render()}return}
+    (P.sel||(P.sel={}))[k]=s.value});
+  m.querySelectorAll("[data-pbok]").forEach(b=>b.onclick=async()=>{const l=S.leadMap[b.dataset.pbok];if(!l)return;const card=b.closest("[data-pbq]");const sel=P.sel||{};const rules=((S.lr&&S.lr.rules)||[]).slice();let miss=0,learn=0;
+    const lines=l.quote.lines.map((x,i)=>{const k=l.id+"|"+i;const em=pbMapOf(x);if(em)return Object.assign({},x,{m:Object.assign({},em,{st:em.st==="auto"?"auto":"ok"})});const sv=card.querySelector(`[data-pbl="${CSS.escape(k)}"]`);const v=sv?sv.value:"";if(!v||v==="new"){miss++;return x}
+      if(card.querySelector(`[data-pbk="${CSS.escape(k)}"]`)?.checked){const key=pbKey(x.item);if(key&&!rules.some(r=>r.key===key)){rules.push({id:"r"+Date.now().toString(36)+i,key,it:v,by:me,at:nowISO(),on:true});learn++}}
+      return Object.assign({},x,{m:{it:v,st:"ok",by:me,at:nowISO()}})});
+    if(miss){toast(`Choose a price item for ${miss} line${miss===1?"":"s"}.`);return}b.disabled=true;
+    try{await pbApproveLines(l,lines);if(learn)await pbSaveRules(rules);S.pbStamp=(S.pbStamp||0)+1;toast(`Lines approved${learn?` · ${learn} rule${learn===1?"":"s"} learnt`:""}`);render()}
+    catch(e){b.disabled=false;toast(/42501|permission/i.test(e.message||e.code||"")?"You can't approve quote lines. Run supabase/21_pricing.sql or ask a Supervisor.":"Couldn't approve: "+(e.message||e.code))}});
+  m.querySelectorAll("[data-pbr]").forEach(b=>b.onclick=async()=>{const rules=((S.lr&&S.lr.rules)||[]).map(r=>r.id===b.dataset.pbr?Object.assign({},r,{on:r.on===false}):r);if(await pbSaveRules(rules)){toast("Rule updated");render()}});
+  $("#pbTpl")?.addEventListener("click",pbDownload);
+  $("#pbUp")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)pbReadSheet(f)});
+  $("#pbUpX")?.addEventListener("click",()=>{P.up=null;render()});
+  $("#pbUpOk")?.addEventListener("click",async e=>{e.currentTarget.disabled=true;const items=pbAll().map(x=>Object.assign({},x));let n=0;
+    for(const r of P.up.rows){if(r.err||r.res==="Unchanged")continue;let it=r.id?items.find(x=>x.id===r.id):null;if(!it){it={id:pbNewId(),cur:"AED",active:true,v:[]};items.push(it)}
+      Object.assign(it,{product:r.f.product,name:r.f.name,type:r.f.type,unit:r.f.unit,yearly:r.f.yearly,pms:r.f.pms,iface:r.f.iface});it.v=pbApplyVersion(it,r.f,me);n++}
+    if(await pbSave(items,`${n} row${n===1?"":"s"} saved as draft from ${P.up.file}. Approve them to use the prices.`)){P.up=null;render()}})}
+/* ---------- price sheet download / upload ---------- */
+const PB_COLS=["ID","Product","Item","Type","Pricing unit","Yearly (Y/N)","PMS","Interface","Onsite price (AED)","Remote price (AED)","Yearly minimum (AED)","Room bands","Valid from"];
+async function pbDownload(){let X;try{X=await loadXLSX()}catch(e){toast("Couldn't load the spreadsheet tool. Check the internet connection.");return}
+  const rows=pbAll().map(it=>{const v=pbDraft(it)||pbVer(it)||{};return[it.id,it.product,it.name,PB_TYPES[it.type]||it.type,PB_UNITS[it.unit]||it.unit,it.yearly?"Y":"N",it.pms||"",it.iface||"",v.on??"",v.re??"",v.min??"",pbBandsTxt(v.bands),v.from||""]});
+  const ws=X.utils.aoa_to_sheet([PB_COLS].concat(rows));ws["!cols"]=PB_COLS.map((c,i)=>({wch:[10,24,44,11,26,8,14,10,12,12,12,20,12][i]}));
+  const help=X.utils.aoa_to_sheet([["How to fill in"],["Keep the ID to update an item; leave it blank for a new item."],["Type: "+Object.values(PB_TYPES).join(", ")],["Pricing unit: "+Object.values(PB_UNITS).join(", ")],["Product: a product from Products & settings, or PMS interface, or Services."],["Room bands (per-room items): 150:30, 400:25, *:20 means up to 150 rooms 30 a room, up to 400 rooms 25, above that 20."],["Valid from: YYYY-MM-DD. Uploaded prices are drafts until approved."]]);
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Price book");X.utils.book_append_sheet(wb,help,"How to fill in");
+  const data=X.write(wb,{bookType:"xlsx",type:"array"});const blob=new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  window.__lastExport={name:`price-book-${todayISO()}.xlsx`,size:blob.size,rows:rows.length};{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`price-book-${todayISO()}.xlsx`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}}
+async function pbReadSheet(file){const P=pbState();let X;try{X=await loadXLSX()}catch(e){toast("Couldn't load the spreadsheet tool.");return}
+  try{const wb=/\.csv$/i.test(file.name)?X.read(await file.text(),{type:"string",cellDates:true}):X.read(new Uint8Array(await file.arrayBuffer()),{type:"array",cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const A=X.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});
+    const hi=A.findIndex(r=>r.some(c=>/^item$/i.test(String(c).trim())));if(hi<0){toast("Couldn't find the header row (Product, Item, …). Use the downloaded price sheet.");return}
+    const H=A[hi].map(c=>String(c).trim().toLowerCase());const col=re=>H.findIndex(h=>re.test(h));
+    const C={id:col(/^id$/),product:col(/^product/),name:col(/^item/),type:col(/^type/),unit:col(/unit/),yearly:col(/^yearly \(/),pms:col(/^pms/),iface:col(/^interface/),on:col(/onsite|^price/),re:col(/remote/),min:col(/minimum/),bands:col(/band/),from:col(/valid/)};
+    const tUnit=t=>{t=String(t).trim().toLowerCase();return Object.keys(PB_UNITS).find(k=>k===t||PB_UNITS[k].toLowerCase()===t)||(/room/.test(t)?"room":/one-?time|once/.test(t)?"once":/\bpc\b|front/.test(t)?"pc":/user/.test(t)?"user":/unit/.test(t)?"unit":/property/.test(t)?"property":"")};
+    const tType=t=>{t=String(t).trim().toLowerCase();return Object.keys(PB_TYPES).find(k=>k===t||PB_TYPES[k].toLowerCase()===t)||""};
+    const numv=v=>{if(v===""||v==null)return null;const n=typeof v==="number"?v:+String(v).replace(/[, ]|AED/gi,"");return isNaN(n)?NaN:n};
+    const dval=v=>v instanceof Date?ymd(v):String(v||"").trim().slice(0,10);
+    const prods=pbProducts().map(p=>p.toLowerCase());const rows=[];
+    A.slice(hi+1).forEach((r,ri)=>{const g=k=>C[k]>=0?r[C[k]]:"";const name=String(g("name")).trim();if(!name&&!String(g("product")).trim())return;
+      const pr=String(g("product")).trim();const pc=pbProducts().find(p=>p.toLowerCase()===pr.toLowerCase())||"";
+      const f={product:pc,name,type:tType(g("type")),unit:tUnit(g("unit")),yearly:/^y/i.test(String(g("yearly"))),pms:String(g("pms")).trim(),iface:String(g("iface")).trim(),on:numv(g("on")),re:numv(g("re")),min:numv(g("min")),bands:pbBandsParse(g("bands")),from:dval(g("from"))||todayISO()};
+      const id=String(g("id")).trim();const ex=id?pbItem(id):pbAll().find(x=>pbKey(x.product)===pbKey(pc)&&pbKey(x.name)===pbKey(name));
+      let err="";if(!pc)err=prods.length?`unknown product "${pr}"`:"product missing";else if(!name)err="item name missing";else if(!f.type)err="type not recognised";else if(!f.unit)err="pricing unit not recognised";else if([f.on,f.re,f.min].some(v=>Number.isNaN(v)))err="a price isn't a number";else if(f.bands===null)err="room bands not readable";else if(!/^\d{4}-\d{2}-\d{2}$/.test(f.from))err="valid-from date not readable";
+      let res="New";if(ex){const cur=pbDraft(ex)||pbVer(ex)||{};const same=["on","re","min"].every(k=>(cur[k]??null)===(f[k]??null))&&JSON.stringify(cur.bands||[])===JSON.stringify(f.bands||[])&&pbKey(ex.name)===pbKey(f.name)&&ex.unit===f.unit&&ex.type===f.type&&!!ex.yearly===f.yearly;res=same?"Unchanged":"Changed"}
+      rows.push({n:hi+ri+2,id:ex?ex.id:"",f,err,res,old:ex?(pbDraft(ex)||pbVer(ex)||{}):null})});
+    P.up={file:file.name,rows};render()}catch(e){toast("Couldn't read the price sheet: "+(e.message||e))}}
+function pbUploadHTML(){const U=pbState().up;const c=k=>U.rows.filter(r=>k==="err"?r.err:!r.err&&r.res===k).length;const ok=U.rows.filter(r=>!r.err&&r.res!=="Unchanged").length;
+  const show=U.rows.filter(r=>r.err||r.res!=="Unchanged");const nf=(o,k,v)=>o&&(o[k]??null)!==(v??null)&&o[k]!=null?`<span class="del">${fmtN(+o[k])}</span> `:"";
+  return`<div class="panel pbup" style="margin-bottom:12px;display:grid;gap:8px"><div class="row"><b>Upload preview</b><span class="small muted">${esc(U.file)}</span><span class="sp"></span><span class="chip ok">${c("New")} new</span><span class="chip warn">${c("Changed")} changed</span><span class="chip bad">${c("err")} errors</span><span class="chip">${c("Unchanged")} unchanged</span></div>
+   <div class="tw"><table><thead><tr><th>Row</th><th>Product · item</th><th>Unit</th><th class="num">Onsite / price</th><th class="num">Remote</th><th>Result</th></tr></thead><tbody>
+   ${show.slice(0,200).map(r=>`<tr><td>${r.n}</td><td>${esc(r.f.product||"?")} · ${esc(r.f.name)}</td><td>${esc(PB_UNITS[r.f.unit]||"?")}</td><td class="num">${nf(r.old,"on",r.f.on)}${r.f.on!=null&&!Number.isNaN(r.f.on)?fmtN(r.f.on):"—"}${r.f.unit==="room"&&r.f.min!=null?`<div class="small muted">min ${fmtN(r.f.min)}</div>`:""}</td><td class="num">${nf(r.old,"re",r.f.re)}${r.f.re!=null&&!Number.isNaN(r.f.re)?fmtN(r.f.re):"—"}</td>
+     <td>${r.err?`<span class="chip bad">Error: ${esc(r.err)}</span>`:`<span class="chip ${r.res==="New"?"ok":"warn"}">${r.res}</span>`}</td></tr>`).join("")||`<tr><td colspan="6" class="muted">Nothing new or changed.</td></tr>`}</tbody></table></div>
+   <div class="row"><span class="small muted">Rows with errors are skipped. The rest are saved as drafts for approval.</span><span class="sp"></span><button type="button" class="btn" id="pbUpX">Cancel</button><button type="button" class="btn pri" id="pbUpOk"${ok?"":" disabled"}>Save ${ok} row${ok===1?"":"s"} as draft</button></div></div>`}
+
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
-const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]);
+const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(canPB()?[["pb","Price book"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
@@ -2780,12 +3030,13 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-ops" data-sec="ops"></div>
-   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div>
+   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div>
   </section>`;
   mgmtOps($("#mg-ops"));
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
   if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
   if(MV==="tg"){const x=$("#mg-tg");x.innerHTML=targetsHTML();bindTargets(x)}
+  if(MV==="pb"){const x=$("#mg-pb");x.innerHTML=priceBookHTML();bindPriceBook(x)}
   $("#goDq")?.addEventListener("click",()=>{S.tab="bo";S.boDqOpen=true;try{history.replaceState(null,"","#bo")}catch(_){}render();setTimeout(()=>$("#boDq")?.scrollIntoView({block:"start"}),0)});
   bindFilters(m);bindSort(m);
   m.querySelectorAll("[data-sec]").forEach(x=>{x.hidden=x.dataset.sec!==MV});

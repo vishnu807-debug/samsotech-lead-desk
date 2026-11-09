@@ -110,6 +110,11 @@
     return ME.displayName;
   };
   // Supervisor: move every lead of a name that isn't on the Sales engineer list to an existing engineer (supabase/15_merge.sql)
+  window.__approveQuoteLines = async (id, lines) => {
+    const { error } = await sb.rpc("approve_quote_lines", { p_id: id, p_lines: lines });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return true;
+  };
   window.__mergeProduct = async (from, to) => {
     const { data, error } = await sb.rpc("merge_product", { p_old: from, p_new: to });
     if (error) throw dbErr(error);
