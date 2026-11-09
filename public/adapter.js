@@ -54,12 +54,14 @@
     return { t: "docs", k: "path", id: path };
   }
   async function fetchAll(table, key) {
+    // Supabase returns at most "Max rows" per request (1000 by default, can be lower), whatever range is asked for,
+    // so keep asking from where the last answer ended until an empty page comes back.
     const out = []; const page = 1000;
-    for (let from = 0; ; from += page) {
+    for (let from = 0; ; ) {
       const { data, error } = await sb.from(table).select(key + ",doc").order(key).range(from, from + page - 1);
       if (error) throw dbErr(error);
-      out.push(...data);
-      if (data.length < page) break;
+      if (!data.length) break;
+      out.push(...data); from += data.length;
     }
     return out;
   }
@@ -68,23 +70,25 @@
   let hasStamp = null;                                       // null = unknown yet; false = SQL not run, use full loads
   async function fetchSince(table, key, since) {
     const out = []; const page = 1000;
-    for (let from = 0; ; from += page) {
+    for (let from = 0; ; ) {
       let q = sb.from(table).select(key + ",doc,updated_at").order("updated_at").order(key).range(from, from + page - 1);
       if (since) q = q.gt("updated_at", new Date(new Date(since).getTime() - 60000).toISOString());   // 1-minute overlap for slow saves
       const { data, error } = await q;
       if (error) throw error;
-      out.push(...data);
-      if (data.length < page) break;
+      if (!data.length) break;
+      out.push(...data); from += data.length;
     }
     return out;
   }
   async function fetchKeys(table, key) {
-    const out = []; const page = 5000;
-    for (let from = 0; ; from += page) {
+    // Fix 9 Nov 2026: this used to stop after the first 1000 keys (Supabase's row limit), so once there were more than
+    // 1000 leads the newest ones were dropped from the device copy every 30 minutes.
+    const out = []; const page = 1000;
+    for (let from = 0; ; ) {
       const { data, error } = await sb.from(table).select(key).order(key).range(from, from + page - 1);
       if (error) throw dbErr(error);
-      out.push(...data.map((x) => x[key]));
-      if (data.length < page) break;
+      if (!data.length) break;
+      out.push(...data.map((x) => x[key])); from += data.length;
     }
     return out;
   }
@@ -247,7 +251,7 @@
         // Data use matters (free plan: 5 GB a month). Live changes arrive one row at a time. For leads and
         // accounts each device keeps a copy and only asks for rows changed since its last sync, plus the
         // list of row keys (to drop rows that were deleted or are no longer visible to this user).
-        const ck = "v1:" + table + ":" + ME.email;
+        const ck = "v2:" + table + ":" + ME.email;   // v2: start every device with a fresh full copy (rows lost to the old 1000-key limit)
         let sync = null, lastFull = 0, lastKeys = 0, inflight = null, saveT = null, last = 0;
         const save = () => { clearTimeout(saveT); saveT = setTimeout(() => idb.set(ck, { sync, lastFull, rows: [...map.entries()] }), 1500); };
         const serverNow = async () => { const { data, error } = await sb.rpc("server_now"); if (error || !data) throw Object.assign(new Error("no server_now"), { code: "42703" }); return data; };
