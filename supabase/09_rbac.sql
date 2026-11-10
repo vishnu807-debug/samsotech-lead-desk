@@ -21,7 +21,7 @@ $$;
 
 -- ---------- 2. Permission table (defaults; Supervisors change it in the app) ----------
 insert into public.docs (path, doc) values ('config/permissions', jsonb_build_object('roles', $j${
-  "leadmanager": ["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","lead.view_all","lead.create","lead.verify","lead.edit_all","lead.reassign","account.manage"],
+  "leadmanager": ["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","lead.view_all","lead.create","lead.verify","lead.edit_all","lead.reassign","lead.export","account.manage"],
   "management":  ["page.leads","page.pipelines","page.meetings","page.accounts","page.management","lead.view_all"],
   "sales":       ["page.leads","page.pipelines","page.meetings","page.accounts","lead.create_own_outbound","lead.edit_own"]
 }$j$::jsonb))
@@ -214,3 +214,11 @@ end $$;
 
 -- Check: who has which role now
 select role, count(*) from public.members group by role order by role;
+
+-- 5 Nov 2026: new permission "lead.export" (Export leads to Excel/CSV), on for Lead Manager by default.
+-- Adds it to a permission table saved before this permission existed. Safe to run again.
+update public.docs
+set doc = jsonb_set(doc, '{roles,leadmanager}', coalesce(doc->'roles'->'leadmanager','[]'::jsonb) || '["lead.export"]'::jsonb)
+where path = 'config/permissions'
+  and not (doc ? 'known')
+  and not (coalesce(doc->'roles'->'leadmanager','[]'::jsonb) ? 'lead.export');
