@@ -360,6 +360,77 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
 .listedit .it{display:flex;gap:6px;align-items:center}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(30px);opacity:.6}}}
 @media (max-width:560px){.frow{grid-template-columns:96px minmax(0,1fr) 84px}.timeline div{grid-template-columns:100px 1fr}}
+/* ===== Finish layer (Nov 2026): navigation, states, rhythm. Colours and layout come from the tokens above. ===== */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+:root{--ring:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent);--e1:0 1px 2px rgba(20,33,49,.05);--e2:0 6px 20px rgba(20,33,49,.10)}
+:root[data-theme="dark"]{--e1:0 1px 2px rgba(0,0,0,.35);--e2:0 8px 24px rgba(0,0,0,.5)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--e1:0 1px 2px rgba(0,0,0,.35);--e2:0 8px 24px rgba(0,0,0,.5)}}
+/* navigation */
+header.top{box-shadow:var(--e1)}
+nav.tabs{overflow:visible;align-items:center}
+nav.tabs button{border-radius:8px;transition:background .12s,color .12s}
+nav.tabs button[aria-selected="true"]{font-weight:600}
+nav.tabs button:active{transform:translateY(.5px)}
+.mtw{position:relative;flex:none}
+.mtw>.mt{color:var(--ink)}.mtw>.mt svg{opacity:.7;transition:transform .15s}.mtw>.mt[aria-expanded="true"]{background:var(--sunk)}.mtw>.mt[aria-expanded="true"] svg{transform:rotate(180deg)}
+.mtp{position:absolute;right:0;top:calc(100% + 8px);z-index:30;display:grid;gap:2px;min-width:220px;max-width:calc(100vw - 32px);padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--e2)}
+.mtp button{justify-content:space-between;width:100%;padding:10px 12px!important;font-size:14px!important;color:var(--ink)!important}
+.mtp button[aria-selected="true"]{color:var(--accent)!important}
+@media (prefers-reduced-motion:no-preference){.mtp:not([hidden]){animation:pop .12s ease-out}@keyframes pop{from{opacity:0;transform:translateY(-4px)}}}
+@media (max-width:760px){nav.tabs{scroll-snap-type:none;padding-bottom:4px}.mtw{margin-left:auto}.mtp{min-width:240px}.mtp button{padding:12px 14px!important;font-size:15px!important}}
+/* sub-tabs: soft edge shows there is more to scroll to */
+.mtabs{scroll-behavior:smooth}
+.mtabs.fr{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.mtabs.fl{-webkit-mask-image:linear-gradient(270deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(270deg,#000 calc(100% - 44px),transparent)}
+.mtabs.fl.fr{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent)}
+.mtabs button{transition:color .12s,border-color .12s}.mtabs button[aria-selected="true"]{font-weight:600}
+/* surfaces */
+.panel,.kpi,.tw{box-shadow:var(--e1)}.panel{border-radius:12px}.kpi{border-radius:12px}
+.panel .panel,.panel .kpi,.panel .tw,.drawer .tw{box-shadow:none}
+.kpi .l{letter-spacing:.07em}.kpi .v{letter-spacing:-.01em;line-height:1.15;margin-top:6px}.kpi .s{margin-top:2px}
+.vhead h2{letter-spacing:-.01em}
+/* controls: hover, press, focus, disabled */
+.btn{transition:background .12s,border-color .12s,box-shadow .12s,transform .06s;box-shadow:var(--e1)}
+.btn:hover{border-color:color-mix(in srgb,var(--ink) 24%,var(--line))}
+.btn:active:not([disabled]){transform:translateY(1px);box-shadow:none}
+.btn.pri{box-shadow:0 1px 2px color-mix(in srgb,var(--accent) 40%,transparent)}.btn.pri:hover{border-color:var(--accent)}
+.btn.bad:hover{background:var(--bad-soft)}
+.btn[disabled]{box-shadow:none}
+input,select,textarea{transition:border-color .12s,box-shadow .12s}
+input:hover,select:hover,textarea:hover{border-color:color-mix(in srgb,var(--ink) 28%,var(--line))}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--accent);box-shadow:var(--ring)}
+input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--muted) 75%,transparent)}
+input[disabled],select[disabled],textarea[disabled]{background:var(--sunk);color:var(--muted);cursor:not-allowed}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent)}
+.seg{width:fit-content;max-width:100%;justify-self:start}
+.seg button{transition:background .12s,color .12s}.seg button:not([aria-pressed="true"]):hover{background:var(--sunk);color:var(--ink)}
+.pchk{transition:border-color .12s,background .12s}.pchk:not(.blocked):hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+/* tables */
+tbody tr{transition:background .1s}
+.tw tbody tr:hover{background:color-mix(in srgb,var(--sunk) 55%,transparent)}
+tbody tr.click:hover{background:var(--accent-soft)}
+th{position:relative}
+.empty{padding:36px 20px}
+/* badges in dark mode: dark text on the light red, readable */
+:root[data-theme="dark"] .count:not(.n),:root[data-theme="dark"] .chip.newl{color:#2a0f0c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .count:not(.n),:root:not([data-theme="light"]) .chip.newl{color:#2a0f0c}}
+/* thin, quiet scrollbars inside the app */
+.tw,.drawer,.sugg,.board{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+::selection{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+/* phone */
+.aftog{display:none}
+@media (max-width:760px){
+ main{padding-block:16px 48px}.view{gap:14px}.panel{padding:14px}
+ .vhead{align-items:flex-start}.vhead h2{font-size:20px}
+ .btn{padding:10px 14px}.btn.sm{padding:7px 11px}
+ input,select,textarea{font-size:16px;padding:9px 12px}.fgrid select,.fgrid input{height:44px}input[type=checkbox],input[type=radio]{padding:0}
+ .kpis,.kpis.k7,.kpis.k5{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.kpi{padding:12px 14px}.kpi .v,.kpis.k7 .v,.kpis.k5 .v{font-size:22px}
+ .aftog{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:2px 0;font:600 14px var(--f-body);color:var(--ink);cursor:pointer}
+ .panel.afbar.afc>.fgrid{display:none}.panel.afbar:not(.afc)>.aftog{margin-bottom:8px}
+ .alerts .alert{flex-wrap:wrap;row-gap:4px}.alerts .alert>span[style*="flex:1"]{flex-basis:calc(100% - 110px)!important}
+ .toast{left:16px;right:16px;transform:none;max-width:none;text-align:center}
+ .listedit .it{flex-wrap:wrap;min-width:0}.listedit .it>*{min-width:0}.listedit .it input,.listedit .it select{flex:1 1 140px}
+}
 </style>
 
 <header class="top gut">
@@ -377,6 +448,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="accts" role="tab">Accounts</button>
       <button data-tab="set" role="tab">Products &amp; settings</button>
       <button data-tab="audit" role="tab">Audit trail</button>
+      <div class="mtw" id="tabMore" hidden><button type="button" class="mt" id="tabMoreBtn" aria-haspopup="true" aria-expanded="false">More <span class="count" id="c-more" hidden></span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="mtp" id="tabMoreMenu" hidden></div></div>
     </nav>
     <div id="who" class="row" style="gap:6px"></div>
   </div>
@@ -648,7 +720,7 @@ async function boot(){
 }
 function bindTabs(){document.addEventListener("click",e=>{const d=document.querySelector("#who details[open]");if(d&&!d.contains(e.target))d.open=false});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){const d=document.querySelector("#who details[open]");if(d){d.open=false;d.querySelector("summary").focus()}}});
-  $("#tabs").addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;const bs=[...document.querySelectorAll("#tabs button")].filter(b=>!b.hidden);const i=bs.indexOf(document.activeElement);if(i<0)return;e.preventDefault();
+  $("#tabs").addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;const bs=[...document.querySelectorAll("#tabs button[data-tab]")].filter(b=>!b.hidden);const i=bs.indexOf(document.activeElement);if(i<0)return;e.preventDefault();
     const n=e.key==="Home"?0:e.key==="End"?bs.length-1:(i+(e.key==="ArrowRight"?1:-1)+bs.length)%bs.length;bs[n].click();setTimeout(()=>document.querySelector(`#tabs [data-tab="${bs[n].dataset.tab}"]`)?.focus())});
   $("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;S.tab=b.dataset.tab;S.tabChosen=true;try{if(location.hash)history.replaceState(null,"",location.pathname+location.search)}catch(_){}render()});
   window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&h!==S.tab&&document.querySelector(`[data-tab="${h}"]`)){S.tab=h;render()}})}
@@ -656,7 +728,30 @@ function bindTabs(){document.addEventListener("click",e=>{const d=document.query
 /* full render on tab switch; soft render on data change keeps forms intact */
 function showFail(where,e){console.error("Lead Desk "+where+":",e);const m=$("#main");const msg=(e&&(e.message||e.code))||String(e);
   m.innerHTML=`<div class="panel" style="padding:22px;display:grid;gap:8px"><h3>Something went wrong showing this page</h3><p class="muted" style="margin:0">Please send this message to whoever looks after Lead Desk:</p><pre class="mono" style="white-space:pre-wrap;background:var(--sunk);padding:10px;border-radius:8px;margin:0">${esc(where+": "+msg+(e&&e.stack?"\n"+String(e.stack).split("\n").slice(0,4).join("\n"):""))}</pre><div><button class="btn" onclick="location.reload()">Reload</button></div></div>`}
-function render(){try{renderInner()}catch(e){showFail("render "+(S.tab||""),e)}}
+function render(){try{renderInner()}catch(e){showFail("render "+(S.tab||""),e)}try{uiPolish()}catch(e){}}
+/* Tabs that don't fit on one row move under "More", so nothing is ever cut off or hidden behind the logo. */
+let TAB_ORDER=null;
+function tabsFit(){const nav=$("#tabs"),w=$("#tabMore"),menu=$("#tabMoreMenu");if(!nav||!w||nav.hidden)return;
+  if(!TAB_ORDER)TAB_ORDER=[...nav.querySelectorAll("button[data-tab]")];
+  TAB_ORDER.forEach(b=>nav.insertBefore(b,w));menu.hidden=true;$("#tabMoreBtn").setAttribute("aria-expanded","false");w.hidden=true;
+  const over=()=>nav.scrollWidth>nav.clientWidth;
+  if(over()){w.hidden=false;const vis=TAB_ORDER.filter(b=>!b.hidden);let i=vis.length-1,moved=[];
+    while(over()&&i>=0){const b=vis[i--];if(b.getAttribute("aria-selected")==="true")continue;moved.unshift(b);menu.insertBefore(b,menu.firstChild)}
+    if(!moved.length)w.hidden=true}
+  const n=[...menu.querySelectorAll(".count:not([hidden])")].reduce((t,c)=>t+(+c.textContent||0),0);const c=$("#c-more");c.hidden=!n;c.textContent=n}
+function tabsInit(){const btn=$("#tabMoreBtn"),menu=$("#tabMoreMenu");if(!btn||btn._on)return;btn._on=1;
+  const close=()=>{menu.hidden=true;btn.setAttribute("aria-expanded","false")};
+  btn.addEventListener("click",e=>{e.stopPropagation();const o=menu.hidden;menu.hidden=!o;btn.setAttribute("aria-expanded",String(o));if(o)menu.querySelector("button")?.focus()});
+  document.addEventListener("click",e=>{if(!menu.hidden&&!e.target.closest("#tabMore"))close()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!menu.hidden){close();btn.focus()}});
+  let t;addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(tabsFit,80)});try{document.fonts&&document.fonts.ready.then(tabsFit)}catch(e){}}
+/* Small finishing touches after each draw: sub-tabs keep the chosen one in view; on phones the filter bars fold away. */
+function uiPolish(){tabsInit();
+  document.querySelectorAll(".mtabs").forEach(t=>{const sel=t.querySelector('[aria-selected="true"]');if(sel&&t.scrollWidth>t.clientWidth)t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2);
+    const fade=()=>{t.classList.toggle("fl",t.scrollLeft>4);t.classList.toggle("fr",t.scrollLeft+t.clientWidth<t.scrollWidth-4)};fade();t.onscroll=fade});
+  if(innerWidth<=760){S.afOpen=S.afOpen||{};document.querySelectorAll("#main .panel.afbar").forEach((p,i)=>{const g=p.querySelector(":scope>.fgrid");if(!g||p.querySelector(":scope>.aftog"))return;const key=(S.tab||"")+":"+i;
+      const b=document.createElement("button");b.type="button";b.className="aftog";const set=()=>{const o=!!S.afOpen[key];p.classList.toggle("afc",!o);b.setAttribute("aria-expanded",String(o));b.innerHTML=`<span>Filters</span><span class="small muted">${o?"Hide":"Show"}</span>`};
+      b.onclick=()=>{S.afOpen[key]=!S.afOpen[key];set()};p.insertBefore(b,g);set()})}}
 function renderInner(){const m=$("#main");
   if(!S.db){m.innerHTML=`<div class="panel empty">Lead Desk needs you to be signed in to claude.ai with access to this page.</div>`;$("#tabs").hidden=true;return}
   if(!S.usersLoaded){m.innerHTML=`<div class="panel empty">Checking your access…</div>`;$("#tabs").hidden=true;return}
@@ -665,13 +760,13 @@ function renderInner(){const m=$("#main");
   const allowed=allowedTabs();mineLabel();if(!allowed.length){$("#tabs").hidden=true;m.innerHTML=`<div class="panel empty">Your role (${esc(ROLE_LABEL[S.role]||S.role)}) has no pages switched on. Ask a Supervisor.</div>`;return}
   if(!S.tabChosen||!allowed.includes(S.tab)){S.tab=homeTab();S.tabChosen=true}
   $("#tabs").hidden=allowed.length<2;
-  document.querySelectorAll("#tabs button").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab);b.tabIndex=b.dataset.tab===S.tab?0:-1});
+  document.querySelectorAll("#tabs button[data-tab]").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab);b.tabIndex=b.dataset.tab===S.tab?0:-1});
   const pt=document.querySelector('#tabs [data-tab="pipe"] .tl');pt.textContent=!viewAll()?"My pipeline":can("lead.edit_all")?"Pipelines":"Team pipeline";document.querySelector('#tabs [data-tab="new"]').textContent=can("lead.create")||can("lead.create_own_outbound")?"Leads":"Leads";
   $("#who").innerHTML=`<details class="acctm"><summary aria-label="Account: ${esc(S.myName||"")}, ${esc(ROLE_LABEL[S.role])}"><span class="av" aria-hidden="true">${esc((myLabel()||"?").trim().charAt(0).toUpperCase())}</span><span class="acn"><b>${esc(myLabel())}</b><span>${esc(ROLE_LABEL[S.role])}</span></span></summary>
     <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button><button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}${themeSeg()}</div></details>`;
   bindTheme();
   $("#dnMenu")?.addEventListener("click",()=>{$("#who details")?.removeAttribute("open");openDisplayName()});
-  const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&$("#tabs").scrollWidth>$("#tabs").clientWidth){const t=$("#tabs");t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2)}
+  tabsFit();
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
 ({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,renew:renderRenew,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
@@ -687,7 +782,7 @@ function notifyNewLeads(){if(!S.myEng||!S.loaded.leads||!S.role)return;const ids
   const fresh=S.newSeenIds?ids.filter(i=>!S.newSeenIds.has(i)):ids;
   if(fresh.length){const l=S.leadMap[fresh[0]];toast(fresh.length===1?`New lead assigned to you: ${l.accountName} (${l.ref}). See My pipeline.`:`${fresh.length} new leads assigned to you. See My pipeline.`)}
   S.newSeenIds=new Set(ids)}
-function updateCounts(){notifyNewLeads();{const cr=$("#c-renew");if(cr){const n=renAlertCount();cr.hidden=!n;cr.textContent=n;cr.title=n+" renewal"+(n===1?"":"s")+" due soon or late"}}{const cf=$("#c-focus");if(cf){const n=S.leads.filter(l=>(viewAll()||isMine(l))&&ruleFlags(l).length).length;cf.hidden=!n;cf.textContent=n;cf.title=n+" lead"+(n===1?"":"s")+" needing action"}}const np=newForMe().length,cp=$("#c-pipe");if(cp){cp.hidden=!np;cp.textContent=np;cp.title=np+" new lead"+(np===1?"":"s")+" assigned to you"}if(!can("page.backoffice")){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
+function updateCounts(){notifyNewLeads();{const cr=$("#c-renew");if(cr){const n=renAlertCount();cr.hidden=!n;cr.textContent=n;cr.title=n+" renewal"+(n===1?"":"s")+" due soon or late"}}{const cf=$("#c-focus");if(cf){const n=S.leads.filter(l=>(viewAll()||isMine(l))&&ruleFlags(l).length).length;cf.hidden=!n;cf.textContent=n;cf.title=n+" lead"+(n===1?"":"s")+" needing action"}}const np=newForMe().length,cp=$("#c-pipe");if(cp){cp.hidden=!np;cp.textContent=np;cp.title=np+" new lead"+(np===1?"":"s")+" assigned to you"}if(!can("page.backoffice")){$("#c-bo").hidden=true;try{tabsFit()}catch(e){}return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n;try{tabsFit()}catch(e){}}
 
 /* ======================= 1. NEW LEAD (any department) ======================= */
 function renderNew(m){
