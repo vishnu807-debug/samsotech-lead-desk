@@ -256,7 +256,7 @@
         // Data use matters (free plan: 5 GB a month). Live changes arrive one row at a time. For leads and
         // accounts each device keeps a copy and only asks for rows changed since its last sync, plus the
         // list of row keys (to drop rows that were deleted or are no longer visible to this user).
-        const ck = "v3:" + table + ":" + ME.email;   // v3: fresh full copy on every device (v2: rows lost to the old 1000-key limit; v3: sales can now read leads they generated)
+        const ck = "v4:" + table + ":" + ME.email + ":" + (ME.role || "");   // v3: fresh full copy on every device (v2: rows lost to the old 1000-key limit; v3: sales can now read leads they generated)
         let sync = null, lastFull = 0, lastKeys = 0, inflight = null, saveT = null, last = 0;
         const save = () => { clearTimeout(saveT); saveT = setTimeout(() => idb.set(ck, { sync, lastFull, rows: [...map.entries()] }), 1500); };
         const serverNow = async () => { const { data, error } = await sb.rpc("server_now"); if (error || !data) throw Object.assign(new Error("no server_now"), { code: "42703" }); return data; };

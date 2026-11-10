@@ -417,6 +417,7 @@ th{position:relative}
 /* thin, quiet scrollbars inside the app */
 .tw,.drawer,.sugg,.board{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 ::selection{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+#who{margin-left:auto}
 /* phone */
 .aftog{display:none}
 @media (max-width:760px){
@@ -460,7 +461,7 @@ th{position:relative}
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js"></script>
+<script src="adapter.js?v=3fc2bfdf"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -3234,6 +3235,10 @@ function renderRenew(m){const V=renState();const all=renAll();const cfg=amcCfg()
     <div class="row" style="gap:8px;align-items:end"><label class="f fsm">Due in<select id="rnY">${yrs.map(y=>`<option${y===V.yr?" selected":""}>${y}</option>`).join("")}<option value="all"${V.yr==="all"?" selected":""}>All years</option></select></label>
      <label class="f fsm">Type<select id="rnT"><option value="">All types</option>${Object.entries(REN_T).map(([k,t])=>`<option value="${k}"${V.ty===k?" selected":""}>${t}</option>`).join("")}</select></label><button type="button" class="btn" id="rnX">Export Excel</button></div></div>
    ${isSales()?`<div class="notice">These are the renewals on <b>your</b> won orders. The AMC team sees the same rows, so update the status and add notes here to work on them together.</div>`:""}
+   ${(()=>{if(all.length)return"";const won=S.leads.filter(l=>l.status==="Won"&&!l.deleted).length;const rates=(cfg.rates||[]).filter(r=>+r.pct>0).length;
+     if(!won)return`<div class="notice warn" id="renDiag"><b>No won orders have reached this sign-in.</b> ${viewAll()||can("lead.view_won")?"The app allows this role to see won orders, but the database returned none. A Supervisor should run <span class=\"mono\">26_amc_access_fix.sql</span> in Supabase, then check that “Read won orders only, for renewals” is ticked for this role in Roles &amp; permissions and press Save.":"You only see renewals for orders assigned to you, and you have no won orders yet."}</div>`;
+     if(!rates&&!(cfg.subProducts||[]).length)return`<div class="notice warn" id="renDiag"><b>${won} won orders loaded, but no AMC rate or subscription product is set.</b> A Supervisor sets them in Products &amp; settings → AMC and renewals.</div>`;
+     return`<div class="notice info" id="renDiag">${won} won orders loaded. None of them has a product with an AMC rate or an annual subscription, so nothing renews yet.</div>`})()}
    ${cfg.salesShare==null||cfg.salesShare===""?`<div class="notice warn">The Sales share of subscriptions isn't set yet, so it shows as 0. ${can("settings.manage")?"Set it in Products &amp; settings → AMC and renewals.":"A Supervisor sets it in Products &amp; settings."}</div>`:""}
    <div class="kpis">${kp(`Expected, due in ${V.yr==="all"?"all years":V.yr}`,fmtAED(sum(F.filter(i=>i.ty!=="ohip"),i=>i.amt)),`${F.filter(i=>i.ty!=="ohip").length} renewals · AMC and subscription`)}${kp("AMC",fmtAED(sum(of("amc"),i=>i.amt)),`${of("amc").length} contracts · 100% AMC department`)}
     ${kp("Annual subscription",fmtAED(sum(of("sub"),i=>i.amt)),`AMC dept ${fmtAED(sum(of("sub"),i=>i.dept))} · Sales ${fmtAED(sum(of("sub"),i=>i.sales))}`)}${kp("OHIP (paid to the PMS vendor)",fmtAED(sum(of("ohip"),i=>i.amt)),"noted separately · not AMC, no Sales share")}
