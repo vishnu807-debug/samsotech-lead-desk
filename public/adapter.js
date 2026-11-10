@@ -272,6 +272,8 @@
           rows.forEach((x) => map.set(x[key], x.doc)); sync = t0;
           if (Date.now() - lastKeys > 30 * 60000) {           // prune rows deleted or reassigned away, every 30 min
             const keep = new Set(await fetchKeys(table, key)); [...map.keys()].forEach((k) => { if (!keep.has(k)) map.delete(k); }); lastKeys = Date.now();
+            // rows this user may now read but this device never received (e.g. a permission was switched on): take a fresh full copy
+            for (const k of keep) if (!map.has(k)) { await full(); return; }
           }
           emit(); save();
         };
