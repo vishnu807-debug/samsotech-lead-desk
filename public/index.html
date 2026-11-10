@@ -155,6 +155,8 @@ tr.top td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
 tr.tot td{background:var(--sunk);font-weight:600}
 .pbt{font:600 10.5px var(--f-body);letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px;white-space:nowrap}.pbt-software{background:var(--accent-soft);color:var(--accent)}.pbt-hardware{background:var(--warn-soft);color:var(--warn)}.pbt-interface{background:var(--sunk);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.pbt-service{background:var(--ok-soft);color:var(--ok)}
 tr.pbg td{background:var(--sunk);font-weight:600}
+.rty{font:600 10.5px var(--f-body);letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px;white-space:nowrap}.rty-amc{background:var(--warn-soft);color:var(--warn)}.rty-sub{background:var(--accent-soft);color:var(--accent)}.rty-ohip{background:var(--sunk);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.rch{grid-template-columns:repeat(12,1fr);gap:5px;height:190px}.rch .gst{width:80%}.rnote{display:grid;gap:4px;padding:4px 2px}.amsub{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 12px}.amsub label{display:flex;gap:6px;align-items:center}.rtab a{color:inherit}
 .gdash{display:grid;gap:14px}.gdash>.kpi{max-width:420px}.tgt{height:12px;border-radius:8px;background:var(--sunk);overflow:hidden;margin:8px 0 4px}.tgt i{display:block;height:100%;background:var(--accent);border-radius:8px}
 .gch{position:relative;height:220px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end;padding-top:14px;border-bottom:1px solid var(--line)}.gcol{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;position:relative}.gcol>span{font-size:12px;color:var(--muted);position:absolute;bottom:-20px}
 .gst{width:min(56px,80%);display:flex;flex-direction:column;gap:2px;position:relative;min-height:2px;margin-bottom:0}.gst i{display:block;border-radius:3px;min-height:3px}.gst b{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:12.5px}
@@ -369,6 +371,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <button data-tab="pipe" role="tab"><span class="tl">My pipeline</span> <span class="count" id="c-pipe" hidden></span></button>
       <button data-tab="focus" role="tab"><span class="tl">Focus</span> <span class="count" id="c-focus" hidden></span></button>
       <button data-tab="mine" role="tab">My leads</button>
+      <button data-tab="renew" role="tab"><span class="tl">Renewals</span> <span class="count" id="c-renew" hidden></span></button>
       <button data-tab="meet" role="tab">Meetings</button>
       <button data-tab="mgmt" role="tab"><span class="tl">Management</span></button>
       <button data-tab="accts" role="tab">Accounts</button>
@@ -512,27 +515,27 @@ const S={settings:DEFAULTS,registry:{},history:null,accounts:{},leads:[],leadMap
 /* ===== Role-based access: ONE permission table drives navigation, actions and data scope =====
    Roles and their permissions live in the shared document config/permissions (edited by Supervisors under
    Products & settings → Roles and permissions). The same table is enforced by the database on the hosted version. */
-const ROLES=["supervisor","leadmanager","management","sales"];
-const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales"};
+const ROLES=["supervisor","leadmanager","management","sales","amc"];
+const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales",amc:"AMC"};
 const PERMISSIONS=[
  ["page.leads","Leads tab: lead form and lead list","Pages"],["page.backoffice","Back office queue","Pages"],["page.pipelines","Pipelines","Pages"],["page.focus","Focus (needs action, forecast call, cross-sell)","Pages"],
  ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],["page.audit","Audit trail (who did what, when)","Pages"],
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["lead.view_generated","See leads I generated, read-only, even when another engineer has them (Generated by me)","Leads"],["report.generators","Lead generators: leads by who brought them in, and their status (Management → Lead generators)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["page.renewals","Renewals page: AMC, subscriptions and OHIP due on won orders","Pages"],["renewal.manage","Update the status, notes and amount of any renewal (AMC team)","Renewals"],["lead.view_won","Read won orders only, for renewals (AMC team)","Renewals"],["lead.view_generated","See leads I generated, read-only, even when another engineer has them (Generated by me)","Leads"],["report.generators","Lead generators: leads by who brought them in, and their status (Management → Lead generators)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "targets.manage", "pricing.view", "pricing.approve"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated"]};
+const DEFAULT_PERMS={"leadmanager": ["page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals"], "amc": ["page.renewals", "renewal.manage", "lead.view_won"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
 function permsFor(role){if(role==="supervisor")return PERMISSIONS.map(x=>x[0]);const def=DEFAULT_PERMS[role]||[];if(!(S.perms&&Array.isArray(S.perms[role])))return def;
   const known=Array.isArray(S.permsKnown)?S.permsKnown:PERMS_V1;return S.perms[role].concat(def.filter(p=>!known.includes(p)))}
 const can=perm=>!!S.role&&permsFor(S.role).includes(perm);
-const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",mine:"page.mine",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
-const LANDING=["bo","mgmt","pipe","focus","mine","meet","new","accts","set","audit"];
-const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet"};   // first page after sign-in
+const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",mine:"page.mine",renew:"page.renewals",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
+const LANDING=["bo","mgmt","pipe","focus","mine","renew","meet","new","accts","set","audit"];
+const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet",amc:"renew"};   // first page after sign-in
 const homeTab=()=>{const a=allowedTabs();return a.includes(HOME[S.role])?HOME[S.role]:a[0]};
 const mineLabel=()=>{const b=document.querySelector('#tabs [data-tab="mine"]');if(b){const t=isSales()?"Generated by me":"My leads";if(b.textContent!==t)b.textContent=t}};
 const allowedTabs=()=>LANDING.filter(t=>t==="mine"?!!(typeof myGen==="function"&&myGen()):can(TAB_PERM[t]));
@@ -631,7 +634,7 @@ async function boot(){
   const errH=e=>{console.error("Lead Desk data error:",e);$("#banner").innerHTML=`<div class="notice bad" style="margin-top:14px">Lost connection to the lead database (${esc(e&&(e.code||e.name)||"error")}${e&&e.message?": "+esc(e.message):""}). Reload the page to reconnect.</div>`};
   db.doc("config/users").onSnapshot(s=>{S.users=s.exists?(s.data().members||{}):{};const before=S.role+"|"+S.myEng;S.usersLoaded=true;computeRole();if(before!==S.role+"|"+S.myEng)render();else softRender()},e=>{S.usersLoaded=true;computeRole();render();errH(e)});
   db.doc("config/permissions").onSnapshot(s=>{S.perms=s.exists?(s.data().roles||null):null;S.permsKnown=s.exists?(s.data().known||null):null;if(S.allLeads)ldSplit();render()},()=>{});
-  db.doc("config/settings").onSnapshot(s=>{if(s.exists)S.settings=Object.assign({},DEFAULTS,s.data());softRender()},errH);
+  db.doc("config/settings").onSnapshot(s=>{if(s.exists)S.settings=Object.assign({},DEFAULTS,s.data());S.setStamp=(S.setStamp||0)+1;softRender()},errH);
   S.db.doc("config/targets").onSnapshot(s=>{S.targetsExists=s.exists;S.targetsDoc=s.exists?s.data():{years:{}};softRender()},()=>{S.targetsDoc={years:{}}});
   S.db.doc("config/pricebook").onSnapshot(s=>{S.pbExists=s.exists;S.pb=s.exists?s.data():{items:[]};S.pbStamp=(S.pbStamp||0)+1;softRender()},()=>{S.pb=null});
   S.db.doc("config/linerules").onSnapshot(s=>{S.lrExists=s.exists;S.lr=s.exists?s.data():{rules:[]};S.pbStamp=(S.pbStamp||0)+1;softRender()},()=>{S.lr={rules:[]}});
@@ -671,7 +674,7 @@ function renderInner(){const m=$("#main");
   const sel=document.querySelector('#tabs [aria-selected="true"]');if(sel&&$("#tabs").scrollWidth>$("#tabs").clientWidth){const t=$("#tabs");t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2)}
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
-({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
+({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,renew:renderRenew,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
 function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
   if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
@@ -684,7 +687,7 @@ function notifyNewLeads(){if(!S.myEng||!S.loaded.leads||!S.role)return;const ids
   const fresh=S.newSeenIds?ids.filter(i=>!S.newSeenIds.has(i)):ids;
   if(fresh.length){const l=S.leadMap[fresh[0]];toast(fresh.length===1?`New lead assigned to you: ${l.accountName} (${l.ref}). See My pipeline.`:`${fresh.length} new leads assigned to you. See My pipeline.`)}
   S.newSeenIds=new Set(ids)}
-function updateCounts(){notifyNewLeads();{const cf=$("#c-focus");if(cf){const n=S.leads.filter(l=>(viewAll()||isMine(l))&&ruleFlags(l).length).length;cf.hidden=!n;cf.textContent=n;cf.title=n+" lead"+(n===1?"":"s")+" needing action"}}const np=newForMe().length,cp=$("#c-pipe");if(cp){cp.hidden=!np;cp.textContent=np;cp.title=np+" new lead"+(np===1?"":"s")+" assigned to you"}if(!can("page.backoffice")){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
+function updateCounts(){notifyNewLeads();{const cr=$("#c-renew");if(cr){const n=renAlertCount();cr.hidden=!n;cr.textContent=n;cr.title=n+" renewal"+(n===1?"":"s")+" due soon or late"}}{const cf=$("#c-focus");if(cf){const n=S.leads.filter(l=>(viewAll()||isMine(l))&&ruleFlags(l).length).length;cf.hidden=!n;cf.textContent=n;cf.title=n+" lead"+(n===1?"":"s")+" needing action"}}const np=newForMe().length,cp=$("#c-pipe");if(cp){cp.hidden=!np;cp.textContent=np;cp.title=np+" new lead"+(np===1?"":"s")+" assigned to you"}if(!can("page.backoffice")){$("#c-bo").hidden=true;return}const n=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").length;const c=$("#c-bo");c.hidden=!n;c.textContent=n}
 
 /* ======================= 1. NEW LEAD (any department) ======================= */
 function renderNew(m){
@@ -1169,7 +1172,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      ${l.nextFollowUp?`<div><span>Next follow-up</span><span><b style="${fuOverdue(l)?"color:var(--bad)":""}">${esc(fuDue(l).toLocaleString("en-GB",{weekday:"short",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}))}</b>${fuOverdue(l)?" · overdue":""}${l.followUpNote?"<br>"+esc(l.followUpNote):""}</span></div>`:""}
    </div></div>
    ${inBO&&ch.length?`<div class="view" style="gap:4px">${ch.map(c=>`<div class="notice ${c.lvl}" style="padding:6px 10px">${esc(c.msg)}</div>`).join("")}</div>`:""}
-   <div id="pmsArea"></div><div id="pbArea"></div>
+   <div id="pmsArea"></div><div id="pbArea"></div><div id="recArea"></div>
    <div id="prodArea"></div>
    <div id="actArea"></div>
    <div id="delArea"></div>
@@ -1180,7 +1183,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $(".drawer").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...e.currentTarget.querySelectorAll("button,input,select,textarea,a[href]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeDrawer()};
   document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer)closeDrawer()};
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
-  fillNames();drawDetails(l);drawPms(l);drawPricing(l);drawProdArea(l);drawActions(l);drawDelArea(l);
+  fillNames();drawDetails(l);drawPms(l);drawPricing(l);drawRecurring(l);drawProdArea(l);drawActions(l);drawDelArea(l);
   $("#restoreLead")?.addEventListener("click",()=>restoreLead(l));
   $("#fcEdit")?.addEventListener("click",()=>{const f=fcOf(l);cfmOpen(`<h3>Forecast for ${esc(l.ref)}</h3><p class="small muted" style="margin:0">${esc(l.accountName)} · ${leadValue(l)?fmtAED(leadValue(l)):"no amount yet"}</p>
     <label class="f">Forecast<select id="fcC">${FC_CATS.map(([v,t])=>`<option value="${v}"${f.cat===v?" selected":""}>${t}</option>`).join("")}</select></label><label class="f">Month<select id="fcMo"><option value="">—</option>${[...new Set(fcMonths().concat(f.month?[f.month]:[]))].map(mm=>`<option value="${mm}"${f.month===mm?" selected":""}>${ymLabel(mm)}</option>`).join("")}</select></label>
@@ -2248,7 +2251,7 @@ function renderFocus(m){if(S.imp)return renderImport(m);const F=focusState();con
    ${sec("ch","Hotel chains to win",ch.reduce((s,c)=>s+c.open.length,0),chBody)}
    ${sec("ref","Reference sites",Object.keys(refs()).length,refBody)}</section>`;
   m.querySelectorAll("details.fsec").forEach(d=>d.ontoggle=()=>{F.open[d.dataset.sec]=d.open});
-  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});$("#fImp")?.addEventListener("click",()=>{impState();render();scrollTo(0,0)});
+  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});$("#fImp")?.addEventListener("click",()=>{impState();render();scrollTo(0,0)});{const rn=renNotice();if(rn){m.querySelector(".vhead")?.insertAdjacentHTML("afterend",rn);$("#renGo")?.addEventListener("click",()=>{S.tab="renew";render();scrollTo(0,0)})}}
   m.querySelectorAll("[data-feng]").forEach(r=>r.onclick=()=>{F.eng=r.dataset.feng;render();scrollTo(0,0)});
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{e.stopPropagation();openDrawer(b.dataset.open)});
   m.querySelectorAll("[data-flog]").forEach(b=>b.onclick=()=>{openDrawer(b.dataset.flog);S.drawer.mode="contact";drawDrawer()});
@@ -2737,7 +2740,7 @@ function pbStd(it,qty,ctx){const v=pbVer(it,ctx.date);if(!v)return null;const re
   if(it.unit==="once")return{amt:toAED(price,cur),note:"one-time per property"};
   return{amt:toAED(price*(+qty||1),cur),note:""}}
 /* effective mapping of a quote line: saved approval, else a rule, else nothing */
-function pbMapOf(x){if(x&&x.m&&x.m.st&&x.m.st!=="wait"&&x.m.it)return x.m;const k=pbKey(x&&x.item);const r=k&&pbRules().find(r=>r.key===k);return r?{it:r.it,st:"auto",rule:r.id}:null}
+function pbMapOf(x){if(x&&x.m&&x.m.st&&x.m.st!=="wait"&&x.m.it)return x.m;const k=pbKey(x&&x.item);const r=k&&pbRules().find(r=>r.key===k);return r?Object.assign({it:r.it,st:"auto",rule:r.id},r.ty?{ty:r.ty,un:r.un,yr:r.yr,pr:r.pr,if:r.if,nm:r.nm}:{}):null}
 function pbMapLines(lines){return(lines||[]).map(x=>{if(x.m&&x.m.st==="ok")return x;const m=pbMapOf(Object.assign({},x,{m:null}));return Object.assign({},x,{m:m||{st:"wait"}})})}
 const pbPending=l=>(l.quote&&Array.isArray(l.quote.lines)?l.quote.lines:[]).filter(x=>!pbMapOf(x));
 const pbYearly=it=>!!(it&&(it.yearly||it.unit==="room"));
@@ -2760,9 +2763,11 @@ const pbOpts=(sel,withX=true)=>{const by={};pbItems().forEach(it=>(by[it.product
   return`<option value="">Choose…</option>${withX?Object.entries(PB_X).map(([k,t])=>`<option value="${k}"${sel===k?" selected":""}>${t}</option>`).join(""):""}${Object.keys(by).sort().map(p=>`<optgroup label="${esc(p)}">${by[p].map(it=>`<option value="${esc(it.id)}"${sel===it.id?" selected":""}>${esc(it.name)} · ${esc(PB_UNITS[it.unit]||it.unit)}</option>`).join("")}</optgroup>`).join("")}`};
 const pbName=it=>pbKey(it.name).includes(pbKey(it.product).split(" ")[0])?it.name:it.product+" · "+it.name;
 const pbChip=t=>`<span class="pbt pbt-${t}">${PB_TYPES[t]||t}</span>`;
-async function pbSave(items,msg){const doc={items};try{if(S.pbExists)await S.db.doc("config/pricebook").update(doc);else{await S.db.doc("config/pricebook").set(doc);S.pbExists=true}S.pb=doc;S.pbStamp=(S.pbStamp||0)+1;if(msg)toast(msg);render();return true}
+async function pbSave(items,msg){const doc={items};try{if(S.pbExists)await S.db.doc("config/pricebook").update(doc);else{await S.db.doc("config/pricebook").set(doc);S.pbExists=true}S.pb=doc;S.pbStamp=(S.pbStamp||0)+1;pbIndexSave(items);if(msg)toast(msg);render();return true}
   catch(e){toast(/permission|42501|row-level|Supervisor/i.test(e.message||"")?(e.message&&/Supervisor/.test(e.message)?e.message:"You can't change the price book. Run supabase/21_pricing.sql, or ask a Supervisor."):"Couldn't save: "+(e.message||e.code));return false}}
-async function pbSaveRules(rules){try{if(S.lrExists)await S.db.doc("config/linerules").update({rules});else{await S.db.doc("config/linerules").set({rules});S.lrExists=true}S.lr={rules};S.pbStamp=(S.pbStamp||0)+1;return true}catch(e){toast("Couldn't save the line rules: "+(e.message||e.code));return false}}
+/* price-free list of items (type, unit, product) kept beside the rules so roles without the price book can still class quote lines */
+async function pbIndexSave(items){const ix={};(items||[]).forEach(i=>{ix[i.id]=pbMeta(i)});try{if(S.lrExists)await S.db.doc("config/linerules").update({items:ix});else{await S.db.doc("config/linerules").set({rules:[],items:ix});S.lrExists=true}S.lr=Object.assign({},S.lr,{items:ix})}catch(e){}}
+async function pbSaveRules(rules){try{if(S.lrExists)await S.db.doc("config/linerules").update({rules});else{await S.db.doc("config/linerules").set({rules});S.lrExists=true}S.lr=Object.assign({},S.lr,{rules});S.pbStamp=(S.pbStamp||0)+1;return true}catch(e){toast("Couldn't save the line rules: "+(e.message||e.code));return false}}
 async function pbApproveLines(l,lines){if(window.__approveQuoteLines)return window.__approveQuoteLines(l.id,lines);
   await S.db.doc("leads/"+l.id).update({quote:Object.assign({},l.quote,{lines}),updatedAt:nowISO()})}
 
@@ -2811,7 +2816,7 @@ function drawBuilder(l){const B=S.pbBuild;if(!B||B.leadId!==l.id)return;const A=
   A.querySelectorAll("[data-bq]").forEach(s=>s.onchange=()=>{B.rows[+s.dataset.bq].qty=Math.max(0,Math.round(+s.value||0));drawBuilder(l)});
   A.querySelectorAll("[data-bx]").forEach(b=>b.onclick=()=>{B.rows.splice(+b.dataset.bx,1);if(!B.rows.length)B.rows.push({it:"",qty:1});drawBuilder(l)});
   $("#bAdd").onclick=()=>{B.rows.push({it:"",qty:+l.pcs||1});drawBuilder(l)};$("#bX").onclick=()=>{S.pbBuild=null;drawActions(l)};
-  $("#bUse").onclick=()=>{B.total=Math.round(tot);B.lines=B.rows.map((r,i)=>{const it=pbItem(r.it);if(!it||!calc[i])return null;return{item:it.name,product:it.product,qty:r.qty,unit:calc[i].amt/(+r.qty||1),list:calc[i].amt/(+r.qty||1),total:calc[i].amt,m:{it:it.id,st:"ok",by:actor()||S.myName||"",at:nowISO()}}}).filter(Boolean);
+  $("#bUse").onclick=()=>{B.total=Math.round(tot);B.lines=B.rows.map((r,i)=>{const it=pbItem(r.it);if(!it||!calc[i])return null;return{item:it.name,product:it.product,qty:r.qty,unit:calc[i].amt/(+r.qty||1),list:calc[i].amt/(+r.qty||1),total:calc[i].amt,m:Object.assign({it:it.id,st:"ok",by:actor()||S.myName||"",at:nowISO()},pbMeta(it))}}).filter(Boolean);
     S.drawer.mode="quote";drawActions(l);const val=$("#a-val");if(val){val.value=B.total;const c=$("#a-cur");if(c)c.value="AED";val.dispatchEvent(new Event("input"));toast("Amount filled in from the price book. Add the target date and next step, then save.")}}}
 /* quote save: keep built lines, map read lines with the rules */
 function pbQuoteLines(l,o){if(S.pbBuild&&S.pbBuild.leadId===l.id&&S.pbBuild.lines&&!(o.lines&&o.lines.length)&&Math.abs((+o.aed||0)-S.pbBuild.total)<1){o.lines=S.pbBuild.lines;o.source=o.source||"Price book"}S.pbBuild=null;if(o.lines)o.lines=pbMapLines(o.lines);return o}
@@ -2901,8 +2906,8 @@ function bindPriceBook(m){const P=pbState();const man=can("pricing.manage");cons
     (P.sel||(P.sel={}))[k]=s.value});
   m.querySelectorAll("[data-pbok]").forEach(b=>b.onclick=async()=>{const l=S.leadMap[b.dataset.pbok];if(!l)return;const card=b.closest("[data-pbq]");const sel=P.sel||{};const rules=((S.lr&&S.lr.rules)||[]).slice();let miss=0,learn=0;
     const lines=l.quote.lines.map((x,i)=>{const k=l.id+"|"+i;const em=pbMapOf(x);if(em)return Object.assign({},x,{m:Object.assign({},em,{st:em.st==="auto"?"auto":"ok"})});const sv=card.querySelector(`[data-pbl="${CSS.escape(k)}"]`);const v=sv?sv.value:"";if(!v||v==="new"){miss++;return x}
-      if(card.querySelector(`[data-pbk="${CSS.escape(k)}"]`)?.checked){const key=pbKey(x.item);if(key&&!rules.some(r=>r.key===key)){rules.push({id:"r"+Date.now().toString(36)+i,key,it:v,by:me,at:nowISO(),on:true});learn++}}
-      return Object.assign({},x,{m:{it:v,st:"ok",by:me,at:nowISO()}})});
+      if(card.querySelector(`[data-pbk="${CSS.escape(k)}"]`)?.checked){const key=pbKey(x.item);if(key&&!rules.some(r=>r.key===key)){rules.push(Object.assign({id:"r"+Date.now().toString(36)+i,key,it:v,by:me,at:nowISO(),on:true},pbMeta(pbItem(v))||{}));learn++}}
+      return Object.assign({},x,{m:Object.assign({it:v,st:"ok",by:me,at:nowISO()},pbMeta(pbItem(v))||{})})});
     if(miss){toast(`Choose a price item for ${miss} line${miss===1?"":"s"}.`);return}b.disabled=true;
     try{await pbApproveLines(l,lines);if(learn)await pbSaveRules(rules);S.pbStamp=(S.pbStamp||0)+1;toast(`Lines approved${learn?` · ${learn} rule${learn===1?"":"s"} learnt`:""}`);render()}
     catch(e){b.disabled=false;toast(/42501|permission/i.test(e.message||e.code||"")?"You can't approve quote lines. Run supabase/21_pricing.sql or ask a Supervisor.":"Couldn't approve: "+(e.message||e.code))}});
@@ -3063,6 +3068,146 @@ function genTargetsPanel(){const ppl=genList().map(g=>g).concat(spNames().filter
    <div class="tw"><table><thead><tr><th>Person</th><th>Department</th><th class="num">Target / month</th><th class="num">This month</th></tr></thead><tbody>
    ${ppl.map(g=>{const n=S.leads.filter(l=>!l.deleted&&!isUpsell(l)&&genMatch(g,l)&&ymKey(l.createdAt||reqDate(l))===now).length;const t=genTarget(g.name);
      return`<tr><td>${esc(g.name)}</td><td>${esc(g.dept||"—")}</td><td class="num">${E?`<input type="number" min="0" step="1" data-tgg="${esc(g.name)}" value="${t||""}" placeholder="0" style="max-width:110px;text-align:right">`:t||"—"}</td><td class="num">${n}${t?` <span class="small muted">(${Math.round(n/t*100)}%)</span>`:""}</td></tr>`}).join("")}</tbody></table></div></div>`}
+
+/* ======================= RECURRING REVENUE AND RENEWALS (Renewals tab) =======================
+   What a won order brings in from the 2nd year: AMC, annual subscription, and OHIP (noted separately: it is paid on
+   to the PMS vendor, so it is neither AMC nor part of the Sales share).
+   settings.amc = {rates:[{scope:"std"|"region"|"chain",key,product|"*",pct}], startMonths, salesShare, alertDays, subProducts}
+     AMC % applies to the order value of hardware, software licences and one-time PMS interface lines.
+     Rate used: hotel chain, else region, else standard. Sales share = % of subscription from year 2, every year.
+   Amounts come from the order's matched quotation lines (line meta m.ty/un/yr/pr/if, or the price book);
+   orders without lines are estimated from the order value and marked "estimated".
+   lead.renewals["amc-2"|"sub-3"|"ohip-2"…] = {st, amt (corrected yearly amount), notes:[{t,by,a}], by, at},
+   written through set_renewal() (24_amc_renewals.sql): AMC team (renewal.manage) or the order's own engineer. */
+const amcCfg=()=>Object.assign({rates:[],startMonths:12,salesShare:null,alertDays:[90,60,30],subProducts:[]},S.settings.amc||{});
+const REN_ST=["Not started","Contacted","Quoted","Renewed","Lost"];
+const REN_T={amc:"AMC",sub:"Subscription",ohip:"OHIP"};
+const renChip=t=>`<span class="rty rty-${t}">${REN_T[t]}</span>`;
+const pbMeta=it=>it?{ty:it.type,un:it.unit,yr:pbYearly(it),pr:it.product,if:it.iface||"",nm:it.name}:null;
+function lineMeta(x){const m=pbMapOf(x);if(!m||!m.it||String(m.it).startsWith("x:"))return null;const it=pbItem(m.it);if(it)return pbMeta(it);const ix=((S.lr||{}).items||{})[m.it];if(ix)return ix;return m.ty?{ty:m.ty,un:m.un,yr:!!m.yr,pr:m.pr,if:m.if||"",nm:m.nm||x.item}:null}
+function amcRate(l,p){const R=amcCfg().rates||[];const ch=(chainOf(accKey(l),l.accountName)||{}).chain||"";const rg=regionOf(l);
+  const pick=(sc,key)=>{const L=R.filter(r=>r.scope===sc&&+r.pct>0&&(sc==="std"||nk(r.key)===nk(key)));return L.find(r=>r.product===p)||L.find(r=>r.product==="*")||null};
+  const c=ch&&pick("chain",ch);if(c)return{pct:+c.pct,src:`${c.pct}% · ${ch} chain rate`};const g=rg&&pick("region",rg);if(g)return{pct:+g.pct,src:`${g.pct}% · ${rg} region rate`};
+  const s=pick("std","");return s?{pct:+s.pct,src:`${s.pct}% · standard`}:null}
+/* yearly recurring amounts of one won order */
+function recOf(l){if(l.status!=="Won")return null;if(l._rec&&l._rec.k===S.pbStamp+"|"+S.setStamp)return l._rec.v;const ov=orderVal(l);const cfg=amcCfg();const cur=(l.quote&&l.quote.currency)||"AED";
+  const M=((l.quote&&l.quote.lines)||[]).map(x=>({me:lineMeta(x),q:toAED(Math.max(0,+x.total||0),cur)})).filter(r=>r.me&&r.q>0);const sum=M.reduce((s,r)=>s+r.q,0);
+  const o={amc:[],sub:[],ohip:[],est:false,one:0,order:ov};
+  if(sum>0){const k=ov/sum;const base={};let ifc=0;
+    M.forEach(r=>{const v=r.q*k,me=r.me;if(me.un==="room"||/ohip/i.test(me.if||"")){o.ohip.push({name:me.nm,amt:v});return}if(me.yr){o.sub.push({name:me.nm,amt:v});return}
+      o.one+=v;if(me.ty==="interface")ifc+=v;else if(me.ty==="hardware"||me.ty==="software")base[me.pr]=(base[me.pr]||0)+v});
+    const rated=Object.keys(base).filter(p=>amcRate(l,p));const tb=rated.reduce((s,p)=>s+base[p],0);
+    rated.forEach(p=>{const r=amcRate(l,p);const b=base[p]+(tb?ifc*base[p]/tb:0);o.amc.push({product:p,base:b,pct:r.pct,src:r.src,amt:b*r.pct/100})})}
+  else{o.est=true;const subs=cfg.subProducts||[];productsOf(l).forEach(p=>{const b=ov*pbShare(l,p);if(!b)return;const r=amcRate(l,p);
+      if(subs.some(s=>nk(s)===nk(p)))o.sub.push({name:p,amt:b});else{o.one+=b;if(r)o.amc.push({product:p,base:b,pct:r.pct,src:r.src,amt:b*r.pct/100})}})}
+  const t=a=>a.reduce((s,x)=>s+x.amt,0);o.amcT=t(o.amc);o.subT=t(o.sub);o.ohipT=t(o.ohip);
+  try{Object.defineProperty(l,"_rec",{value:{k:S.pbStamp+"|"+S.setStamp,v:o},configurable:true,enumerable:false,writable:true})}catch(e){}return o}
+const addMonthsISO=(iso,n)=>{const d=new Date(iso);if(isNaN(d))return"";const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+n);d.setDate(Math.min(day,new Date(d.getFullYear(),d.getMonth()+1,0).getDate()));return ymd(d)};
+/* renewal items (year 2 and year 3) of a won order */
+function renItems(l){const r=recOf(l);if(!r)return[];const won=String(wonAt(l)||"").slice(0,10);if(!won)return[];const cfg=amcCfg();const sh=Math.max(0,Math.min(100,+cfg.salesShare||0))/100;const out=[];
+  for(const y of [2,3])for(const ty of ["amc","sub","ohip"]){const calc=ty==="amc"?r.amcT:ty==="sub"?r.subT:r.ohipT;const key=ty+"-"+y;const st=(l.renewals||{})[key]||{};const amt=st.amt!=null&&st.amt!==""?+st.amt:calc;if(!(amt>0)&&!(calc>0))continue;
+    const due=addMonthsISO(won,(ty==="amc"?(+cfg.startMonths||12):12)+(y-2)*12);const sales=ty==="sub"?amt*sh:0;
+    out.push({l,y,ty,key,amt,calc,fixed:st.amt!=null&&st.amt!=="",due,st:st.st||"Not started",notes:st.notes||[],sales,dept:ty==="amc"?amt:ty==="sub"?amt-sales:0,est:r.est&&!(st.amt!=null&&st.amt!==""),
+      src:ty==="amc"?[...new Set(r.amc.map(a=>a.src))].join(", "):ty==="sub"?"yearly subscription":"paid on to the PMS vendor",what:ty==="amc"?r.amc.map(a=>a.product).join(", "):(ty==="sub"?r.sub:r.ohip).map(a=>a.name).join(", ")})}
+  return out}
+const renAll=()=>S.leads.filter(l=>l.status==="Won"&&!l.deleted).flatMap(renItems);
+const renOpen=i=>!["Renewed","Lost"].includes(i.st);
+const renDays=i=>Math.round((new Date(i.due)-new Date(todayISO()))/864e5);
+const renCanEdit=l=>can("renewal.manage")||can("lead.edit_all")||isMine(l);
+function renAlertCount(){if(!can("page.renewals"))return 0;const mx=Math.max(...(amcCfg().alertDays||[90]).map(Number),30);return renAll().filter(i=>renOpen(i)&&renDays(i)<=mx&&renDays(i)>=-180).length}
+async function renSave(l,key,val){const cur=(l.renewals||{})[key]||{};const v=Object.assign({},cur,val,{by:actor()||S.myName||"",at:nowISO()});
+  if(window.__setRenewal)await window.__setRenewal(l.id,key,v);else await S.db.doc("leads/"+l.id).update({renewals:Object.assign({},l.renewals||{},{[key]:v}),updatedAt:nowISO()});
+  l.renewals=Object.assign({},l.renewals||{},{[key]:v});try{delete l._rec}catch(e){}}
+function renState(){const y=new Date().getFullYear();return S.renv||(S.renv={yr:String(y+1),ty:"",st:"open",open:"",all:false,q:""})}
+function renderRenew(m){const V=renState();const all=renAll();const cfg=amcCfg();const y0=new Date().getFullYear();const yrs=[y0,y0+1,y0+2].map(String);
+  const inY=i=>V.yr==="all"||i.due.slice(0,4)===V.yr;const F=all.filter(inY);const sum=(L,f)=>L.reduce((s,i)=>s+f(i),0);const of=t=>F.filter(i=>i.ty===t);
+  const soon=all.filter(i=>renOpen(i)&&renDays(i)<=90&&renDays(i)>=-180);const q=nk(V.q);
+  const list=F.filter(i=>(!V.ty||i.ty===V.ty)&&(V.st==="all"||renOpen(i))&&(!q||nk(i.l.accountName+" "+i.l.ref+" "+(i.l.assignedTo||"")+" "+i.what).includes(q))).sort((a,b)=>a.due.localeCompare(b.due));
+  const kp=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+  const mon=MON.map((_,i)=>{const k=V.yr+"-"+String(i+1).padStart(2,"0");const L=F.filter(x=>x.due.slice(0,7)===k);return{a:sum(L.filter(x=>x.ty==="amc"),x=>x.amt),s:sum(L.filter(x=>x.ty==="sub"),x=>x.amt),o:sum(L.filter(x=>x.ty==="ohip"),x=>x.amt)}});const top=Math.max(1,...mon.map(x=>x.a+x.s+x.o));
+  const Y=y=>{const L=all.filter(i=>i.y===y);return{a:sum(L.filter(i=>i.ty==="amc"),i=>i.amt),sd:sum(L.filter(i=>i.ty==="sub"),i=>i.dept),ss:sum(L.filter(i=>i.ty==="sub"),i=>i.sales),o:sum(L.filter(i=>i.ty==="ohip"),i=>i.amt)}};const Y2=Y(2),Y3=Y(3);
+  const row=i=>{const l=i.l;const d=renDays(i);const ed=renCanEdit(l);const open=V.open===l.id+"|"+i.key;const late=renOpen(i)&&d<0;
+    return`<tr${!renOpen(i)?` style="opacity:.6"`:""}><td><a href="#" data-open="${esc(l.id)}"><b>${esc(l.accountName||l.ref)}</b></a><div class="small muted">${esc(i.what||productsOf(l).join(", "))} · year ${i.y}</div></td><td>${renChip(i.ty)}</td>
+     <td class="num">${fmtAED(orderVal(l))}</td><td class="small">${esc(i.src)}</td><td class="num"><b>${fmtAED(i.amt)}</b>${i.est?`<div class="small muted">estimated</div>`:i.fixed?`<div class="small muted">corrected</div>`:""}</td>
+     <td class="num">${i.sales?fmtAED(i.sales):"—"}</td><td class="num">${i.dept?fmtAED(i.dept):"—"}</td><td class="nowrap"${late?` style="color:var(--bad)"`:d<=30&&renOpen(i)?` style="color:var(--warn)"`:""}>${fmtD(i.due)}<div class="small">${!renOpen(i)?"":late?`${-d} days late`:`in ${d} days`}</div></td><td>${esc(l.assignedTo||"—")}</td>
+     <td>${ed?`<select data-rst="${esc(l.id)}|${i.key}" style="min-width:118px">${opts(REN_ST,i.st)}</select>`:`<span class="chip ${i.st==="Renewed"?"ok":i.st==="Lost"?"bad":i.st==="Not started"?"warn":""}">${esc(i.st)}</span>`}
+       <div><button type="button" class="linkbtn small" data-rop="${esc(l.id)}|${i.key}">${i.notes.length?`${i.notes.length} note${i.notes.length===1?"":"s"}`:ed?"Add note":"Notes"}</button></div></td></tr>
+     ${open?`<tr class="pbed"><td colspan="10"><div class="rnote">${i.notes.map(n=>`<div class="small"><span class="muted">${fmtD(n.t)} · ${esc(n.by||"")}</span> ${esc(n.a)}</div>`).join("")||`<div class="small muted">No notes yet.</div>`}
+       ${ed?`<div class="row" style="margin-top:8px;gap:8px;align-items:end"><label class="f fsm" style="flex:1;min-width:200px">Note<input id="rn-t" placeholder="e.g. Renewal quote sent to the Financial Controller"></label><label class="f fsm" style="width:160px">Corrected yearly amount (AED)<input id="rn-a" type="number" min="0" step="1" value="${i.fixed?Math.round(i.amt):""}" placeholder="${Math.round(i.calc)}"></label><button type="button" class="btn pri sm" data-rsv="${esc(l.id)}|${i.key}">Save</button></div>`:""}</div></td></tr>`:""}`};
+  const shareTxt=cfg.salesShare==null||cfg.salesShare===""?"Sales share not set":`Sales share ${+cfg.salesShare}%`;
+  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Renewals · AMC and subscriptions</h2><p>What won orders bring in from the 2nd year, and what is due next. Expected amounts assume every contract renews.</p></div>
+    <div class="row" style="gap:8px;align-items:end"><label class="f fsm">Due in<select id="rnY">${yrs.map(y=>`<option${y===V.yr?" selected":""}>${y}</option>`).join("")}<option value="all"${V.yr==="all"?" selected":""}>All years</option></select></label>
+     <label class="f fsm">Type<select id="rnT"><option value="">All types</option>${Object.entries(REN_T).map(([k,t])=>`<option value="${k}"${V.ty===k?" selected":""}>${t}</option>`).join("")}</select></label><button type="button" class="btn" id="rnX">Export Excel</button></div></div>
+   ${isSales()?`<div class="notice">These are the renewals on <b>your</b> won orders. The AMC team sees the same rows, so update the status and add notes here to work on them together.</div>`:""}
+   ${cfg.salesShare==null||cfg.salesShare===""?`<div class="notice warn">The Sales share of subscriptions isn't set yet, so it shows as 0. ${can("settings.manage")?"Set it in Products &amp; settings → AMC and renewals.":"A Supervisor sets it in Products &amp; settings."}</div>`:""}
+   <div class="kpis">${kp(`Expected, due in ${V.yr==="all"?"all years":V.yr}`,fmtAED(sum(F.filter(i=>i.ty!=="ohip"),i=>i.amt)),`${F.filter(i=>i.ty!=="ohip").length} renewals · AMC and subscription`)}${kp("AMC",fmtAED(sum(of("amc"),i=>i.amt)),`${of("amc").length} contracts · 100% AMC department`)}
+    ${kp("Annual subscription",fmtAED(sum(of("sub"),i=>i.amt)),`AMC dept ${fmtAED(sum(of("sub"),i=>i.dept))} · Sales ${fmtAED(sum(of("sub"),i=>i.sales))}`)}${kp("OHIP (paid to the PMS vendor)",fmtAED(sum(of("ohip"),i=>i.amt)),"noted separately · not AMC, no Sales share")}
+    ${kp("Due in the next 90 days",fmtAED(sum(soon.filter(i=>i.ty!=="ohip"),i=>i.amt)),`${soon.length} renewal${soon.length===1?"":"s"} · ${soon.filter(i=>i.st==="Not started").length} not started${soon.some(i=>renDays(i)<0)?` · ${soon.filter(i=>renDays(i)<0).length} late`:""}`)}</div>
+   <div class="grid2" style="align-items:start">${V.yr==="all"?"":`<div class="panel"><h3>${V.yr} by month</h3><p class="small muted" style="margin:2px 0 10px">Expected renewal revenue by the month it falls due.</p>
+     <div class="gch rch">${mon.map((x,i)=>`<div class="gcol" title="${MON[i]} ${V.yr}: AMC ${fmtAED(x.a)} · subscription ${fmtAED(x.s)} · OHIP ${fmtAED(x.o)}"><div class="gst" style="height:${(x.a+x.s+x.o)/top*82}%">${[["o","var(--line)"],["s","var(--accent)"],["a","var(--warn)"]].map(([k,c])=>x[k]?`<i style="flex:${x[k]};background:${c}"></i>`:"").join("")}</div><span>${MON[i].slice(0,3)}</span></div>`).join("")}</div>
+     <div class="glg"><span><i style="background:var(--warn)"></i>AMC</span><span><i style="background:var(--accent)"></i>annual subscription</span><span><i style="background:var(--line)"></i>OHIP</span></div></div>`}
+    <div class="panel"><h3>2nd and 3rd year of every won order</h3><div class="tw" style="margin-top:8px"><table><thead><tr><th></th><th class="num">2nd year</th><th class="num">3rd year</th></tr></thead><tbody>
+     <tr><td>${renChip("amc")} AMC department</td><td class="num">${fmtAED(Y2.a)}</td><td class="num">${fmtAED(Y3.a)}</td></tr><tr><td>${renChip("sub")} to AMC department</td><td class="num">${fmtAED(Y2.sd)}</td><td class="num">${fmtAED(Y3.sd)}</td></tr>
+     <tr><td>${renChip("sub")} Sales share</td><td class="num">${fmtAED(Y2.ss)}</td><td class="num">${fmtAED(Y3.ss)}</td></tr><tr class="tot"><td>Total expected</td><td class="num">${fmtAED(Y2.a+Y2.sd+Y2.ss)}</td><td class="num">${fmtAED(Y3.a+Y3.sd+Y3.ss)}</td></tr>
+     <tr><td>${renChip("ohip")} paid on to the PMS vendor</td><td class="num">${fmtAED(Y2.o)}</td><td class="num">${fmtAED(Y3.o)}</td></tr></tbody></table></div>
+     <p class="small muted" style="margin-top:8px">${shareTxt}, every year from the 2nd year. AMC starts ${+cfg.startMonths||12} months after the order. OHIP is kept out of the totals.</p></div></div>
+   <div class="panel"><div class="row" style="gap:8px;align-items:end"><h3>Renewals due</h3><span class="sp"></span><label class="f fsm">Show<select id="rnS"><option value="open"${V.st==="open"?" selected":""}>Still open</option><option value="all"${V.st==="all"?" selected":""}>All, with renewed and lost</option></select></label><label class="f fsm">Find<input id="rnQ" value="${esc(V.q)}" placeholder="Hotel, engineer, product"></label></div>
+    <div class="tw" style="margin-top:8px"><table class="rtab"><thead><tr><th>Hotel · product</th><th>Type</th><th class="num">Original order</th><th>Rate used</th><th class="num">Yearly amount</th><th class="num">Sales share</th><th class="num">AMC dept</th><th>Due</th><th>Sales engineer</th><th>Status</th></tr></thead><tbody>
+    ${list.slice(0,V.all?9999:40).map(row).join("")||`<tr><td colspan="10" class="empty">No renewals ${V.st==="open"?"open ":""}for this choice.</td></tr>`}</tbody></table></div>
+    ${list.length>40&&!V.all?`<div style="margin-top:10px"><button type="button" class="btn" id="rnAll">Show all ${list.length}</button></div>`:""}
+    <p class="small muted" style="margin-top:8px">The AMC team and the order's sales engineer both update the status and notes: Not started → Contacted → Quoted → Renewed or Lost. "Estimated" amounts come from the order value because the order has no matched quotation lines; correct them with a note.</p></div></section>`;
+  $("#rnY").onchange=e=>{V.yr=e.target.value;render()};$("#rnT").onchange=e=>{V.ty=e.target.value;render()};$("#rnS").onchange=e=>{V.st=e.target.value;render()};$("#rnQ").onchange=e=>{const v=e.target.value;if(v===V.q)return;V.q=v;setTimeout(render,0)};$("#rnAll")?.addEventListener("click",()=>{V.all=true;render()});
+  m.querySelectorAll("[data-open]").forEach(a=>a.onclick=e=>{e.preventDefault();openDrawer(a.dataset.open)});
+  m.querySelectorAll("[data-rop]").forEach(b=>b.onclick=()=>{V.open=V.open===b.dataset.rop?"":b.dataset.rop;render()});
+  const fail=e=>toast(/42501|permission|Only the AMC/i.test(e.message||e.code||"")?"You can't update this renewal. Run supabase/24_amc_renewals.sql, or ask the AMC team.":"Couldn't save: "+(e.message||e.code));
+  m.querySelectorAll("[data-rst]").forEach(s=>s.onchange=async()=>{const [id,key]=s.dataset.rst.split("|");const l=S.leadMap[id];s.disabled=true;try{await renSave(l,key,{st:s.value,notes:[...(((l.renewals||{})[key]||{}).notes||[]),{t:nowISO(),by:actor()||S.myName||"",a:"Status: "+s.value}]});toast("Renewal updated");render()}catch(e){s.disabled=false;fail(e)}});
+  m.querySelectorAll("[data-rsv]").forEach(b=>b.onclick=async()=>{const [id,key]=b.dataset.rsv.split("|");const l=S.leadMap[id];const t=$("#rn-t").value.trim(),a=$("#rn-a").value;const cur=(l.renewals||{})[key]||{};const amt=a===""?null:Math.max(0,Math.round(+a));
+    if(!t&&(amt??null)===(cur.amt??null)){toast("Write a note or a corrected amount");return}const notes=[...(cur.notes||[])];if(t||amt!==(cur.amt??null))notes.push({t:nowISO(),by:actor()||S.myName||"",a:(t||"")+(amt!==(cur.amt??null)?(t?" · ":"")+(amt==null?"Amount back to the calculated value":"Yearly amount corrected to "+fmtAED(amt)):"")});
+    b.disabled=true;try{await renSave(l,key,{amt,notes,st:cur.st||"Not started"});toast("Saved");render()}catch(e){b.disabled=false;fail(e)}});
+  $("#rnX").onclick=async()=>{let X;try{X=await loadXLSX()}catch(e){toast("Couldn't load the spreadsheet tool.");return}
+    const R=[["Hotel","Ref","Country","Products","Type","Contract year","Original order (AED)","Rate used","Yearly amount (AED)","Estimated","Sales share (AED)","AMC dept (AED)","Due","Sales engineer","Status","Last note"]].concat(list.map(i=>[i.l.accountName||"",i.l.ref,i.l.country||"",i.what,REN_T[i.ty],i.y,Math.round(orderVal(i.l)),i.src,Math.round(i.amt),i.est?"yes":"",Math.round(i.sales),Math.round(i.dept),i.due,i.l.assignedTo||"",i.st,(i.notes[i.notes.length-1]||{}).a||""]));
+    const wb=X.utils.book_new();X.utils.book_append_sheet(wb,X.utils.aoa_to_sheet(R),"Renewals");const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});const name=`renewals-${V.yr}-${todayISO()}.xlsx`;
+    window.__lastExport={name,rows:R.length-1};const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}}
+/* lead drawer: recurring revenue of a won order */
+function drawRecurring(l){const A=$("#recArea");if(!A)return;const r=recOf(l);if(!r||!(r.amcT||r.subT||r.ohipT)){A.innerHTML="";return}const it=renItems(l);const g=(y,t)=>it.find(i=>i.y===y&&i.ty===t);const v=(y,t)=>{const i=g(y,t);return i?fmtAED(i.amt):"—"};
+  const tot=y=>["amc","sub"].reduce((s,t)=>s+((g(y,t)||{}).amt||0),0);const y1=r.one+r.subT;const sh=y=>(g(y,"sub")||{}).sales||0;const next=it.filter(renOpen).sort((a,b)=>a.due.localeCompare(b.due))[0];
+  A.innerHTML=`<div class="panel pbp"><div class="row"><b>Recurring revenue</b><span class="sp"></span>${can("page.renewals")?`<button type="button" class="btn sm" id="rec-go">Open Renewals</button>`:""}</div>
+   <div class="tw" style="margin-top:8px"><table class="pbtab"><thead><tr><th></th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead><tbody>
+   <tr><td>One-time</td><td class="num">${fmtAED(r.one)}</td><td class="num">—</td><td class="num">—</td></tr>
+   ${r.amcT?`<tr><td>${renChip("amc")} <span class="small muted">${esc([...new Set(r.amc.map(a=>a.src))].join(", "))} on ${fmtAED(r.amc.reduce((s,a)=>s+a.base,0))}</span></td><td class="num small muted">warranty</td><td class="num">${v(2,"amc")}</td><td class="num">${v(3,"amc")}</td></tr>`:""}
+   ${r.subT?`<tr><td>${renChip("sub")} <span class="small muted">${esc(r.sub.map(a=>a.name).join(", "))}</span></td><td class="num">${fmtAED(r.subT)}</td><td class="num">${v(2,"sub")}</td><td class="num">${v(3,"sub")}</td></tr>`:""}
+   <tr class="tot"><td>Company revenue</td><td class="num">${fmtAED(y1)}</td><td class="num">${fmtAED(tot(2))}</td><td class="num">${fmtAED(tot(3))}</td></tr>
+   ${r.subT?`<tr><td class="small muted">of which Sales share (${+amcCfg().salesShare||0}% of subscription)</td><td class="num small">—</td><td class="num small">${fmtAED(sh(2))}</td><td class="num small">${fmtAED(sh(3))}</td></tr>`:""}
+   ${r.ohipT?`<tr><td>${renChip("ohip")} <span class="small muted">paid on to the PMS vendor, kept separate</span></td><td class="num">${fmtAED(r.ohipT)}</td><td class="num">${v(2,"ohip")}</td><td class="num">${v(3,"ohip")}</td></tr>`:""}</tbody></table></div>
+   <div class="small muted" style="margin-top:6px">3-year value ${fmtAED(y1+tot(2)+tot(3))}${next?` · next renewal ${fmtD(next.due)} (${esc(next.st)})`:""}${r.est?" · estimated from the order value: this order has no matched quotation lines":""}</div></div>`;
+  $("#rec-go")?.addEventListener("click",()=>{closeDrawer&&closeDrawer();S.tab="renew";const V=renState();V.yr="all";V.q=l.accountName||"";render()})}
+function renNotice(){if(!can("page.renewals"))return"";const n=renAll().filter(i=>renOpen(i)&&renDays(i)<=90&&renDays(i)>=-180);if(!n.length)return"";const v=n.filter(i=>i.ty!=="ohip").reduce((s,i)=>s+i.amt,0);
+  return`<div class="notice warn" id="renNote" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span><b>${n.length} renewal${n.length===1?"":"s"}</b> on your won orders ${n.length===1?"is":"are"} due within 90 days (${fmtAED(v)} a year). Work with the AMC team to close ${n.length===1?"it":"them"}.</span><button type="button" class="btn sm" id="renGo">Open Renewals</button></div>`}
+/* Products & settings → AMC and renewals */
+function amcPanel(){if(!can("settings.manage"))return"";const c=amcCfg();const ed=!!S.amcEd;const R=ed?S.amcEd.rates:c.rates;const prods=prodList(false).map(p=>p.name);const regs=[...new Set(S.leads.map(regionOf))].filter(r=>r&&r!=="No region").sort();const chains=[...new Set(chainList().map(c=>c.name||c[0]||c).filter(c=>typeof c==="string").concat(Object.values(S.settings.chainOverrides||{})))].sort();
+  const sc={std:"Standard",region:"Region",chain:"Hotel chain"};
+  return`<div class="panel" id="amcPanel"><div class="row"><h3>AMC and renewals</h3><span class="sp"></span>${ed?`<button type="button" class="btn" id="amAdd">Add rate</button><button type="button" class="btn" id="amX">Cancel</button><button type="button" class="btn pri" id="amS">Save</button>`:`<button type="button" class="btn pri" id="amE">Edit</button>`}</div>
+   <p class="small muted" style="margin:4px 0 10px">Yearly AMC as a % of the order value of hardware, software licences and the one-time PMS interface. The most specific rate wins: hotel chain, then region, then standard.</p>
+   <div class="tw"><table><thead><tr><th>Applies to</th><th>Region or chain</th><th>Product</th><th class="num">AMC % a year</th>${ed?"<th></th>":""}</tr></thead><tbody>
+   ${R.map((r,i)=>ed?`<tr data-ai="${i}"><td><select data-a="scope">${Object.entries(sc).map(([k,t])=>`<option value="${k}"${r.scope===k?" selected":""}>${t}</option>`).join("")}</select></td><td><input data-a="key" value="${esc(r.key||"")}" list="amKeys" placeholder="${r.scope==="std"?"all customers":"type or pick"}"${r.scope==="std"?" disabled":""}></td>
+      <td><select data-a="product"><option value="*"${r.product==="*"?" selected":""}>All products</option>${prods.map(p=>`<option${p===r.product?" selected":""}>${esc(p)}</option>`).join("")}</select></td><td class="num"><input data-a="pct" type="number" min="0" max="100" step="0.5" value="${esc(r.pct??"")}" style="max-width:90px;text-align:right"></td><td><button type="button" class="btn sm" data-adel="${i}" aria-label="Remove">✕</button></td></tr>`
+     :`<tr><td>${sc[r.scope]||r.scope}</td><td>${r.scope==="std"?"All customers":esc(r.key||"—")}</td><td>${r.product==="*"?"All products":esc(r.product)}</td><td class="num">${esc(r.pct)}%</td></tr>`).join("")||`<tr><td colspan="5" class="muted">No AMC rates yet.</td></tr>`}</tbody></table></div>
+   <datalist id="amKeys">${regs.concat(chains).map(k=>`<option value="${esc(k)}">`).join("")}</datalist>
+   <div class="grid2" style="margin-top:12px"><label class="f fsm">AMC starts (months after the order) ${ed?`<input id="am-start" type="number" min="0" max="60" step="1" value="${esc((S.amcEd&&S.amcEd.f||{}).start??c.startMonths)}">`:`<b>${esc(c.startMonths)}</b>`}</label>
+    <label class="f fsm">Sales share of subscriptions (% a year, from the 2nd year) ${ed?`<input id="am-share" type="number" min="0" max="100" step="0.5" value="${esc((S.amcEd.f||{}).share??c.salesShare??"")}" placeholder="decided by Management">`:`<b>${c.salesShare==null||c.salesShare===""?"not set":esc(c.salesShare)+"%"}</b>`}</label>
+    <label class="f fsm">Alert days before a renewal is due ${ed?`<input id="am-days" value="${esc((S.amcEd.f||{}).days??(c.alertDays||[]).join(", "))}">`:`<b>${esc((c.alertDays||[]).join(", "))}</b>`}</label></div>
+   <div style="margin-top:10px"><div class="small" style="margin-bottom:4px"><b>Annual subscription products</b> <span class="muted">· for orders without quotation lines, the whole order value of these counts as a yearly subscription</span></div>
+    ${ed?`<div class="amsub">${prods.map(p=>`<label class="small"><input type="checkbox" data-asub="${esc(p)}"${(c.subProducts||[]).some(s=>nk(s)===nk(p))?" checked":""}> ${esc(p)}</label>`).join("")}</div>`:`<div class="small">${(c.subProducts||[]).map(p=>`<span class="chip">${esc(p)}</span>`).join(" ")||`<span class="muted">none</span>`}</div>`}</div></div>`}
+function bindAmcPanel(m){if(!$("#amcPanel"))return;const read=()=>[...m.querySelectorAll("[data-ai]")].map(r=>{const g=k=>r.querySelector(`[data-a="${k}"]`).value;return{scope:g("scope"),key:g("scope")==="std"?"":g("key").trim(),product:g("product"),pct:g("pct")===""?null:+g("pct")}});
+  const keep=()=>{S.amcEd.rates=read();S.amcEd.f={share:$("#am-share").value,start:$("#am-start").value,days:$("#am-days").value}};
+  $("#amE")?.addEventListener("click",()=>{S.amcEd={rates:(amcCfg().rates||[]).map(r=>Object.assign({},r))};render()});$("#amX")?.addEventListener("click",()=>{S.amcEd=null;render()});
+  $("#amAdd")?.addEventListener("click",()=>{keep();S.amcEd.rates.push({scope:"chain",key:"",product:"*",pct:null});render()});
+  m.querySelectorAll("[data-adel]").forEach(b=>b.onclick=()=>{keep();S.amcEd.rates.splice(+b.dataset.adel,1);render()});
+  m.querySelectorAll('#amcPanel [data-a="scope"]').forEach(s=>s.onchange=()=>{keep();render()});
+  $("#amS")?.addEventListener("click",async e=>{const rates=read();const bad=rates.find(r=>!(r.pct>0)||(r.scope!=="std"&&!r.key));if(bad){toast(bad.scope!=="std"&&!bad.key?"Choose the region or hotel chain for each rate.":"Enter the AMC % for each rate.");return}
+    const sh=$("#am-share").value;const days=$("#am-days").value.split(/[,; ]+/).map(Number).filter(n=>n>0&&n<=365).sort((a,b)=>b-a);
+    const amc={rates,startMonths:Math.max(0,Math.round(+$("#am-start").value||12)),salesShare:sh===""?null:Math.max(0,Math.min(100,+sh)),alertDays:days.length?days:[90,60,30],subProducts:[...m.querySelectorAll("[data-asub]")].filter(x=>x.checked).map(x=>x.dataset.asub)};
+    e.currentTarget.disabled=true;try{await S.db.doc("config/settings").update({amc});S.settings.amc=amc;S.setStamp=(S.setStamp||0)+1;S.amcEd=null;toast("AMC settings saved");render()}catch(er){e.currentTarget.disabled=false;toast("Couldn't save: "+(er.message||er.code))}})}
 
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
 const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(can("report.generators")?[["gen","Lead generators"]]:[]).concat(canPB()?[["pb","Price book"]]:[]);
@@ -3423,6 +3568,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   ${rulesPanel()}
   ${pmsPanel()}
   ${genPanel()}
+  ${amcPanel()}
   <div class="grid2">
    <div class="panel"><h3>Product catalog <span class="chip">${prods.filter(p=>p.active!==false).length} active</span></h3>
      <form class="row" id="addProd" style="margin-bottom:6px"><input id="np" placeholder="New product name" style="flex:1"><label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="npRep" style="width:auto">Repeatable</label><button class="btn pri">Add product</button></form>
@@ -3458,7 +3604,7 @@ function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindRules();bindPmsPanel(m);bindGenPanel(m);
+  bindChains(m);bindRules();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
