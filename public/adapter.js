@@ -119,6 +119,36 @@
     if (error) throw Object.assign(new Error(error.message), { code: error.code });
     return true;
   };
+  // AMC contracts of existing clients (supabase/28_contracts.sql). A small table read in full; the PDFs are never uploaded.
+  window.__contracts = {
+    async list() {
+      const out = [];
+      for (let from = 0; ; ) {
+        const { data, error } = await sb.from("contracts").select("id,doc").order("id").range(from, from + 999);
+        if (error) throw Object.assign(new Error(error.message), { code: error.code });
+        if (!data.length) break;
+        data.forEach((r) => out.push(Object.assign({}, r.doc, { id: r.id })));
+        from += data.length;
+      }
+      return out;
+    },
+    async insert(rows) {
+      const { error } = await sb.from("contracts").insert(rows.map((d) => ({ id: d.id, doc: d })));
+      if (error) throw Object.assign(new Error(error.message), { code: error.code });
+      return true;
+    },
+    async update(id, doc) {
+      const { data, error } = await sb.from("contracts").update({ doc }).eq("id", id).select("id");
+      if (error) throw Object.assign(new Error(error.message), { code: error.code });
+      if (!data || !data.length) throw Object.assign(new Error("You are not allowed to change this contract."), { code: "42501" });
+      return true;
+    },
+    async setRenewal(id, key, val) {
+      const { error } = await sb.rpc("set_contract_renewal", { p_id: id, p_key: key, p_val: val });
+      if (error) throw Object.assign(new Error(error.message), { code: error.code });
+      return true;
+    },
+  };
   window.__approveQuoteLines = async (id, lines) => {
     const { error } = await sb.rpc("approve_quote_lines", { p_id: id, p_lines: lines });
     if (error) throw Object.assign(new Error(error.message), { code: error.code });
