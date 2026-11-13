@@ -424,7 +424,7 @@ th{position:relative}
 .ctdrop:hover,.ctdrop.on{border-color:var(--accent);background:var(--accent-soft)}
 .ctc.bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}.ctc.dup{opacity:.75}
 .ctg{display:grid;grid-template-columns:1.4fr .9fr 1fr 1fr 1.2fr 1.2fr;gap:16px;margin-top:12px;align-items:start}.ctg .l{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.ctg select,.ctg input{width:100%}.ctl select{min-width:118px;width:100%;padding-left:8px;padding-right:22px;font-size:13.5px}.ctl select[data-cp]{min-width:160px}.ctl select[data-cc]{min-width:176px}.ctl td:nth-child(3){min-width:210px}.ctl th,.ctl td{padding-left:8px;padding-right:8px}.ctl td{vertical-align:top}.ctc input[type=checkbox],#ctrCatPanel input[type=checkbox],#ohipPanel input[type=checkbox]{width:auto;flex:none;margin:0}
+.ctg select,.ctg input{width:100%}.ctl select{min-width:118px;width:100%;padding-left:8px;padding-right:22px;font-size:13.5px}.ctl select[data-cp]{min-width:160px}.ctl select[data-ci]{min-width:160px;max-width:240px}.ctl select[data-cc]{min-width:176px}.ctl td:nth-child(3){min-width:210px}.ctl th,.ctl td{padding-left:8px;padding-right:8px}.ctl td{vertical-align:top}.ctc input[type=checkbox],#ctrCatPanel input[type=checkbox],#ohipPanel input[type=checkbox]{width:auto;flex:none;margin:0}
 .ctcl{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.ctcl .l{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.ctph td{vertical-align:top}.ctph tr.ctgh td{background:var(--sunk);font:600 12px var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding-block:6px}.ctph th.num{min-width:150px}
 .ctprep{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ctprep .l{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.ctfiles{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}.ctfiles li{display:flex;gap:10px;align-items:center;padding:6px 10px;background:var(--sunk);border-radius:8px}.ctfiles li span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ibbar{display:flex;align-items:center;gap:8px}.ibbar i{display:block;height:10px;min-width:2px;border-radius:0 4px 4px 0;background:var(--accent)}.ibbar span{font:600 13px var(--f-body);font-variant-numeric:tabular-nums}
@@ -443,6 +443,19 @@ th{position:relative}
  .toast{left:16px;right:16px;transform:none;max-width:none;text-align:center}
  .listedit .it{flex-wrap:wrap;min-width:0}.listedit .it>*{min-width:0}.listedit .it input,.listedit .it select{flex:1 1 140px}
 }
+/* Products & settings: section menu */
+.setw{width:100%;display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;align-items:start}
+.setn{position:sticky;top:76px;display:grid;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;max-height:calc(100vh - 96px);overflow:auto}
+.setn input{margin-bottom:6px}.setr{display:grid;gap:4px}
+.setn button{appearance:none;border:0;background:none;text-align:left;cursor:pointer;display:block;padding:9px 11px;border-radius:8px;font:600 14px var(--f-body);color:var(--ink)}
+.setn button small{display:block;font:400 12px/1.35 var(--f-body);color:var(--muted);margin-top:2px}
+.setn button:hover{background:var(--sunk)}.setn button.on{background:var(--accent-soft);color:var(--accent)}
+.setn button:focus-visible,.setj button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.setc{display:grid;gap:16px;min-width:0}.setc .panel{scroll-margin-top:76px}.setc .set1{display:block}
+.setj{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.setj:empty{display:none}
+.setj button{appearance:none;border:0;cursor:pointer;font:500 12.5px var(--f-body);color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:99px}
+@media(max-width:860px){.setw{display:block}.setn{position:static;display:flex;overflow-x:auto;gap:6px;padding:6px;margin-bottom:12px;max-height:none;align-items:center}
+ .setn input{margin:0;min-width:150px;flex:0 0 150px}.setr{display:flex;gap:6px}.setn button{white-space:nowrap;padding:7px 12px;font-size:13px;flex:0 0 auto}.setn button small{display:none}.setc .panel{scroll-margin-top:120px}}
 </style>
 
 <header class="top gut">
@@ -891,9 +904,11 @@ function leadsSwitch(canCreate){return canCreate?`<div class="row"><span class="
 function bindLeadsSwitch(){$("#newSeg")?.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.newView=b.dataset.v;render()})}
 /* ---------- Leads tab: list with filters, sorting, KPIs and export (one filter function feeds table, KPIs and export) ---------- */
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const LSTAT={"All":()=>true,"Open":l=>OPEN.includes(l.status),"Awaiting approval":l=>["New","Info Needed"].includes(l.status),"Won":l=>l.status==="Won","Lost":l=>l.status==="Lost","On hold":l=>l.status==="On Hold","Duplicate / rejected":l=>["Duplicate","Rejected"].includes(l.status)};
+const LSTAT_ORDER=["New","Info Needed","Assigned","Meeting Done","Quotation Sent","On Hold","Won","Lost","Duplicate","Rejected"];
+/* lead list status filter: the same status names a lead shows, plus "Open (all)" (matches the Open tile) */
+const LSTAT=Object.assign({"All":()=>true,"Open (all)":l=>OPEN.includes(l.status)},Object.fromEntries(LSTAT_ORDER.map(x=>[x,l=>l.status===x])));
 const NO_DEPT="Not recorded";
-function lf(){const F=S.lf||(S.lf={});const d={q:"",source:"",status:"All",region:"",sub:"",eng:"",cat:"All",dept:"",year:String(new Date().getFullYear()),month:"",n:100};for(const k in d)if(F[k]===undefined)F[k]=d[k];return F}
+function lf(){const F=S.lf||(S.lf={});if(F.status&&!LSTAT[F.status])F.status="All";const d={q:"",source:"",status:"All",region:"",sub:"",eng:"",cat:"All",dept:"",year:String(new Date().getFullYear()),month:"",n:100};for(const k in d)if(F[k]===undefined)F[k]=d[k];return F}
 const LF_RESET=()=>({q:"",source:"",status:"All",region:"",sub:"",eng:"",cat:"All",dept:"",year:"",month:"",n:100});
 const deptOf=l=>(l.department||"").trim()||NO_DEPT;
 function leadSources(){return[...new Set((S.settings.sources||[]).map(x=>x.name).concat(S.leads.map(l=>(l.source||"").trim())).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
@@ -1036,6 +1051,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(!f.products.length)errs.push("Select at least one product");
   if(!f.category)errs.push("Choose Inbound or Outbound");
   if(!v("f-pms")&&f.products.some(p=>!prodNoPms(p)))errs.push("Choose the hotel's PMS (or “Not known yet”)");
+  {const pb=pmsBlock(v("f-pms"),f.products);if(pb)errs.push(pb)}
   if(!v("f-source"))errs.push("Choose the source channel");
   if(!v("f-genby"))errs.push("Add who generated the lead");
   if(!v("f-reqdate"))errs.push("Add the date the requirement came in");else if(v("f-reqdate")>todayISO())errs.push("The requirement date can't be in the future");
@@ -1404,6 +1420,7 @@ function drawProdArea(l){const P=$("#prodArea");if(!P)return;const cur=productsO
     if(!next.length){$("#pMsg").innerHTML=`<div class="notice bad">Keep at least one product on the lead.</div>`;return}
     const blocked=next.filter(p=>!cur.includes(p)&&productState(l.accountKey,p,l.id).state==="blocked");if(blocked.length){$("#pMsg").innerHTML=`<div class="notice bad">${esc(blocked.join(", "))} was just opened on another lead for this account.</div>`;return}
     const add=next.filter(p=>!cur.includes(p)),rem=cur.filter(p=>!next.includes(p));if(!add.length&&!rem.length){S.drawer.mode=null;drawDrawer();return}
+    {const pb=pmsBlock(l.pms,add);if(pb){$("#pMsg").innerHTML=`<div class="notice bad">${esc(pb)}</div>`;return}}
     if(add.length&&upsellApplies(l,false)){const keep=cur.filter(p=>!rem.includes(p));if(!keep.length){$("#pMsg").innerHTML=`<div class="notice bad">Keep at least one of this lead's own products. New products go to an Upsell lead.</div>`;return}
       const eng=lastMeetBy(l)||l.assignedTo;let r;try{r=await createUpsell(l,add,eng,null)}catch(e){$("#pMsg").innerHTML=`<div class="notice bad">Couldn't create the upsell lead (${esc(e.code||e.message)}).</div>`;return}
       const body={};if(rem.length){body.products=keep;body.product=keep.join(", ")}if(!r.added)body.upsells=[...(l.upsells||[]),r.id];
@@ -1425,6 +1442,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
         ${upsellApplies(l,true)&&extra.length?`<span class="small muted" style="font-weight:400">A new product ticked here becomes an <b>Upsell lead</b> for the engineer who held the meeting. This lead keeps its products and lead generator.</span>`:""}</div>`};
   const bindMeet=()=>{let mode="";$("#mt-mode").onclick=e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.v;$("#mt-mode").dataset.v=mode;document.querySelectorAll("#mt-mode button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===mode))};
     $("#mt-add")?.addEventListener("change",e=>{const n=e.target.value;if(!n)return;const ps=productState(l.accountKey,n,l.id);if(ps.state==="blocked"){toast(`${n} is already ${ps.msg}`);e.target.value="";return}
+      {const pb=pmsBlock(l.pms,[n]);if(pb){toast(pb);e.target.value="";return}}
       $("#mt-prods").insertAdjacentHTML("beforeend",`<label class="pchk sel" style="padding:5px 9px"><input type="checkbox" data-mp="${esc(n)}" checked>${esc(n)} <small style="display:inline">(new)</small></label>`);e.target.querySelector(`option[value="${CSS.escape(n)}"]`)?.remove();e.target.value=""});
     $("#mt-prods").onchange=e=>{const c=e.target.closest("input");if(c)c.closest("label").classList.toggle("sel",c.checked)}};
   const readMeet=(date,notes)=>{const mode=$("#mt-mode").dataset.v||"";const products=[...document.querySelectorAll("#mt-prods input:checked")].map(c=>c.dataset.mp);
@@ -2604,7 +2622,7 @@ function impAuto(r){if(r.err)return r;const fx=S.settings.fx||{AED:1};r.cur=fx[r
 function impState(){return S.imp||(S.imp={rows:[],busy:0,tgt:"",fu:ymd(new Date(Date.now()+7*864e5)),done:false})}
 function impCheck(r){if(r.err||r.dup||r.match==="skip")return"";if(!(+r.amt>0))return"Enter the quoted amount.";if(!r.tgt)return"Set the target date (when you expect the order).";
   if(r.q.date&&r.tgt<r.q.date)return"The target date can't be before the quotation date.";
-  if(r.ps.some(p=>!prodNoPms(p))&&!isRealPms(r.pms))return"Choose the hotel's PMS.";
+  if(r.ps.some(p=>!prodNoPms(p))&&!isRealPms(r.pms))return"Choose the hotel's PMS.";{const pb=pmsBlock(r.pms,r.ps);if(pb)return pb}
   if(r.match==="new"){if(!r.eng)return"Choose the sales engineer.";if(!r.ps.length)return"Choose the product.";const k=r.acc?r.acc.key:keyOf(r.q.client);
     const bl=r.ps.filter(p=>productState(k,p).state==="blocked");if(bl.length)return`${r.acc?esc(allAccounts()[k]?.name||""):"This client"} already has an open lead for ${bl.join(", ")}. Add the quotation to that lead instead.`;if(!(r.q.client||r.acc))return"The client name is missing on the quotation."}
   return""}
@@ -2718,12 +2736,19 @@ function accountPms(key){if(!key)return"";const a=S.accounts[key];let best=null;
   return best?best.pms:(a&&isRealPms(a.pms)?a.pms:"")}
 const pmsOf=l=>isRealPms(l.pms)?l.pms:"";
 function ifaceOf(l,p){const v=(l.pmsIface||{})[p];if(v)return v;const m=pmsMethods(p,l.pms);return m&&m.length===1?m[0]:""}
-function pmsWarn(pms,ps){const bad=ps.filter(p=>{const m=pmsMethods(p,pms);return m&&!m.length});return bad.length?`${bad.join(", ")} ${bad.length>1?"aren't":"isn't"} listed as working with ${pms}. Check with Support before quoting.`:""}
+function pmsWarn(pms,ps){const bad=ps.filter(p=>{if(prodStrict(p))return false;const m=pmsMethods(p,pms);return m&&!m.length});return bad.length?`${bad.join(", ")} ${bad.length>1?"aren't":"isn't"} listed as working with ${pms}. Check with Support before quoting.`:""}
+/* Strict products (products[].pmsStrict): a lead can't be saved with the product when the hotel's PMS is "not supported" for it.
+   The database repeats this check (30_pms_strict.sql). An unknown PMS never blocks. */
+const prodStrict=p=>{const x=prodList(true).find(x=>nk(x.name)===nk(p))||{};return!!x.pmsStrict&&!x.noPms};
+function pmsWorksWith(p){const M=pmsCfg().matrix;const k=Object.keys(M).find(x=>nk(x)===nk(p)&&M[x]);if(!k)return"";return Object.entries(M[k]).filter(([c,v])=>c!=="*"&&Array.isArray(v)&&v.length).map(([c,v])=>`${c} (${v.join(" or ")})`).join(", ")+((M[k]["*"]||[]).length?`, any other PMS (${M[k]["*"].join(" or ")})`:"")}
+function pmsBlock(pms,ps){if(!isRealPms(pms))return"";const bad=(ps||[]).filter(p=>{if(!prodStrict(p))return false;const m=pmsMethods(p,pms);return m&&!m.length});if(!bad.length)return"";
+  return bad.map(p=>{const w=pmsWorksWith(p);return`${p} does not work with ${pms}.${w?` It works with ${w}.`:""}`}).join(" ")+" Remove the product or correct the hotel's PMS."}
 /* PMS + interface fields (used in the lead drawer, the quotation/order forms and the import) */
 function pmsFields(pre,pms,ps,cur){const C=pmsCfg();const list=C.list.includes(pms)||!isRealPms(pms)?C.list:C.list.concat([pms]);
   return`<div class="pmsf" data-pmsf="${pre}"><label class="f">Hotel PMS <span class="req">*</span><select id="${pre}-pms">${opts(list,isRealPms(pms)?pms:"","Choose")}</select></label>
    ${isRealPms(pms)&&ps.length?`<div class="pmsif">${ps.map(p=>{const m=pmsMethods(p,pms);const o=m==null?C.ifaces:m;const v=(cur||{})[p]||(o.length===1?o[0]:"");
-     return`<label class="f fsm">${esc(p)} · interface${m&&!m.length?` <span style="color:var(--warn)">· not listed for ${esc(pms)}</span>`:""}<select data-pmsi="${esc(p)}">${opts(m&&!m.length?C.ifaces:o,v,o.length===1?null:"Interface")}</select></label>`}).join("")}</div>`:""}
+     return`<label class="f fsm">${esc(p)} · interface${m&&!m.length?(prodStrict(p)?` <span style="color:var(--bad)">· does not work with ${esc(pms)}</span>`:` <span style="color:var(--warn)">· not listed for ${esc(pms)}</span>`):""}<select data-pmsi="${esc(p)}"${m&&!m.length&&prodStrict(p)?" disabled":""}>${opts(m&&!m.length?(prodStrict(p)?[]:C.ifaces):o,v,o.length===1?null:(m&&!m.length&&prodStrict(p)?"Not supported":"Interface"))}</select></label>`}).join("")}</div>`:""}
+   ${isRealPms(pms)?(w=>w?`<div class="notice bad" data-pmsblock style="padding:6px 10px">${esc(w)}</div>`:"")(pmsBlock(pms,ps)):""}
    ${isRealPms(pms)?(w=>w?`<div class="notice warn" style="padding:6px 10px">${esc(w)}</div>`:"")(pmsWarn(pms,ps)):""}</div>`}
 function pmsRead(pre,root){root=root||document;const pms=(root.querySelector(`#${pre}-pms`)||{}).value||"";const it={};root.querySelectorAll(`[data-pmsf="${pre}"] [data-pmsi]`).forEach(s=>{if(s.value)it[s.dataset.pmsi]=s.value});return{pms,iface:it}}
 function bindPmsFields(pre,ps,cur,root,onChange){root=root||document;const sel=root.querySelector(`#${pre}-pms`);if(!sel)return;
@@ -2736,10 +2761,11 @@ function drawPms(l){const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);co
     <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="lp-all" checked style="width:auto"> Use this PMS on the hotel's other open leads that have none or a different one</label>
     <div class="small" id="lp-msg"></div><div class="row"><button type="button" class="btn pri" id="lp-save">Save</button><button type="button" class="btn" id="lp-x">Cancel</button></div></div>`;
     bindPmsFields("lp",hp,l.pmsIface,A);$("#lp-x").onclick=()=>{S.drawer.pmsEdit=false;drawPms(l)};
-    $("#lp-save").onclick=async e=>{const r=pmsRead("lp",A);if(!isRealPms(r.pms)){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">Choose the hotel's PMS.</span>`;return}e.currentTarget.disabled=true;
+    $("#lp-save").onclick=async e=>{const r=pmsRead("lp",A);if(!isRealPms(r.pms)){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">Choose the hotel's PMS.</span>`;return}
+      {const pb=pmsBlock(r.pms,hp);if(pb){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">${esc(pb)}</span>`;return}}e.currentTarget.disabled=true;
       const note=$("#lp-note").value.trim();const ch=r.pms!==l.pms;const ok=await patch(l,{pms:r.pms,pmsIface:r.iface,pmsNote:note},`PMS: ${r.pms}${Object.keys(r.iface).length?" · "+Object.entries(r.iface).map(([p,m])=>p+" via "+m).join(", "):""}`);
       if(!ok){e.currentTarget.disabled=false;return}S.drawer.pmsEdit=false;
-      if(ch&&$("#lp-all")?.checked){const others=S.leads.filter(x=>x.id!==l.id&&!x.deleted&&accKey(x)===accKey(l)&&OPEN.includes(x.status)&&canAct(x)&&x.pms!==r.pms);let n=0;
+      if(ch&&$("#lp-all")?.checked){const others=S.leads.filter(x=>x.id!==l.id&&!x.deleted&&accKey(x)===accKey(l)&&OPEN.includes(x.status)&&canAct(x)&&x.pms!==r.pms&&!pmsBlock(r.pms,pmsProducts(x)));let n=0;
         for(const x of others){try{await S.db.doc("leads/"+x.id).update({pms:r.pms,pmsIface:null,updatedAt:nowISO(),log:[...(x.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS set to ${r.pms} (same hotel as ${l.ref})`}]});n++}catch(_){}}
         if(n)toast(`PMS also set on ${n} other open lead${n===1?"":"s"} for this hotel`)}}
     return}
@@ -2754,7 +2780,7 @@ function pmsInject(l,A){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||pmsMe
   const h=document.createElement("div");h.id="aPms";h.style.cssText="display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)";
   h.innerHTML=`<div class="small"><b>PMS integration</b> · required from Quotation sent onwards${sug&&!pmsOf(l)?` (suggested from this hotel's other leads)`:""}</div>${pmsFields("ap",sug,pmsProducts(l),l.pmsIface)}`;
   const t=box.querySelector("h3");t?t.after(h):box.prepend(h);bindPmsFields("ap",pmsProducts(l),l.pmsIface,h)}
-function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead("ap",h);if(!isRealPms(r.pms))return{err:"Choose the hotel's PMS (PMS integration)."};
+function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead("ap",h);if(!isRealPms(r.pms))return{err:"Choose the hotel's PMS (PMS integration)."};{const pb=pmsBlock(r.pms,pmsProducts(l));if(pb)return{err:pb}}
   const it=Object.assign({},l.pmsIface||{},r.iface);return{body:{pms:r.pms,pmsIface:it},txt:` · PMS ${r.pms}`}}
 /* Back office → Data issues: won leads without a PMS */
 function noPmsWon(){return S.leads.filter(l=>!l.deleted&&l.status==="Won"&&!pmsOf(l)&&pmsProducts(l).length).sort((a,b)=>(wonAt(b)||"").localeCompare(wonAt(a)||""))}
@@ -2799,10 +2825,10 @@ function pmsPanel(){if(!can("settings.manage"))return"";const C=pmsCfg();const e
     if(p.standalone&&!(v||[]).some(x=>nk(x)==="standalone"))v=(v||[]).concat(["Standalone"]);
     return`<td>${(v||[]).length?v.map(x=>`<span class="iface${x==="Standalone"?" sa":""}">${esc(x)}</span>`).join(" "):`<span class="muted">—</span>`}</td>`};
   return`<div class="panel" id="pmsPanel"><div class="row"><h3>PMS integrations</h3><span class="sp"></span>${ed?`<button type="button" class="btn pri" id="pmSave">Save</button><button type="button" class="btn" id="pmX">Cancel</button>`:`<button type="button" class="btn pri" id="pmE">Edit</button>`}</div>
-   <p class="small muted" style="margin:6px 0 12px">Which PMS each product works with, and how. <span class="iface">blue</span> interface to the PMS · <span class="iface sa">grey</span> Standalone (no PMS link) · — not supported · “not set” means no rule yet. Products with “Standalone always allowed” can run without the PMS interface whatever the hotel’s PMS; interfacing is the client’s choice. Sales see the allowed interfaces on each lead and a warning when a product isn't listed for the hotel's PMS.${ed?" Type the methods separated by commas; leave a cell empty for “not supported”, or the whole row empty for “not set”.":""}</p>
+   <p class="small muted" style="margin:6px 0 12px">Which PMS each product works with, and how. <span class="iface">blue</span> interface to the PMS · <span class="iface sa">grey</span> Standalone (no PMS link) · — not supported · “not set” means no rule yet. Products with “Standalone always allowed” can run without the PMS interface whatever the hotel’s PMS; interfacing is the client’s choice. Sales see the allowed interfaces on each lead and a warning when a product isn't listed for the hotel's PMS. For a product marked “Block if not supported”, a lead can't be saved with a PMS marked —.${ed?" Type the methods separated by commas; leave a cell empty for “not supported”, or the whole row empty for “not set”.":""}</p>
    ${ed?`<div class="grid3" style="margin-bottom:12px"><label class="f">PMS list<input id="pm-list" value="${esc(C.list.join(", "))}"></label><label class="f">Interface methods<input id="pm-if" value="${esc(C.ifaces.join(", "))}"></label><label class="f">PMS with their own column<input id="pm-cols" value="${esc(C.cols.join(", "))}"></label></div><datalist id="pmsIfL">${C.ifaces.map(x=>`<option value="${esc(x)}">`).join("")}</datalist>`:""}
-   <div class="tw"><table><thead><tr><th>Product</th>${cols.map(c=>`<th>${esc(colName(c))}</th>`).join("")}${ed?"<th>Standalone always allowed</th><th>Not PMS-related</th>":""}</tr></thead><tbody>
-   ${prods.map(p=>`<tr><td><b>${esc(p.name)}</b>${p.noPms&&!ed?`<div class="small muted">not PMS-related</div>`:""}</td>${cols.map(c=>cell(p,c)).join("")}${ed?`<td><input type="checkbox" data-pms1="${esc(p.name)}"${p.standalone?" checked":""} style="width:auto"></td><td><input type="checkbox" data-pmn="${esc(p.name)}"${p.noPms?" checked":""} style="width:auto"></td>`:""}</tr>`).join("")}</tbody></table></div>
+   <div class="tw"><table><thead><tr><th>Product</th>${cols.map(c=>`<th>${esc(colName(c))}</th>`).join("")}${ed?"<th>Standalone always allowed</th><th>Block if not supported</th><th>Not PMS-related</th>":""}</tr></thead><tbody>
+   ${prods.map(p=>`<tr><td><b>${esc(p.name)}</b>${p.noPms&&!ed?`<div class="small muted">not PMS-related</div>`:""}${p.pmsStrict&&!p.noPms&&!ed?`<div class="small" style="color:var(--bad)">Blocked on a PMS marked —</div>`:""}</td>${cols.map(c=>cell(p,c)).join("")}${ed?`<td><input type="checkbox" data-pms1="${esc(p.name)}"${p.standalone?" checked":""} style="width:auto"></td><td><input type="checkbox" data-pmk="${esc(p.name)}"${p.pmsStrict?" checked":""} style="width:auto"></td><td><input type="checkbox" data-pmn="${esc(p.name)}"${p.noPms?" checked":""} style="width:auto"></td>`:""}</tr>`).join("")}</tbody></table></div>
    ${ed?"":`<p class="small muted" style="margin:10px 0 0">PMS list: ${esc(C.list.join(", "))}. Interface methods: ${esc(C.ifaces.join(", "))}.</p>`}</div>`}
 function bindPmsPanel(m){if(!$("#pmsPanel"))return;$("#pmE")?.addEventListener("click",()=>{S.pmsEd=true;render()});$("#pmX")?.addEventListener("click",()=>{S.pmsEd=false;render()});
   m.querySelectorAll("[data-pmn]").forEach(c=>c.onchange=()=>m.querySelectorAll(`[data-pmx="${CSS.escape(c.dataset.pmn)}"]`).forEach(i=>i.disabled=c.checked));
@@ -2811,7 +2837,7 @@ function bindPmsPanel(m){if(!$("#pmsPanel"))return;$("#pmE")?.addEventListener("
     const M={};const byP={};m.querySelectorAll("[data-pmx]").forEach(i=>{(byP[i.dataset.pmx]=byP[i.dataset.pmx]||[]).push(i)});
     for(const[p,ins]of Object.entries(byP)){if(ins.every(i=>!i.value.trim()))continue;const row={};ins.forEach(i=>{const v=sp(i.value);v.forEach(x=>{if(!ifaces.some(y=>nk(y)===nk(x)))ifaces.push(x)});row[i.dataset.pmc]=v.map(x=>ifaces.find(y=>nk(y)===nk(x))||x)});M[p]=row}
     const old=pmsCfg().matrix;Object.keys(old).forEach(p=>{if(!M[p])M[p]=byP[p]?null:old[p]});
-    const noP=new Set([...m.querySelectorAll("[data-pmn]")].filter(c=>c.checked).map(c=>c.dataset.pmn));const sa=new Set([...m.querySelectorAll("[data-pms1]")].filter(c=>c.checked).map(c=>c.dataset.pms1));const products=prodList(true).map(x=>Object.assign({},x,{noPms:noP.has(x.name)},m.querySelector(`[data-pms1="${CSS.escape(x.name)}"]`)?{standalone:sa.has(x.name)}:{}));
+    const noP=new Set([...m.querySelectorAll("[data-pmn]")].filter(c=>c.checked).map(c=>c.dataset.pmn));const sa=new Set([...m.querySelectorAll("[data-pms1]")].filter(c=>c.checked).map(c=>c.dataset.pms1));const stK=new Set([...m.querySelectorAll("[data-pmk]")].filter(c=>c.checked).map(c=>c.dataset.pmk));const products=prodList(true).map(x=>Object.assign({},x,{noPms:noP.has(x.name)},m.querySelector(`[data-pms1="${CSS.escape(x.name)}"]`)?{standalone:sa.has(x.name),pmsStrict:stK.has(x.name)}:{}));
     e.currentTarget.disabled=true;try{await S.db.doc("config/settings").update({pmsList:list,pmsIfaces:ifaces,pmsCols:cols,pmsMatrix:M,products});Object.assign(S.settings,{pmsList:list,pmsIfaces:ifaces,pmsCols:cols,pmsMatrix:M,products});S.pmsEd=false;toast("PMS integrations saved");render()}
     catch(er){e.currentTarget.disabled=false;toast("Couldn't save: "+(er.message||er.code))}})}
 
@@ -3384,12 +3410,12 @@ function ctrGuessCat(item,kind){const t=String(item||"");const pick=k=>{const c=
   if(/scanner|reader|kiosk|printer|terminal|hardware/i.test(t))return pick("hw");if(/install|training|migration|service|support|consult/i.test(t))return pick("svc");
   if(/licen[cs]e|application|software|capabilit|module|\bapp\b|standard|plus|user|billing/i.test(t))return pick("sw");if(/\bipad|tablet|device/i.test(t))return pick("hw");return""}
 /* what a line is: a learned rule first, then the best guess from the catalogue and the wording */
-function ctrClassify(item,kind){const r=ctrRuleOf(item);if(r)return{product:r.product||"",cat:r.cat||"",kind:r.kind||kind,state:"learned"};
+function ctrClassify(item,kind){const r=ctrRuleOf(item);if(r)return Object.assign({product:r.product||"",cat:r.cat||"",kind:r.kind||kind,state:"learned"},r.it?{it:r.it,itName:r.itName||""}:{});
   const p=ctrProductOf(item).product||"";const cat=ctrGuessCat(item,kind);return{product:p,cat,kind,state:p||cat?"guess":"new"}}
-function ctrApplyRules(c){let ch=false;(c.lines||[]).forEach(x=>{if(x.state==="set"||x.state==="learned")return;const r=ctrRuleOf(x.item);if(!r)return;x.product=r.product||"";x.cat=r.cat||"";if(r.kind)x.kind=r.kind;x.state="learned";ch=true});return ch}
+function ctrApplyRules(c){let ch=false;(c.lines||[]).forEach(x=>{if(x.state==="set"||x.state==="learned")return;const r=ctrRuleOf(x.item);if(!r)return;x.product=r.product||"";x.cat=r.cat||"";if(r.kind)x.kind=r.kind;if(r.it&&!x.it){x.it=r.it;x.itName=r.itName||""}x.state="learned";ch=true});return ch}
 async function ctrLearn(c){if(!can("settings.manage"))return 0;const L=ctrRules().slice();let n=0;const who=S.myName||actor()||"";
-  (c.lines||[]).forEach(x=>{const k=ctrRuleKey(x.item);if(!k||(!x.product&&!x.cat))return;const cur=L.findIndex(r=>r.k===k);const rule={k,item:x.item,product:x.product||"",cat:x.cat||"",kind:x.kind,no:c.no||"",by:who,at:nowISO()};
-    if(cur>=0){const o=L[cur];if(o.product===rule.product&&o.cat===rule.cat&&o.kind===rule.kind)return;L[cur]=rule}else L.push(rule);n++});
+  (c.lines||[]).forEach(x=>{const k=ctrRuleKey(x.item);if(!k||(!x.product&&!x.cat&&!x.it))return;const cur=L.findIndex(r=>r.k===k);const rule={k,item:x.item,product:x.product||"",cat:x.cat||"",kind:x.kind,no:c.no||"",by:who,at:nowISO()};if(x.it){rule.it=x.it;rule.itName=x.itName||ctrItName(x.it)}else if(cur>=0&&L[cur].it){rule.it=L[cur].it;rule.itName=L[cur].itName||""}
+    if(cur>=0){const o=L[cur];if(o.product===rule.product&&o.cat===rule.cat&&o.kind===rule.kind&&(o.it||"")===(rule.it||""))return;L[cur]=rule}else L.push(rule);n++});
   if(!n)return 0;try{await S.db.doc("config/settings").update({ctrRules:L});S.settings.ctrRules=L;S.setStamp=(S.setStamp||0)+1}catch(e){return 0}return n}
 /* after a rule is learned, the other contracts still waiting pick it up */
 async function ctrSpread(skipId){for(const c of ctrAll().filter(x=>x.status==="pending"&&x.id!==skipId)){if(ctrApplyRules(c)){try{await window.__contracts.update(c.id,ctrClean(c))}catch(e){}}}}
@@ -3419,7 +3445,7 @@ function parseAmc(L){const R={lines:[],warn:[]};const T=L.map(l=>l.t);const flat
       let serials=[];const sm=item.match(/Serial\s*(?:numbers?|nos?\.?)\s*:?\s*([A-Za-z0-9,\s\/]+)$/i);if(sm){serials=sm[1].split(/[,\s\/]+/).filter(v=>v.length>3);item=item.slice(0,sm.index).trim()}
       const total=amcNum(x[5]),charge=amcNum(x[8]),yr=amcNum(x[6]);const pct=total?Math.round(yr/total*1000)/10:null;
       const kind=/\bohip\b/i.test(item)?"ohip":(/annual billing|subscription|hosting|per (?:year|annum)|yearly/i.test(item)||(pct!=null&&pct>=99))?"sub":"amc";
-      const cl=ctrClassify(item,kind);R.lines.push({sr:+x[1],ref,item,unit:amcNum(x[3]),qty:+x[4],total,yearly:yr,months:+x[7],charge,pct,kind:cl.kind,serials,product:cl.product,cat:cl.cat,state:cl.state})});
+      const cl=ctrClassify(item,kind);R.lines.push({sr:+x[1],ref,item,unit:amcNum(x[3]),qty:+x[4],total,yearly:yr,months:+x[7],charge,pct,kind:cl.kind,serials,product:cl.product,cat:cl.cat,state:cl.state,...(cl.it?{it:cl.it,itName:cl.itName}:{})})});
     const sum=Math.round(R.lines.reduce((s,x)=>s+x.charge,0)*100)/100;if(R.total==null)R.total=sum;else if(Math.abs(sum-R.total)>0.05)R.warn.push(`The lines add up to ${sum.toLocaleString("en-US")} but the contract total says ${R.total.toLocaleString("en-US")}.`)}
   const line=re=>{for(const t of T){if(/\.{5,}/.test(t))continue;const x=t.match(re);if(x)return x}return null};
   m=line(/AMC Sender\s+(.+)/i);R.sender=m?m[1].trim():"";
@@ -3479,9 +3505,20 @@ const ctrMoney=(c,v)=>`${esc(c.cur||"AED")} ${(+v||0).toLocaleString("en-US",{ma
 function ctrRateNote(c){const L=(c.lines||[]).filter(x=>x.kind==="amc"&&x.total);if(!L.length)return"";const base=L.reduce((s,x)=>s+x.total,0),chg=L.reduce((s,x)=>s+x.yearly,0);const pct=Math.round(chg/base*1000)/10;
   const prods=[...new Set(L.map(x=>x.product).filter(Boolean))];let std=null;for(const p of prods){const r=amcRate(ctrLead(c),p);if(r){std=r;break}}
   return std&&Math.abs(std.pct-pct)>0.5?`<span class="chip warn" title="The ${esc(std.src)} is ${std.pct}%">${pct}% · standard ${std.pct}%</span>`:`<span class="small muted">${pct}%</span>`}
-function ctrLinesHTML(c,ed,pre){const P=prodList().map(p=>p.name);const CN=ctrCats().map(x=>x.name);return`<div class="tw"><table class="ctl"><thead><tr><th>#</th><th>Order ref</th><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Total</th><th class="num">Charge / year</th><th class="num">Rate</th><th>Product</th><th>Category</th><th>Type</th></tr></thead><tbody>
+/* Contract lines ↔ price book items (the same review a quotation gets): x.it = price item id (or x:… "not a product"),
+   x.itName = its name, kept on the line so people who can't open the price book still see it. Only someone who may approve
+   contracts and can open the price book chooses it; learned rules carry it to later uploads. */
+const ctrPbOn=()=>canCA()&&canPB()&&S.pb&&(pbItems().length>0||can("pricing.manage"));
+const ctrItName=id=>id?(PB_X[id]||(pbItem(id)||{}).name||""):"";
+function ctrPbGuess(x){const r=ctrRuleOf(x.item);if(r&&r.it&&(PB_X[r.it]||pbItem(r.it)))return r.it;const m=pbMapOf({item:x.item});if(m&&m.it&&(PB_X[m.it]||pbItem(m.it)))return m.it;const k=pbKey(x.item);const hit=pbItems().filter(i=>pbKey(i.name)===k);return hit.length===1?hit[0].id:""}
+function ctrPbFill(c){if(!ctrPbOn())return;(c.lines||[]).forEach(x=>{if(x.it&&!PB_X[x.it]&&!pbItem(x.it)){x.it="";x.itName=""}if(!x.it){const g=ctrPbGuess(x);if(g){x.it=g;x.itName=ctrItName(g);x.itAuto=true}}})}
+const ctrPbMissing=c=>ctrPbOn()?(c.lines||[]).filter(x=>!x.it).length:0;
+function ctrPbNewItem(c,x){const cat=ctrCatByName(x.cat);const ck=cat?cat.key:"";const nm=ctrLineName(c,x);const qty=+x.qty||1;const unitP=ctrFx(c,+x.unit||((+x.total||0)/qty)||0);const me=S.myName||actor()||"";
+  return{id:pbNewId(),product:x.product&&pbProducts().includes(x.product)?x.product:(x.product||"Services"),name:nm,type:ck==="hw"?"hardware":ck==="if1"||ck==="ifs"||ck==="ohip"||x.kind==="ohip"?"interface":ck==="svc"||ck==="cloud"?"service":ck==="sw"?"software":/scanner|ipad|tablet|kiosk|printer|hardware/i.test(nm)?"hardware":/ohip|interface/i.test(nm)?"interface":"software",
+    unit:x.kind==="ohip"||/per room/i.test(nm)?"room":qty>1?"pc":"property",yearly:x.kind==="sub"||x.kind==="ohip",cur:"AED",active:true,v:[{on:Math.round(unitP*100)/100,re:null,min:null,bands:[],from:todayISO(),st:"draft",by:me,at:nowISO(),note:"from AMC contract "+(c.no||c.client||"")}]}}
+function ctrLinesHTML(c,ed,pre){const pbOn=ed&&ctrPbOn();if(pbOn)ctrPbFill(c);const P=prodList().map(p=>p.name);const CN=ctrCats().map(x=>x.name);return`<div class="tw"><table class="ctl"><thead><tr><th>#</th><th>Order ref</th><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Total</th><th class="num">Charge / year</th><th class="num">Rate</th><th>${pbOn?"Product · price item":"Product"}</th><th>Category</th><th>Type</th></tr></thead><tbody>
   ${(c.lines||[]).map((x,i)=>`<tr><td>${x.sr}</td><td class="mono small">${esc(x.ref||"—")}</td><td>${(n=>n!==x.item?`<b>${esc(n)}</b><div class="small muted">on the contract: ${esc(x.item)}</div>`:esc(x.item))(ctrLineName(c,x))}${(x.serials||[]).length?`<div class="small muted">Serial: ${esc(x.serials.join(", "))}</div>`:""}${ed&&ctrStateChip(x)?`<div style="margin-top:4px">${ctrStateChip(x)}</div>`:""}</td><td class="num">${x.qty}</td><td class="num">${(+x.unit||0).toLocaleString("en-US")}</td><td class="num">${(+x.total||0).toLocaleString("en-US")}</td><td class="num"><b>${(+x.charge||0).toLocaleString("en-US")}</b>${x.months&&x.months!==12?`<div class="small muted">${x.months} months</div>`:""}</td><td class="num">${x.pct!=null?x.pct+"%":"—"}</td>
-    <td>${ed?`<select data-cp="${pre}|${i}" aria-label="Product of line ${x.sr}"><option value="">Not a product</option>${P.concat(x.product&&!P.includes(x.product)?[x.product]:[]).map(p=>`<option${p===x.product?" selected":""}>${esc(p)}</option>`).join("")}</select>`:esc(x.product||"—")}</td>
+    <td>${ed?`<select data-cp="${pre}|${i}" aria-label="Product of line ${x.sr}"><option value="">Not a product</option>${P.concat(x.product&&!P.includes(x.product)?[x.product]:[]).map(p=>`<option${p===x.product?" selected":""}>${esc(p)}</option>`).join("")}</select>${pbOn?`<select data-ci="${pre}|${i}" aria-label="Price item of line ${x.sr}" style="margin-top:4px${x.it?"":";border-color:var(--warn)"}">${pbOpts(x.it||"").replace('<option value="">Choose…</option>','<option value="">Choose the price item…</option>')}${can("pricing.manage")?`<option value="new">+ New price item from this line…</option>`:""}</select>${x.it&&x.itAuto?`<div class="small muted">matched automatically</div>`:""}`:x.itName?`<div class="small muted">Price item: ${esc(x.itName)}</div>`:""}`:esc(x.product||"—")+(x.itName?`<div class="small muted">Price item: ${esc(x.itName)}</div>`:"")}</td>
     <td>${ed?`<select data-cc="${pre}|${i}" aria-label="Category of line ${x.sr}"><option value="">Choose</option>${CN.concat(x.cat&&!CN.includes(x.cat)?[x.cat]:[]).map(n=>`<option${n===x.cat?" selected":""}>${esc(n)}</option>`).join("")}</select>`:esc(x.cat||"—")}</td>
     <td>${ed?`<select data-ck="${pre}|${i}" aria-label="Type of line ${x.sr}">${Object.entries(CTR_KIND).map(([k,t])=>`<option value="${k}"${x.kind===k?" selected":""}>${t}</option>`).join("")}</select>`:renChip(x.kind)}</td></tr>`).join("")}
   <tr class="tot"><td colspan="6">Total</td><td class="num">${ctrMoney(c,c.total)}</td><td colspan="4" class="small muted">${c.cur&&c.cur!=="AED"?fmtAED(ctrFx(c,c.total)):""}</td></tr></tbody></table></div>`}
@@ -3499,6 +3536,10 @@ function ctrBindEdit(m,get,done){
   m.querySelectorAll("[data-cc]").forEach(s=>s.onchange=()=>{const[p,i]=s.dataset.cc.split("|");const c=get(p);const x=c.lines[+i];x.cat=s.value;x.state="set";const cat=ctrCatByName(s.value);if(cat&&cat.type)x.kind=cat.type;
     const k=ctrRuleKey(x.item);if(p[0]==="d")(S.ctrDraft||[]).forEach(d=>d.c&&d.c.lines.forEach(y=>{if(y!==x&&!y.cat&&ctrRuleKey(y.item)===k){y.cat=x.cat;y.kind=x.kind}}));done(c)});
   m.querySelectorAll("[data-cp]").forEach(s=>s.onchange=()=>{const[p,i]=s.dataset.cp.split("|");const c=get(p);c.lines[+i].product=s.value;c.lines[+i].state="set";const k=nk(c.lines[+i].item);if(s.value&&p[0]==="d")(S.ctrDraft||[]).forEach(d=>d.c&&d.c.lines.forEach(x=>{if(!x.product&&nk(x.item)===k)x.product=s.value}));done(c)});
+  m.querySelectorAll("[data-ci]").forEach(s=>s.onchange=async()=>{const[p,i]=s.dataset.ci.split("|");const c=get(p);const x=c.lines[+i];let v=s.value;
+    if(v==="new"){const it=ctrPbNewItem(c,x);s.disabled=true;if(!await pbSave(pbAll().concat([it]),"New draft price item added from the contract line. Check its price and unit in the price book.")){s.disabled=false;s.value=x.it||"";return}v=it.id}
+    x.it=v;x.itName=ctrItName(v);delete x.itAuto;const it=pbItem(v);if(it&&it.product&&prodList().some(q=>q.name===it.product)&&!x.product){x.product=it.product}x.state="set";
+    const k=ctrRuleKey(x.item);if(v)c.lines.forEach(y=>{if(y!==x&&!y.it&&ctrRuleKey(y.item)===k){y.it=v;y.itName=x.itName}});done(c)});
   m.querySelectorAll("[data-cm]").forEach(s=>s.onchange=()=>{const c=get(s.dataset.cm);ctrSetClient(c,s.value);done(c)});
   m.querySelectorAll("[data-ce]").forEach(s=>s.onchange=()=>{const c=get(s.dataset.ce);c.engineer=s.value;c.engWhy=s.value?(nk(s.value)===nk(c.terrEng)?`territory: ${c.terrArea||c.country}`:"chosen by hand"):"";done(c)});
   m.querySelectorAll("[data-cd]").forEach(s=>s.onchange=()=>{const[p,f]=s.dataset.cd.split("|");const c=get(p);c[f]=f==="rooms"?(s.value===""?"":Math.max(0,Math.round(+s.value))):s.value.trim();if(f==="pms")c.pmsWhy="";if(f==="country"){c.region=guessRegion(c.country)||"";ctrAssign(c)}done(c)})}
@@ -3552,7 +3593,7 @@ function ctrUp(B){const D=S.ctrDraft||[];const ready=D.filter(d=>d.c&&!d.dup);co
     catch(err){b.disabled=false;toast(/23505|duplicate/i.test((err.message||"")+(err.code||""))?"One of these contracts was uploaded by someone else in the meantime. Refresh and try again.":/42501|row-level/i.test((err.message||"")+(err.code||""))?"You are not allowed to upload contracts.":"Couldn't send: "+(err.message||err.code))}})}
 
 /* Approval queue */
-function ctrQueue(B){const P=ctrAll().filter(c=>c.status==="pending").sort((a,b)=>String(a.upAt||"").localeCompare(String(b.upAt||"")));const A=canCA();const clean=P.filter(c=>!ctrWarns(c).length&&(c.match||{}).kind!=="possible");
+function ctrQueue(B){const P=ctrAll().filter(c=>c.status==="pending").sort((a,b)=>String(a.upAt||"").localeCompare(String(b.upAt||"")));const A=canCA();if(A)P.forEach(ctrPbFill);const clean=P.filter(c=>!ctrWarns(c).length&&(c.match||{}).kind!=="possible"&&!ctrPbMissing(c));
   B.innerHTML=`<section class="view"><div class="vhead"><div><h2>Contracts to approve</h2><p>${A?"Check the client match, the sales engineer and the lines, then approve. Approved contracts appear for Sales, Management and the AMC team.":"These are waiting for a Supervisor. You can still correct them or take one back."}</p></div>
     ${A&&clean.length>1?`<div><button type="button" class="btn" id="ctAll">${S.ctrAllAsk?`Confirm: approve ${clean.length}`:`Approve the ${clean.length} without warnings`}</button></div>`:""}</div>
    ${P.map(c=>`<div class="panel ctc"><div class="row" style="gap:8px"><b>${esc(c.client)}</b><span class="chip warn">Waiting for approval</span><span class="small muted">uploaded by ${esc(c.upBy||"—")} · ${fmtD(c.upAt)}</span><span class="sp"></span>
@@ -3560,16 +3601,16 @@ function ctrQueue(B){const P=ctrAll().filter(c=>c.status==="pending").sort((a,b)
      ${ctrSummaryRow(c,true,c.id)}${ctrOhipHTML(c)}
      <div class="notice info" style="margin-top:8px">${(c.match||{}).key?`On approval this contract is added to the existing client <b>${esc(c.match.name)}</b>. Nothing on its leads changes.`:`On approval <b>${esc(c.client)}</b> is added as an existing client${c.engineer?` under ${esc(c.engineer)}`:""}. No lead is created.`}</div>
      ${ctrWarns(c).map(w=>`<div class="notice warn" style="margin-top:8px">${esc(w)}</div>`).join("")}
-     ${(()=>{const L=c.lines||[];const n=L.filter(x=>x.state==="learned").length;return A?`<div class="row small" style="gap:10px;margin-top:8px;flex-wrap:wrap"><span class="chip ${n===L.length?"ok":""}">${n===L.length?`All ${L.length} lines recognised`:`${n} of ${L.length} lines recognised`}</span>${can("settings.manage")?`<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" data-clr="${esc(c.id)}"${(S.ctrNoLearn||{})[c.id]?"":" checked"}> Remember the product, category and type of each line for future uploads</label>`:""}</div>`:""})()}
+     ${(()=>{const L=c.lines||[];const n=L.filter(x=>x.state==="learned").length;return A?`<div class="row small" style="gap:10px;margin-top:8px;flex-wrap:wrap"><span class="chip ${n===L.length?"ok":""}">${n===L.length?`All ${L.length} lines recognised`:`${n} of ${L.length} lines recognised`}</span>${can("settings.manage")?`<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" data-clr="${esc(c.id)}"${(S.ctrNoLearn||{})[c.id]?"":" checked"}> Remember the product, ${ctrPbOn()?"price item, ":""}category and type of each line for future uploads</label>`:""}${ctrPbMissing(c)?`<span class="chip warn" data-pbmiss>${ctrPbMissing(c)} line${ctrPbMissing(c)===1?"":"s"} without a price item</span>`:""}</div>`:""})()}
      ${S.ctrRej===c.id?`<div class="row" style="gap:8px;margin-top:8px;align-items:end"><label class="f fsm" style="flex:1">Reason for rejecting<input id="ctRejT" placeholder="e.g. Wrong client, superseded contract"></label><button type="button" class="btn sm bad" data-crr="${esc(c.id)}">Reject contract</button><button type="button" class="btn sm" data-crx="1">Cancel</button></div>`:""}
-     <details style="margin-top:10px"${S.ctrOpenQ===c.id||(A&&(c.lines||[]).some(x=>x.state!=="learned"))?" open":""} data-cqt="${esc(c.id)}"><summary>${(c.lines||[]).length} lines covered</summary><div style="margin-top:8px">${ctrLinesHTML(c,true,c.id)}</div>${ctrMore(c)}</details></div>`).join("")||`<div class="panel empty">Nothing is waiting for approval.</div>`}</section>`;
+     <details style="margin-top:10px"${S.ctrOpenQ===c.id||(A&&((c.lines||[]).some(x=>x.state!=="learned")||ctrPbMissing(c)))?" open":""} data-cqt="${esc(c.id)}"><summary>${(c.lines||[]).length} lines covered</summary><div style="margin-top:8px">${ctrLinesHTML(c,true,c.id)}</div>${ctrMore(c)}</details></div>`).join("")||`<div class="panel empty">Nothing is waiting for approval.</div>`}</section>`;
   const save=async(c,patch,msg)=>{const n=Object.assign(ctrClean(c),patch||{});try{await window.__contracts.update(c.id,n);Object.assign(c,n);S.ctrStamp++;if(msg)toast(msg);render()}catch(e){toast(/42501|not allowed/i.test((e.message||"")+(e.code||""))?"You are not allowed to change this contract.":"Couldn't save: "+(e.message||e.code));ctrLoad(true)}};
   ctrBindEdit(B,id=>ctrById(id),c=>save(c));
   B.querySelectorAll("[data-cqt]").forEach(d=>d.ontoggle=()=>{if(d.open)S.ctrOpenQ=d.dataset.cqt;else if(S.ctrOpenQ===d.dataset.cqt)S.ctrOpenQ=null});
   const who=()=>S.myName||actor()||"";
   B.querySelectorAll("[data-clr]").forEach(x=>x.onchange=()=>{(S.ctrNoLearn=S.ctrNoLearn||{})[x.dataset.clr]=!x.checked});
   const learn=async c=>{if((S.ctrNoLearn||{})[c.id])return 0;const n=await ctrLearn(c);if(n)await ctrSpread(c.id);return n};
-  B.querySelectorAll("[data-ca]").forEach(b=>b.onclick=async()=>{b.disabled=true;const c=ctrById(b.dataset.ca);const n=await learn(c);save(c,{status:"approved",okBy:who(),okAt:nowISO()},n?`Contract approved · ${n} line${n===1?"":"s"} remembered for future uploads`:"Contract approved")});
+  B.querySelectorAll("[data-ca]").forEach(b=>b.onclick=async()=>{const c=ctrById(b.dataset.ca);const mi=ctrPbMissing(c);if(mi){toast(`Choose the price item for ${mi} line${mi===1?"":"s"} (or “Not a product”).`);S.ctrOpenQ=c.id;render();return}b.disabled=true;(c.lines||[]).forEach(x=>{delete x.itAuto});const n=await learn(c);save(c,{status:"approved",okBy:who(),okAt:nowISO()},n?`Contract approved · ${n} line${n===1?"":"s"} remembered for future uploads`:"Contract approved")});
   B.querySelectorAll("[data-cr]").forEach(b=>b.onclick=()=>{S.ctrRej=b.dataset.cr;render();$("#ctRejT")?.focus()});B.querySelectorAll("[data-crx]").forEach(b=>b.onclick=()=>{S.ctrRej=null;render()});
   B.querySelectorAll("[data-crr]").forEach(b=>b.onclick=()=>{const t=$("#ctRejT").value.trim();if(!t){toast("Write the reason");return}S.ctrRej=null;save(ctrById(b.dataset.crr),{status:"rejected",rejectNote:t,okBy:who(),okAt:nowISO()},"Contract rejected")});
   B.querySelectorAll("[data-cw]").forEach(b=>b.onclick=()=>save(ctrById(b.dataset.cw),{status:"withdrawn"},"Contract taken back"));
@@ -4128,7 +4169,38 @@ function renderAcctMatrix(m){ensureTip();const M=mxState();const{prods,hotels}=m
 
 
 /* ======================= 6. SETTINGS (editors) ======================= */
-function renderSet(m){const st=S.settings;const prods=prodList(true),sps=spList(true);
+/* ---- Products & settings in sections: every block is still rendered (so nothing about saving changes); this only
+   decides which blocks are shown. S.setSec = section key (remembered on the device), S.setJump = block to scroll to. */
+const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Sales engineers","Lead generators"]],
+  ["terr","Territories & accounts","Territories, emirates and states, hotel chains",["Territories","Emirates and states","Hotel chains"]],
+  ["prod","Products & PMS","Product catalog, PMS integrations",["Product catalog","PMS integrations"]],
+  ["sales","Sales rules","Source channels, rates and targets, activity rules",["Source channels","Rates and targets","Activity rules and forecast"]],
+  ["amc","AMC & contracts","Renewal rates, line categories, reading rules, OHIP",["AMC and renewals","Contract line categories","Contract reading rules","OHIP rules"]],
+  ["sys","Backup","Download a copy of all data",["Backup"]]];
+function renderSet(m){renderSetBase(m);if(can("settings.manage")&&!window.__NOSETSEC)setSections(m)}
+function setSections(m){const sec=m.querySelector("section.view");if(!sec)return;const title=p=>((p.querySelector("h3,h2")||{}).textContent||"").trim();
+  const tops=[...sec.children].filter(k=>!k.classList.contains("vhead"));const panels=[];tops.forEach(k=>{if(k.classList.contains("panel"))panels.push([k,k]);else k.querySelectorAll(":scope>.panel").forEach(p=>panels.push([p,k]))});
+  const secOf=t=>SET_SECS.find(g=>g[3].some(x=>t.startsWith(x)));
+  const have=SET_SECS.filter(g=>panels.some(([p])=>secOf(title(p))===g));if(have.length<2)return;
+  let cur=have.find(g=>g[0]===(S.setSec||lsGet("ld.setsec")))||have[0];S.setSec=cur[0];
+  const q=(S.setQ||"").trim().toLowerCase();const allT=panels.map(([p])=>title(p)).filter(secOf);let hits=q?allT.filter(t=>t.toLowerCase().includes(q)):[];if(q&&!hits.length)hits=allT.filter(t=>secOf(t)[1].toLowerCase().includes(q)||secOf(t)[2].toLowerCase().includes(q));
+  const w=document.createElement("div");w.className="setw";const n=document.createElement("nav");n.className="setn";n.setAttribute("aria-label","Settings sections");const c=document.createElement("div");c.className="setc";
+  n.innerHTML=`<input id="setQ" type="search" placeholder="Find a setting…" value="${esc(S.setQ||"")}" aria-label="Find a setting">`+
+    (q?`<div class="setr">${hits.length?hits.map(t=>`<button type="button" data-setgo="${esc(secOf(t)[0])}" data-setp="${esc(t)}">${esc(t.replace(/\s+\d+ active$/,""))}<small>${esc(secOf(t)[1])}</small></button>`).join(""):`<div class="small muted" style="padding:8px 11px">Nothing matches “${esc(S.setQ)}”.</div>`}</div>`
+      :have.map(g=>`<button type="button" data-setsec="${g[0]}"${g===cur?' class="on" aria-current="true"':""}>${esc(g[1])}<small>${esc(g[2])}</small></button>`).join(""));
+  const shown=[];panels.forEach(([p,top])=>{const g=secOf(title(p));if(g&&g!==cur)p.hidden=true;else shown.push([g?g[3].findIndex(x=>title(p).startsWith(x)):99,p,top])});
+  tops.forEach(k=>{if(!k.classList.contains("panel")){const vis=[...k.querySelectorAll(":scope>.panel")].filter(p=>!p.hidden).length;if(!vis)k.hidden=true;else if(vis===1)k.classList.add("set1")}});
+  const j=document.createElement("div");j.className="setj";const names=shown.filter(x=>x[0]<99).sort((a,b)=>a[0]-b[0]);
+  if(names.length>1)j.innerHTML=`<span class="small muted">Jump to</span>`+names.map(([i,p])=>`<button type="button" data-setp="${esc(title(p))}">${esc(cur[3][i])}</button>`).join("");
+  c.appendChild(j);const done=new Set();shown.sort((a,b)=>a[0]-b[0]).forEach(([i,p,top])=>{if(!done.has(top)){done.add(top);c.appendChild(top)}});tops.forEach(k=>{if(!done.has(k))c.appendChild(k)});
+  w.appendChild(n);w.appendChild(c);sec.appendChild(w);const hp=sec.querySelector(".vhead p");if(hp)hp.textContent="Choose a section, or type in “Find a setting”. Only a Supervisor can change these.";
+  const jump=t=>{const p=panels.map(x=>x[0]).find(p=>title(p)===t);if(p)p.scrollIntoView({block:"start"})};
+  n.querySelectorAll("[data-setsec]").forEach(b=>b.onclick=()=>{S.setSec=b.dataset.setsec;lsSet("ld.setsec",S.setSec);render();window.scrollTo(0,0)});
+  w.querySelectorAll("[data-setp]").forEach(b=>b.onclick=()=>{if(b.dataset.setgo){S.setSec=b.dataset.setgo;lsSet("ld.setsec",S.setSec);S.setQ="";S.setJump=b.dataset.setp;render()}else jump(b.dataset.setp)});
+  const qi=n.querySelector("#setQ");qi.oninput=()=>{S.setQ=qi.value;clearTimeout(qi.t);qi.t=setTimeout(()=>{render();const i=$("#setQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)};
+  if(S.setJump){const t=S.setJump;S.setJump="";jump(t)}
+  const on=n.querySelector("button.on");if(on&&n.scrollWidth>n.clientWidth)n.scrollLeft=Math.max(0,on.offsetLeft-12)}
+function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spList(true);
   if(!can("settings.manage")){m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Products, sales engineers, sources, exchange rates and targets. Only a Supervisor can change these.</p></div></div>
    ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
    <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;$("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}return}
