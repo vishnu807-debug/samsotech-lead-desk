@@ -114,6 +114,33 @@
     return ME.displayName;
   };
   // Supervisor: move every lead of a name that isn't on the Sales engineer list to an existing engineer (supabase/15_merge.sql)
+  // AMC changes (supabase/34_amc_lines_signoff_cloud.sql): project sign-off date on a won order, and the picture of a
+  // contract's commercial page, kept only while the contract waits for approval. Pictures are fetched on demand.
+  window.__setSignoff = async (id, date) => {
+    const { error } = await sb.rpc("set_signoff", { p_id: id, p_date: date });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return true;
+  };
+  // Renaming an account: asked by a sales engineer, done by someone with account.manage. One database call each.
+  window.__accountRename = {
+    request: async (a) => { const { error } = await sb.rpc("account_rename_request", { p_key: a.key, p_name: a.name, p_reason: a.reason || "", p_cur: a.cur || {} }); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return true; },
+    rename: async (a) => { const { error } = await sb.rpc("account_rename", { p_key: a.key, p_name: a.name, p_reason: a.reason || "", p_cur: a.cur || {} }); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return true; },
+    reject: async (a) => { const { error } = await sb.rpc("account_rename_reject", { p_key: a.key }); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return true; },
+  };
+  window.__contractPages = {
+    put: async (id, pages) => {
+      const rows = (pages || []).slice(0, 3).map((p) => ({ contract_id: id, n: p.n, img: p.img }));
+      if (!rows.length) return true;
+      const { error } = await sb.from("contract_pages").upsert(rows, { onConflict: "contract_id,n" });
+      if (error) throw Object.assign(new Error(error.message), { code: error.code });
+      return true;
+    },
+    list: async (id) => {
+      const { data, error } = await sb.from("contract_pages").select("n,img").eq("contract_id", id).order("n");
+      if (error) throw Object.assign(new Error(error.message), { code: error.code });
+      return data || [];
+    },
+  };
   // Joint work and events (supabase/33_joint_events.sql)
   window.__shareDecide = async (id, ok) => {
     const { error } = await sb.rpc("lead_share_decide", { p_id: id, p_ok: !!ok });
