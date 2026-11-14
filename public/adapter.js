@@ -114,6 +114,17 @@
     return ME.displayName;
   };
   // Supervisor: move every lead of a name that isn't on the Sales engineer list to an existing engineer (supabase/15_merge.sql)
+  // Joint work and events (supabase/33_joint_events.sql)
+  window.__shareDecide = async (id, ok) => {
+    const { error } = await sb.rpc("lead_share_decide", { p_id: id, p_ok: !!ok });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return true;
+  };
+  window.__saveEvents = async (list) => {
+    const { error } = await sb.rpc("save_events", { p_events: list });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return true;
+  };
   window.__setRenewal = async (id, key, val) => {
     const { error } = await sb.rpc("set_renewal", { p_id: id, p_key: key, p_val: val });
     if (error) throw Object.assign(new Error(error.message), { code: error.code });
