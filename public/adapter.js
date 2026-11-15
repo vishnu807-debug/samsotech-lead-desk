@@ -233,6 +233,16 @@
   /* ---------- realtime fan-out ---------- */
   const listeners = {};  // table -> Set(fn)
   const resync = {};     // table -> Set(fn) called when the live connection comes back after a drop
+  // The screen must not depend on Supabase's live updates to show the user's OWN change: if that message is late or
+  // lost, a form would stay on "Saving…" although the save went through. So after a successful write the change is
+  // handed to the same listeners straight away (an update or delete), or the list is re-read through the normal
+  // access rules (a new row, which the person may not be allowed to see).
+  function localEcho(table, key, id, doc, type) {
+    (listeners[table] || []).forEach((f) => { try { f({ eventType: type, new: type === "DELETE" ? {} : { [key]: id, doc }, old: { [key]: id }, local: true }); } catch (e) { console.error(e); } });
+  }
+  const localReload = (table) => (resync[table] || []).forEach((f) => { try { f(); } catch (e) { console.error(e); } });
+  // changes made through database functions (sign-off, agreed share, renewal progress) are re-read the same way
+  ["__setSignoff", "__shareDecide", "__setRenewal"].forEach((n) => { const f = window[n]; if (typeof f === "function") window[n] = async (...a) => { const r = await f(...a); localReload("leads"); return r; }; });
   function onTable(table, fn) {
     if (!listeners[table]) {
       listeners[table] = new Set(); resync[table] = resync[table] || new Set();
@@ -275,6 +285,7 @@
         }
         if (error) throw dbErr(error);
         (caches[r.t] = caches[r.t] || new Map()).set(r.id, d);
+        localReload(r.t); if (r.t === "docs") localEcho(r.t, r.k, r.id, d, "UPDATE");
       },
       async update(d) {
         if (r.t === "members") return writeMembers(merge(await readMembers(), d));
@@ -287,11 +298,13 @@
         if (error) throw dbErr(error);
         if (!data || !data.length) throw { code: "invalid_argument", message: "You don't have permission to change this record." };
         caches[r.t].set(r.id, next);
+        localEcho(r.t, r.k, r.id, next, "UPDATE");
       },
       async delete() {
         if (r.t === "members") return;
         const { error } = await sb.from(r.t).delete().eq(r.k, r.id);
         if (error) throw dbErr(error);
+        localEcho(r.t, r.k, r.id, null, "DELETE");
       },
       async acquire() { return { acquired: true }; },   // reference numbers come from next_lead_ref() instead
       onSnapshot(next, onErr) {
