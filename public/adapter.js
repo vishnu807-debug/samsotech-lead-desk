@@ -467,11 +467,132 @@
     host.querySelector("#cp1").focus();
   };
 
+
+  /* ---------- two-step sign-in with an authenticator app (supabase/36_mfa.sql) ----------
+     Uses Supabase's built-in MFA. The database gives no data to a person who must use two-step sign-in
+     until the code has been entered in this session, so this screen comes before anything is loaded. */
+  const mfaState = async () => { try { const { data, error } = await sb.rpc("mfa_state"); return error ? null : data; } catch (e) { return null; } };   // null: 36_mfa.sql not run yet
+  async function mfaFactors() {
+    const { data, error } = await sb.auth.mfa.listFactors();
+    if (error) throw error;
+    const all = (data && data.all) || [];
+    return { ok: all.filter((f) => f.status === "verified" && f.factor_type === "totp"), open: all.filter((f) => f.status !== "verified") };
+  }
+  const mfaLog = (a) => sb.rpc("mfa_log", { p_action: a }).then(() => {}, () => {});
+  // One small dialog for: entering the code, first set-up, and switching it on or off from the account menu.
+  function mfaDialog(o) {
+    return new Promise((done) => {
+      const host = document.createElement("div");
+      host.className = "scrim mfas"; host.style.alignItems = "center"; host.style.justifyContent = "center"; host.style.overflow = "auto";
+      document.body.appendChild(host);
+      const close = (v) => { host.remove(); done(v); };
+      const err = (t) => { const m = host.querySelector("#mfm"); if (m) m.innerHTML = t ? `<span style="color:var(--bad)">${clean(t)}</span>` : ""; };
+      const shell = (title, body, okLabel) => {
+        host.innerHTML = `<form class="panel" role="dialog" aria-modal="true" aria-label="${title}" style="width:min(420px,calc(100% - 24px));display:grid;gap:12px;padding:20px;margin:12px auto" novalidate>
+          <h3 style="margin:0">${title}</h3>${body}<div id="mfm" class="small" role="alert"></div>
+          <div class="row">${okLabel ? `<button class="btn pri" type="submit" id="mfok">${okLabel}</button>` : ""}<button class="btn" type="button" id="mfx">${o.forced ? "Sign out" : "Close"}</button></div></form>`;
+        host.querySelector("#mfx").onclick = o.forced ? () => window.__signOut() : () => close(false);
+      };
+      const codeBox = `<label class="f">6-digit code<input id="mfc" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="000000" style="font:600 22px var(--f-mono,monospace);letter-spacing:.3em;text-align:center;height:48px"></label>`;
+      const readCode = () => { const c = (host.querySelector("#mfc").value || "").replace(/\D/g, ""); if (c.length !== 6) { err("Enter the 6 digits shown in your authenticator app."); return null; } return c; };
+      const busy = (on, label) => { const b = host.querySelector("#mfok"); if (b) { b.disabled = on; b.textContent = label; } };
+      const askCode = async () => {
+        let f; try { f = (await mfaFactors()).ok[0]; } catch (e) { f = null; }
+        shell("Two-step sign-in", `<p class="small muted" style="margin:0">Open your authenticator app and enter the code shown for Lead Desk.</p>${codeBox}
+          <p class="small muted" style="margin:0">Lost or changed your phone? Ask a Supervisor to reset your two-step sign-in.</p>`, "Verify");
+        host.querySelector("form").onsubmit = async (e) => {
+          e.preventDefault(); const code = readCode(); if (!code) return;
+          if (!f) return err("No authenticator is registered for this account. Ask a Supervisor to reset your two-step sign-in.");
+          busy(true, "Checking…");
+          const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: f.id, code });
+          busy(false, "Verify");
+          if (error) { err(/invalid|expired/i.test(error.message) ? "That code is not right or has expired. Wait for the next code and try again." : error.message); host.querySelector("#mfc").select(); return; }
+          close(true);
+        };
+        host.querySelector("#mfc").focus();
+      };
+      const setUp = async () => {
+        shell("Set up two-step sign-in", `<p class="small muted" style="margin:0">Preparing…</p>`, "");
+        let en;
+        try {
+          const fs = await mfaFactors();
+          for (const f of fs.open) await sb.auth.mfa.unenroll({ factorId: f.id });             // an earlier set-up that was never finished
+          const r = await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "Lead Desk " + new Date().toISOString().slice(0, 16) });
+          if (r.error) throw r.error; en = r.data;
+        } catch (e) {
+          shell("Set up two-step sign-in", `<p class="small" style="margin:0;color:var(--bad)">${clean(/not enabled|disabled/i.test(e.message || "") ? "Two-step sign-in is not switched on in Supabase yet (Authentication → Sign In / Providers → Multi-Factor → TOTP)." : (e.message || "Could not start the set-up."))}</p>`, "");
+          return;
+        }
+        shell("Set up two-step sign-in", `${o.forced ? `<p class="small" style="margin:0"><b>Your Supervisor requires two-step sign-in.</b> It takes about a minute and you only do it once.</p>` : ""}
+          <ol class="small" style="margin:0;padding-left:18px;display:grid;gap:8px">
+            <li>Install an authenticator app on your phone, for example Microsoft Authenticator or Google Authenticator.</li>
+            <li>In the app choose “Add account” and scan this picture:<div style="margin:8px 0;display:grid;justify-items:center"><img alt="QR code for your authenticator app" id="mfqr" width="176" height="176" style="background:#fff;padding:8px;border-radius:8px;border:1px solid var(--line);max-width:100%;height:auto"></div>
+              <details><summary>Can't scan? Type this key instead</summary><div class="mono" style="word-break:break-all;user-select:all;padding:8px;margin-top:6px;background:var(--sunk);border-radius:6px" id="mfkey"></div></details></li>
+            <li>Enter the 6-digit code the app now shows.</li></ol>${codeBox}`, "Switch on");
+        // Supabase returns the picture as an SVG data address that contains quotes, so it is set here, not inside the HTML text
+        const qr = String(en.totp.qr_code || ""); host.querySelector("#mfqr").src = /^data:image\/svg\+xml;utf-?8,/i.test(qr) ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(qr.replace(/^data:image\/svg\+xml;utf-?8,/i, "")) : qr;
+        host.querySelector("#mfkey").textContent = en.totp.secret || "";
+        host.querySelector("form").onsubmit = async (e) => {
+          e.preventDefault(); const code = readCode(); if (!code) return;
+          busy(true, "Checking…");
+          const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: en.id, code });
+          busy(false, "Switch on");
+          if (error) { err(/invalid|expired/i.test(error.message) ? "That code is not right or has expired. Wait for the next code and try again." : error.message); host.querySelector("#mfc").select(); return; }
+          await mfaLog("mfa_enabled");
+          close(true);
+        };
+        host.querySelector("#mfc").focus();
+      };
+      const manage = async () => {
+        shell("Two-step sign-in", `<p class="small muted" style="margin:0">Checking…</p>`, "");
+        const st = await mfaState(); let fs = { ok: [] }; try { fs = await mfaFactors(); } catch (e) {}
+        if (!st) { shell("Two-step sign-in", `<p class="small muted" style="margin:0">Two-step sign-in is not available yet. A Supervisor needs to run <span class="mono">supabase/36_mfa.sql</span> first.</p>`, ""); return; }
+        const on = fs.ok.length > 0;
+        const rule = st.mode === "required" ? "Your Supervisor requires it for your account." : st.mode === "optional" ? "It is optional for your account." : "Your Supervisor has not switched it on for your account.";
+        if (on) {
+          shell("Two-step sign-in", `<p style="margin:0"><span class="chip ok">On</span> You enter a code from your authenticator app each time you sign in.</p><p class="small muted" style="margin:0">${rule}${st.mode === "required" ? " Only a Supervisor can reset it." : ""}</p>`, st.mode === "required" ? "" : "Switch off");
+          const fm = host.querySelector("form");
+          fm.onsubmit = async (e) => {
+            e.preventDefault(); const b = host.querySelector("#mfok");
+            if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Confirm: switch off"; return; }
+            busy(true, "Switching off…");
+            for (const f of fs.ok) { const { error } = await sb.auth.mfa.unenroll({ factorId: f.id }); if (error) { busy(false, "Switch off"); return err(error.message); } }
+            await mfaLog("mfa_disabled"); try { await sb.auth.refreshSession(); } catch (e2) {}
+            close(true);
+          };
+        } else if (st.mode === "off") {
+          shell("Two-step sign-in", `<p style="margin:0"><span class="chip">Off</span> ${rule}</p>`, "");
+        } else {
+          shell("Two-step sign-in", `<p style="margin:0"><span class="chip">Off</span> Add a second step to your sign-in: a 6-digit code from an authenticator app on your phone.</p><p class="small muted" style="margin:0">${rule}</p>`, "Set up now");
+          host.querySelector("form").onsubmit = (e) => { e.preventDefault(); setUp(); };
+        }
+      };
+      (o.view === "code" ? askCode : o.view === "setup" ? setUp : manage)();
+    });
+  }
+  // Before any data is read: ask for the code, or take the person through set-up when it is required.
+  async function mfaGate() {
+    const st = await mfaState();
+    if (!st || !st.member || st.need === "none") return;
+    document.getElementById("tabs").hidden = true;
+    document.getElementById("main").innerHTML = '<div class="panel empty">Two-step sign-in: enter your code to continue.</div>';
+    await mfaDialog({ view: st.need === "code" ? "code" : "setup", forced: true });
+  }
+  window.__mfa = {
+    state: mfaState,
+    manage: () => mfaDialog({ view: "manage" }),
+    setup: () => mfaDialog({ view: "setup" }),                          // Supervisor setting up their own before making it required
+    users: async () => { const { data, error } = await sb.rpc("mfa_users"); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data || {}; },
+    setPolicy: async (p) => { const { data, error } = await sb.rpc("set_mfa_policy", { p }); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data; },
+    reset: (email) => window.__adminUser("mfa_reset", email),
+  };
+
   let started = false;
   async function start(session) {
     if (started || !session) return;
     started = true;
     ME.email = (session.user.email || "").toLowerCase();
+    await mfaGate();                                                    // two-step sign-in comes before any data
     // "*" so this keeps working before supabase/14_names.sql adds the display_name column
     const { data } = await sb.from("members").select("*").eq("email", ME.email).eq("active", true).maybeSingle();
     ME.role = data ? data.role : null;

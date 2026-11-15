@@ -243,7 +243,7 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .cfm>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px;display:grid;gap:12px}
 .cfm h3{margin:0}
 .qhist{display:grid;gap:3px;margin-top:4px}
-.achip.a-updated{background:var(--accent-soft);color:var(--accent)}.achip.a-exported,.achip.a-presentation,.achip.a-password{background:var(--warn-soft);color:var(--warn)}
+.achip.a-updated{background:var(--accent-soft);color:var(--accent)}.achip.a-exported,.achip.a-presentation,.achip.a-password,.achip.a-mfa{background:var(--warn-soft);color:var(--warn)}
 .linkb{all:unset;cursor:pointer;color:var(--accent);font:500 12.5px var(--f-mono)}.linkb:hover{text-decoration:underline}.linkb:focus-visible{outline:2px solid var(--accent)}
 table.chg{margin-top:8px;font-size:12px;border:1px solid var(--line);border-radius:6px;width:100%}table.chg th{font-size:10px;padding:5px 8px}table.chg td{padding:5px 8px;vertical-align:top;overflow-wrap:anywhere}
 .audt td{vertical-align:top}table.chg td:first-child{white-space:nowrap;width:1%;font-weight:500}
@@ -351,6 +351,26 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
 .stages span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;padding:6px 4px;border-radius:4px;background:var(--sunk);color:var(--muted)}
 .stages span.on{background:var(--accent);color:var(--accent-ink)}
 .stages span.won{background:var(--ok);color:#fff}
+.mfag{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.mful{border:1px solid var(--line);border-radius:10px;overflow:hidden}.mfuh,.mfur{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1.3fr) auto;gap:10px;align-items:center;padding:8px 12px}
+.mfuh{background:var(--sunk);font-weight:600}.mfur{border-top:1px solid var(--line)}.mfun{display:grid;min-width:0}.mfun b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mfur select{width:100%;min-width:0}.mfub{min-width:112px;text-align:right}
+@media(max-width:767px){.mfuh{display:none}.mfur{grid-template-columns:minmax(0,1fr) auto;row-gap:6px}.mfur>span:nth-child(3){grid-column:1/-1}.mfur>.mfub{grid-column:1/-1;text-align:left;min-width:0}.mfur>.mfub:empty{display:none}.mfur select{min-height:40px}}
+.bkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.bkopt{display:grid;gap:6px;align-content:start;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}.bkopt .btn{justify-self:start;margin-top:4px}
+.bkprog{display:grid;gap:6px;margin-top:12px}.bkbar{height:8px;border-radius:99px;background:var(--sunk);overflow:hidden}.bkbar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .2s}
+@media(max-width:480px){.bkopt .btn{justify-self:stretch;width:100%}}
+.stages button{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;padding:6px 4px;border-radius:4px;background:var(--sunk);color:var(--muted);border:1px solid transparent;min-height:32px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stages button.on{background:var(--accent);color:var(--accent-ink)}.stages button.won{background:var(--ok);color:#fff}
+.stages button[aria-disabled="true"]{cursor:default}.stages button[aria-disabled="true"]:not(.on):not(.won):not(.lost){opacity:.72}
+.stages button.go{background:var(--surface);color:var(--ink);border-color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+.stages button.go.on{background:var(--accent-soft);color:var(--accent)}.stages button.go.won{background:var(--ok-soft);color:var(--ok);border-color:var(--ok);box-shadow:inset 0 -2px 0 var(--ok)}
+.stages button.go:hover{background:var(--accent);color:var(--accent-ink)}
+.stages button[aria-current="step"]{outline:2px solid var(--ink);outline-offset:1px}
+.stages button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stages button.lostb{flex:0 0 auto;padding-left:12px;padding-right:12px;margin-left:8px}
+.stages button.lostb.go{border-color:var(--bad);color:var(--bad);box-shadow:inset 0 -2px 0 var(--bad)}.stages button.lostb.go:hover{background:var(--bad);color:#fff}
+.stages button.lostb.lost{background:var(--bad);color:#fff}
+@media(max-width:767px){.stages.sgo{gap:3px}.stages button{min-height:44px;font-size:9.5px;letter-spacing:.01em;padding:6px 1px}.stages button.lostb{padding-left:8px;padding-right:8px;margin-left:5px}}
+@media(max-width:359px){.stages button{font-size:9px;letter-spacing:0}.stages.sgo button{flex:1 1 auto;min-width:36px}.stages.sgo button.lostb{flex:0 1 auto;padding-left:6px;padding-right:6px}}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:40;font-size:13.5px;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 .banner{max-width:1240px;margin:0 auto}
 .matrix td.c{text-align:center;padding:6px 4px}
@@ -514,7 +534,7 @@ th{position:relative}
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js?v=20081c3b"></script>
+<script src="adapter.js?v=3a485e0f"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -820,7 +840,7 @@ function renderInner(){const m=$("#main");
   document.querySelectorAll("#tabs button[data-tab]").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab);b.tabIndex=b.dataset.tab===S.tab?0:-1});
   const pt=document.querySelector('#tabs [data-tab="pipe"] .tl');pt.textContent=!viewAll()?"My pipeline":can("lead.edit_all")?"Pipelines":"Team pipeline";document.querySelector('#tabs [data-tab="new"]').textContent=can("lead.create")||can("lead.create_own_outbound")?"Leads":"Leads";
   $("#who").innerHTML=`<details class="acctm"><summary aria-label="Account: ${esc(S.myName||"")}, ${esc(ROLE_LABEL[S.role])}"><span class="av" aria-hidden="true">${esc((myLabel()||"?").trim().charAt(0).toUpperCase())}</span><span class="acn"><b>${esc(myLabel())}</b><span>${esc(ROLE_LABEL[S.role])}</span></span></summary>
-    <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button><button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}${themeSeg()}</div></details>`;
+    <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button>${window.__mfa?`<button type="button" role="menuitem" id="mfaMenu" onclick="this.closest('details')?.removeAttribute('open');window.__mfa.manage()">Two-step sign-in</button>`:""}<button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}${themeSeg()}</div></details>`;
   bindTheme();
   $("#dnMenu")?.addEventListener("click",()=>{$("#who details")?.removeAttribute("open");openDisplayName()});
   tabsFit();
@@ -1407,6 +1427,42 @@ async function unWin(l,to,why,lr){if(!canUnwin(l))return false;if(!can("lead.sta
   if(l.order)body.orderHistory=[...(l.orderHistory||[]),Object.assign({},l.order,{removedAt:t,removedBy:by,reason:why})];
   if(to==="Lost")body.lost={reason:lr,notes:why,date:t};else if(l.lost)body.lost=null;
   return await patch(l,body,`Status changed from Won to ${to}${to==="Lost"?" ("+lr+")":""}${why?" · "+why:""}${l.order?" · order "+fmtAED(l.order.aed)+" moved to history":""}`)}
+/* Stage boxes (15 Nov 2026). Each box opens the SAME form as the matching "Update stage" button: it only sets
+   S.drawer.mode and calls drawActions(), so every rule, the audit trail and the database guard are unchanged.
+   stageMoves(l) returns null for a read-only lead, else {stage: {m: form, to: target} | {reopen: stage} | {why: reason}}. */
+const STG_LAB={"Meeting Done":"Meeting","Quotation Sent":"Quote"};
+const reopenTo=l=>l.quote?"Quotation Sent":(l.meeting||meetingsOf(l).length)?"Meeting Done":"Assigned";
+function doReopen(l){const back=reopenTo(l);
+  if(productState(l.accountKey,l.product).state==="blocked"&&productState(l.accountKey,l.product).lead.id!==l.id){toast("Another lead for this product is already open on this account");return false}
+  return patch(l,{lost:null},"Reopened",back)}
+function stageMoves(l){if(!l||l.deleted||!canAct(l))return null;const s=l.status,M={},meets=meetingsOf(l).length;
+  const CUR="This is the current stage.",DONE="Already done. A lead does not move back to this stage.";
+  if(s==="Won"){const ok=canUnwin(l),own=!can("lead.status_override");const T=ok?wonTargets(l).map(x=>x[0]).filter(x=>!own||WON_PATH.includes(x)):[];
+    const no=ok?"":isMine(l)&&can("lead.won_own")?`Your ${wonDays()} days to move this order back have passed. Ask a Lead Manager or Supervisor.`:"Only a Lead Manager or Supervisor can move a won order back.";
+    M.New={why:"A won order cannot go back to New."};
+    ["Assigned","Meeting Done","Quotation Sent"].forEach(k=>M[k]=T.includes(k)?{m:"unwin",to:k}:{why:no||(k==="Quotation Sent"?"This lead has no quotation on record.":"Not available for this lead.")});
+    M.Won={why:CUR};M.Lost=T.includes("Lost")?{m:"unwin",to:"Lost"}:{why:no||"Only a Lead Manager or Supervisor can mark a won order as lost."};return M}
+  if(s==="Lost"||s==="On Hold"){const back=reopenTo(l),why=s==="Lost"?"This lead is lost. Reopen it first.":"This lead is on hold. Reopen it first.";
+    ["New","Assigned","Meeting Done","Quotation Sent","Won"].forEach(k=>M[k]={why});M[back]={reopen:back};
+    if(s==="On Hold"){if(!meets&&back!=="Meeting Done")M["Meeting Done"]={m:"meet"};if(back!=="Quotation Sent")M["Quotation Sent"]={m:"quote"};M.Won={m:"won"};M.Lost={m:"lost"}}
+    else M.Lost={why:CUR};return M}
+  const fresh=s==="New"||s==="Info Needed",FIRST="Back office verifies and assigns the lead first.";
+  M.New={why:fresh?CUR:DONE};
+  M.Assigned={why:fresh?FIRST:s==="Assigned"?CUR:DONE};
+  M["Meeting Done"]=fresh?{why:FIRST}:s==="Assigned"?(meets?{why:"A meeting is already recorded. Use Log a meeting to add another."}:{m:"meet"}):{why:s==="Meeting Done"?"This is the current stage. Use Log a meeting to add another meeting.":DONE};
+  M["Quotation Sent"]=fresh?{why:FIRST}:["Assigned","Meeting Done"].includes(s)?{m:"quote"}:{why:"This is the current stage. Use Revise quotation to upload a new quote."};
+  M.Won=fresh?{why:FIRST}:["Meeting Done","Quotation Sent"].includes(s)?{m:"won"}:{why:"Record the meeting or the quotation first."};
+  M.Lost={m:"lost"};return M}
+function stagesHTML(l,stg,reachedIdx){const M=stageMoves(l);const lab=s=>STG_LAB[s]||s;const won=l.status==="Won";
+  if(!M)return`<div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(won?"won":"on"):""}">${lab(s)}</span>`).join("")}</div>`;
+  const box=(s,cls)=>{const x=M[s]||{why:"Not available."};const go=!x.why;const tip=go?(x.reopen?`Reopen this lead (back to ${x.reopen})`:x.m==="unwin"?`Move back to ${s}`:x.m==="lost"?"Mark as lost":`Move to ${s}`):x.why;
+    return`<button type="button" data-stg="${esc(s)}" class="${cls}${go?" go":""}"${go?"":` aria-disabled="true"`}${l.status===s?` aria-current="step"`:""} title="${esc(tip)}" aria-label="${esc(lab(s)+": "+tip)}">${lab(s)}</button>`};
+  return`<div class="stages sgo" role="group" aria-label="Lead stage. Choose a stage to move the lead.">${stg.map((s,i)=>box(s,i<=reachedIdx?(won?"won":"on"):"")).join("")}${box("Lost","lostb"+(l.status==="Lost"?" lost":""))}</div>`}
+function bindStages(l){document.querySelectorAll("#drawerHost .stages [data-stg]").forEach(b=>b.onclick=()=>{const cur=S.leadMap[l.id]||l;const x=(stageMoves(cur)||{})[b.dataset.stg];if(!x)return;
+  if(x.why){toast(x.why);return}
+  if(x.reopen){cfmOpen(`<h3>Reopen ${esc(cur.ref)}?</h3><p class="small muted" style="margin:0">The lead goes back to <b style="color:var(--ink)">${esc(x.reopen)}</b>. Nothing else changes.</p><div class="row"><button type="button" class="btn pri" id="sgOk">Reopen</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,async()=>{const r=await doReopen(cur);return r!==false},"#sgOk");return}
+  S.drawer.mode=x.m;S.drawer.uwTo=x.to||"";drawActions(cur);const A=$("#actArea");if(!A)return;try{A.scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}
+  A.querySelector("select,input:not([type=hidden]):not([type=file]),textarea,button")?.focus({preventScroll:true})})}
 function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return}
   const stg=["New","Assigned","Meeting Done","Quotation Sent","Won"];const reachedIdx=Math.max(...stg.map((s,i)=>l.stageAt?.[s]?i:-1));
   const inBO=l.status==="New"||l.status==="Info Needed";const ch=dupChecks(l);
@@ -1416,7 +1472,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   <div class="lvh">
    <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
    <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
-   <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
+   ${stagesHTML(l,stg,reachedIdx)}
   </div>
   <div class="lvb">
    ${lvTop}
@@ -1457,7 +1513,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   </div>
   </div>
   </aside></div>`;
-  $("#dClose").onclick=closeDrawer;if(!document.activeElement||!document.activeElement.closest?.(".drawer"))$("#dClose").focus({preventScroll:true});
+  $("#dClose").onclick=closeDrawer;bindStages(l);if(!document.activeElement||!document.activeElement.closest?.(".drawer"))$("#dClose").focus({preventScroll:true});
   $(".drawer").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...e.currentTarget.querySelectorAll("button,input,select,textarea,a[href]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
   /* the lead closes only with its Close button: no click-outside, no Esc (window.__ESCCLOSE is for the automated tests) */
   document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer&&window.__ESCCLOSE)closeDrawer()};
@@ -1703,13 +1759,13 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       e.currentTarget.disabled=true;S.drawer.mode=null;await fixOrder(l,{value:v,currency:c,aed,fromQuote:no},why,nq)};return}
   if(mode==="unwin"&&canUnwin(l)){const own=!can("lead.status_override");const T=wonTargets(l).filter(x=>!own||WON_PATH.includes(x[0]));
     A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:6px">Change status of a won lead</h3><p class="small muted" style="margin:0 0 10px">${own?`You can move your own won lead back for ${wonDaysLeft(l)} more day${wonDaysLeft(l)===1?"":"s"}. `:""}Use this when an order was marked Won by mistake, cancelled or not confirmed. ${l.order?`The order of <b>${fmtAED(l.order.aed)}</b>${l.order.no?" ("+esc(l.order.no)+")":""} is kept in the lead's history but no longer counts as revenue or incentive.`:"This lead has no order amount."}</p>
-     <div style="display:grid;gap:10px"><label class="f" style="max-width:320px">New status <span class="req">*</span><select id="uw-s">${opts(T.map(x=>x[0]),"","Choose")}</select></label>
+     <div style="display:grid;gap:10px"><label class="f" style="max-width:320px">New status <span class="req">*</span><select id="uw-s">${opts(T.map(x=>x[0]),T.some(x=>x[0]===S.drawer.uwTo)?S.drawer.uwTo:"","Choose")}</select></label>
       <div class="small muted" id="uw-h"></div>
       <label class="f" id="uw-lw" hidden>Lost reason <span class="req">*</span><select id="uw-lr">${opts(["Order cancelled","Price","Went with competitor","No budget","No response","Project cancelled","Not a fit","Other"],"","Choose")}</select></label>
       <label class="f">Why is it no longer Won? ${own?"(optional)":`<span class="req">*</span>`}<textarea id="uw-r" rows="2" maxlength="300" placeholder="e.g. Client cancelled the PO on 5 Nov"></textarea></label><div class="small" id="uw-msg"></div>
       <div class="row"><button class="btn pri" id="uw-ok">Change status</button><button class="btn" id="uw-x">Cancel</button></div></div></div>`;
     $("#uw-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
-    $("#uw-s").onchange=e=>{const t=T.find(x=>x[0]===e.target.value);$("#uw-h").textContent=t?t[1]:"";$("#uw-lw").hidden=e.target.value!=="Lost"};
+    $("#uw-s").onchange=e=>{const t=T.find(x=>x[0]===e.target.value);$("#uw-h").textContent=t?t[1]:"";$("#uw-lw").hidden=e.target.value!=="Lost"};if($("#uw-s").value)$("#uw-s").onchange({target:$("#uw-s")});S.drawer.uwTo="";
     $("#uw-ok").onclick=()=>{const to=$("#uw-s").value,why=$("#uw-r").value.trim(),lr=$("#uw-lr").value;const M=$("#uw-msg");
       if(!to){M.innerHTML=`<span style="color:var(--bad)">Choose the new status.</span>`;return}if(to==="Lost"&&!lr){M.innerHTML=`<span style="color:var(--bad)">Choose the lost reason.</span>`;return}
       if(!own&&why.length<3){M.innerHTML=`<span style="color:var(--bad)">Explain why the lead is no longer Won.</span>`;return}
@@ -1736,9 +1792,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       <div class="row"><button class="btn sm pri" id="fuSave">${l.nextFollowUp?"Update follow-up":"Set follow-up"}</button>${l.nextFollowUp?`<button class="btn sm ok" id="fuDone">Mark follow-up done</button><button class="btn sm" id="fuClear">Remove</button>`:""}<span class="small muted">${window.LD_HOSTED?"You'll get a reminder email at this time.":""}</span></div></div>`:""}</div>`:"";
   A.querySelectorAll("[data-m]").forEach(x=>x.onclick=()=>{S.drawer.mode=x.dataset.m;drawActions(l)});
   A.querySelector("[data-hold]")?.addEventListener("click",()=>patch(l,{},"Put on hold","On Hold"));
-  A.querySelector("[data-reopen]")?.addEventListener("click",()=>{const back=l.quote?"Quotation Sent":(l.meeting||meetingsOf(l).length)?"Meeting Done":"Assigned";
-    if(productState(l.accountKey,l.product).state==="blocked"&&productState(l.accountKey,l.product).lead.id!==l.id){toast("Another lead for this product is already open on this account");return}
-    patch(l,{lost:null},"Reopened",back)});
+  A.querySelector("[data-reopen]")?.addEventListener("click",()=>doReopen(l));
   $("#fuSave")?.addEventListener("click",()=>{const v=$("#fu").value,note=$("#fuNote").value.trim();if(!v){toast("Pick the date and time for the follow-up");return}
     const at=new Date(v);if(isNaN(at)){toast("That date and time isn't valid");return}if(at<new Date(Date.now()-6e4)){toast("Pick a time in the future");return}
     patch(l,{nextFollowUp:v,nextFollowUpAt:at.toISOString(),followUpNote:note,followUpRemindedFor:null},`Follow-up set for ${at.toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}${note?" · "+note:""}`)});
@@ -1936,7 +1990,7 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
    Rows come from the database table audit_log (supabase/10_audit_trail.sql): every change is written by
    database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
 const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
-const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
+const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",mfa_enabled:"Two-step on",mfa_disabled:"Two-step off",mfa_reset:"Two-step reset",mfa_policy:"Two-step rule",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
 const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",lines:"Quotation lines",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
 function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
 function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
@@ -1993,27 +2047,84 @@ function renderAudit(m){const A=audState();
 /* ======================= BACKUP (Supervisor) =======================
    One file with everything in Lead Desk: leads, accounts, users, settings, permissions and the audit trail.
    The free Supabase plan has no automatic backups, so this is the safety net. */
-function backupPanel(){const lb=S.settings.lastBackup;const age=lb&&lb.at?Math.floor(days(lb.at)):null;const due=age==null||age>=7;
-  return`<div class="panel" id="backupPanel" style="${due?"border-left:3px solid var(--warn)":""}"><div class="row" style="margin-bottom:6px"><h3>Backup</h3><span class="sp"></span><button type="button" class="btn pri" id="bkBtn">Download full backup</button></div>
-   <p class="small muted" style="margin:0;max-width:85ch">Saves every lead, account, user, setting and the audit trail in one file. ${window.LD_HOSTED?"The free Supabase plan keeps no backups, so download one every week and keep it in a safe shared folder.":"Download one every week and keep it in a safe folder."}
-   <b style="color:var(--ink)">${lb&&lb.at?`Last backup: ${fmtD(lb.at)} (${age===0?"today":age===1?"yesterday":age+" days ago"}) by ${esc(lb.by||"someone")}.`:"No backup taken yet."}</b>${due?` <span style="color:var(--warn)">A backup is due.</span>`:""}</p></div>`}
-async function takeBackup(){if(!can("data.backup")){toast("Your role can't download backups.");return}const b=$("#bkBtn");const lab=b?.textContent;if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing backup…`}
-  try{const out={app:"Lead Desk",format:1,createdAt:nowISO(),createdBy:S.myName||S.uid||"",tables:{}};
-    if(window.LD_HOSTED&&window.__sb){const sb=window.__sb;
-      const all=async(t,cols,order)=>{const rows=[];for(let f=0;;f+=1000){const{data,error}=await sb.from(t).select(cols).order(order).range(f,f+999);if(error)throw error;rows.push(...data);if(data.length<1000)break}return rows};
-      out.tables.leads=await all("leads","id,doc","id");out.tables.accounts=await all("accounts","key,doc","key");out.tables.members=await all("members","*","email");out.tables.docs=await all("docs","path,doc","path");
-      try{out.tables.audit_log=await all("audit_log","*","id")}catch(e){out.tables.audit_log=[];out.note="Audit trail not included: "+(e.message||e.code)}}
-    else{out.tables.leads=S.leads.map(l=>({id:l.id,doc:l}));out.tables.accounts=Object.entries(S.accounts||{}).map(([key,doc])=>({key,doc}));out.tables.members=Object.entries(S.users||{}).map(([id,u])=>Object.assign({id},u));
-      out.tables.docs=[{path:"config/settings",doc:S.settings},{path:"config/permissions",doc:{roles:S.perms||DEFAULT_PERMS}}]}
-    out.counts=Object.fromEntries(Object.entries(out.tables).map(([k,v])=>[k,v.length]));
-    const d=new Date();const name=`LeadDesk_Backup_${ymd(d)}_${String(d.getHours()).padStart(2,"0")}${String(d.getMinutes()).padStart(2,"0")}.json`;
-    const blob=new Blob([JSON.stringify(out)],{type:"application/json"});
-    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
-    window.__audit?.("exported","report",name,`Full backup: ${out.counts.leads} leads, ${out.counts.accounts} accounts, ${out.counts.members} users`,out.counts);
-    try{const lb={at:nowISO(),by:S.myEng||S.myName||""};await S.db.doc("config/settings").update({lastBackup:lb});S.settings.lastBackup=lb}catch(e){}
-    toast(`${name} is ready (${fmtN(out.counts.leads)} leads)`);render()}
-  catch(e){if(e?.code==="cancelled")toast("Download cancelled");else{console.error(e);toast("Backup failed: "+(e?.message||e?.code||"unknown error"))}}
-  finally{const nb=$("#bkBtn");if(nb){nb.disabled=false;nb.textContent=lab||"Download full backup"}}}
+function backupPanel(){const lb=S.settings.lastBackup;const age=lb&&lb.at?Math.floor(days(lb.at)):null;const due=age==null||age>=7;const P=S.bk||{};
+  return`<div class="panel" id="backupPanel" style="${due?"border-left:3px solid var(--warn)":""}"><div class="row" style="margin-bottom:6px"><h3>Backup and full export</h3></div>
+   <p class="small muted" style="margin:0 0 10px;max-width:85ch">Everything in Lead Desk: leads, accounts, contacts, AMC contracts, users, every settings document and the audit trail. ${window.LD_HOSTED?"The free Supabase plan keeps no backups, so download the backup file every week and keep it in a safe shared folder. ":""}Passwords, two-step sign-in secrets and email credentials are never included.</p>
+   <div class="bkgrid">
+    <div class="bkopt"><b>Backup file</b><span class="small muted">One complete file that Lead Desk can be restored from. Not meant for reading.</span><button type="button" class="btn pri" id="bkBtn"${P.busy?" disabled":""}>Download backup file</button></div>
+    <div class="bkopt"><b>Excel workbook</b><span class="small muted">The same data for people to read: one sheet per type of data.</span><button type="button" class="btn" id="bkXls"${P.busy?" disabled":""}>Download Excel workbook</button></div>
+   </div>
+   <div id="bkProg" class="bkprog" role="status" aria-live="polite"${P.msg?"":" hidden"}><div class="bkbar"><i style="width:${P.pct||0}%"></i></div><span class="small ${P.lvl==="bad"?"":"muted"}" style="${P.lvl==="bad"?"color:var(--bad)":P.lvl==="ok"?"color:var(--ok)":""}">${esc(P.msg||"")}</span></div>
+   <p class="small" style="margin:10px 0 0"><b style="color:var(--ink)">${lb&&lb.at?`Last backup file: ${fmtD(lb.at)} (${age===0?"today":age===1?"yesterday":age+" days ago"}) by ${esc(lb.by||"someone")}.`:"No backup file taken yet."}</b>${due?` <span style="color:var(--warn)">A backup is due.</span>`:""} <span class="muted">Every export is recorded in the audit trail.</span></p></div>`}
+/* Full export (15 Nov 2026). Two downloads from the same fetched data. Hosted: the database function export_begin()
+   refuses anyone without data.backup, records who / when, and returns the row counts used for progress and for the
+   completeness check. Rows are fetched 1,000 at a time by key (never one huge request). */
+const BK_TABLES=[["leads","id","id,doc,updated_at","Leads"],["accounts","key","key,doc,updated_at","Accounts"],["contracts","id","id,doc,updated_at","AMC contracts"],["members","email","*","Users"],["docs","path","path,doc,updated_at","Settings documents"],["audit_log","id","*","Audit trail"]];
+const BK_SECRET=/^(pass(word)?|pwd|secret|token|api[_-]?key|apikey|smtp[_-]?pass(word)?|totp[_-]?secret|mfa[_-]?secret|service[_-]?role.*)$/i;
+function bkScrub(v){if(Array.isArray(v))return v.map(bkScrub);if(v&&typeof v==="object"){const o={};for(const[k,x]of Object.entries(v)){if(BK_SECRET.test(k))continue;o[k]=bkScrub(x)}return o}return v}
+function bkProg(msg,pct,lvl){S.bk=Object.assign(S.bk||{},{msg,pct:pct==null?(S.bk||{}).pct||0:Math.max(0,Math.min(100,Math.round(pct))),lvl:lvl||""});const h=$("#bkProg");if(!h)return;h.hidden=!msg;const i=h.querySelector("i"),t=h.querySelector("span");if(i)i.style.width=S.bk.pct+"%";if(t){t.textContent=msg||"";t.className="small "+(lvl==="bad"?"":"muted");t.style.color=lvl==="bad"?"var(--bad)":lvl==="ok"?"var(--ok)":""}}
+async function bkFetch(counts){const T={},notes=[];
+  if(window.LD_HOSTED&&window.__sb){const sb=window.__sb;const total=BK_TABLES.reduce((n,t)=>n+(+(counts||{})[t[0]]||0),0)||1;let got=0;
+    for(const[t,key,cols,lab]of BK_TABLES){const rows=[];let last=null;
+      try{for(;;){let q=sb.from(t).select(cols).order(key).limit(1000);if(last!=null)q=q.gt(key,last);const{data,error}=await q;if(error)throw error;if(!data||!data.length)break;
+          rows.push(...data);got+=data.length;last=data[data.length-1][key];bkProg(`${lab}: ${fmtN(rows.length)}${counts&&counts[t]!=null?" of "+fmtN(Math.max(+counts[t],rows.length)):""} rows`,5+85*Math.min(1,got/total));
+          if(data.length<1000)break}}
+      catch(e){notes.push(`${lab} could not be read: ${e.message||e.code||e}`)}
+      if(counts&&counts[t]!=null&&rows.length<+counts[t])notes.push(`${lab}: only ${rows.length} of ${counts[t]} rows could be read with your access.`);
+      T[t]=t==="docs"?rows.map(r=>Object.assign({},r,{doc:bkScrub(r.doc)})):rows}}
+  else{T.leads=Object.values(S.leadMap||{}).map(l=>({id:l.id,doc:l}));T.accounts=Object.entries(S.accounts||{}).map(([key,doc])=>({key,doc}));T.contracts=(S.contracts||[]).map(c=>({id:c.id,doc:c}));
+    T.members=Object.entries(S.users||{}).map(([id,u])=>Object.assign({email:id},u));T.docs=[{path:"config/settings",doc:bkScrub(S.settings)},{path:"config/permissions",doc:{roles:S.perms||DEFAULT_PERMS}}];T.audit_log=[];bkProg("Collecting the data…",80)}
+  return{T,notes}}
+function bkSave(name,blob){if(S.downloads)return S.downloads.save({filename:name,data:blob});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+/* ---- Excel workbook: one sheet per type of data ---- */
+const bkCell=v=>{if(v==null)return"";if(v instanceof Date||typeof v==="number"||typeof v==="boolean")return v;const t=typeof v==="object"?JSON.stringify(v):String(v);return t.length>32000?t.slice(0,32000)+" …(cut)":t};
+function bkTable(rows,first){const keys=[];const seen=new Set(first||[]);(first||[]).forEach(k=>keys.push(k));rows.forEach(r=>Object.keys(r||{}).forEach(k=>{if(!seen.has(k)){seen.add(k);keys.push(k)}}));return[keys].concat(rows.map(r=>keys.map(k=>bkCell((r||{})[k]))))}
+function bkFlat(doc){const out=[["Setting","Value"]];const walk=(v,p)=>{if(Array.isArray(v)&&v.length&&v.every(x=>x&&typeof x==="object"&&!Array.isArray(x))){out.push([]);out.push([p+" ("+v.length+")"]);bkTable(v).forEach(r=>out.push([""].concat(r)));out.push([])}
+    else if(v&&typeof v==="object"&&!Array.isArray(v)){const ks=Object.keys(v);if(!ks.length)out.push([p,"(empty)"]);ks.forEach(k=>walk(v[k],p?p+" › "+k:k))}
+    else out.push([p,bkCell(Array.isArray(v)?v.join(", "):v)])};walk(doc,"");return out}
+function bkSheets(T,meta){const d=v=>v?String(v).slice(0,10):"";const leads=T.leads.map(r=>Object.assign({},r.doc,{id:r.id}));const SH=[];
+  const ex=exportRows(leads);SH.push(["Leads",[ex.H.map(h=>h[0]).concat(["Deleted"])].concat(ex.rows.map((r,i)=>r.concat([leads[i].deleted?"Yes · "+d(leads[i].deleted.at):""])))]);
+  const ql=[["Lead","Property","Engineer","Quotation no.","Quotation date","Item","Product","Qty","List price","Unit price","Line total","Currency"]];
+  leads.forEach(l=>((l.quote||{}).lines||[]).forEach(x=>ql.push([l.ref||l.id,l.accountName||"",l.assignedTo||"",l.quote.no||"",d(l.quote.date),bkCell(x.item),x.product||"",x.qty??"",x.list??"",x.unit??"",x.total??"",l.quote.currency||""])));SH.push(["Quotation lines",ql]);
+  const mt=[["Lead","Property","Engineer","Meeting date","Held","Joined by","Notes"]];leads.forEach(l=>meetingsOf(l).forEach(m=>mt.push([l.ref||l.id,l.accountName||"",l.assignedTo||"",d(m.date),m.mode||"",(m.joined||[]).join(", "),bkCell(m.notes||m.note||"")])));SH.push(["Meetings",mt]);
+  const la=[["Lead","Property","When","By","What happened"]];leads.forEach(l=>(l.log||[]).forEach(g=>la.push([l.ref||l.id,l.accountName||"",g.t||"",g.by||"",bkCell(g.a)])));SH.push(["Lead activity",la]);
+  SH.push(["Accounts",bkTable(T.accounts.map(r=>Object.assign({key:r.key},r.doc)),["key","name"])]);
+  const cs=new Map();const addC=(acc,c,src,eng)=>{if(!c||!(c.name||c.email||c.phone))return;const k=nk(acc)+"|"+nk(c.email||c.name||c.phone);if(!cs.has(k))cs.set(k,[acc,c.name||"",c.title||"",c.email||"",c.phone||"",src,eng||""])};
+  leads.forEach(l=>{addC(l.accountName||"",l.contact,l.ref||l.id,l.assignedTo);(l.contacts||[]).forEach(c=>addC(l.accountName||"",c,l.ref||l.id,l.assignedTo))});
+  T.accounts.forEach(r=>((r.doc||{}).contacts||[]).forEach(c=>addC((r.doc||{}).name||r.key,c,"Account","")));
+  T.contracts.forEach(r=>{const c=r.doc||{};if(c.signer)addC(c.accountName||c.client||"",typeof c.signer==="object"?c.signer:{name:c.signer},"Contract "+(c.no||r.id),c.engineer)});
+  SH.push(["Contacts",[["Property","Name","Title","Email","Phone","First seen on","Engineer"]].concat([...cs.values()].sort((a,b)=>String(a[0]).localeCompare(String(b[0]))))]);
+  const cRows=T.contracts.map(r=>{const c=Object.assign({},r.doc,{id:r.id});const o={};Object.keys(c).forEach(k=>{if(!["lines","renewals","handEdits","match"].includes(k))o[k]=c[k]});return o});SH.push(["AMC contracts",bkTable(cRows,["id","no","client","accountName","status","start","end","cur","total","engineer"])]);
+  const cl=[];T.contracts.forEach(r=>((r.doc||{}).lines||[]).forEach((x,i)=>cl.push(Object.assign({contract:(r.doc||{}).no||r.id,client:(r.doc||{}).client||"",line:i+1},x))));SH.push(["Contract lines",bkTable(cl,["contract","client","line"])]);
+  SH.push(["Users",[["Email","Display name","Role","Linked sales engineer","Active","Added on","Added by"]].concat(T.members.map(m=>[m.email||"",m.display_name||m.displayName||"",ROLE_LABEL[m.role]||m.role||"",m.engineer||"",m.active===false?"No":"Yes",d(m.added_at||m.addedAt),m.added_by||""]))]);
+  T.docs.forEach(r=>SH.push([String(r.path).replace(/^config\//,"Settings · ").replace(/[\\\/\?\*\[\]:]/g," "),bkFlat(r.doc)]));
+  const AMAX=200000;const au=T.audit_log.slice(-AMAX).reverse();const ar=[["When","Who","Role","Source","Action","What","Record","Summary","Changes"]].concat(au.map(a=>[a.at||"",a.actor||"",a.actor_role||"",a.source||"",AUD_ACT[a.action]||a.action||"",a.entity||"",a.entity_id||"",bkCell(a.summary),bkCell(a.changes)]));
+  SH.push(["Audit trail",ar]);
+  const about=[["Lead Desk · full data export"],[],["Created",meta.createdAt],["Created by",meta.createdBy],[],["Sheet","Rows"]].concat(SH.map(x=>[x[0],Math.max(0,x[1].filter(r=>r.length).length-1)]));
+  if(T.audit_log.length>AMAX)about.push([],[`The Audit trail sheet holds the newest ${fmtN(AMAX)} of ${fmtN(T.audit_log.length)} entries. The backup file holds all of them.`]);
+  about.push([],["Not included: passwords, two-step sign-in secrets and email credentials (they are not stored in Lead Desk's tables)."]);(meta.notes||[]).forEach(n=>about.push(["Warning: "+n]));
+  return[["About",about]].concat(SH)}
+async function fullExport(kind){if(!can("data.backup")){toast("Your role can't export all data.");return}if((S.bk||{}).busy)return;S.bk={busy:true,msg:"",pct:0};
+  const setB=on=>["#bkBtn","#bkXls"].forEach(q=>{const b=$(q);if(b)b.disabled=on});setB(true);bkProg("Checking your permission…",2);
+  try{let begin=null;
+    if(window.LD_HOSTED&&window.__sb){const{data,error}=await window.__sb.rpc("export_begin",{p_kind:kind});
+      if(error){if(error.code==="42501")throw new Error("Only a Supervisor can export all Lead Desk data.");if(/PGRST202|42883|404/.test(String(error.code))||/could not find|does not exist/i.test(error.message||""))throw new Error("The database part is missing: run supabase/35_full_export.sql first.");throw error}begin=data}
+    const{T,notes}=await bkFetch(begin&&begin.counts);const meta={app:"Lead Desk",format:2,kind,createdAt:nowISO(),createdBy:S.myEmail||S.myName||S.uid||"",counts:Object.fromEntries(Object.entries(T).map(([k,v])=>[k,v.length])),serverCounts:begin?begin.counts:null,complete:!notes.length,notes};
+    const d=new Date();const stamp=`${ymd(d)}_${String(d.getHours()).padStart(2,"0")}${String(d.getMinutes()).padStart(2,"0")}`;let name,blob;
+    if(kind==="excel"){bkProg("Building the Excel workbook…",92);const X=await loadXLSX();const wb=X.utils.book_new();const used=new Set();
+      bkSheets(T,meta).forEach(([n,aoa])=>{let nm=String(n).slice(0,31)||"Sheet";for(let i=2;used.has(nm.toLowerCase());i++)nm=String(n).slice(0,28)+" "+i;used.add(nm.toLowerCase());const ws=X.utils.aoa_to_sheet(aoa);
+        ws["!cols"]=(aoa.find(r=>r.length>1)||aoa[0]||[]).map((h,c)=>({wch:Math.min(48,Math.max(8,String(h??"").length,...aoa.slice(1,120).map(r=>String(r[c]??"").length))+2)}));X.utils.book_append_sheet(wb,ws,nm)});
+      name=`LeadDesk_Full_Export_${stamp}.xlsx`;blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array",compression:true})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
+    else{bkProg("Writing the backup file…",92);const parts=[JSON.stringify(Object.assign({},meta,{restore:"See README: Restoring from a backup file. Tables: leads(id,doc), accounts(key,doc), contracts(id,doc), members, docs(path,doc), audit_log."})).slice(0,-1),',"tables":{'];
+      Object.entries(T).forEach(([k,rows],i)=>{parts.push((i?",":"")+JSON.stringify(k)+":[");for(let f=0;f<rows.length;f+=500)parts.push((f?",":"")+rows.slice(f,f+500).map(r=>JSON.stringify(r)).join(","));parts.push("]")});parts.push("}}");
+      name=`LeadDesk_Backup_${stamp}.json`;blob=new Blob(parts,{type:"application/json"})}
+    window.__lastExport={name,size:blob.size,kind,counts:meta.counts,notes,blob};await bkSave(name,blob);
+    window.__audit?.("exported","report",name,`Full ${kind==="excel"?"Excel export":"backup file"} downloaded: ${meta.counts.leads} leads, ${meta.counts.accounts} accounts, ${meta.counts.contracts} contracts, ${meta.counts.members} users`,meta.counts);
+    if(kind==="backup"&&!notes.length){try{const lb={at:nowISO(),by:S.myEng||S.myName||""};await S.db.doc("config/settings").update({lastBackup:lb});S.settings.lastBackup=lb}catch(e){}}
+    S.bk={busy:false};bkProg(notes.length?`Downloaded ${name}, but it is not complete: ${notes.join(" ")}`:`Done: ${name} (${blob.size>1048576?(blob.size/1048576).toFixed(1)+" MB":Math.max(1,Math.round(blob.size/1024))+" KB"}).`,100,notes.length?"bad":"ok");toast(notes.length?"Export downloaded with warnings":`${kind==="excel"?"Excel workbook":"Backup file"} downloaded`);if($("#backupPanel"))render()}
+  catch(e){S.bk={busy:false};if(e?.code==="cancelled"){bkProg("Download cancelled.",0)}else{console.error(e);bkProg("Export failed: "+(e?.message||e?.code||"unknown error"),0,"bad")}}
+  finally{S.bk.busy=false;setB(false)}}
+const takeBackup=()=>fullExport("backup");
 
 /* ======================= ANALYTICS (one calculation shared by Accounts and Management) =======================
    Source of truth: the leads table only. Definitions used everywhere:
@@ -4456,7 +4567,7 @@ function renderAcctMatrix(m){ensureTip();const M=mxState();const{prods,hotels}=m
 /* ======================= 6. SETTINGS (editors) ======================= */
 /* ---- Products & settings in sections: every block is still rendered (so nothing about saving changes); this only
    decides which blocks are shown. S.setSec = section key (remembered on the device), S.setJump = block to scroll to. */
-const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Sales engineers","Lead generators"]],
+const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Two-step sign-in","Roles and permissions","Sales engineers","Lead generators"]],
   ["terr","Territories & accounts","Territories, emirates and states, hotel chains",["Territories","Emirates and states","Hotel chains"]],
   ["prod","Products & PMS","Product catalog, PMS integrations",["Product catalog","PMS integrations"]],
   ["sales","Sales rules","Source channels, rates and targets, activity rules",["Source channels","Rates and targets","Activity rules and forecast"]],
@@ -4487,15 +4598,15 @@ function setSections(m){const sec=m.querySelector("section.view");if(!sec)return
   const on=n.querySelector("button.on");if(on&&n.scrollWidth>n.clientWidth)n.scrollLeft=Math.max(0,on.offsetLeft-12)}
 function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spList(true);
   if(!can("settings.manage")){m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Products, sales engineers, sources, exchange rates and targets. Only a Supervisor can change these.</p></div></div>
-   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
-   <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;$("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}return}
+   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+mfaPanel()+permsPanel():""}
+   <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;$("#bkBtn")?.addEventListener("click",takeBackup);$("#bkXls")?.addEventListener("click",()=>fullExport("excel"));if(can("users.manage")){bindUsers();bindPerms();bindMfa()}return}
   const row=(x,i,kind)=>`<div class="it" style="padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1;min-width:0;${x.active===false?"color:var(--muted);text-decoration:line-through":""}">${esc(x.name)}</span>
     ${kind==="p"?`<label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-rep="${i}" ${x.repeatable?"checked":""} style="width:auto">Repeatable</label>`:""}
     <span class="small muted" style="min-width:52px;text-align:right">${kind==="p"?useCount(x.name,"p")+" leads":`${openLeadsOf(x.name).length} open · ${myAreas(x.name).length} areas`}</span>
     ${kind==="s"&&(openLeadsOf(x.name).length||myAreas(x.name).length)?`<button type="button" class="btn sm" data-hand="${esc(x.name)}">Hand over</button>`:""}
     <button type="button" class="btn sm" data-ren="${kind}:${i}">Rename</button><button type="button" class="btn sm" data-tog="${kind}:${i}">${x.active===false?"Restore":"Retire"}</button></div>`;
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Supervisors manage users, roles, the product catalog and the sales engineer list here. Names must be unique, ignoring case and spacing. Retired names stay on existing leads but can no longer be chosen.</p></div></div>
-  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
+  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+mfaPanel()+permsPanel():""}
   ${territoryPanel()}
   ${subTerrPanel()}
   ${chainsPanel()}
@@ -4529,7 +4640,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
     <label class="f">Regions, one per line<textarea id="s-reg" rows="6">${esc(regionList().join("\n"))}</textarea></label>
     <button class="btn pri" id="setSave" type="button">Save sources, regions, rates and targets</button></div></div>
   </form></section>`;
-  $("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}bindTerritories();bindSubTerr();
+  $("#bkBtn")?.addEventListener("click",takeBackup);$("#bkXls")?.addEventListener("click",()=>fullExport("excel"));if(can("users.manage")){bindUsers();bindPerms();bindMfa()}bindTerritories();bindSubTerr();
   const save=async(body,okMsg)=>{try{await S.db.doc("config/settings").update(body);toast(okMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}};
   const dupMsg=(el,list,name)=>{const n=name.trim().replace(/\s+/g," ");if(!n){el.innerHTML=`<div class="notice bad">Enter a name.</div>`;return null}
     const ex=list.find(x=>nk(x.name)===nk(n));if(ex){el.innerHTML=`<div class="notice bad">“${esc(ex.name)}” already exists${ex.active===false?" as a retired entry. Restore it instead":""}.</div>`;return null}
@@ -4750,6 +4861,42 @@ async function renameEverywhere(kind,o,n,merge){if(!can("settings.manage"))throw
     if(Object.keys(b).length){await S.db.doc("leads/"+l.id).update(b);c++}}
   if(kind==="engineer"){const m={};let ch=false;for(const[id,u]of Object.entries(S.users||{})){m[id]=Object.assign({},u);if(same(u.engineer)){m[id].engineer=n;ch=true}}if(ch){await S.db.doc("config/users").set({members:m});S.users=m}}
   return c}
+/* Two-step sign-in (15 Nov 2026, supabase/36_mfa.sql). The rule is settings.mfa {mode, roles{}, users{}}; it is saved only
+   through window.__mfa.setPolicy (database function set_mfa_policy), never with the other settings. Hosted only. */
+const MFA_OPT=[["off","Off"],["optional","Optional"],["required","Required"]];const MFA_LAB={off:"Off",optional:"Optional",required:"Required"};
+const mfaCfg=()=>{const c=S.settings.mfa||{};return{mode:MFA_LAB[c.mode]?c.mode:"off",roles:Object.assign({},c.roles||{}),users:Object.assign({},c.users||{})}};
+const mfaEff=(c,email,role)=>c.users[String(email).toLowerCase()]||c.roles[role]||c.mode||"off";
+function mfaLoad(force){if(!window.__mfa||S.mfaLoading||(S.mfaUsers&&!force))return;S.mfaLoading=true;
+  Promise.all([window.__mfa.users().catch(e=>({__err:e.message||String(e)})),window.__mfa.state()]).then(([u,st])=>{S.mfaUsers=u||{};S.mfaMe=st;S.mfaLoading=false;if(S.tab==="settings"||S.tab==="set")render();else render()})}
+function mfaPanel(){if(!window.LD_HOSTED||!window.__mfa)return"";const D=S.mfaDraft||(S.mfaDraft=mfaCfg());const U=S.mfaUsers;if(!U){mfaLoad();}
+  const missing=U&&U.__err;const mem=Object.entries(S.users).sort((a,b)=>byName(S.names[a[0]]||a[0],S.names[b[0]]||b[0]));const meOn=!!(S.mfaMe&&S.mfaMe.enrolled);
+  const sel=(attr,val,first)=>`<select ${attr}>${first?`<option value="">${esc(first)}</option>`:""}${MFA_OPT.map(([v,t])=>`<option value="${v}"${val===v?" selected":""}>${t}</option>`).join("")}</select>`;
+  const dirty=JSON.stringify(D)!==JSON.stringify(mfaCfg());const chip=m=>`<span class="chip ${m==="required"?"ok":m==="optional"?"warn":""}">${MFA_LAB[m]}</span>`;
+  return`<div class="panel" id="mfaPanel"><div class="row" style="margin-bottom:6px"><h3>Two-step sign-in</h3>${chip(D.mode)}</div>
+   <p class="small muted" style="margin:0 0 12px;max-width:85ch">After the password, the person enters a 6-digit code from an authenticator app on their phone. <b style="color:var(--ink)">Off</b>: nobody is asked to set it up. <b style="color:var(--ink)">Optional</b>: each person may switch it on in the account menu. <b style="color:var(--ink)">Required</b>: the person must set it up at their next sign-in and sees no data until it is done. Anyone who has switched it on is always asked for the code.</p>
+   ${missing?`<div class="notice warn">Two-step sign-in is not ready in the database yet. Run <span class="mono">supabase/36_mfa.sql</span>, then reload.</div>`:`
+   <div class="notice ${meOn?"ok":"info"}" style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="flex:1;min-width:200px">${meOn?"Your own two-step sign-in is on.":"Your own two-step sign-in is not set up. Set it up before you make it required for yourself, so you cannot lock yourself out."}</span>${meOn?"":`<button type="button" class="btn sm" id="mfaMine">Set up mine now</button>`}</div>
+   <div class="mfag"><label class="f">For everyone${sel(`id="mfaAll"`,D.mode)}</label>
+    ${ROLES.map(r=>`<label class="f">${ROLE_LABEL[r]}${sel(`data-mfr="${r}"`,D.roles[r]||"",`Same as everyone (${MFA_LAB[D.mode]})`)}</label>`).join("")}</div>
+   <div class="mful" style="margin-top:14px"><div class="mfuh small muted"><span>Person</span><span>Authenticator</span><span>Rule for this person</span><span></span></div>
+    ${mem.map(([id,u])=>{const on=U&&U[id]&&U[id].enrolled;const eff=mfaEff(D,id,u.role);return`<div class="mfur"><span class="mfun"><b>${esc(S.names[id]||id)}</b><span class="small muted">${esc(ROLE_LABEL[u.role]||u.role)}${id===S.uid?" · You":""}</span></span>
+     <span>${!U?`<span class="small muted">…</span>`:on?`<span class="chip ok">On</span>`:`<span class="chip">Not set up</span>`}${eff==="required"&&U&&!on?` <span class="small" style="color:var(--warn)">set-up at next sign-in</span>`:""}</span>
+     <span>${sel(`data-mfu="${esc(id)}" aria-label="Two-step rule for ${esc(S.names[id]||id)}"`,D.users[id]||"",`Same as role (${MFA_LAB[D.roles[u.role]||D.mode]})`)}</span>
+     <span class="mfub">${on?`<button type="button" class="btn sm" data-mfreset="${esc(id)}">Reset two-step</button>`:""}</span></div>`}).join("")}</div>
+   <div class="row" style="margin-top:12px"><button type="button" class="btn pri" id="mfaSave"${dirty?"":" disabled"}>Save two-step rule</button>${dirty?`<button type="button" class="btn" id="mfaUndo">Undo changes</button>`:""}<div class="small" id="mfaMsg">${S.mfaNote?`<span style="color:var(--${S.mfaNote.lvl==="bad"?"bad":"ok"})">${esc(S.mfaNote.msg)}</span>`:""}</div></div>
+   <p class="small muted" style="margin:10px 0 0;max-width:85ch"><b style="color:var(--ink)">Lost phone:</b> use “Reset two-step” on that person; they set it up again at their next sign-in. Keep at least two Supervisors, so one can reset the other. If the only Supervisor is locked out, follow “Two-step sign-in: recovery” in the README. Changes and resets are recorded in the audit trail.</p>`}</div>`}
+function bindMfa(){const P=$("#mfaPanel");if(!P)return;const D=S.mfaDraft;const re=()=>{S.mfaNote=null;render()};
+  $("#mfaAll")?.addEventListener("change",e=>{D.mode=e.target.value;re()});
+  P.querySelectorAll("[data-mfr]").forEach(x=>x.onchange=()=>{if(x.value)D.roles[x.dataset.mfr]=x.value;else delete D.roles[x.dataset.mfr];re()});
+  P.querySelectorAll("[data-mfu]").forEach(x=>x.onchange=()=>{if(x.value)D.users[x.dataset.mfu]=x.value;else delete D.users[x.dataset.mfu];re()});
+  $("#mfaUndo")?.addEventListener("click",()=>{S.mfaDraft=null;re()});
+  $("#mfaMine")?.addEventListener("click",async()=>{await window.__mfa.setup();mfaLoad(true)});
+  $("#mfaSave")?.addEventListener("click",async()=>{const b=$("#mfaSave");b.disabled=true;b.textContent="Saving…";
+    try{const nw=await window.__mfa.setPolicy(D);S.settings.mfa=nw;S.mfaDraft=null;S.mfaNote={lvl:"ok",msg:"Saved. It applies from each person's next sign-in."}}
+    catch(e){S.mfaNote={lvl:"bad",msg:e.code==="42501"?"Only a Supervisor can change two-step sign-in.":(e.message||"Could not save.")}}render()});
+  P.querySelectorAll("[data-mfreset]").forEach(b=>b.onclick=async()=>{const em=b.dataset.mfreset;if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm reset";return}
+    b.disabled=true;b.textContent="Resetting…";const r=await window.__mfa.reset(em);
+    S.mfaNote=r.error?{lvl:"bad",msg:`Couldn't reset ${em}: ${r.error}`}:{lvl:"ok",msg:r.status==="none"?`${em} had no authenticator to reset.`:`Two-step sign-in reset for ${em}. They set it up again at their next sign-in${mfaEff(mfaCfg(),em,(S.users[em]||{}).role)==="required"?"":" if they wish"}.`};S.mfaUsers=null;render()})}
 function usersPanel(){const mem=Object.entries(S.users);const mapped=new Set(mem.filter(([,u])=>u.engineer).map(([,u])=>nk(u.engineer)));
   return`<div class="panel"><div class="row" style="margin-bottom:6px"><h3>Users and access</h3><span class="chip">${mem.length+(window.LD_HOSTED?0:1)} users</span></div>
    <p class="small muted" style="margin:0 0 12px;max-width:80ch">${window.LD_HOSTED?"Only people on this list can sign in. Add their work email and role; they sign in with the temporary password (or an email link) and choose their own password. Sales engineers only ever see the leads assigned to their linked name.":"Only people on this list can use Lead Desk; everyone else sees an access-denied page. People sign in with their claude.ai account. In the page's Share menu, give Supervisors <b>Editor</b> access and everyone else <b>Contributor</b> access."}</p>
