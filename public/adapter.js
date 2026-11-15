@@ -237,7 +237,21 @@
   // lost, a form would stay on "Saving…" although the save went through. So after a successful write the change is
   // handed to the same listeners straight away (an update or delete), or the list is re-read through the normal
   // access rules (a new row, which the person may not be allowed to see).
+  // Supabase then sends the same change back as a live update. To avoid drawing the screen twice, that echo is
+  // skipped when it carries exactly what was just shown (compared with keys in a fixed order, because the database
+  // returns them in its own order). If the database changed anything on the way, the contents differ and it is shown.
+  const canon = (v) => Array.isArray(v) ? "[" + v.map(canon).join(",") + "]"
+    : v && typeof v === "object" ? "{" + Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => JSON.stringify(k) + ":" + canon(v[k])).join(",") + "}" : JSON.stringify(v === undefined ? null : v);
+  const echoed = {};       // table -> Map(id -> { c: contents, t: when })
+  const isOwnEcho = (table, p) => {
+    const m = echoed[table]; if (!m || !m.size || p.eventType === "DELETE" && !p.old) return false;
+    const now = Date.now(); m.forEach((v, k) => { if (now - v.t > 15000) m.delete(k); });
+    const row = p.eventType === "DELETE" ? p.old : p.new; if (!row) return false;
+    for (const [id, v] of m) { if (Object.values(row).includes(id) && (p.eventType === "DELETE" ? v.c === "deleted" : v.c === canon(row.doc))) { m.delete(id); return true; } }
+    return false;
+  };
   function localEcho(table, key, id, doc, type) {
+    (echoed[table] = echoed[table] || new Map()).set(id, { c: type === "DELETE" ? "deleted" : canon(doc), t: Date.now() });
     (listeners[table] || []).forEach((f) => { try { f({ eventType: type, new: type === "DELETE" ? {} : { [key]: id, doc }, old: { [key]: id }, local: true }); } catch (e) { console.error(e); } });
   }
   const localReload = (table) => (resync[table] || []).forEach((f) => { try { f(); } catch (e) { console.error(e); } });
@@ -248,7 +262,7 @@
       listeners[table] = new Set(); resync[table] = resync[table] || new Set();
       let dropped = false;
       sb.channel("ld-" + table)
-        .on("postgres_changes", { event: "*", schema: "public", table }, (p) => listeners[table].forEach((f) => f(p)))
+        .on("postgres_changes", { event: "*", schema: "public", table }, (p) => { if (!isOwnEcho(table, p)) listeners[table].forEach((f) => f(p)); })
         .subscribe((status) => {
           if (status === "SUBSCRIBED") { if (dropped) { dropped = false; resync[table].forEach((f) => f()); } }
           else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") dropped = true;
