@@ -407,7 +407,7 @@
       <section class="view" style="max-width:440px;margin:48px auto">
         <form class="panel" id="signin" style="padding:28px;display:grid;gap:14px" novalidate>
           <div><h2>Sign in to Lead Desk</h2><p class="muted" style="margin:6px 0 0">Use the work email and password your Supervisor gave you.</p></div>
-          <label class="f">Work email<input id="si-email" type="email" autocomplete="username" required placeholder="name@samsotech.com"></label>
+          <label class="f">Work email<input id="si-email" type="email" autocomplete="username" required placeholder="${clean((window.LD_CONFIG || {}).EMAIL_HINT || "name@company.com")}"></label>
           <label class="f">Password<input id="si-pass" type="password" autocomplete="current-password"></label>
           <button class="btn pri" id="si-btn" type="submit">Sign in</button>
           <button class="btn" id="si-link" type="button">Email me a sign-in link instead</button>
@@ -423,6 +423,7 @@
       if (!EMAIL_RE.test(email)) return bad("Enter a valid email address.");
       if (!password) return bad("Enter your password, or use the email link button.");
       const btn = document.getElementById("si-btn"); btn.disabled = true; btn.textContent = "Signing in…";
+      signedInWith = password;
       const { error } = await sb.auth.signInWithPassword({ email, password });
       btn.disabled = false; btn.textContent = "Sign in";
       if (error) bad(/invalid login/i.test(error.message) ? "Email or password is wrong. Ask a Supervisor to reset your password if you've forgotten it." : error.message);
@@ -459,7 +460,7 @@
       const a = host.querySelector("#cp1").value, b = host.querySelector("#cp2").value, m = host.querySelector("#cpm");
       if (a.length < 8) { m.innerHTML = '<span style="color:var(--bad)">Use at least 8 characters.</span>'; return; }
       if (a !== b) { m.innerHTML = '<span style="color:var(--bad)">The two passwords don\'t match.</span>'; return; }
-      if (a === "Samsotech123") { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
+      if (forced && signedInWith && a === signedInWith) { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
       const { error } = await sb.auth.updateUser({ password: a, data: { must_change_password: false } });
       if (error) m.innerHTML = `<span style="color:var(--bad)">${clean(error.message)}</span>`;
       else { window.__audit("password_changed", "session", ME.email, forced ? "Changed the temporary password" : "Changed password"); m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(() => { close(); if (forced && window.__afterPassword) window.__afterPassword(); }, 900); }
@@ -587,6 +588,21 @@
     reset: (email) => window.__adminUser("mfa_reset", email),
   };
 
+  /* ---------- email settings (supabase/38_email_settings.sql) ----------
+     The service key is write-only: set_mail_key() stores it where no role can read it, and nothing here can fetch it back. */
+  const rpcOr = async (name, args) => { const { data, error } = await sb.rpc(name, args); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data; };
+  window.__mail = {
+    save: (p) => rpcOr("set_mail_settings", { p }),
+    setKey: (k) => rpcOr("set_mail_key", { p_key: k }),
+    log: async (n) => { const { data, error } = await sb.from("mail_log").select("id,at,kind,to_addr,subject,ok,error,provider").order("id", { ascending: false }).limit(n || 50); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data || []; },
+    test: async (to) => {
+      const { data, error } = await sb.functions.invoke("lead-mailer", { body: { type: "test", to } });
+      if (error) { let msg = error.message; try { const j = await error.context.json(); if (j && j.error) msg = j.error; } catch (e) {} return { error: /not found|404|Failed to send/i.test(msg) ? "The lead-mailer function is not deployed yet (or is an older version)." : msg }; }
+      return data || { error: "No answer from the mail function." };
+    },
+  };
+
+  let signedInWith = "";   // the password typed at this sign-in (memory only), so the temporary one cannot be kept
   let started = false;
   async function start(session) {
     if (started || !session) return;
