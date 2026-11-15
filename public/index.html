@@ -351,6 +351,20 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
 .stages span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;padding:6px 4px;border-radius:4px;background:var(--sunk);color:var(--muted)}
 .stages span.on{background:var(--accent);color:var(--accent-ink)}
 .stages span.won{background:var(--ok);color:#fff}
+.acl{font:500 12px var(--f-body);margin-left:6px;white-space:nowrap;padding:2px 0}.acg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 16px;margin-top:8px}.acg .l,.catb .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.actb{width:100%}.acrev td,.acrev th{white-space:nowrap}.actb td:first-child{min-width:96px}.actb td,.actb th{vertical-align:top}.acrev .acsep{border-left:2px solid var(--line)}.acv .lvb{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+#acctHost .scrim{z-index:60}
+#acProducts .chip,#acCtr .chip{white-space:normal;text-align:left;max-width:100%}
+@media(max-width:900px){.acv .lvb{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){.acrev thead{display:none}.acrev,.acrev tbody,.acrev tfoot,.acrev tr{display:block;width:100%}.acrev tr{padding:8px 10px;border-bottom:1px solid var(--line)}.acrev tfoot tr{background:var(--sunk);border-bottom:0}
+ .acrev td{display:flex;justify-content:space-between;gap:12px;border:0!important;padding:2px 0;white-space:normal}.acrev td:first-child{font-size:14px;padding-bottom:4px}.acrev td[data-l]::before{content:attr(data-l);color:var(--muted);font-size:12.5px}.acrev td.acsep{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)!important}}
+@media(max-width:767px){.acv #acClose,.acv #acX{min-height:40px}.acl{display:inline-block;padding:6px 0}}
+.hced{display:grid;gap:14px;padding:6px 2px}.catb{display:grid;gap:8px;align-content:start}.catl{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}.hced select{max-width:520px;width:100%}
+.hcc{display:inline-flex;align-items:center;gap:4px;white-space:normal}.hcc button{border:0;background:none;color:inherit;cursor:pointer;padding:2px 4px;font-size:11px;line-height:1;border-radius:4px}.hcc button:hover{background:var(--sunk)}
+.catt td{vertical-align:top}
+.hsbar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--sunk);min-width:80px}.hsbar i{display:block;height:100%}.hsbar .h,.hsk.h{background:var(--accent)}.hsbar .s,.hsk.s{background:var(--ok)}.hsbar .o,.hsk.o{background:var(--warn)}.hsbar .n,.hsk.n{background:var(--line)}
+.hsk{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+@media(max-width:767px){.catt thead{display:none}.catt,.catt tbody,.catt tr,.catt td{display:block;width:100%}.catt tr{padding:8px 10px;border-bottom:1px solid var(--line)}.catt td{border:0;padding:2px 0;text-align:left!important}.hced select,.hced input{min-height:40px}}
 .mfag{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 .mful{border:1px solid var(--line);border-radius:10px;overflow:hidden}.mfuh,.mfur{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1.3fr) auto;gap:10px;align-items:center;padding:8px 12px}
 .mfuh{background:var(--sunk);font-weight:600}.mfur{border-top:1px solid var(--line)}.mfun{display:grid;min-width:0}.mfun b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mfur select{width:100%;min-width:0}.mfub{min-width:112px;text-align:right}
@@ -1471,11 +1485,11 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   $("#drawerHost").innerHTML=`<div class="scrim lvs" id="scrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Lead ${esc(l.ref)}">
   <div class="lvh">
    <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
-   <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
+   <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))} <button type="button" class="linkb acl" data-acctopen="${esc(accKey(l))}">Account page</button></div></div>
    ${stagesHTML(l,stg,reachedIdx)}
   </div>
   <div class="lvb">
-   ${lvTop}
+   ${lvTop}${catNotice(catIssues(l),l.quote&&Array.isArray(l.quote.lines)?pbPending(l).length:0)}
   <div class="lvc"><p class="lvt">The lead</p>
    <div class="panel" style="padding:14px" id="detPanel">${(can("lead.edit_fields")||canAct(l))&&!l.deleted?`<div class="row" style="margin:-2px 0 8px"><span class="small muted">Lead details</span><span class="sp"></span><button type="button" class="btn sm" id="editAll">Edit details</button></div>`:""}<div class="timeline">
      <div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>
@@ -2258,7 +2272,7 @@ function renderAcctsBase(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatr
    ${renameReqsHTML()}
    <div class="row"><input id="acctQ" placeholder="Search account, country or region" value="${esc(S.acctQ||"")}" style="max-width:320px"><span class="sp"></span><span class="small muted">${fmtN(rows.length)} account${rows.length===1?"":"s"}</span>${F.status?"":`<span class="legend">${ACC_STATUS.map(x=>`<span><i style="background:var(${x[1]});border-radius:50%;width:8px;height:8px"></i>${x[0]}</span>`).join("")}</span>`}</div>
    <div class="tw acct"><table><thead><tr>${cols.map(c=>th("acct",c)).join("")}<th>Key requirements</th>${can("account.manage")||S.myEng?"<th></th>":""}</tr></thead><tbody>
-    ${shown.map(a=>{const x=E[a.eng];const rq=acctDoc(a.key).renameReq;const aka=acctDoc(a.key).aka||[];return`<tr class="click" data-open="${esc(a.latest.id)}"><td><b>${esc(a.name)}</b><div class="small muted">${esc(a.country||"—")}${aka.length?` · formerly ${esc(aka[aka.length-1])}`:""}</div>${rq&&rq.to?`<span class="chip warn" data-renchip>Rename asked: ${esc(rq.to)}</span>`:""}</td><td>${esc(a.region)}</td>
+    ${shown.map(a=>{const x=E[a.eng];const rq=acctDoc(a.key).renameReq;const aka=acctDoc(a.key).aka||[];return`<tr class="click" data-open="${esc(a.latest.id)}"><td><b>${esc(a.name)}</b> <button type="button" class="linkb acl" data-acctopen="${esc(a.key)}">Account page</button><div class="small muted">${esc(a.country||"—")}${aka.length?` · formerly ${esc(aka[aka.length-1])}`:""}</div>${rq&&rq.to?`<span class="chip warn" data-renchip>Rename asked: ${esc(rq.to)}</span>`:""}</td><td>${esc(a.region)}</td>
      <td>${a.eng?esc(a.eng):`<span class="muted">Unassigned</span>`}${a.otherEngs.length?` <span class="small muted" data-tip="Also: ${esc(a.otherEngs.join(", "))}">+${a.otherEngs.length}</span>`:""}</td>
      <td class="num">${a.leads.length}</td><td class="num">${x?x.accounts:"—"}</td><td class="num">${a.orders||""}</td><td class="num">${a.rev?fmtAED(a.rev)+dbar(a.rev,mxRev,"--c-main")+ohipNote(a.ohip):`<span class="muted">—</span>`}</td>
      <td class="num">${x&&x.rpa?fmtAED(x.rpa):"—"}</td><td>${astatus(a.status)}</td><td style="white-space:nowrap">${fmtD(a.last+"T12:00:00")}</td>
@@ -2294,7 +2308,7 @@ function dataIssues(){const ls=S.leads.filter(l=>!["Duplicate","Rejected"].inclu
   const known=new Set(spList(true).map(x=>nk(x.name)));const odd={};
   ls.forEach(l=>{if(l.assignedTo&&!known.has(nk(l.assignedTo))&&!sharedOwners(l.assignedTo))(odd[l.assignedTo]=odd[l.assignedTo]||[]).push(l)});
   const shared=sharedLeads();
-  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length}}
+  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length+catLeads().length}}
 const wonAt=l=>l.stageAt?.Won||l.order?.date||l.updatedAt||l.createdAt||"";
 function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:{}});const cur=Object.keys(S.settings.fx||{AED:1});const sp=spNames();
   const sec1=`<div class="panel" id="dq-won"><div class="row" style="margin-bottom:6px"><h3>Won leads without an order amount</h3><span class="chip" style="${D.zero.length?"background:var(--bad-soft);color:var(--bad)":""}">${D.zero.length} with no revenue</span>${D.noOrder.length>D.zero.length?`<span class="chip">${D.noOrder.length-D.zero.length} using the quotation amount</span>`:""}</div>
@@ -2316,7 +2330,7 @@ function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:
       ${sh?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status</th><th class="num">Value</th><th>Generated by</th><th></th></tr></thead><tbody>${ls.map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td><td>${esc(l.generatedBy||"—")}</td><td class="num"><button type="button" class="btn sm" data-open="${esc(l.id)}">Open${can("lead.reassign")?" / reassign":""}</button></td></tr>`).join("")}</tbody></table></div>`:""}</div>`}).join("")}</div>`:`<p class="small" style="margin:0">Every lead is assigned to a name on the Sales engineer list.</p>`}</div>`;
   const sec3=`<div class="panel" id="dq-shared"><div class="row" style="margin-bottom:6px"><h3>Leads assigned to two people</h3><span class="chip" style="${D.shared.length?"background:var(--warn-soft);color:var(--warn)":""}">${D.shared.length}</span>${D.shared.length&&S.tab!=="bo"&&can("page.backoffice")?`<span class="sp"></span><button type="button" class="btn sm" id="dq-bo">Fix in Back office</button>`:""}</div>
     <p class="small muted" style="margin:0">${D.shared.length?`Combined names such as “${esc(D.shared[0].assignedTo)}”. Use “Move them to the queue” in the panel above to pick one engineer for each.`:"No lead is assigned to two people."}</p></div>`;
-  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}</div>`,D}}
+  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}${catIssuesHTML()}</div>`,D}}
 function suggestEng(n){const k=nk(n);const sp=spNames();return sp.find(x=>nk(x).split(" ")[0]===k.split(" ")[0])||sp.find(x=>nk(x).startsWith(k)||k.startsWith(nk(x)))||""}
 function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});bindPmsIssues(m);
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
@@ -2378,7 +2392,7 @@ function productsHTML(){const P=pvState();const{rows,tot,ls:pls}=productData();c
     ${can("lead.export")?`<button type="button" class="btn" id="pvX">Export to Excel</button>`:""}</div>
    <div class="tw"><table class="pvt"><thead><tr>${PCOLS.map(c=>th("prod",c)).join("")}</tr></thead><tbody>
     ${sr.map(o=>{const op=!!P.open[o.name];return`<tr class="click${op?" xopen":""}" data-pv="${esc(o.name)}" aria-expanded="${op}"><td><span class="pvcar" aria-hidden="true">${op?"▾":"▸"}</span> <b>${esc(o.name)}</b>${o.shared?`<div class="small muted">${o.shared} shared lead${o.shared===1?"":"s"}</div>`:""}</td>${PCOLS.map(c=>cell(o,c)).join("")}</tr>${op?leadRows(o):""}`}).join("")||`<tr><td colspan="${PCOLS.length}" class="empty">No leads for these filters.</td></tr>`}
-   </tbody>${sr.length?`<tfoot><tr><td><b>All products</b><div class="small muted">each lead once</div></td>${PCOLS.map(c=>cell(tot,c)).join("")}</tr></tfoot>`:""}</table></div>${pmsReport(pls)}</div>`}
+   </tbody>${sr.length?`<tfoot><tr><td><b>All products</b><div class="small muted">each lead once</div></td>${PCOLS.map(c=>cell(tot,c)).join("")}</tr></tfoot>`:""}</table></div>${hsHTML(rows)}${pmsReport(pls)}</div>`}
 function bindProducts(m){const P=pvState();
   const set=(k,v)=>{P[k]=v;render()};$("#pvS")&&($("#pvS").onchange=e=>set("status",e.target.value));$("#pvC")&&($("#pvC").onchange=e=>set("cust",e.target.value));$("#pvT")&&($("#pvT").onchange=e=>set("type",e.target.value));
   const qi=$("#pvQ");if(qi)qi.oninput=()=>{clearTimeout(qi.t);qi.t=setTimeout(()=>{P.q=qi.value;render();const i=$("#pvQ");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},300)};
@@ -2393,6 +2407,7 @@ async function exportProducts(){if(!can("lead.export")){toast("Your role can't e
     const H2=["Product","Ref","Property","Country","Emirate / state","Engineer","Lead generator","Lead type","Status","Status date","Quotation (AED)","Target date","Order / revenue (AED)","Products on lead"];const L=[];
     sr.forEach(o=>o.leads.forEach(l=>L.push([o.name,l.ref,l.accountName,l.country||"",subLabel(l)||"",l.assignedTo||"",isUpsell(l)?"":l.generatedBy||"",isUpsell(l)?"Upsell":"Original",l.status,(l.stageAt?.[l.status]||l.updatedAt||l.createdAt||"").slice(0,10),l.quote&&+l.quote.aed>0?Math.round(l.quote.aed):"",l.quote?.targetDate||"",l.status==="Won"?Math.round(orderVal(l)):"",productsOf(l).length])));
     const ws2=X.utils.aoa_to_sheet([H2].concat(L));ws2["!cols"]=H2.map((h,i)=>({wch:[24,15,34,14,16,16,16,10,15,12,14,12,18,10][i]}));ws2["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:L.length,c:H2.length-1}})};X.utils.book_append_sheet(wb,ws2,"Leads by product");
+    const HS=hsData(rows);if(HS.length){const H3=["Product","Won revenue (AED)","Hardware (AED)","Software (AED)","Interface and services (AED)","Not split (AED)"];const ws3=X.utils.aoa_to_sheet([H3].concat(HS.map(g=>[g.name,Math.round(g.rev),Math.round(g.hw),Math.round(g.sw),Math.round(g.ot),Math.round(g.ns)])));ws3["!cols"]=H3.map((h,i)=>({wch:i?Math.max(14,h.length+2):34}));X.utils.book_append_sheet(wb,ws3,"Hardware vs software")}
     const name=`LeadDesk_Products_${ymd(new Date())}.xlsx`;const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});window.__lastExport={name,size:blob.size,rows:L.length};
     if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
     window.__audit?.("exported","report",name,`Product report: ${sr.length} products, ${tot.n} leads`,{products:sr.length,leads:tot.n});toast(name+" is ready")}
@@ -2835,7 +2850,7 @@ function parseQuote(L){const T=L.map(l=>l.t);const R={lines:[],totals:[],warn:[]
   if(!R.no)R.warn.push("No quote number found.");if(R.total==null)R.warn.push("No total found. Enter the amount yourself.");if(!R.lines.length)R.warn.push("No product lines found in a price table.");
   return R}
 /* the panel inside the quotation form */
-function qpdfBlock(){return`<div class="qpdf"><label class="btn" style="cursor:pointer"><input type="file" id="qpdfIn" accept="application/pdf,.pdf" hidden>Upload the quotation from Salesforce (PDF)</label><span class="small muted"><b>Required.</b> The amount (total before tax), the line items and the charges are read from it and saved with the lead. The PDF itself is read on this device only and isn't uploaded or stored.</span></div><div id="qpdfOut"></div><div id="qpdfGate"></div>`}
+function qpdfBlock(){return`<div class="qpdf"><label class="btn" style="cursor:pointer"><input type="file" id="qpdfIn" accept="application/pdf,.pdf" hidden>Upload the quotation from Salesforce (PDF)</label><span class="small muted"><b>Required.</b> The amount (total before tax), the line items and the charges are read from it and saved with the lead. The PDF itself is read on this device only and isn't uploaded or stored.</span>${(l=>l?catHint(productsOf(l)).map(t=>`<span class="small muted" data-cathint>${esc(t)}</span>`).join(""):"")(S.drawer&&S.leadMap[S.drawer.id])}</div><div id="qpdfOut"></div><div id="qpdfGate"></div>`}
 /* A quotation value comes from the uploaded Salesforce quote. Only someone with lead.status_override (Lead Manager,
    Supervisor) may type it instead, with a reason, for a PDF that can't be read. */
 const qpdfOk=l=>!!(S.qpdf&&S.qpdf.leadId===l.id&&S.qpdf.total!=null&&S.qpdf.total>0&&(S.qpdf.lines||[]).length);
@@ -2847,7 +2862,7 @@ function quoteGate(l){const G=$("#qpdfGate"),val=$("#a-val"),cur=$("#a-cur");if(
 function bindQpdf(l){const inp=$("#qpdfIn");if(!inp)return;S.qpdf=null;
   inp.onchange=async()=>{const f=inp.files[0];if(!f)return;const O=$("#qpdfOut");if(f.size>15e6){O.innerHTML=`<div class="notice bad">That file is too large to read (over 15 MB).</div>`;return}
     O.innerHTML=`<p class="small muted"><span class="spin" aria-hidden="true"></span> Reading ${esc(f.name)}…</p>`;
-    try{const R=parseQuote(await pdfLines(f));R.file=f.name;R.leadId=l.id;S.qpdf=R;qpdfFill(l,R);qpdfShow(l);quoteGate(l)}
+    try{const R=parseQuote(await pdfLines(f));R.file=f.name;R.leadId=l.id;S.qpdf=R;qpdfFill(l,R);qpdfShow(l);catQpdf(l);quoteGate(l)}
     catch(e){console.error(e);S.qpdf=null;O.innerHTML=`<div class="notice bad">Couldn't read this PDF: ${esc(e.message||String(e))}. ${can("lead.status_override")?"You can enter the amount by hand with a reason.":"Ask a Lead Manager or Supervisor to enter it by hand."}</div>`;quoteGate(l)}finally{inp.value=""}}}
 function qpdfFill(l,R){const set=(id,v)=>{const e=$(id);if(e&&v!=null&&v!=="")e.value=v};
   if(R.total!=null)set("#a-val",R.total);const cs=$("#a-cur");if(cs&&R.currency){if(![...cs.options].some(o=>o.value===R.currency))R.warn.push(`Currency ${R.currency} isn't in the exchange-rate list (Products & settings). Choose the currency yourself.`);else cs.value=R.currency}
@@ -2963,6 +2978,7 @@ function renderImport(m){const I=impState();const sp=spNames();const lm=!isSales
         <div class="small">${r.ps.length?r.ps.map(p=>`<span class="chip">${esc(p)}</span>`).join(" "):`<span class="muted">No product recognised</span>`} ${q.lines?.length?`<span class="muted">· ${q.lines.length} line${q.lines.length===1?"":"s"}</span>`:""}</div>
         ${r.dup?`<div class="small muted">Quotation ${esc(q.no)} is already on <a href="#" data-imopen="${esc(r.dup.id)}" class="mono">${esc(r.dup.ref)}</a> (${esc(r.dup.accountName)}, ${esc(r.dup.status)}). Nothing to import.</div>`:""}
         ${r.curWarn?`<div class="small" style="color:var(--warn)">Currency ${esc(r.curWarn)} isn't in the exchange-rate list. Choose the currency.</div>`:""}
+        ${r.dup?"":catNotice(catCheck(catRows(pbMapLines(q.lines||[])),{}))}
         ${(q.warn||[]).filter(w=>!/No product lines/.test(w)||!r.ps.length).map(w=>`<div class="small" style="color:var(--warn)">${esc(w)}</div>`).join("")}</div>
        ${r.dup?"":`<div class="imf">
         <div class="row" style="gap:6px;flex-wrap:nowrap"><label class="f fsm" style="flex:1">Quoted amount<input type="number" min="0" step="0.01" data-ima="${i}" value="${r.amt??""}"${dis}></label><label class="f fsm" style="width:86px">Currency<select data-imc="${i}"${dis}>${opts(Object.keys(S.settings.fx||{AED:1}),r.cur)}</select></label></div>
@@ -3242,7 +3258,8 @@ function pbLeadRows(l){const q=l.quote||{};const lines=Array.isArray(q.lines)?q.
   return lines.map(x=>{const m=pbMapOf(x);const it=m&&!String(m.it).startsWith("x:")?pbItem(m.it):null;const quoted=toAED(+x.total||0,cur);let std=null;
     if(it&&canPB()){const once=it.unit==="once";std=once&&seen.has(it.id)?{amt:0,note:"already charged once for this property"}:pbStd(it,x.qty,ctx);if(once)seen.add(it.id)}
     return{x,m,it,quoted,std,yearly:pbYearly(it)}})}
-function drawPricing(l){const A=$("#pbArea");if(!A)return;const q=l.quote;const hasLines=q&&Array.isArray(q.lines)&&q.lines.length;const canE=canAct(l)&&!l.deleted;
+function drawPricing(l){drawPricingBase(l);const P=document.querySelector("#pbArea .pbp");const h=catHint(productsOf(l));if(P&&h.length)P.insertAdjacentHTML("beforeend",`<div class="small muted" data-cathint style="margin-top:8px">${h.map(esc).join("<br>")}</div>`)}
+function drawPricingBase(l){const A=$("#pbArea");if(!A)return;const q=l.quote;const hasLines=q&&Array.isArray(q.lines)&&q.lines.length;const canE=canAct(l)&&!l.deleted;
   const ed=S.drawer.pbEdit&&canE;const v=n=>n==null||n===""?"—":fmtN(+n);
   if(!hasLines&&!l.pcs&&!l.users&&!l.implMode&&!(canPB()&&canE&&OPEN.includes(l.status))){A.innerHTML="";return}
   const rows=hasLines?pbLeadRows(l):[];const grp=(f,label)=>{const R=rows.filter(f);if(!R.length)return"";const st=R.reduce((s,r)=>s+(r.std?r.std.amt:0),0),qt=R.reduce((s,r)=>s+r.quoted,0);const allStd=R.every(r=>r.std);
@@ -3277,11 +3294,13 @@ function drawBuilder(l){const B=S.pbBuild;if(!B||B.leadId!==l.id)return;const A=
    ${B.rows.map((r,i)=>{const it=pbItem(r.it);const c=calc[i];return`<div class="pbrow"><select data-bi="${i}">${pbOpts(r.it,false)}</select><input type="number" min="0" step="1" data-bq="${i}" value="${esc(r.qty)}"${it&&["once","room"].includes(it.unit)?" disabled":""} aria-label="Quantity">
      <div class="num small" style="min-width:96px">${c?fmtAED(c.amt):it?`<span class="muted">no price</span>`:""}${c&&c.note?`<div class="muted" style="font-size:11px">${esc(c.note)}</div>`:""}</div><button type="button" class="btn sm" data-bx="${i}" aria-label="Remove">✕</button></div>`}).join("")}
    <div class="row"><button type="button" class="btn sm" id="bAdd">+ Add item</button><span class="sp"></span><span>${yr?`Yearly ${fmtAED(yr)} · `:""}<b>Total ${fmtAED(tot)}</b></span></div>
+   ${(I=>I.length?catNotice(I)+`<div><button type="button" class="btn sm" id="bCat">Add the missing licence${I[0].need-I[0].have===1?"":"s"} for ${esc(I[0].product)}</button></div>`:"")(catCheck(B.rows,{users:l.users}))}
    <div class="row"><button type="button" class="btn pri" id="bUse"${tot>0?"":" disabled"}>Use in quotation</button><button type="button" class="btn" id="bX">Cancel</button></div></div>`;
   A.querySelectorAll("[data-bi]").forEach(s=>s.onchange=()=>{const r=B.rows[+s.dataset.bi];r.it=s.value;const it=pbItem(r.it);if(it&&["once","room"].includes(it.unit))r.qty=1;else if(it&&it.unit==="pc"&&!r.qty)r.qty=+l.pcs||1;drawBuilder(l)});
   A.querySelectorAll("[data-bq]").forEach(s=>s.onchange=()=>{B.rows[+s.dataset.bq].qty=Math.max(0,Math.round(+s.value||0));drawBuilder(l)});
   A.querySelectorAll("[data-bx]").forEach(b=>b.onclick=()=>{B.rows.splice(+b.dataset.bx,1);if(!B.rows.length)B.rows.push({it:"",qty:1});drawBuilder(l)});
-  $("#bAdd").onclick=()=>{B.rows.push({it:"",qty:+l.pcs||1});drawBuilder(l)};$("#bX").onclick=()=>{S.pbBuild=null;drawActions(l)};
+  $("#bAdd").onclick=()=>{B.rows.push({it:"",qty:+l.pcs||1});drawBuilder(l)};
+  $("#bCat")?.addEventListener("click",()=>{const i=catCheck(B.rows,{users:l.users})[0];if(!i)return;const ex=B.rows.find(r=>i.mods.includes(r.it));if(ex)ex.qty=(+ex.qty||0)+(i.need-i.have);else B.rows.push({it:i.mods.find(id=>pbItem(id)&&pbVer(pbItem(id)))||i.mods[0],qty:i.need-i.have});drawBuilder(l)});$("#bX").onclick=()=>{S.pbBuild=null;drawActions(l)};
   $("#bUse").onclick=()=>{B.total=Math.round(tot);B.lines=B.rows.map((r,i)=>{const it=pbItem(r.it);if(!it||!calc[i])return null;return{item:it.name,product:it.product,qty:r.qty,unit:calc[i].amt/(+r.qty||1),list:calc[i].amt/(+r.qty||1),total:calc[i].amt,m:Object.assign({it:it.id,st:"ok",by:actor()||S.myName||"",at:nowISO()},pbMeta(it))}}).filter(Boolean);
     S.drawer.mode="quote";drawActions(l);const val=$("#a-val");if(val){val.value=B.total;const c=$("#a-cur");if(c)c.value="AED";val.dispatchEvent(new Event("input"));const w=$("#a-why");if(w&&!w.value)w.value="Built from the price book";toast(can("lead.status_override")?"Amount filled in from the price book. Add the target date and next step, then save.":"Amount worked out from the price book. Upload the Salesforce quotation to save it.")}}}
 /* quote save: keep built lines, map read lines with the rules */
@@ -4067,7 +4086,7 @@ function ctrClientHTML(key,name){const{C,rows}=ctrPriceRows(key);const sol=ctrSo
   const tot=ci=>({a:ctrSum(C[ci],"amc"),s:ctrSum(C[ci],"sub"),o:ctrSum(C[ci],"ohip")});
   const G=ctrSolutionsByCat(key);const inC=new Set(G.flatMap(g=>g.items.map(i=>i.product)));const rest=sol.filter(x=>!inC.has(x.product));
   const chipOf=x=>`<span class="chip">${esc(x.product)}${x.qty?` × ${x.qty}`:""}${x.since?` <span class="muted">· since ${x.since}</span>`:""}</span>`;
-  return`<div class="ctcl"><div class="l">Solutions used by ${esc(name||"this client")}</div>
+  return`<div class="ctcl"><button type="button" class="btn sm" data-acctopen="${esc(key)}" style="float:right;margin:0 0 6px 8px">Open account page</button><div class="l">Solutions used by ${esc(name||"this client")}</div>
    <div class="row ctsol" style="gap:20px;flex-wrap:wrap;margin-top:6px;align-items:start">${G.map(g=>`<div><div class="small muted" style="margin-bottom:3px">${esc(g.cat||"No category yet")}</div><div class="row" style="gap:6px;flex-wrap:wrap">${g.items.map(chipOf).join("")}</div></div>`).join("")}
     ${rest.length?`<div><div class="small muted" style="margin-bottom:3px">From won orders</div><div class="row" style="gap:6px;flex-wrap:wrap">${rest.map(chipOf).join("")}</div></div>`:""}${!G.length&&!rest.length?`<span class="small muted">No product chosen on the contract lines yet.</span>`:""}</div>
    ${C.length?`<div class="l" style="margin-top:14px">Prices given to the client, by category and contract year</div>
@@ -4626,6 +4645,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
      <div id="nsMsg"></div>
      <div class="listedit">${sps.map((x,i)=>row(x,i,"s")).join("")||`<p class="muted small">No sales engineers yet.</p>`}</div></div>
   </div>
+  ${catPanel()}
   <form id="setForm" class="grid2" onsubmit="return false">
    <div class="panel"><h3>Source channels</h3><label class="f">One per line as “Name | Inbound” or “Name | Outbound”<textarea id="s-src" rows="10">${esc(st.sources.map(s=>s.name+" | "+s.cat).join("\n"))}</textarea></label></div>
    <div class="panel"><h3>Rates and targets</h3><div style="display:grid;gap:10px">
@@ -4652,7 +4672,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindRules();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
+  bindChains(m);bindRules();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);bindCat();
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
@@ -4897,6 +4917,161 @@ function bindMfa(){const P=$("#mfaPanel");if(!P)return;const D=S.mfaDraft;const 
   P.querySelectorAll("[data-mfreset]").forEach(b=>b.onclick=async()=>{const em=b.dataset.mfreset;if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm reset";return}
     b.disabled=true;b.textContent="Resetting…";const r=await window.__mfa.reset(em);
     S.mfaNote=r.error?{lvl:"bad",msg:`Couldn't reset ${em}: ${r.error}`}:{lvl:"ok",msg:r.status==="none"?`${em} had no authenticator to reset.`:`Two-step sign-in reset for ${em}. They set it up again at their next sign-in${mfaEff(mfaCfg(),em,(S.users[em]||{}).role)==="required"?"":" if they wish"}.`};S.mfaUsers=null;render()})}
+/* ===== Product catalogue: hardware and software (15 Nov 2026, Part B) =====
+   Stored on the product in settings: products[].cat = {hw:[price item id], sw:[{name, mods:[price item id]}], per:""|"pc"|"property"|"user", alone:bool}.
+   Items are the price book's own items (types hardware / software / interface / service): they are linked, never copied.
+   "per" is the required-with rule: hardware on a quote needs software licence lines chosen from this product's modules.
+   The rule only warns (quotes come from Salesforce and may already be with the client). Nothing is stored on leads: checks run on the saved quotation lines. */
+const CAT_PER={pc:"one licence per hardware unit (per PC)",property:"one licence per property",user:"one licence per user"};
+const prodCat=p=>{const d=prodList(true).find(x=>nk(x.name)===nk(p));const c=d&&d.cat;return c?{hw:(c.hw||[]).slice(),sw:(c.sw||[]).map(x=>({name:x.name||"",mods:(x.mods||[]).slice(),opt:!!x.opt})),per:CAT_PER[c.per]?c.per:"",alone:!!c.alone}:null};
+const catIx=id=>pbItem(id)?pbMeta(pbItem(id)):(((S.lr||{}).items||{})[id]||null);
+const catNm=id=>(catIx(id)||{}).nm||"(item no longer in the price book)";
+const catTy=id=>(catIx(id)||{}).ty||"";
+function catItems(){const a=pbItems().map(i=>({id:i.id,name:i.name,type:i.type,product:i.product}));if(a.length)return a;return Object.entries((S.lr||{}).items||{}).map(([id,m])=>({id,name:m.nm,type:m.ty,product:m.pr}))}
+const catRows=lines=>(lines||[]).map(x=>{const m=pbMapOf(x);return m&&m.it&&!String(m.it).startsWith("x:")?{it:m.it,qty:+x.qty||1}:null});
+function catCheck(rows,ctx){ctx=ctx||{};const R=(rows||[]).filter(r=>r&&r.it);const q=ids=>R.reduce((n,r)=>n+(ids.includes(r.it)?(+r.qty||0):0),0);const out=[];
+  prodList(true).forEach(p=>{const c=prodCat(p.name);if(!c||!c.per||!c.hw.length)return;const hw=q(c.hw);if(!hw)return;const req=c.sw.filter(x=>!x.opt);const mods=[...new Set(req.flatMap(x=>x.mods))];if(!mods.length)return;const have=q(mods);
+    const need=c.per==="pc"?hw:c.per==="user"?Math.max(1,+ctx.users||1):1;if(have>=need)return;if(c.alone&&!have)return;
+    out.push({product:p.name,hw,have,need,per:c.per,lic:req.map(x=>x.name).filter(Boolean),mods})});return out}
+const catText=i=>`${i.product}: ${i.hw} hardware unit${i.hw===1?"":"s"} with ${i.have?`only ${i.have} of the ${i.need}`:(i.need===1?"no":"none of the "+i.need)} required software licence${i.need===1?"":"s"} (${CAT_PER[i.per]})${i.lic.length?". Licence: "+i.lic.join(" or "):""}.`;
+function catIssues(l){if(!l||l.deleted||!l.quote||!Array.isArray(l.quote.lines)||!l.quote.lines.length)return[];return catCheck(catRows(l.quote.lines),{users:l.users})}
+function catNotice(list,pending){return list&&list.length?`<div class="notice warn catw" data-catw style="display:grid;gap:3px;padding:8px 10px"><b>Hardware without the required software</b>${list.map(i=>`<span class="small">${esc(catText(i))}</span>`).join("")}${pending?`<span class="small muted">${pending} quotation line${pending===1?" is":"s are"} not matched to a price item yet and ${pending===1?"is":"are"} not counted.</span>`:""}<span class="small muted">This is a warning only: the quotation can still be saved.</span></div>`:""}
+const catHint=ps=>(ps||[]).map(p=>{const c=prodCat(p);return c&&c.per&&c.hw.length?`${p}: hardware needs ${CAT_PER[c.per]}${c.alone?"; hardware can also be sold on its own":""}.`:""}).filter(Boolean);
+function catQpdf(l){const R=S.qpdf,O=$("#qpdfOut");if(!R||!O)return;O.querySelector("[data-catw]")?.remove();const L=pbMapLines(R.lines||[]);O.insertAdjacentHTML("beforeend",catNotice(catCheck(catRows(L),{users:l.users}),L.filter(x=>!pbMapOf(x)).length))}
+const catLeads=()=>S.leads.filter(l=>!l.deleted&&["Quotation Sent","Won"].includes(l.status)).map(l=>({l,iss:catIssues(l)})).filter(x=>x.iss.length).sort((a,b)=>(b.l.quote.date||"").localeCompare(a.l.quote.date||""));
+function catIssuesHTML(){const L=catLeads();const lim=L.slice(0,150);
+  return`<div class="panel" id="dq-cat"><div class="row" style="margin-bottom:6px"><h3>Hardware without the required software</h3><span class="chip" style="${L.length?"background:var(--warn-soft);color:var(--warn)":""}">${L.length} quotation${L.length===1?"":"s"}</span></div>
+   <p class="small muted" style="margin:0 0 10px">Quotations (sent or won) with hardware but not enough software licence lines for the rule set in Products &amp; settings → Product catalog: hardware and software. Open the lead and upload the revised quotation if it needs correcting.</p>
+   ${L.length?`<div class="tw"><table><thead><tr><th>Ref</th><th>Property</th><th>Engineer</th><th>Status</th><th>Quotation</th><th>What is missing</th></tr></thead><tbody>${lim.map(({l,iss})=>`<tr><td class="mono"><button type="button" class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td><td>${esc(l.assignedTo||"—")}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="small">${esc(l.quote.no||"—")}<div class="muted">${fmtD(l.quote.date)}</div></td><td class="small">${iss.map(i=>esc(catText(i))).join("<br>")}</td></tr>`).join("")}</tbody></table></div>${L.length>150?`<p class="small muted" style="margin:6px 0 0">Showing 150 of ${L.length}.</p>`:""}`:`<p class="small muted" style="margin:0">Nothing to fix.</p>`}</div>`}
+/* settings panel */
+function catPanel(){if(!can("settings.manage"))return"";const items=catItems();const E=S.hcEd;const prods=prodList(false);
+  const sum=p=>{const c=prodCat(p.name);if(!c||(!c.hw.length&&!c.sw.length))return`<td colspan="3" class="small muted">Not defined yet</td>`;
+    return`<td class="small">${c.hw.map(id=>esc(catNm(id))).join("<br>")||`<span class="muted">None</span>`}</td><td class="small">${c.sw.map(x=>`<b>${esc(x.name||"Licence")}</b>${x.opt?` <span class="muted">(optional extra)</span>`:""}${x.mods.length?`<div class="muted">${x.mods.map(id=>esc(catNm(id))).join("<br>")}</div>`:""}`).join("")||`<span class="muted">None</span>`}</td><td class="small">${c.per?esc(CAT_PER[c.per])+(c.alone?`<div class="muted">hardware may be sold on its own</div>`:""):`<span class="muted">No rule</span>`}</td>`};
+  const opt=(list,first)=>`<option value="">${first}</option>`+list.map(i=>`<option value="${esc(i.id)}">${esc(i.name)}${i.product?" · "+esc(i.product):""}</option>`).join("");
+  const ed=p=>{const d=E.d;const own=(a,b)=>(b.product===p.name)-(a.product===p.name)||String(a.name).localeCompare(String(b.name));const hwL=items.filter(i=>i.type==="hardware"&&!d.hw.includes(i.id)).sort(own);
+    const chip=(id,attr)=>`<span class="chip hcc">${esc(catNm(id))}<button type="button" ${attr} aria-label="Remove ${esc(catNm(id))}">✕</button></span>`;
+    return`<tr class="pbed"><td colspan="5"><div class="hced">
+     <div class="catb"><div class="l">Hardware items</div><div class="row" style="gap:6px;flex-wrap:wrap">${d.hw.map((id,i)=>chip(id,`data-chx="${i}"`)).join("")||`<span class="small muted">No hardware linked.</span>`}</div><select id="catHwAdd" aria-label="Add a hardware item">${opt(hwL,"+ Add a hardware item from the price book")}</select></div>
+     <div class="catb"><div class="l">Software licences and their modules</div>${d.sw.map((x,j)=>{const used=x.mods;const mL=items.filter(i=>["software","interface"].includes(i.type)&&!used.includes(i.id)).sort(own);
+        return`<div class="catl"><div class="row" style="gap:6px"><input data-cln="${j}" value="${esc(x.name)}" placeholder="Licence name, e.g. Passport/ID scanning" aria-label="Licence name" style="flex:1;min-width:0"><button type="button" class="btn sm" data-clx="${j}">Remove licence</button></div>
+         <div class="row" style="gap:6px;flex-wrap:wrap">${x.mods.map((id,i)=>chip(id,`data-cmx="${j}|${i}"`)).join("")||`<span class="small muted">No module linked.</span>`}</div><select data-cma="${j}" aria-label="Add a module">${opt(mL,"+ Add a module (software or interface item)")}</select>
+         <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-clo="${j}" style="width:auto"${x.opt?" checked":""}> Optional extra, such as a PMS interface: it does not count as the required licence</label></div>`}).join("")||`<span class="small muted">No software licence yet.</span>`}
+      <div><button type="button" class="btn sm" id="catLicAdd">+ Add a software licence</button></div></div>
+     <div class="catb"><div class="l">Required with hardware</div><label class="f">When this hardware is on a quotation<select id="catPer"><option value="">No rule: nothing is checked</option>${Object.entries(CAT_PER).map(([k,t])=>`<option value="${k}"${d.per===k?" selected":""}>Needs ${t}</option>`).join("")}</select></label>
+      <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="catAlone" style="width:auto"${d.alone?" checked":""}> Hardware may also be sold on its own (no warning when the quotation has no licence at all)</label>
+      <p class="small muted" style="margin:0">Example: 4 scanners with “per PC” need 4 licence lines chosen from the modules above. The check warns; it never blocks.</p></div>
+     <div class="row"><button type="button" class="btn pri" id="catSave">Save ${esc(p.name)}</button><button type="button" class="btn" id="catCancel">Cancel</button><span class="small" id="catMsg"></span></div></div></td></tr>`};
+  return`<div class="panel" id="catPanel"><div class="row" style="margin-bottom:6px"><h3>Product catalog: hardware and software</h3></div>
+   <p class="small muted" style="margin:0 0 10px;max-width:90ch">Define each product in two parts: its <b style="color:var(--ink)">hardware items</b> and its <b style="color:var(--ink)">software licences</b> with their modules. The items are the price book's own items, linked here, so there is one list only. The “required with” rule flags a quotation that has hardware without its licence lines, in the lead, the quote builder, the Salesforce quotation reader, Import quotations and Back office → Data issues.</p>
+   ${items.length?"":`<div class="notice info" style="margin-bottom:10px">The price book has no items yet. Add hardware and software items under Management → Price book first.</div>`}
+   <div class="tw"><table class="catt"><thead><tr><th>Product</th><th>Hardware items</th><th>Software licences · modules</th><th>Required with hardware</th><th></th></tr></thead><tbody>
+    ${prods.map(p=>`<tr${E&&E.p===p.name?` class="xopen"`:""}><td><b>${esc(p.name)}</b></td>${sum(p)}<td style="text-align:right">${E&&E.p===p.name?"":`<button type="button" class="btn sm" data-hced="${esc(p.name)}">Define</button>`}</td></tr>${E&&E.p===p.name?ed(p):""}`).join("")||`<tr><td colspan="5" class="empty">No products yet.</td></tr>`}</tbody></table></div></div>`}
+function bindCat(){const P=$("#catPanel");if(!P)return;P.querySelectorAll("[data-hced]").forEach(b=>b.onclick=()=>{const p=b.dataset.hced;S.hcEd={p,d:prodCat(p)||{hw:[],sw:[],per:"",alone:false}};render()});
+  const E=S.hcEd;if(!E||!$("#catSave"))return;const d=E.d;const keep=()=>{P.querySelectorAll("[data-cln]").forEach(i=>{if(d.sw[+i.dataset.cln])d.sw[+i.dataset.cln].name=i.value.trim()});P.querySelectorAll("[data-clo]").forEach(i=>{if(d.sw[+i.dataset.clo])d.sw[+i.dataset.clo].opt=i.checked});d.per=$("#catPer").value;d.alone=$("#catAlone").checked};const re=()=>{keep();render()};
+  $("#catHwAdd").onchange=e=>{if(e.target.value){keep();d.hw.push(e.target.value);render()}};
+  P.querySelectorAll("[data-chx]").forEach(b=>b.onclick=()=>{keep();d.hw.splice(+b.dataset.chx,1);render()});
+  P.querySelectorAll("[data-cma]").forEach(x=>x.onchange=()=>{if(x.value){keep();d.sw[+x.dataset.cma].mods.push(x.value);render()}});
+  P.querySelectorAll("[data-cmx]").forEach(b=>b.onclick=()=>{keep();const[j,i]=b.dataset.cmx.split("|");d.sw[+j].mods.splice(+i,1);render()});
+  P.querySelectorAll("[data-clx]").forEach(b=>b.onclick=()=>{keep();d.sw.splice(+b.dataset.clx,1);render()});
+  $("#catLicAdd").onclick=()=>{keep();d.sw.push({name:"",mods:[],opt:false});render();const a=document.querySelectorAll("#catPanel [data-cln]");a[a.length-1]?.focus()};
+  $("#catCancel").onclick=()=>{S.hcEd=null;render()};
+  $("#catSave").onclick=async e=>{keep();const msg=t=>{$("#catMsg").innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`};
+    if(d.sw.some(x=>!x.name))return msg("Give every software licence a name.");if(d.per&&!d.hw.length)return msg("Link at least one hardware item, or choose “No rule”.");if(d.per&&!d.sw.some(x=>!x.opt&&x.mods.length))return msg("The rule needs at least one software module to choose from.");
+    const cat={hw:d.hw,sw:d.sw,per:d.per,alone:d.alone};const products=prodList(true).map(x=>nk(x.name)===nk(E.p)?Object.assign({},x,{cat}):x);e.currentTarget.disabled=true;
+    try{await S.db.doc("config/settings").update({products});S.settings.products=products;S.setStamp=(S.setStamp||0)+1;S.hcEd=null;toast(`Hardware and software saved for ${E.p}`);render()}catch(er){e.currentTarget.disabled=false;msg("Couldn't save: "+(er.message||er.code||er))}}}
+/* hardware vs software revenue of a won order, per product. Same base as pbShares(), so the parts add up to the product's revenue. */
+function pbSplit(l){const out={};for(const x of(l.quote&&l.quote.lines)||[]){const m=pbMapOf(x);const t=Math.max(0,+x.total||0);if(!m||String(m.it).startsWith("x:")||!t)continue;const it=pbItem(m.it);if(!it||it.product==="PMS interface"||it.product==="Services")continue;
+    const o=out[it.product]||(out[it.product]={hw:0,sw:0,ot:0});o[it.type==="hardware"?"hw":it.type==="software"?"sw":"ot"]+=t}return out}
+function hsData(rows){const G={};rows.forEach(o=>{const g=G[o.name]={name:o.name,rev:o.rev,hw:0,sw:0,ot:0,ns:0};o.leads.forEach(l=>{if(l.status!=="Won")return;const v=orderVal(l)*pbShare(l,o.name);if(!v)return;const sp=pbSplit(l)[o.name];const b=sp?sp.hw+sp.sw+sp.ot:0;
+    if(!b){g.ns+=v;return}g.hw+=v*sp.hw/b;g.sw+=v*sp.sw/b;g.ot+=v*sp.ot/b})});return Object.values(G).filter(g=>g.rev>0).sort((a,b)=>b.rev-a.rev)}
+function hsHTML(rows){const D=hsData(rows);if(!D.length)return"";const T=D.reduce((t,g)=>({rev:t.rev+g.rev,hw:t.hw+g.hw,sw:t.sw+g.sw,ot:t.ot+g.ot,ns:t.ns+g.ns}),{rev:0,hw:0,sw:0,ot:0,ns:0});const c=v=>`<td class="num">${v>0.5?fmtAED(v):"—"}</td>`;
+  const bar=g=>{const t=g.hw+g.sw+g.ot+g.ns||1;return`<div class="hsbar" role="img" aria-label="Hardware ${Math.round(g.hw/t*100)}%, software ${Math.round(g.sw/t*100)}%"><i class="h" style="width:${g.hw/t*100}%"></i><i class="s" style="width:${g.sw/t*100}%"></i><i class="o" style="width:${g.ot/t*100}%"></i><i class="n" style="width:${g.ns/t*100}%"></i></div>`};
+  return`<div class="panel" id="pvHS"><div class="row" style="margin-bottom:4px"><h3>Hardware and software revenue per product</h3></div>
+   <p class="small muted" style="margin:0 0 8px;max-width:90ch">Won revenue of each product, split by the type of its quotation lines (hardware, software, or its own interface and service items). Orders without matched quotation lines cannot be split and are shown as “Not split”. Each row adds up to the product's won revenue in the table above.</p>
+   <div class="row small" style="gap:14px;margin-bottom:6px"><span><i class="hsk h"></i> Hardware</span><span><i class="hsk s"></i> Software</span><span><i class="hsk o"></i> Interface and services</span><span><i class="hsk n"></i> Not split</span></div>
+   <div class="tw"><table class="hst"><thead><tr><th>Product</th><th style="width:22%">Split</th><th class="num">Won revenue</th><th class="num">Hardware</th><th class="num">Software</th><th class="num">Interface and services</th><th class="num">Not split</th></tr></thead><tbody>
+    ${D.map(g=>`<tr><td><b>${esc(g.name)}</b></td><td>${bar(g)}</td>${c(g.rev)}${c(g.hw)}${c(g.sw)}${c(g.ot)}${c(g.ns)}</tr>`).join("")}</tbody>
+    <tfoot><tr><td><b>All products</b><div class="small muted">shared leads split between products</div></td><td>${bar(T)}</td>${c(T.rev)}${c(T.hw)}${c(T.sw)}${c(T.ot)}${c(T.ns)}</tr></tfoot></table></div></div>`}
+/* ===== Account page: one view per hotel (15 Nov 2026, Part B) =====
+   Built only from what this user's session already holds (S.leads, and S.contracts when the role may see contracts), so every role
+   sees exactly what it can already see: Sales get their own leads and orders only. Nothing is stored and there is no new revenue logic:
+   orders = orderVal(), OHIP = ohipVal(), first-year subscription = recOf().subT, contracts = ctrSum(), renewals = renItems(). */
+const acctLeads=key=>S.leads.filter(l=>!l.deleted&&!["Duplicate","Rejected"].includes(l.status)&&accKey(l)===key);
+const acctCtrs=key=>(typeof canCV==="function"&&canCV())?ctrOfClient(key):[];
+function acctFacts(key){const L=acctLeads(key).slice().sort((a,b)=>(wonAt(b)||b.createdAt||"").localeCompare(wonAt(a)||a.createdAt||""));const C=acctCtrs(key);const live=C[C.length-1]||null;
+  const won=L.filter(l=>l.status==="Won"),rest=L.filter(l=>l.status!=="Won");const any=L[0]||null;const name=(allAccounts()[key]||{}).name||(any&&any.accountName)||(live&&(live.accountName||live.client))||key;
+  const pick=(fc,fl)=>{const c=[];if(live){const v=fc(live);if(v)c.push({v,src:`AMC contract ${live.no||""}`.trim()})}won.forEach(l=>{const v=fl(l);if(v)c.push({v,src:`won order ${l.ref}`,l})});rest.forEach(l=>{const v=fl(l);if(v)c.push({v,src:`lead ${l.ref}`,l})});
+    if(!c.length)return{v:"",src:"",other:[]};const other=[];c.slice(1).forEach(x=>{if(nk(x.v)!==nk(c[0].v)&&!other.some(o=>nk(o.v)===nk(x.v)))other.push(x)});return{v:c[0].v,src:c[0].src,l:c[0].l,other}};
+  const rooms=pick(c=>+c.rooms||0,l=>+l.rooms||0),pms=pick(c=>isRealPms(c.pms)?c.pms:"",l=>pmsOf(l));const ifL=[pms.l].concat(L).find(l=>l&&l.pmsIface&&Object.keys(l.pmsIface).length);
+  const country=(any&&any.country)||(live&&live.country)||"";return{key,name,L,C,live,won,chain:chainOf(key,name).chain,country,region:(any&&regionOf(any))||(live&&live.region)||guessRegion(country)||"",rooms,pms,iface:ifL?ifL.pmsIface:{},
+    eng:[...new Set(L.map(l=>l.assignedTo).filter(Boolean))]}}
+function acctContacts(F){const M=new Map();const add=(c,src,when)=>{if(!c||!(c.name||c.email||c.phone))return;const k=nk(c.email||c.name||c.phone);const o=M.get(k);if(o){["title","email","phone","name"].forEach(f=>{if(!o[f]&&c[f])o[f]=c[f]});return}M.set(k,{name:c.name||"",title:c.title||"",email:c.email||"",phone:c.phone||"",src,when:when||""})};
+  F.L.forEach(l=>{add(l.contact,l.ref,l.createdAt);(l.contacts||[]).forEach(c=>add(c,l.ref,l.createdAt))});((acctDoc(F.key)||{}).contacts||[]).forEach(c=>add(c,"Account",""));
+  F.C.forEach(c=>{if(c.signer)add(typeof c.signer==="object"?c.signer:{name:c.signer,title:"Signed the AMC contract"},"Contract "+(c.no||c.id),c.signedOn||c.start)});return[...M.values()].sort((a,b)=>byName(a.name||a.email,b.name||b.email))}
+function acctItems(F){const R=[];const TY={hardware:"Hardware",software:"Software",interface:"Interface",service:"Service"};
+  F.won.forEach(l=>{const since=(wonAt(l)||"").slice(0,10);const seen=new Set();((l.quote&&l.quote.lines)||[]).forEach(x=>{const me=lineMeta(x);if(!me)return;seen.add(me.pr);R.push({product:me.pr||"",item:me.nm||x.item||"",type:TY[me.ty]||"",qty:+x.qty||1,since,src:l.ref})});
+    productsOf(l).forEach(p=>{if(!seen.has(p))R.push({product:p,item:"",type:"",qty:"",since,src:l.ref})})});
+  F.C.forEach(c=>(c.lines||[]).forEach(x=>{if(!x.product&&!x.item)return;const me=x.it&&!String(x.it).startsWith("x:")?catIx(x.it):null;R.push({product:x.product||(me&&me.pr)||"",item:x.itName||x.item||"",type:me?TY[me.ty]||"":CTR_KIND[x.kind]||"",qty:+x.qty||"",since:String(c.start||"").slice(0,10),src:"Contract "+(c.no||c.id)})}));
+  return R.sort((a,b)=>String(a.product).localeCompare(String(b.product))||String(a.since).localeCompare(String(b.since)))}
+function acctRevenue(F){const Y={};const row=y=>Y[y]||(Y[y]={y,sales:0,amc:0,sub:0,ohip:0,cloud:0});let orders=0,ohipIn=0,est=0;
+  F.won.forEach(l=>{const ov=orderVal(l);if(!ov)return;const y=(wonAt(l)||"").slice(0,4)||"No date";const oh=ohipVal(l);const r=recOf(l);const sub=r&&!r.est?Math.max(0,Math.min(ov-oh,+r.subT||0)):0;if(r&&r.est)est++;
+    const o=row(y);o.sales+=ov-oh-sub;o.sub+=sub;o.ohip+=oh;orders+=ov;ohipIn+=oh});
+  F.C.forEach(c=>{const o=row(String(c.start||"").slice(0,4)||"No date");o.amc+=ctrSum(c,"amc");o.sub+=ctrSum(c,"sub");o.ohip+=ctrSum(c,"ohip");o.cloud+=ctrSum(c,"cloud")});
+  if(!F.C.length)F.won.forEach(l=>renItems(l).forEach(i=>{if(i.st!=="Renewed"||!(i.amt>0))return;const o=row(String(i.due||"").slice(0,4)||"No date");o[i.ty]+=i.amt}));
+  const rows=Object.values(Y).sort((a,b)=>String(a.y).localeCompare(String(b.y)));rows.forEach(o=>o.total=o.sales+o.amc+o.sub);
+  const tot=rows.reduce((t,o)=>({sales:t.sales+o.sales,amc:t.amc+o.amc,sub:t.sub+o.sub,ohip:t.ohip+o.ohip,cloud:t.cloud+o.cloud,total:t.total+o.total}),{sales:0,amc:0,sub:0,ohip:0,cloud:0,total:0});
+  return{rows,tot,orders,ohipIn,est}}
+function acctData(key){const F=acctFacts(key);return{F,contacts:acctContacts(F),items:acctItems(F),sol:(typeof ctrSolutions==="function")?ctrSolutions(key).concat():[],open:F.L.filter(l=>OPEN.includes(l.status)),rev:acctRevenue(F)}}
+function openAccount(key){if(!key)return;if(S.drawer)closeDrawer();S.acct={key,from:document.activeElement};drawAccount()}
+function closeAccount(){const f=S.acct&&S.acct.from;S.acct=null;const h=$("#acctHost");if(h)h.innerHTML="";if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}}
+function drawAccount(){if(!S.acct)return;let host=$("#acctHost");if(!host){host=document.createElement("div");host.id="acctHost";document.body.appendChild(host)}
+  const D=acctData(S.acct.key),F=D.F,R=D.rev;const all=can("lead.view_all")||can("report.view");const m=v=>v>0.5?fmtAED(v):"—";
+  const fact=(lab,p,fmt)=>`<div><div class="l">${lab}</div><b>${p.v?esc(fmt?fmt(p.v):p.v):`<span class="muted" style="font-weight:400">Not recorded</span>`}</b>${p.v?`<div class="small muted">from ${esc(p.src)}</div>`:""}${p.other.length?`<div class="small" style="color:var(--warn)" data-acdiff>Other records say ${p.other.map(o=>`${esc(fmt?fmt(o.v):o.v)} (${esc(o.src)})`).join(", ")}</div>`:""}</div>`;
+  const ifs=Object.entries(F.iface||{}).filter(([,v])=>v);
+  const solSrc=x=>[...(x.src||[])].map(v=>v==="contract"?"AMC contract":v==="order"?"won order":v).join(", ");
+  host.innerHTML=`<div class="scrim lvs" id="acctScrim"><aside class="drawer lv acv" role="dialog" aria-modal="true" aria-label="Account ${esc(F.name)}">
+   <div class="lvh"><div class="row"><span class="chip">Account</span>${F.live?`<span class="chip ok">AMC contract ${esc(F.live.no||"")}</span>`:F.won.length?`<span class="chip ok">Client</span>`:`<span class="chip">Prospect</span>`}<span class="sp"></span>${can("lead.export")?`<button type="button" class="btn sm" id="acX">Export to Excel</button>`:""}<button type="button" class="btn sm" id="acClose">Close</button></div>
+    <h2 style="margin:0;font-size:20px;overflow-wrap:anywhere">${esc(F.name)}</h2><div class="small muted">${esc([F.chain&&F.chain!=="Independent"?F.chain:"Independent hotel",ctryOf(F.country),F.region].filter(Boolean).join(" · "))}${F.eng.length?` · Sales engineer: ${esc(F.eng.join(", "))}`:""}</div></div>
+   <div class="lvb">${all?"":`<div class="notice info" data-acown>You see your own leads and orders for this hotel. Leads and revenue of other sales engineers are not shown.</div>`}
+     <div class="panel" id="acRev" style="grid-column:1/-1"><div class="row"><h3>Revenue from this hotel</h3></div>
+      ${R.rows.length?`<div class="tw" style="margin-top:8px"><table class="actb acrev"><thead><tr><th>Year</th><th class="num">One-time sales</th><th class="num">AMC</th><th class="num">Subscription</th><th class="num">Total</th><th class="num acsep">OHIP</th><th class="num">Cloud hosting</th></tr></thead><tbody>
+        ${R.rows.map(o=>`<tr><td><b>${esc(String(o.y))}</b></td><td class="num" data-l="One-time sales">${m(o.sales)}</td><td class="num" data-l="AMC">${m(o.amc)}</td><td class="num" data-l="Subscription">${m(o.sub)}</td><td class="num" data-l="Total"><b>${m(o.total)}</b></td><td class="num acsep" data-l="OHIP (separate)">${m(o.ohip)}</td><td class="num" data-l="Cloud hosting (separate)">${m(o.cloud)}</td></tr>`).join("")}</tbody>
+        <tfoot><tr><td><b>Total</b></td><td class="num" data-l="One-time sales">${m(R.tot.sales)}</td><td class="num" data-l="AMC">${m(R.tot.amc)}</td><td class="num" data-l="Subscription">${m(R.tot.sub)}</td><td class="num" data-l="Total"><b>${m(R.tot.total)}</b></td><td class="num acsep" data-l="OHIP (separate)">${m(R.tot.ohip)}</td><td class="num" data-l="Cloud hosting (separate)">${m(R.tot.cloud)}</td></tr></tfoot></table></div>
+       <p class="small muted" style="margin:10px 0 0">OHIP and cloud hosting are shown separately and are not in the Total. <span id="acOrd">Order revenue <b style="color:var(--ink)">${fmtAED(R.orders)}</b>${R.ohipIn>0.5?`, of which OHIP ${fmtAED(R.ohipIn)}`:""}</span>: the same figure as Management → Revenue per account (all time). AMC, subscription, OHIP and cloud hosting from contracts are the approved AMC contracts, by contract start year${F.C.length?"":"; without a contract, renewals marked Renewed are counted"}.${R.est?` ${R.est} order${R.est===1?" has":"s have"} no matched quotation lines, so ${R.est===1?"it is":"they are"} shown whole under One-time sales.`:""}</p>`:`<p class="small muted" style="margin:8px 0 0">No revenue recorded yet.</p>`}</div>
+    <div class="lvc">
+     <div class="panel" id="acFacts"><h3>Hotel details</h3><div class="acg">
+       <div><div class="l">Chain</div><b>${esc(F.chain||"Independent")}</b></div><div><div class="l">Country · region</div><b>${esc(ctryOf(F.country))}</b><div class="small muted">${esc(F.region||"")}</div></div>
+       ${fact("Rooms",F.rooms,v=>fmtN(v))}${fact("PMS",F.pms)}
+       <div><div class="l">PMS interface</div>${ifs.length?ifs.map(([p,v])=>`<div class="small"><b>${esc(v)}</b> <span class="muted">· ${esc(p)}</span></div>`).join(""):`<span class="muted">Not recorded</span>`}</div></div>
+      <p class="small muted" style="margin:10px 0 0">Rooms and PMS are read from the hotel's newest record (AMC contract, then won orders, then leads). Nothing is stored twice; correct the value on that record.</p></div>
+     <div class="panel" id="acContacts"><div class="row"><h3>Contacts</h3><span class="chip">${D.contacts.length}</span></div>
+      ${D.contacts.length?`<div class="tw" style="margin-top:8px"><table class="actb"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>First seen on</th></tr></thead><tbody>${D.contacts.map(c=>`<tr><td><b>${esc(c.name||"—")}</b>${c.title?`<div class="small muted">${esc(c.title)}</div>`:""}</td><td class="small" style="overflow-wrap:anywhere">${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:"—"}</td><td class="small">${esc(c.phone||"—")}</td><td class="small mono">${esc(c.src)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="small muted" style="margin:8px 0 0">No contact recorded on this hotel's leads.</p>`}</div>
+     <div class="panel" id="acProducts"><div class="row"><h3>Products in use</h3><span class="chip">${D.sol.length}</span></div>
+      ${D.sol.length?`<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">${D.sol.map(x=>`<span class="chip">${esc(x.product)}${x.qty?` × ${x.qty}`:""}${x.since?` <span class="muted">· since ${esc(String(x.since))}</span>`:""}<span class="muted"> · ${esc(solSrc(x))}</span></span>`).join("")}</div>`:`<p class="small muted" style="margin:8px 0 0">Nothing bought yet.</p>`}
+      ${D.items.length?`<div class="tw" style="margin-top:10px"><table class="actb"><thead><tr><th>Product</th><th>Item</th><th>Type</th><th class="num">Qty</th><th>Since</th><th>From</th></tr></thead><tbody>${D.items.map(x=>`<tr><td>${esc(x.product||"—")}</td><td class="small">${esc(x.item||"—")}</td><td>${x.type?`<span class="chip ${x.type==="Hardware"?"":x.type==="Software"?"ok":"warn"}">${esc(x.type)}</span>`:`<span class="small muted">Not itemised</span>`}</td><td class="num">${x.qty||"—"}</td><td class="small">${x.since?fmtD(x.since):"—"}</td><td class="small mono">${esc(x.src)}</td></tr>`).join("")}</tbody></table></div>`:""}</div>
+    </div>
+    <div class="lvc">
+     <div class="panel" id="acOpen"><div class="row"><h3>Open leads</h3><span class="chip">${D.open.length}</span></div>
+      ${D.open.length?`<div class="tw" style="margin-top:8px"><table class="actb"><thead><tr><th>Ref</th><th>Products</th><th>Status</th><th>Engineer</th><th class="num">Value</th></tr></thead><tbody>${D.open.map(l=>`<tr><td class="mono"><button type="button" class="linkb" data-acopen="${esc(l.id)}">${esc(l.ref)}</button></td><td class="small">${esc(productsOf(l).join(", "))}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="small">${esc(l.assignedTo||"—")}</td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td></tr>`).join("")}</tbody></table></div>`:`<p class="small muted" style="margin:8px 0 0">No open lead for this hotel.</p>`}
+      ${F.L.length>D.open.length?`<details style="margin-top:10px"><summary class="small" style="cursor:pointer">All ${F.L.length} leads and orders</summary><div class="tw" style="margin-top:6px"><table class="actb"><thead><tr><th>Ref</th><th>Products</th><th>Status</th><th>Date</th><th class="num">Value</th></tr></thead><tbody>${F.L.map(l=>`<tr><td class="mono"><button type="button" class="linkb" data-acopen="${esc(l.id)}">${esc(l.ref)}</button></td><td class="small">${esc(productsOf(l).join(", "))}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="small">${fmtD(wonAt(l)||l.createdAt)}</td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td></tr>`).join("")}</tbody></table></div></details>`:""}</div>
+     ${F.C.length?`<div class="panel" id="acCtr"><h3>AMC contracts and prices</h3><div style="margin-top:8px">${ctrClientHTML(F.key,F.name).replace(/<button[^>]*data-acctopen[^>]*>[^<]*<\/button>/g,"")}</div></div>`:""}
+    </div></div></aside></div>`;
+  $("#acClose").onclick=closeAccount;$("#acX")?.addEventListener("click",()=>acctExport(D));
+  host.querySelectorAll("[data-acopen]").forEach(b=>b.onclick=()=>{const id=b.dataset.acopen;closeAccount();openDrawer(id)});$("#acClose").focus({preventScroll:true})}
+async function acctExport(D){const b=$("#acX");if(b){b.disabled=true;b.textContent="Preparing…"}
+  try{const X=await loadXLSX();const wb=X.utils.book_new();const F=D.F,R=D.rev;const r0=v=>Math.round(v||0);const sheet=(n,aoa,w)=>{const ws=X.utils.aoa_to_sheet(aoa);ws["!cols"]=(w||[]).map(x=>({wch:x}));X.utils.book_append_sheet(wb,ws,n)};
+    sheet("Account",[["Hotel",F.name],["Chain",F.chain||"Independent"],["Country",ctryOf(F.country)],["Region",F.region||""],["Rooms",F.rooms.v||"",F.rooms.src?"from "+F.rooms.src:""],["PMS",F.pms.v||"",F.pms.src?"from "+F.pms.src:""],["PMS interface",Object.entries(F.iface||{}).map(([p,v])=>p+": "+v).join("; ")],["Sales engineer",F.eng.join(", ")],["AMC contract",F.live?F.live.no||"":"None"],[],
+      ["Order revenue (AED)",r0(R.orders)],["of which OHIP (AED)",r0(R.ohipIn)],["Exported",fmtD(todayISO())+" by "+(S.myName||S.myEng||S.myEmail||"")],can("lead.view_all")||can("report.view")?[]:["Note","Own leads and orders only"]],[22,40,34]);
+    sheet("Revenue by year",[["Year","One-time sales (AED)","AMC (AED)","Subscription (AED)","Total (AED)","OHIP, separate (AED)","Cloud hosting, separate (AED)"]].concat(R.rows.map(o=>[o.y,r0(o.sales),r0(o.amc),r0(o.sub),r0(o.total),r0(o.ohip),r0(o.cloud)])).concat([["Total",r0(R.tot.sales),r0(R.tot.amc),r0(R.tot.sub),r0(R.tot.total),r0(R.tot.ohip),r0(R.tot.cloud)]]),[10,20,14,18,14,20,26]);
+    sheet("Contacts",[["Name","Title","Email","Phone","First seen on"]].concat(D.contacts.map(c=>[c.name,c.title,c.email,c.phone,c.src])),[26,24,34,18,18]);
+    sheet("Products in use",[["Product","Item","Type","Qty","Since","From"]].concat(D.items.map(x=>[x.product,x.item,x.type||"Not itemised",x.qty,x.since,x.src])),[30,44,14,8,12,22]);
+    sheet("Leads and orders",[["Ref","Products","Status","Engineer","Date","Quotation (AED)","Order (AED)"]].concat(F.L.map(l=>[l.ref,productsOf(l).join(", "),l.status,l.assignedTo||"",(wonAt(l)||l.createdAt||"").slice(0,10),l.quote&&+l.quote.aed>0?r0(l.quote.aed):"",l.status==="Won"?r0(orderVal(l)):""])),[14,40,16,18,12,16,14]);
+    if(F.C.length)sheet("AMC contracts",[["Contract","Start","End","Status","AMC (AED)","Subscription (AED)","OHIP (AED)","Cloud hosting (AED)"]].concat(F.C.map(c=>[c.no||c.id,c.start||"",c.end||"",c.status,r0(ctrSum(c,"amc")),r0(ctrSum(c,"sub")),r0(ctrSum(c,"ohip")),r0(ctrSum(c,"cloud"))])),[20,12,12,12,14,18,14,20]);
+    const name=`LeadDesk_Account_${String(F.name).replace(/[^A-Za-z0-9]+/g,"_").slice(0,40)}_${ymd(new Date())}.xlsx`;const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    window.__lastExport={name,size:blob.size,blob};await bkSave(name,blob);window.__audit?.("exported","report",name,`Account page exported: ${F.name}`,{account:F.key,leads:F.L.length});toast("Account page exported")}
+  catch(e){if(e?.code!=="cancelled"){console.error(e);toast("Couldn't export: "+(e.message||e))}}finally{const n=$("#acX");if(n){n.disabled=false;n.textContent="Export to Excel"}}}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-acctopen]");if(!b)return;e.preventDefault();e.stopPropagation();openAccount(b.dataset.acctopen)},true);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.acct&&window.__ESCCLOSE)closeAccount()});
 function usersPanel(){const mem=Object.entries(S.users);const mapped=new Set(mem.filter(([,u])=>u.engineer).map(([,u])=>nk(u.engineer)));
   return`<div class="panel"><div class="row" style="margin-bottom:6px"><h3>Users and access</h3><span class="chip">${mem.length+(window.LD_HOSTED?0:1)} users</span></div>
    <p class="small muted" style="margin:0 0 12px;max-width:80ch">${window.LD_HOSTED?"Only people on this list can sign in. Add their work email and role; they sign in with the temporary password (or an email link) and choose their own password. Sales engineers only ever see the leads assigned to their linked name.":"Only people on this list can use Lead Desk; everyone else sees an access-denied page. People sign in with their claude.ai account. In the page's Share menu, give Supervisors <b>Editor</b> access and everyone else <b>Contributor</b> access."}</p>
