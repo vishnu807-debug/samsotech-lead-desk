@@ -38,16 +38,10 @@ set doc = jsonb_set(doc, '{known}', (select coalesce(jsonb_agg(distinct x), '[]'
          from jsonb_array_elements_text(coalesce(doc->'known','[]'::jsonb) || '["page.renewals","renewal.manage","lead.view_won"]'::jsonb) x))
 where path = 'config/permissions' and doc ? 'roles' and doc ? 'known';
 
--- 3. Who can read which lead (as before, plus: won orders for lead.view_won)
-drop policy if exists leads_select on public.leads;
-create policy leads_select on public.leads for select to authenticated
-  using (
-    (select public.has_perm('lead.view_all'))
-    or ((doc->>'deleted') is null and (select public.my_engineer()) <> '' and lower(coalesce(assigned_to,'')) = lower((select public.my_engineer())))
-    or ((doc->>'deleted') is null and (select public.my_engineer()) <> '' and (select public.has_perm('lead.view_generated'))
-        and lower(btrim(coalesce(doc->>'generatedBy',''))) = lower((select public.my_engineer())))
-    or ((doc->>'deleted') is null and status = 'Won' and (select public.has_perm('lead.view_won')))
-  );
+-- 3. AMC read rule for won orders, as a policy of its own (see 27_lead_read_rules.sql)
+drop policy if exists leads_select_won on public.leads;
+create policy leads_select_won on public.leads for select to authenticated
+  using ((doc->>'deleted') is null and status = 'Won' and (select public.has_perm('lead.view_won')));
 
 -- 4. Record a renewal's progress
 create or replace function public.set_renewal(p_id text, p_key text, p_val jsonb) returns boolean

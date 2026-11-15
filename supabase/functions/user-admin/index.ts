@@ -1,7 +1,7 @@
 // Lead Desk · user-admin (Supabase Edge Function)
 //
-// Lets a Supervisor create a sign-in for a new team member, or reset someone's password,
-// without opening the Supabase dashboard. New and reset passwords are set to DEFAULT_PASSWORD
+// Lets a Supervisor create a sign-in for a new team member, reset someone's password, or reset
+// someone's two-step sign-in (action "mfa_reset"), without opening the Supabase dashboard. New and reset passwords are set to DEFAULT_PASSWORD
 // (Samsotech123 unless you set the secret), and the person must choose their own password the
 // first time they sign in.
 //
@@ -86,6 +86,20 @@ Deno.serve(async (req) => {
       if (error) return reply({ error: error.message }, 400);
       await audit("password_reset", `Reset the password of ${email} to the temporary password`);
       return reply({ status: "reset", password: DEFAULT_PASSWORD });
+    }
+    if (action === "mfa_reset") {
+      // Two-step sign-in (supabase/36_mfa.sql): remove the person's authenticator, e.g. after a lost phone.
+      // If two-step sign-in is required for them, they set it up again at their next sign-in.
+      if (!id) return reply({ error: "This person has no sign-in yet." }, 400);
+      const { data: fl, error: le } = await admin.auth.admin.mfa.listFactors({ userId: id });
+      if (le) return reply({ error: le.message }, 400);
+      const factors = fl?.factors ?? [];
+      for (const f of factors) {
+        const { error } = await admin.auth.admin.mfa.deleteFactor({ id: f.id, userId: id });
+        if (error) return reply({ error: error.message }, 400);
+      }
+      if (factors.length) await audit("mfa_reset", `Reset two-step sign-in for ${email} (authenticator removed)`);
+      return reply({ status: factors.length ? "reset" : "none" });
     }
     return reply({ error: "Unknown action." }, 400);
   } catch (e) {
