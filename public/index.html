@@ -525,6 +525,26 @@ th{position:relative}
 .setj button{appearance:none;border:0;cursor:pointer;font:500 12.5px var(--f-body);color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:99px}
 @media(max-width:860px){.setw{display:block}.setn{position:static;display:flex;overflow-x:auto;gap:6px;padding:6px;margin-bottom:12px;max-height:none;align-items:center}
  .setn input{margin:0;min-width:150px;flex:0 0 150px}.setr{display:flex;gap:6px}.setn button{white-space:nowrap;padding:7px 12px;font-size:13px;flex:0 0 auto}.setn button small{display:none}.setc .panel{scroll-margin-top:120px}}
+
+/* Save / Cancel bar: stays at the bottom of the screen while a form is long */
+.actbar{position:sticky;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);margin-top:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 18px -12px rgba(20,33,49,.35);align-items:center}
+.panel[style*="padding:14px"] .actbar{margin-inline:-14px;margin-bottom:-14px;padding-inline:14px;border-radius:0 0 10px 10px}
+.actbar .btn.pri,.actbar .btn.bad{min-width:120px;font-weight:600;box-shadow:0 2px 8px color-mix(in srgb,currentColor 0%,transparent),0 2px 8px color-mix(in srgb,var(--accent) 30%,transparent)}
+.actbar .btn.bad{box-shadow:0 2px 8px color-mix(in srgb,var(--bad) 30%,transparent)}
+@media(max-width:767px){.actbar{gap:8px}.actbar .btn{flex:1 1 0;justify-content:center}}
+/* Separate proposals */
+.sepsw{display:grid;gap:6px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunk)}
+.sepl{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.sepl>input,.sepck input,.sepw>input{width:18px;height:18px;flex:none;padding:0;margin:2px 0 0;accent-color:var(--accent)}.lvb>.sepbox{grid-column:1/-1;margin:0}.sepl>span{display:grid;gap:2px;min-width:0}
+.sepbox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);display:grid;gap:6px;min-width:0}
+.sepsw .sepbox{background:var(--sunk);border:0;padding:6px 0 0}
+.sepp{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.sepp .small.muted{grid-column:1/-1}
+.lvc .panel>div[style*="display:grid"],.lvc .panel>div>div[style*="display:grid"]{grid-template-columns:minmax(0,1fr)}
+.qpdf>.btn{white-space:normal;text-align:center;max-width:100%}
+.sepsw,.sepbox,.sepadd,.sepck label,.sepw{min-width:0}.sepp>span:first-child,.sepck label>span{min-width:0}.sepp .chip{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:480px){.sepp{grid-template-columns:minmax(0,1fr) auto}.sepp>span:first-child{grid-column:1;grid-row:1}.sepp>b{grid-column:2;grid-row:1}.sepp>.mono{grid-column:1;grid-row:2}.sepp .small.muted{grid-row:3}}
+.sepck,.sepw{display:grid;gap:6px}.sepck label,.sepw{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer}
+.sepadd{display:grid;gap:8px;padding:10px;border:1px dashed var(--accent);border-radius:10px;background:var(--surface)}
 </style>
 
 <header class="top gut">
@@ -554,7 +574,7 @@ th{position:relative}
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js?v=26600dcd"></script>
+<script src="adapter.js?v=eeb5afd4"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -843,6 +863,10 @@ function tabsInit(){const btn=$("#tabMoreBtn"),menu=$("#tabMoreMenu");if(!btn||b
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!menu.hidden){close();btn.focus()}});
   let t;addEventListener("resize",()=>{clearTimeout(t);t=setTimeout(tabsFit,80)});try{document.fonts&&document.fonts.ready.then(tabsFit)}catch(e){}}
 /* Small finishing touches after each draw: sub-tabs keep the chosen one in view; on phones the filter bars fold away. */
+/* Save / Cancel stay in view: a row with a main action and a Cancel button is pinned to the bottom of its form */
+(function(){let t=0;const scan=()=>{t=0;document.querySelectorAll("div.row").forEach(r=>{if(r.classList.contains("actbar")||r.closest(".cfm"))return;const b=[...r.children].filter(c=>c.tagName==="BUTTON");if(b.length<2||b.length>4)return;if(!b.some(x=>/^cancel$/i.test(x.textContent.trim())))return;if(!b.some(x=>/\b(pri|bad)\b/.test(x.className)&&!/\bsm\b/.test(x.className)))return;r.classList.add("actbar")})};
+  const go=()=>{if(!t)t=setTimeout(scan,50)};const start=()=>{new MutationObserver(go).observe(document.body,{childList:true,subtree:true});go()};
+  document.body?start():document.addEventListener("DOMContentLoaded",start)})();
 function uiPolish(){tabsInit();
   document.querySelectorAll(".mtabs").forEach(t=>{const sel=t.querySelector('[aria-selected="true"]');if(sel&&t.scrollWidth>t.clientWidth)t.scrollLeft=Math.max(0,sel.offsetLeft-t.clientWidth/2+sel.offsetWidth/2);
     const fade=()=>{t.classList.toggle("fl",t.scrollLeft>4);t.classList.toggle("fr",t.scrollLeft+t.clientWidth<t.scrollWidth-4)};fade();t.onscroll=fade});
@@ -1273,7 +1297,7 @@ function refreshDrawer(){if(!S.drawer)return;if(!S.drawer.mode&&!S.drawer.pmsEdi
    so the generator's incentive covers the original products only. Each amount belongs to exactly one lead: no double counting.
    Supervisor settings decide whether upsell revenue counts in the engineer's results and at what upsell incentive %. */
 const isUpsell=l=>!!l&&l.type==="Upsell";
-const engCredit=l=>!(isUpsell(l)&&S.settings.upsellCredit===false);
+const engCredit=l=>!(isUpsell(l)&&!l.split&&S.settings.upsellCredit===false);
 const upsellApplies=(l,atMeeting)=>!isUpsell(l)&&!["New","Info Needed"].includes(l.status)&&(atMeeting||meetingsOf(l).length>0);
 const lastMeetBy=l=>meetingsOf(l).slice().sort((a,b)=>(a.date||"")<(b.date||"")?1:-1).find(m=>m.by)?.by||"";
 async function createUpsell(l,prods,eng,meeting){eng=eng||l.assignedTo||actor();const t=nowISO();
@@ -1495,12 +1519,12 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
    ${stagesHTML(l,stg,reachedIdx)}
   </div>
   <div class="lvb">
-   ${lvTop}${catNotice(catIssues(l),l.quote&&Array.isArray(l.quote.lines)?pbPending(l).length:0)}
+   ${lvTop}${sepNotice(l)}${catNotice(catIssues(l),l.quote&&Array.isArray(l.quote.lines)?pbPending(l).length:0)}
   <div class="lvc"><p class="lvt">The lead</p>
    <div class="panel" style="padding:14px" id="detPanel">${(can("lead.edit_fields")||canAct(l))&&!l.deleted?`<div class="row" style="margin:-2px 0 8px"><span class="small muted">Lead details</span><span class="sp"></span><button type="button" class="btn sm" id="editAll">Edit details</button></div>`:""}<div class="timeline">
      <div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>
      <div><span>Contact</span><span>${esc(l.contact?.name)}${l.contact?.title?", "+esc(l.contact.title):""}<br><span class="mono">${esc(l.contact?.email||"")}</span> ${esc(l.contact?.phone||"")}</span></div>
-     ${isUpsell(l)?`<div><span>Upsell of</span><span>${S.leadMap[l.parentId]?`<button type="button" class="linkb" data-goto="${esc(l.parentId)}">${esc(l.parentRef)}</button>`:`<span class="mono">${esc(l.parentRef||"")}</span>`} <span class="chip ups">Upsell</span><br><span class="small muted">From the meeting held by ${esc(l.assignedTo)}${l.upsellMeeting?.date?" on "+fmtD(l.upsellMeeting.date):""}. The original lead's generator${l.originalGenerator?" ("+esc(l.originalGenerator)+")":""} gets no credit on this lead.</span></span></div>`
+     ${isUpsell(l)?`<div><span>${l.split?"Split from":"Upsell of"}</span><span>${S.leadMap[l.parentId]?`<button type="button" class="linkb" data-goto="${esc(l.parentId)}">${esc(l.parentRef)}</button>`:`<span class="mono">${esc(l.parentRef||"")}</span>`} <span class="chip ups">${l.split?"Split proposal":"Upsell"}</span><br><span class="small muted">${l.split?`The client ordered other products on ${esc(l.parentRef||"the original lead")}. These are the products they did not order, moved here with their proposals. The original lead's generator keeps the credit on the original lead.`:`From the meeting held by ${esc(l.assignedTo)}${l.upsellMeeting?.date?" on "+fmtD(l.upsellMeeting.date):""}. The original lead's generator${l.originalGenerator?" ("+esc(l.originalGenerator)+")":""} gets no credit on this lead.`}</span></span></div>`
        :`<div><span>Generated by</span><span>${esc(l.generatedBy)}${l.department?" · "+esc(l.department):""} · entered ${fmtD(l.createdAt)}</span></div>`}
      ${l.eventName?`<div><span>Event</span><span>${esc(l.eventName)}</span></div>`:""}
      ${(l.upsells||[]).length?`<div><span>Upsell leads</span><span style="display:grid;gap:3px">${l.upsells.map(id=>{const k=S.leadMap[id];return k?`<span><button type="button" class="linkb" data-goto="${esc(id)}">${esc(k.ref)}</button> · ${esc(productsOf(k).join(", "))} · ${esc(k.assignedTo)} · <span class="${stCls(k.status)}">${esc(k.deleted?"Deleted":k.status)}</span>${leadValue(k)?" · "+fmtAED(leadValue(k)):""}</span>`:`<span class="mono">${esc(id)}</span>`}).join("")}</span></div>`:""}
@@ -1687,12 +1711,22 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     return{m:Object.assign({id:"m"+Date.now().toString(36),date,mode,type:$("#mt-type").value,products,notes,by,byId:S.uid||null,at:nowISO()},joined.length?{joined}:{})}};
   const meetBody=(m)=>{const lp=productsOf(l);const add=m.products.filter(n=>!lp.includes(n));const body={meetings:[...meetingsOf(l).map(({legacy,...x})=>x),m]};if((m.joined||[]).length)body.joint=[...new Set([...(l.joint||[]),...m.joined])];
     if(add.length){const all=lp.concat(add);body.products=all;body.product=all.join(", ")}return{body,add}};
-  const amountForm=(title,withNo,noLabel,withMeet,withTarget)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withTarget?qpdfBlock():""}${withMeet?meetFields():""}
+  const amountForm=(title,withNo,noLabel,withMeet,withTarget)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withTarget?sepSwitch(l):""}${withTarget?qpdfBlock():""}${withMeet?meetFields():""}
     <div class="grid3"><label class="f">Amount${withTarget?" (total before tax)":""} <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,"AED")}</select></label><label class="f">Date<input id="a-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
     ${withNo?`<div class="grid2"><label class="f">${noLabel}<input id="a-no"></label>${withTarget?`<label class="f">Target date <span class="req">*</span><input id="a-tgt" type="date" min="${todayISO()}" value="${esc(withTarget===true?"":withTarget)}"><span class="small muted" style="font-weight:400">When the client is expected to decide</span></label>`:""}</div>`:""}<label class="f">Notes<input id="a-notes"></label>${withTarget?nextFields(l):""}<div class="small muted" id="a-aed"></div>
     <div class="row"><button class="btn pri" id="a-save">Save</button><button class="btn" id="a-cancel">Cancel</button></div></div></div>`;
   const bindAmount=(field,status,msg)=>{const upd=()=>{const v=+$("#a-val").value;$("#a-aed").textContent=v?"= "+fmtAED(toAED(v,$("#a-cur").value)):""};$("#a-val").oninput=upd;$("#a-cur").onchange=upd;$("#a-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};
-    $("#a-save").onclick=async()=>{let manual=null;
+const sepSave=async()=>{const D=S.sepDraft,E=t=>{$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`};
+      if(!D.changed)return E((l.proposals||[]).length?"Nothing has changed. Upload another proposal, or press Cancel.":"Upload at least one proposal: choose the PDF, tick the product(s) it covers, then press “Add this proposal”.");
+      const t=$("#a-tgt").value;if(!t){E("Enter the target date. Every quotation needs one.");$("#a-tgt").focus();return}
+      const last=D.list.map(p=>p.date||"").sort().pop();if(last&&t<last)return E("The target date can't be before the quotation date.");
+      const nx=readNext();if(nx.err)return E(nx.err);const pmx=pmsFromForm(l);if(pmx.err){E(pmx.err);$("#ap-pms")?.focus();return}Object.assign(nx.body,pmx.body,D.body);
+      const props=D.list.map(p=>({...p})),Q=sepCombine(props,{targetDate:t,notes:$("#a-notes").value.trim()});pbQuoteLines(l,Q);
+      const pr=productsOf(l),cov=sepCovered(props),n=pr.filter(p=>cov.has(p)).length;
+      const body={...nx.body,sep:{on:true,at:(l.sep&&l.sep.at)||nowISO(),by:(l.sep&&l.sep.by)||actor()||S.myName||"",offAt:null,offBy:null,offWhy:null},proposals:props,quote:Q};
+      if(l.quote)body.quoteHistory=[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})];
+      S.sepDraft=null;await patch(l,body,`Separate proposals · ${n} of ${pr.length} products covered · ${fmtAED(Q.aed)} · target ${fmtD(t)}${nx.txt||""}`,status)};
+    $("#a-save").onclick=async()=>{let manual=null;if(field==="quote"&&sepActive(l))return sepSave();
       if(field==="quote"){if(qpdfOk(l)){$("#a-val").value=S.qpdf.total}else if(!can("lead.status_override")){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Upload the quotation from Salesforce (PDF) first. If it can't be read, ask a Lead Manager or Supervisor to enter it by hand.</span>`;return}
         else{const why=(($("#a-why")||{}).value||"").trim();if(why.length<3){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Give the reason for entering the amount by hand.</span>`;$("#a-why")?.focus();return}manual={by:actor()||S.myName||"",at:nowISO(),reason:why}}}
       const v=+$("#a-val").value;if(!(v>0)){$("#a-aed").innerHTML=`<span style="color:var(--bad)">Enter the amount. It's required at this stage.</span>`;return}
@@ -1701,6 +1735,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
         if(o.date&&t<o.date){$("#a-aed").innerHTML=`<span style="color:var(--bad)">The target date can't be before the quotation date.</span>`;return}o.targetDate=t}
       const nx=field==="quote"?readNext():{body:{}};if(nx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const pmx=field==="quote"||field==="order"?pmsFromForm(l):{body:{}};if(pmx.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(pmx.err)}</span>`;$("#ap-pms")?.focus();return}Object.assign(nx.body,pmx.body);
+      if(field==="quote"){const so=sepOff(l);if(so.err){$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(so.err)}</span>`;$("#sep-why")?.focus();return}Object.assign(nx.body,so.body)}
       if(field==="quote"){const qx=qpdfExtra(l);Object.assign(o,qx.q);Object.assign(nx.body,qx.lead);S.qpdf=null;if(manual){o.src="manual";o.manual=manual}pbQuoteLines(l,o)}
       if(field==="order"&&l.quote&&l.quote.aed>0){o.value=l.quote.value!=null?l.quote.value:l.quote.aed;o.currency=l.quote.currency||"AED";o.aed=l.quote.aed;o.fromQuote=l.quote.no||""}
       if(field==="quote"&&l.quote){await patch(l,{...nx.body,quote:o,quoteHistory:[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]},`Quotation revised · ${fmtAED(o.aed)} · target ${fmtD(o.targetDate)}`,status);return}
@@ -1749,7 +1784,8 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const{body,add}=meetBody(r.m);let ex="";try{ex=await meetProducts(l,r.m,body,add)}catch(e){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">Couldn't create the upsell lead (${esc(e.code||e.message)}).</span>`;return}
       Object.assign(body,nx.body);await patch(l,body,`${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${nx.txt||""}`)};return}
-  if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);pmsInject(l,A);bindAmount("quote","Quotation Sent","Quotation sent");bindQpdf(l);quoteGate(l);return}
+  if(mode==="quote"){A.innerHTML=amountForm(l.quote?"Revise quotation · new quoted value":"Quotation sent · quoted value",true,"Quotation number",false,l.quote?.targetDate||true);pmsInject(l,A);bindAmount("quote","Quotation Sent","Quotation sent");bindQpdf(l);quoteGate(l);bindSep(l);return}
+  if(mode==="won"&&sepWonOn(l)){sepWonForm(l,A);return}
   if(mode==="won"){const q=l.quote;
     if(!q||!(q.aed>0)){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:6px">Order closed</h3><p class="small muted" style="margin:0 0 10px">The order value is taken from the quotation, and this lead has no quotation yet. Record the quotation first by uploading the Salesforce quote, then mark the order as won.</p><div class="row"><button class="btn pri" id="w-q">Record the quotation</button><button class="btn" id="w-x">Cancel</button></div></div>`;
       $("#w-q").onclick=()=>{S.drawer.mode="quote";drawActions(l)};$("#w-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};return}
@@ -2011,7 +2047,7 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
    database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
 const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
 const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",mfa_enabled:"Two-step on",mfa_disabled:"Two-step off",mfa_reset:"Two-step reset",mfa_policy:"Two-step rule",mail_settings:"Email settings",mail_key:"Email key",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
-const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",lines:"Quotation lines",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
+const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",sep:"Separate proposals",proposals:"Proposals",lines:"Quotation lines",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
 function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
 function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
   if(Array.isArray(v)){if(v.every(x=>typeof x!=="object"))return esc(v.join(", "));if(v.length&&v[0]&&v[0].date!==undefined)return esc(v.map(x=>[x.date,x.mode,x.type].filter(Boolean).join(" ")).join(" · "));return esc(v.length+" item(s)")}
@@ -2861,7 +2897,83 @@ function qpdfBlock(){return`<div class="qpdf"><label class="btn" style="cursor:p
 /* A quotation value comes from the uploaded Salesforce quote. Only someone with lead.status_override (Lead Manager,
    Supervisor) may type it instead, with a reason, for a PDF that can't be read. */
 const qpdfOk=l=>!!(S.qpdf&&S.qpdf.leadId===l.id&&S.qpdf.total!=null&&S.qpdf.total>0&&(S.qpdf.lines||[]).length);
-function quoteGate(l){const G=$("#qpdfGate"),val=$("#a-val"),cur=$("#a-cur");if(!G||!val)return;const over=can("lead.status_override"),ok=qpdfOk(l);const keep=($("#a-why")||{}).value||"";
+/* ======================= SEPARATE PROPOSALS (one quotation per product) =======================
+   l.sep = {on, at, by} and l.proposals = [{id, products[], no, date, value, currency, aed, q{lines, charges, …}, status open|accepted|moved|not ordered, history[]}].
+   l.quote stays the combined quotation (the sum of the proposals), so the pipeline value, Won and the database's order rule do not change. */
+const sepOn=l=>!!(l&&l.sep&&l.sep.on);
+const sepActive=l=>!!(S.sepDraft&&l&&S.sepDraft.leadId===l.id&&S.sepDraft.on);
+const sepLive=ps=>(ps||[]).filter(p=>p.status!=="not ordered"&&p.status!=="moved");
+function sepCovered(ps){const m=new Map();sepLive(ps).forEach(p=>(p.products||[]).forEach(x=>m.set(x,p)));return m}
+function sepCombine(ps,x){const aed=ps.reduce((a,p)=>a+(+p.aed||0),0);const curs=[...new Set(ps.map(p=>p.currency||"AED"))];const one=curs.length===1;
+  const sum=k=>ps.reduce((a,p)=>a+(+((p.q||{})[k])||0),0);const gr=ps.every(p=>(p.q||{}).gross!=null);
+  return{value:one?ps.reduce((a,p)=>a+(+p.value||0),0):aed,currency:one?curs[0]:"AED",aed,date:ps.map(p=>p.date||"").sort().pop()||todayISO(),no:ps.map(p=>p.no).filter(Boolean).join(", "),notes:x.notes||"",targetDate:x.targetDate||"",
+    lines:ps.flatMap(p=>(p.q&&p.q.lines)||[]),charges:ps.flatMap(p=>(p.q&&p.q.charges)||[]),tax:sum("tax"),gross:gr&&ps.length?sum("gross"):null,source:"Salesforce PDF",src:"upload",
+    createdBy:null,createdByTitle:null,createdByEmail:null,validUntil:null,paymentTerms:null,quoteContact:null,subject:null,discount:0,manual:null}}
+const sepStat=p=>({open:"Sent",accepted:"Ordered",moved:"Moved to "+(p.movedTo||"a new lead"),"not ordered":"Not ordered"}[p.status||"open"]||"Sent");
+function sepSwitch(l){const n=productsOf(l).length;if(n<2&&!sepOn(l))return"";const has=(l.proposals||[]).length>0,on=sepOn(l),lock=on&&has&&!can("lead.edit_all");
+  return`<div class="sepsw"><label class="sepl"><input type="checkbox" id="sep-on"${on?" checked":""}${lock?" disabled":""}><span><b>Separate proposal for each product</b><span class="small muted" style="font-weight:400">Tick this when the client asked for a separate proposal for each product. Upload one Salesforce quote per product. The client can then go for one, some or all of them.</span>${lock?`<span class="small muted" style="font-weight:400">Only a Lead Manager or Supervisor can switch this off once proposals are uploaded.</span>`:""}</span></label><div id="sepBox"></div></div>`}
+function bindSep(l){const D=S.sepDraft={leadId:l.id,on:sepOn(l),list:JSON.parse(JSON.stringify(l.proposals||[])),changed:false,body:{},turnOff:false,sel:null,selFor:null};const cb=$("#sep-on");
+  if(cb)cb.onchange=()=>{if(cb.checked){D.on=true;D.turnOff=false}else if(D.list.length&&can("lead.edit_all")){D.on=false;D.turnOff=true}else{D.on=false;D.turnOff=false;D.list=[];D.changed=false}sepPaint(l)};sepPaint(l)}
+function sepPaint(l){const D=S.sepDraft;if(!D||D.leadId!==l.id)return;const g3=$("#a-val")?.closest(".grid3"),no=$("#a-no")?.closest("label");if(g3)g3.style.display=D.on?"none":"";if(no)no.style.display=D.on?"none":"";
+  const B=$("#sepBox");if(!B)return;
+  if(D.turnOff){B.innerHTML=`<label class="f" style="margin-top:8px">Reason for switching off separate proposals <span class="req">*</span><input id="sep-why" maxlength="300"></label><p class="small muted" style="margin:0">The proposals stay on the lead as history. The quotation is replaced by the one you save here.</p>`;return}
+  if(!D.on){B.innerHTML="";return}
+  const pr=productsOf(l),cov=sepCovered(D.list),miss=pr.filter(p=>!cov.has(p)),R=S.qpdf&&S.qpdf.leadId===l.id?S.qpdf:null;
+  if(R&&D.selFor!==R){D.selFor=R;const fromPdf=pr.filter(p=>!cov.has(p)&&R.lines.some(x=>x.product===p));D.sel=new Set(fromPdf.length?fromPdf:miss.slice(0,1))}
+  B.innerHTML=`<div class="sepbox"><b>${pr.length-miss.length} of ${pr.length} products have a proposal</b>
+   ${D.list.map(p=>`<div class="sepp"><span>${p.products.map(x=>`<span class="chip">${esc(x)}</span>`).join(" ")}</span><span class="mono small">${esc(p.no||"")}</span><b>${fmtAED(p.aed)}</b></div>`).join("")}
+   ${miss.length?`<p class="small" style="color:var(--warn);margin:0">Still to upload: ${esc(miss.join(", "))}</p>`:`<p class="small" style="color:var(--ok);margin:0">✓ Every product has a proposal.</p>`}
+   ${R?`<div class="sepadd"><div><b>This quotation covers</b> <span class="small muted">${esc(R.no||R.file||"")} · ${esc(R.currency||"AED")} ${fmtN(R.total)}</span></div><div class="sepck">${pr.map(p=>{const c=cov.get(p);return`<label><input type="checkbox" data-sepc="${esc(p)}"${D.sel&&D.sel.has(p)?" checked":""}><span>${esc(p)}${c?`<span class="small muted"> · now in ${esc(c.no||"another proposal")}</span>`:""}</span></label>`}).join("")}</div><button type="button" class="btn pri" id="sep-add">Add this proposal</button><div class="small" id="sep-err" role="alert"></div></div>`:`<p class="small muted" style="margin:0">Upload a quotation PDF below, then tick the product(s) it covers.</p>`}</div>`;
+  B.querySelectorAll("[data-sepc]").forEach(x=>x.onchange=()=>{x.checked?D.sel.add(x.dataset.sepc):D.sel.delete(x.dataset.sepc)});
+  const add=$("#sep-add");if(add)add.onclick=()=>{const E=t=>{$("#sep-err").innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`},sel=pr.filter(p=>D.sel.has(p));
+    if(!sel.length)return E("Tick the product(s) this quotation covers.");if(!(R.total>0))return E("The total couldn't be read from this PDF.");
+    const hit=sepLive(D.list).filter(p=>p.products.some(x=>sel.includes(x)));const same=hit.length===1&&hit[0].products.length===sel.length&&hit[0].products.every(x=>sel.includes(x));
+    if(hit.length&&!same)return E(`${hit.map(p=>p.products.join(" + ")).join(", ")} already ${hit.length===1?"has a proposal":"have proposals"} (${hit.map(p=>p.no||"no number").join(", ")}). To replace a proposal, tick exactly the products it covers.`);
+    if(R.no&&D.list.some(p=>p.no===R.no&&!(same&&hit[0]===p)))return E("This quote number is already on the lead.");
+    const qx=qpdfExtra(l),cur=R.currency||"AED",it={id:"P"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),products:sel.slice(),no:R.no||"",date:R.date||todayISO(),value:R.total,currency:cur,aed:toAED(R.total,cur),q:qx.q,file:R.file||"",status:"open",addedAt:nowISO(),addedBy:actor()||S.myName||""};
+    Object.assign(D.body,qx.lead);
+    if(same){const o=hit[0];it.history=[...(o.history||[]),{no:o.no,date:o.date,value:o.value,currency:o.currency,aed:o.aed,replacedAt:nowISO()}];D.list[D.list.indexOf(o)]=it}else D.list.push(it);
+    D.changed=true;S.qpdf=null;D.selFor=null;const O=$("#qpdfOut");if(O)O.innerHTML="";sepPaint(l)}}
+function sepOff(l){const D=S.sepDraft;if(!D||D.leadId!==l.id||!D.turnOff)return{body:{}};const w=(($("#sep-why")||{}).value||"").trim();if(w.length<3)return{err:"Give the reason for switching off separate proposals."};
+  return{body:{sep:{on:false,offAt:nowISO(),offBy:actor()||S.myName||"",offWhy:w}}}}
+function sepNotice(l){if(!sepOn(l)||!(l.proposals||[]).length)return"";const ps=l.proposals,pr=productsOf(l),cov=sepCovered(ps),miss=pr.filter(p=>!cov.has(p)),open=miss.length&&!["Won","Lost"].includes(l.status);
+  return`<div class="sepbox" data-sep style="margin:0 0 12px"><div class="row" style="gap:8px"><b>Separate proposals</b><span class="sp"></span><span class="chip" style="${open?"background:var(--warn-soft);color:var(--warn)":"background:var(--ok-soft);color:var(--ok)"}">${pr.length-miss.length} of ${pr.length} products covered</span></div>
+   ${ps.map(p=>`<div class="sepp"><span>${(p.products||[]).map(x=>`<span class="chip">${esc(x)}</span>`).join(" ")}</span><span class="mono small">${esc(p.no||"")}</span><b>${fmtAED(p.aed)}</b><span class="small muted">${esc(sepStat(p))}${(p.history||[]).length?` · ${p.history.length} earlier version${p.history.length===1?"":"s"}`:""}</span></div>`).join("")}
+   ${open?`<div class="small" style="color:var(--warn)" data-sepwait>Waiting for a proposal: ${esc(miss.join(", "))}. Use “Revise quotation” to upload it.</div>`:""}</div>`}
+async function createSplit(l,id,prods,rest){const t=nowISO(),eng=l.assignedTo||actor();
+  const doc={ref:id,type:"Upsell",split:true,parentId:l.id,parentRef:l.ref,accountKey:l.accountKey,accountName:l.accountName,country:l.country||"",region:l.region||"",subdivision:l.subdivision||"",contact:l.contact||{},
+    products:prods,product:prods.join(", "),category:l.category||"Inbound",source:"Upsell",generatedBy:eng,department:"Sales",originalGenerator:l.generatedBy||"",
+    status:"Meeting Done",assignedTo:eng,priority:l.priority||"",createdAt:t,createdBy:S.uid||null,verifiedAt:t,assignedAt:t,requirementDate:todayISO(),stageAt:{Assigned:t,"Meeting Done":t},
+    ...(l.pms?{pms:l.pms}:{}),...(l.rooms?{rooms:l.rooms}:{}),...(l.users?{users:l.users}:{}),...(nk(eng)===nk(actor())?{assigneeSeenAt:t}:{}),
+    log:[{t,by:actor(),byId:S.uid||null,a:`Split from ${l.ref}: the client ordered other products. ${prods.join(", ")} moved here${rest.length?" with "+rest.length+" proposal"+(rest.length===1?"":"s"):""} · assigned to ${eng}`}]};
+  await S.db.doc("leads/"+id).set(doc);
+  if(rest.length){const props=rest.map(p=>({...p,status:"open",movedTo:null})),Q=sepCombine(props,{targetDate:(l.quote||{}).targetDate,notes:(l.quote||{}).notes}),nf=l.nextFollowUp?{nextFollowUp:l.nextFollowUp,nextFollowUpAt:l.nextFollowUpAt||null,followUpNote:l.followUpNote||""}:{};
+    await S.db.doc("leads/"+id).update({status:"Quotation Sent",quote:Q,proposals:props,sep:{on:true,at:t,by:actor()||S.myName||""},stageAt:{...doc.stageAt,"Quotation Sent":t},...nf,updatedAt:t,log:[...doc.log,{t,by:actor(),byId:S.uid||null,a:`Quotation Sent · ${props.length} proposal${props.length===1?"":"s"} moved from ${l.ref} · ${fmtAED(Q.aed)}`}]})}}
+const sepWonOn=l=>sepOn(l)&&sepLive(l.proposals).length>0;
+function sepWonForm(l,A){const ps=sepLive(l.proposals),pr=productsOf(l),cov=sepCovered(ps),noProp=pr.filter(p=>!cov.has(p));
+  A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:6px">Order closed · separate proposals</h3><p class="small muted" style="margin:0 0 10px">Tick the proposals the client ordered. The order value is the total of the ticked proposals. Products the client did not order move to a new linked lead, so they can still be won or lost later.</p>
+   <div style="display:grid;gap:8px">${ps.map(p=>`<label class="sepw"><input type="checkbox" data-sepw="${esc(p.id)}" checked><span><b>${esc((p.products||[]).join(" + "))}</b><span class="small muted"> · ${esc(p.no||"no number")} · ${fmtAED(p.aed)}</span></span></label>`).join("")}
+   ${noProp.length?`<div class="small muted">No proposal yet for ${esc(noProp.join(", "))}. If the client orders only some proposals, these move to the new lead as well.</div>`:""}
+   <div class="row" style="gap:8px"><span>Order value</span><b id="w-val">—</b></div>
+   <div class="grid2"><label class="f">PO / order number<input id="a-no"></label><label class="f">Order date<input id="a-date" type="date" max="${todayISO()}" value="${todayISO()}"></label></div><label class="f">Notes<input id="a-notes"></label><div class="small muted" id="a-aed"></div>
+   <div class="row"><button class="btn pri" id="a-save">Mark as won</button><button class="btn" id="a-cancel">Cancel</button></div></div></div>`;
+  pmsInject(l,A);const sel=()=>ps.filter(p=>A.querySelector(`[data-sepw="${p.id}"]`).checked);
+  const upd=()=>{const x=sel();$("#w-val").textContent=x.length?fmtAED(x.reduce((a,p)=>a+(+p.aed||0),0)):"—"};A.querySelectorAll("[data-sepw]").forEach(x=>x.onchange=upd);upd();
+  $("#a-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};
+  $("#a-save").onclick=async()=>{const E=t=>{$("#a-aed").innerHTML=`<span style="color:var(--bad)">${esc(t)}</span>`},acc=sel();
+    if(!acc.length)return E("Tick at least one proposal the client ordered. If they ordered nothing, mark the lead as lost.");const od=$("#a-date").value;if(!od)return E("Enter the order date.");
+    const pmx=pmsFromForm(l);if(pmx.err){E(pmx.err);$("#ap-pms")?.focus();return}
+    const ids=new Set(acc.map(p=>p.id)),rest=sepLive(l.proposals).filter(p=>!ids.has(p.id)),accProd=[...new Set(acc.flatMap(p=>p.products||[]))],restProd=pr.filter(p=>!accProd.includes(p));
+    const Q=sepCombine(acc,{targetDate:(l.quote||{}).targetDate,notes:(l.quote||{}).notes}),id=restProd.length?`${l.ref}-U${(l.upsells||[]).length+1}`:null;
+    const order={value:Q.value,currency:Q.currency,aed:Q.aed,date:od,notes:$("#a-notes").value.trim(),no:$("#a-no").value.trim(),fromQuote:Q.no||""};
+    const props=(l.proposals||[]).map(p=>ids.has(p.id)?{...p,status:"accepted"}:sepLive([p]).length?{...p,status:"moved",movedTo:id}:p);
+    const body={...pmx.body,order,proposals:props};
+    if(restProd.length){body.quote=Q;body.products=accProd;body.product=accProd.join(", ");body.upsells=[...(l.upsells||[]),id];body.quoteHistory=[...(l.quoteHistory||[]),Object.assign({},l.quote,{replacedAt:nowISO()})]}
+    $("#a-save").disabled=true;
+    const ok=await patch(l,body,`Order won · ${acc.map(p=>(p.products||[]).join(" + ")).join("; ")} · ${fmtAED(order.aed)}${restProd.length?` · ${restProd.join(", ")} moved to ${id}`:""}`,"Won");
+    if(!ok){const b=$("#a-save");if(b)b.disabled=false;return}
+    if(restProd.length){try{await createSplit(l,id,restProd,rest)}catch(e){console.error(e);toast("The order is saved, but the other products couldn't be moved to a new lead: "+(e.message||e.code||"error"))}}}}
+function quoteGate(l){const G=$("#qpdfGate"),val=$("#a-val"),cur=$("#a-cur");if(!G||!val)return;if(sepActive(l)){G.innerHTML="";return}const over=can("lead.status_override"),ok=qpdfOk(l);const keep=($("#a-why")||{}).value||"";
   val.readOnly=ok||!over;if(cur)cur.disabled=ok||!over;
   G.innerHTML=ok?`<div class="small" style="color:var(--good,var(--accent))">Amount taken from the quotation: total before tax${S.qpdf.tax?` (VAT of ${fmtN(S.qpdf.tax)} left out)`:""}.</div>`
     :over?`<label class="f">Reason for entering the amount by hand <span class="req">*</span><input id="a-why" maxlength="300" value="${esc(keep)}" placeholder="e.g. Quote sent as a scanned copy, PDF can't be read"><span class="small muted" style="font-weight:400">Only a Lead Manager or Supervisor can type the amount. Enter the total before tax.</span></label>`
@@ -2892,7 +3004,7 @@ function qpdfShow(l){const R=S.qpdf;const O=$("#qpdfOut");if(!R||!O)return;const
     ${R.lineCheck?`<p class="small" style="color:var(--ok);margin:4px 0 0">✓ The line items add up to the quotation total.</p>`:""}`:""}
    ${extra.length?`<p class="small muted" style="margin:6px 0 0">This quotation includes ${esc(extra.join(", "))}, which ${extra.length===1?"isn't":"aren't"} on this lead. Add ${extra.length===1?"it":"them"} with “Add or remove products” if needed (after a meeting this creates an upsell lead).</p>`:""}
    <p class="small muted" style="margin:6px 0 0">Amount, currency, date, quote number and notes above have been filled in. Check them, add the target date and next step, then save.</p></div>`;
-  $("#qpdfClr").onclick=()=>{S.qpdf=null;O.innerHTML="";if(!can("lead.status_override")){const v=$("#a-val");if(v)v.value=""}quoteGate(l)};O.querySelectorAll("[data-qlp]").forEach(s=>s.onchange=()=>{R.lines[+s.dataset.qlp].product=s.value})}
+  $("#qpdfClr").onclick=()=>{S.qpdf=null;O.innerHTML="";if(!can("lead.status_override")){const v=$("#a-val");if(v)v.value=""}quoteGate(l);sepPaint(l)};O.querySelectorAll("[data-qlp]").forEach(s=>s.onchange=()=>{R.lines[+s.dataset.qlp].product=s.value});sepPaint(l)}
 /* what gets saved with the quotation (and the lead's contact, if ticked) */
 function qpdfExtra(l){const R=S.qpdf;if(!R||R.leadId!==l.id)return{q:{},lead:{}};
   const q={lines:R.lines.map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})),source:"Salesforce PDF",createdBy:R.by||"",createdByTitle:R.byTitle||"",createdByEmail:R.byEmail||"",validUntil:R.validUntil||"",paymentTerms:R.payment||"",quoteContact:R.contact?{name:R.contact,title:R.title||""}:null,discount:R.discount||0,subject:R.subject||"",charges:(R.totals||[]).map(t=>({label:t.label,amount:t.amount})),tax:R.tax||0,gross:R.gross!=null?R.gross:null,src:"upload"};
