@@ -141,6 +141,12 @@
       return data || [];
     },
   };
+  // Guided stage flow (supabase/37_stage_flow.sql): an engineer declines an assigned lead; it returns to back office
+  window.__leadDecline = async (id, reason, note) => {
+    const { error } = await sb.rpc("lead_decline", { p_id: id, p_reason: reason, p_note: note || "" });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return true;
+  };
   // Joint work and events (supabase/33_joint_events.sql)
   window.__shareDecide = async (id, ok) => {
     const { error } = await sb.rpc("lead_share_decide", { p_id: id, p_ok: !!ok });
@@ -233,36 +239,12 @@
   /* ---------- realtime fan-out ---------- */
   const listeners = {};  // table -> Set(fn)
   const resync = {};     // table -> Set(fn) called when the live connection comes back after a drop
-  // The screen must not depend on Supabase's live updates to show the user's OWN change: if that message is late or
-  // lost, a form would stay on "Saving…" although the save went through. So after a successful write the change is
-  // handed to the same listeners straight away (an update or delete), or the list is re-read through the normal
-  // access rules (a new row, which the person may not be allowed to see).
-  // Supabase then sends the same change back as a live update. To avoid drawing the screen twice, that echo is
-  // skipped when it carries exactly what was just shown (compared with keys in a fixed order, because the database
-  // returns them in its own order). If the database changed anything on the way, the contents differ and it is shown.
-  const canon = (v) => Array.isArray(v) ? "[" + v.map(canon).join(",") + "]"
-    : v && typeof v === "object" ? "{" + Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => JSON.stringify(k) + ":" + canon(v[k])).join(",") + "}" : JSON.stringify(v === undefined ? null : v);
-  const echoed = {};       // table -> Map(id -> { c: contents, t: when })
-  const isOwnEcho = (table, p) => {
-    const m = echoed[table]; if (!m || !m.size || p.eventType === "DELETE" && !p.old) return false;
-    const now = Date.now(); m.forEach((v, k) => { if (now - v.t > 15000) m.delete(k); });
-    const row = p.eventType === "DELETE" ? p.old : p.new; if (!row) return false;
-    for (const [id, v] of m) { if (Object.values(row).includes(id) && (p.eventType === "DELETE" ? v.c === "deleted" : v.c === canon(row.doc))) { m.delete(id); return true; } }
-    return false;
-  };
-  function localEcho(table, key, id, doc, type) {
-    (echoed[table] = echoed[table] || new Map()).set(id, { c: type === "DELETE" ? "deleted" : canon(doc), t: Date.now() });
-    (listeners[table] || []).forEach((f) => { try { f({ eventType: type, new: type === "DELETE" ? {} : { [key]: id, doc }, old: { [key]: id }, local: true }); } catch (e) { console.error(e); } });
-  }
-  const localReload = (table) => (resync[table] || []).forEach((f) => { try { f(); } catch (e) { console.error(e); } });
-  // changes made through database functions (sign-off, agreed share, renewal progress) are re-read the same way
-  ["__setSignoff", "__shareDecide", "__setRenewal"].forEach((n) => { const f = window[n]; if (typeof f === "function") window[n] = async (...a) => { const r = await f(...a); localReload("leads"); return r; }; });
   function onTable(table, fn) {
     if (!listeners[table]) {
       listeners[table] = new Set(); resync[table] = resync[table] || new Set();
       let dropped = false;
       sb.channel("ld-" + table)
-        .on("postgres_changes", { event: "*", schema: "public", table }, (p) => { if (!isOwnEcho(table, p)) listeners[table].forEach((f) => f(p)); })
+        .on("postgres_changes", { event: "*", schema: "public", table }, (p) => listeners[table].forEach((f) => f(p)))
         .subscribe((status) => {
           if (status === "SUBSCRIBED") { if (dropped) { dropped = false; resync[table].forEach((f) => f()); } }
           else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") dropped = true;
@@ -299,7 +281,6 @@
         }
         if (error) throw dbErr(error);
         (caches[r.t] = caches[r.t] || new Map()).set(r.id, d);
-        localReload(r.t); if (r.t === "docs") localEcho(r.t, r.k, r.id, d, "UPDATE");
       },
       async update(d) {
         if (r.t === "members") return writeMembers(merge(await readMembers(), d));
@@ -312,13 +293,11 @@
         if (error) throw dbErr(error);
         if (!data || !data.length) throw { code: "invalid_argument", message: "You don't have permission to change this record." };
         caches[r.t].set(r.id, next);
-        localEcho(r.t, r.k, r.id, next, "UPDATE");
       },
       async delete() {
         if (r.t === "members") return;
         const { error } = await sb.from(r.t).delete().eq(r.k, r.id);
         if (error) throw dbErr(error);
-        localEcho(r.t, r.k, r.id, null, "DELETE");
       },
       async acquire() { return { acquired: true }; },   // reference numbers come from next_lead_ref() instead
       onSnapshot(next, onErr) {
@@ -434,7 +413,7 @@
       <section class="view" style="max-width:440px;margin:48px auto">
         <form class="panel" id="signin" style="padding:28px;display:grid;gap:14px" novalidate>
           <div><h2>Sign in to Lead Desk</h2><p class="muted" style="margin:6px 0 0">Use the work email and password your Supervisor gave you.</p></div>
-          <label class="f">Work email<input id="si-email" type="email" autocomplete="username" required placeholder="${clean((window.LD_CONFIG || {}).EMAIL_HINT || "name@company.com")}"></label>
+          <label class="f">Work email<input id="si-email" type="email" autocomplete="username" required placeholder="name@samsotech.com"></label>
           <label class="f">Password<input id="si-pass" type="password" autocomplete="current-password"></label>
           <button class="btn pri" id="si-btn" type="submit">Sign in</button>
           <button class="btn" id="si-link" type="button">Email me a sign-in link instead</button>
@@ -450,7 +429,6 @@
       if (!EMAIL_RE.test(email)) return bad("Enter a valid email address.");
       if (!password) return bad("Enter your password, or use the email link button.");
       const btn = document.getElementById("si-btn"); btn.disabled = true; btn.textContent = "Signing in…";
-      signedInWith = password;
       const { error } = await sb.auth.signInWithPassword({ email, password });
       btn.disabled = false; btn.textContent = "Sign in";
       if (error) bad(/invalid login/i.test(error.message) ? "Email or password is wrong. Ask a Supervisor to reset your password if you've forgotten it." : error.message);
@@ -487,7 +465,7 @@
       const a = host.querySelector("#cp1").value, b = host.querySelector("#cp2").value, m = host.querySelector("#cpm");
       if (a.length < 8) { m.innerHTML = '<span style="color:var(--bad)">Use at least 8 characters.</span>'; return; }
       if (a !== b) { m.innerHTML = '<span style="color:var(--bad)">The two passwords don\'t match.</span>'; return; }
-      if (forced && signedInWith && a === signedInWith) { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
+      if (a === "Samsotech123") { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
       const { error } = await sb.auth.updateUser({ password: a, data: { must_change_password: false } });
       if (error) m.innerHTML = `<span style="color:var(--bad)">${clean(error.message)}</span>`;
       else { window.__audit("password_changed", "session", ME.email, forced ? "Changed the temporary password" : "Changed password"); m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(() => { close(); if (forced && window.__afterPassword) window.__afterPassword(); }, 900); }
@@ -495,147 +473,11 @@
     host.querySelector("#cp1").focus();
   };
 
-
-  /* ---------- two-step sign-in with an authenticator app (supabase/36_mfa.sql) ----------
-     Uses Supabase's built-in MFA. The database gives no data to a person who must use two-step sign-in
-     until the code has been entered in this session, so this screen comes before anything is loaded. */
-  const mfaState = async () => { try { const { data, error } = await sb.rpc("mfa_state"); return error ? null : data; } catch (e) { return null; } };   // null: 36_mfa.sql not run yet
-  async function mfaFactors() {
-    const { data, error } = await sb.auth.mfa.listFactors();
-    if (error) throw error;
-    const all = (data && data.all) || [];
-    return { ok: all.filter((f) => f.status === "verified" && f.factor_type === "totp"), open: all.filter((f) => f.status !== "verified") };
-  }
-  const mfaLog = (a) => sb.rpc("mfa_log", { p_action: a }).then(() => {}, () => {});
-  // One small dialog for: entering the code, first set-up, and switching it on or off from the account menu.
-  function mfaDialog(o) {
-    return new Promise((done) => {
-      const host = document.createElement("div");
-      host.className = "scrim mfas"; host.style.alignItems = "center"; host.style.justifyContent = "center"; host.style.overflow = "auto";
-      document.body.appendChild(host);
-      const close = (v) => { host.remove(); done(v); };
-      const err = (t) => { const m = host.querySelector("#mfm"); if (m) m.innerHTML = t ? `<span style="color:var(--bad)">${clean(t)}</span>` : ""; };
-      const shell = (title, body, okLabel) => {
-        host.innerHTML = `<form class="panel" role="dialog" aria-modal="true" aria-label="${title}" style="width:min(420px,calc(100% - 24px));display:grid;gap:12px;padding:20px;margin:12px auto" novalidate>
-          <h3 style="margin:0">${title}</h3>${body}<div id="mfm" class="small" role="alert"></div>
-          <div class="row">${okLabel ? `<button class="btn pri" type="submit" id="mfok">${okLabel}</button>` : ""}<button class="btn" type="button" id="mfx">${o.forced ? "Sign out" : "Close"}</button></div></form>`;
-        host.querySelector("#mfx").onclick = o.forced ? () => window.__signOut() : () => close(false);
-      };
-      const codeBox = `<label class="f">6-digit code<input id="mfc" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="000000" style="font:600 22px var(--f-mono,monospace);letter-spacing:.3em;text-align:center;height:48px"></label>`;
-      const readCode = () => { const c = (host.querySelector("#mfc").value || "").replace(/\D/g, ""); if (c.length !== 6) { err("Enter the 6 digits shown in your authenticator app."); return null; } return c; };
-      const busy = (on, label) => { const b = host.querySelector("#mfok"); if (b) { b.disabled = on; b.textContent = label; } };
-      const askCode = async () => {
-        let f; try { f = (await mfaFactors()).ok[0]; } catch (e) { f = null; }
-        shell("Two-step sign-in", `<p class="small muted" style="margin:0">Open your authenticator app and enter the code shown for Lead Desk.</p>${codeBox}
-          <p class="small muted" style="margin:0">Lost or changed your phone? Ask a Supervisor to reset your two-step sign-in.</p>`, "Verify");
-        host.querySelector("form").onsubmit = async (e) => {
-          e.preventDefault(); const code = readCode(); if (!code) return;
-          if (!f) return err("No authenticator is registered for this account. Ask a Supervisor to reset your two-step sign-in.");
-          busy(true, "Checking…");
-          const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: f.id, code });
-          busy(false, "Verify");
-          if (error) { err(/invalid|expired/i.test(error.message) ? "That code is not right or has expired. Wait for the next code and try again." : error.message); host.querySelector("#mfc").select(); return; }
-          close(true);
-        };
-        host.querySelector("#mfc").focus();
-      };
-      const setUp = async () => {
-        shell("Set up two-step sign-in", `<p class="small muted" style="margin:0">Preparing…</p>`, "");
-        let en;
-        try {
-          const fs = await mfaFactors();
-          for (const f of fs.open) await sb.auth.mfa.unenroll({ factorId: f.id });             // an earlier set-up that was never finished
-          const r = await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "Lead Desk " + new Date().toISOString().slice(0, 16) });
-          if (r.error) throw r.error; en = r.data;
-        } catch (e) {
-          shell("Set up two-step sign-in", `<p class="small" style="margin:0;color:var(--bad)">${clean(/not enabled|disabled/i.test(e.message || "") ? "Two-step sign-in is not switched on in Supabase yet (Authentication → Sign In / Providers → Multi-Factor → TOTP)." : (e.message || "Could not start the set-up."))}</p>`, "");
-          return;
-        }
-        shell("Set up two-step sign-in", `${o.forced ? `<p class="small" style="margin:0"><b>Your Supervisor requires two-step sign-in.</b> It takes about a minute and you only do it once.</p>` : ""}
-          <ol class="small" style="margin:0;padding-left:18px;display:grid;gap:8px">
-            <li>Install an authenticator app on your phone, for example Microsoft Authenticator or Google Authenticator.</li>
-            <li>In the app choose “Add account” and scan this picture:<div style="margin:8px 0;display:grid;justify-items:center"><img alt="QR code for your authenticator app" id="mfqr" width="176" height="176" style="background:#fff;padding:8px;border-radius:8px;border:1px solid var(--line);max-width:100%;height:auto"></div>
-              <details><summary>Can't scan? Type this key instead</summary><div class="mono" style="word-break:break-all;user-select:all;padding:8px;margin-top:6px;background:var(--sunk);border-radius:6px" id="mfkey"></div></details></li>
-            <li>Enter the 6-digit code the app now shows.</li></ol>${codeBox}`, "Switch on");
-        // Supabase returns the picture as an SVG data address that contains quotes, so it is set here, not inside the HTML text
-        const qr = String(en.totp.qr_code || ""); host.querySelector("#mfqr").src = /^data:image\/svg\+xml;utf-?8,/i.test(qr) ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(qr.replace(/^data:image\/svg\+xml;utf-?8,/i, "")) : qr;
-        host.querySelector("#mfkey").textContent = en.totp.secret || "";
-        host.querySelector("form").onsubmit = async (e) => {
-          e.preventDefault(); const code = readCode(); if (!code) return;
-          busy(true, "Checking…");
-          const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: en.id, code });
-          busy(false, "Switch on");
-          if (error) { err(/invalid|expired/i.test(error.message) ? "That code is not right or has expired. Wait for the next code and try again." : error.message); host.querySelector("#mfc").select(); return; }
-          await mfaLog("mfa_enabled");
-          close(true);
-        };
-        host.querySelector("#mfc").focus();
-      };
-      const manage = async () => {
-        shell("Two-step sign-in", `<p class="small muted" style="margin:0">Checking…</p>`, "");
-        const st = await mfaState(); let fs = { ok: [] }; try { fs = await mfaFactors(); } catch (e) {}
-        if (!st) { shell("Two-step sign-in", `<p class="small muted" style="margin:0">Two-step sign-in is not available yet. A Supervisor needs to run <span class="mono">supabase/36_mfa.sql</span> first.</p>`, ""); return; }
-        const on = fs.ok.length > 0;
-        const rule = st.mode === "required" ? "Your Supervisor requires it for your account." : st.mode === "optional" ? "It is optional for your account." : "Your Supervisor has not switched it on for your account.";
-        if (on) {
-          shell("Two-step sign-in", `<p style="margin:0"><span class="chip ok">On</span> You enter a code from your authenticator app each time you sign in.</p><p class="small muted" style="margin:0">${rule}${st.mode === "required" ? " Only a Supervisor can reset it." : ""}</p>`, st.mode === "required" ? "" : "Switch off");
-          const fm = host.querySelector("form");
-          fm.onsubmit = async (e) => {
-            e.preventDefault(); const b = host.querySelector("#mfok");
-            if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Confirm: switch off"; return; }
-            busy(true, "Switching off…");
-            for (const f of fs.ok) { const { error } = await sb.auth.mfa.unenroll({ factorId: f.id }); if (error) { busy(false, "Switch off"); return err(error.message); } }
-            await mfaLog("mfa_disabled"); try { await sb.auth.refreshSession(); } catch (e2) {}
-            close(true);
-          };
-        } else if (st.mode === "off") {
-          shell("Two-step sign-in", `<p style="margin:0"><span class="chip">Off</span> ${rule}</p>`, "");
-        } else {
-          shell("Two-step sign-in", `<p style="margin:0"><span class="chip">Off</span> Add a second step to your sign-in: a 6-digit code from an authenticator app on your phone.</p><p class="small muted" style="margin:0">${rule}</p>`, "Set up now");
-          host.querySelector("form").onsubmit = (e) => { e.preventDefault(); setUp(); };
-        }
-      };
-      (o.view === "code" ? askCode : o.view === "setup" ? setUp : manage)();
-    });
-  }
-  // Before any data is read: ask for the code, or take the person through set-up when it is required.
-  async function mfaGate() {
-    const st = await mfaState();
-    if (!st || !st.member || st.need === "none") return;
-    document.getElementById("tabs").hidden = true;
-    document.getElementById("main").innerHTML = '<div class="panel empty">Two-step sign-in: enter your code to continue.</div>';
-    await mfaDialog({ view: st.need === "code" ? "code" : "setup", forced: true });
-  }
-  window.__mfa = {
-    state: mfaState,
-    manage: () => mfaDialog({ view: "manage" }),
-    setup: () => mfaDialog({ view: "setup" }),                          // Supervisor setting up their own before making it required
-    users: async () => { const { data, error } = await sb.rpc("mfa_users"); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data || {}; },
-    setPolicy: async (p) => { const { data, error } = await sb.rpc("set_mfa_policy", { p }); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data; },
-    reset: (email) => window.__adminUser("mfa_reset", email),
-  };
-
-  /* ---------- email settings (supabase/38_email_settings.sql) ----------
-     The service key is write-only: set_mail_key() stores it where no role can read it, and nothing here can fetch it back. */
-  const rpcOr = async (name, args) => { const { data, error } = await sb.rpc(name, args); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data; };
-  window.__mail = {
-    save: (p) => rpcOr("set_mail_settings", { p }),
-    setKey: (k) => rpcOr("set_mail_key", { p_key: k }),
-    log: async (n) => { const { data, error } = await sb.from("mail_log").select("id,at,kind,to_addr,subject,ok,error,provider").order("id", { ascending: false }).limit(n || 50); if (error) throw Object.assign(new Error(error.message), { code: error.code }); return data || []; },
-    test: async (to) => {
-      const { data, error } = await sb.functions.invoke("lead-mailer", { body: { type: "test", to } });
-      if (error) { let msg = error.message; try { const j = await error.context.json(); if (j && j.error) msg = j.error; } catch (e) {} return { error: /not found|404|Failed to send/i.test(msg) ? "The lead-mailer function is not deployed yet (or is an older version)." : msg }; }
-      return data || { error: "No answer from the mail function." };
-    },
-  };
-
-  let signedInWith = "";   // the password typed at this sign-in (memory only), so the temporary one cannot be kept
   let started = false;
   async function start(session) {
     if (started || !session) return;
     started = true;
     ME.email = (session.user.email || "").toLowerCase();
-    await mfaGate();                                                    // two-step sign-in comes before any data
     // "*" so this keeps working before supabase/14_names.sql adds the display_name column
     const { data } = await sb.from("members").select("*").eq("email", ME.email).eq("active", true).maybeSingle();
     ME.role = data ? data.role : null;

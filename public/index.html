@@ -89,12 +89,17 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .chip.inb{background:var(--inb-soft);color:var(--inb)} .chip.outb{background:var(--outb-soft);color:var(--outb)}
 .st{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:4px;white-space:nowrap}
 .st-New{background:var(--accent-soft);color:var(--accent)} .st-Info{background:var(--warn-soft);color:var(--warn)}
-.st-Assigned{background:var(--sunk);color:var(--ink)} .st-Meeting{background:var(--inb-soft);color:var(--inb)}
+.st-Assigned{background:var(--sunk);color:var(--ink)} .st-Attended{background:var(--sunk);color:var(--inb)} .st-Meeting{background:var(--inb-soft);color:var(--inb)}
 .st-Quotation{background:var(--outb-soft);color:var(--outb)} .st-Won{background:var(--ok-soft);color:var(--ok)}
 .st-Lost,.st-Rejected,.st-Duplicate{background:var(--bad-soft);color:var(--bad)} .st-On{background:var(--sunk);color:var(--muted)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .seg button{border:0;background:var(--surface);color:var(--muted);font:500 13px var(--f-body);padding:7px 14px;cursor:pointer}
 .seg button+button{border-left:1px solid var(--line)}
+.seg.segw{display:flex;flex-wrap:wrap;gap:6px;border:0;overflow:visible}
+.seg.segw button{border:1px solid var(--line);border-radius:8px;padding:6px 11px}
+.seg.segw button+button{border-left:1px solid var(--line)}
+.lv-acc #pmsArea,.lv-acc #pbArea,.lv-acc #recArea,.lv-acc #prodArea,.lv-acc .actlog,.lv-acc #editAll,.lv-acc #fcEdit,.lv-acc #jointArea{display:none!important}
+.nxq{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 -2px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .seg.cat button[data-v="Inbound"][aria-pressed="true"]{background:var(--inb);color:#fff}
 .seg.cat button[data-v="Outbound"][aria-pressed="true"]{background:var(--outb);color:#fff}
@@ -348,9 +353,10 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
 .timeline div{display:grid;grid-template-columns:130px 1fr;gap:10px;color:var(--muted)}
 .timeline div span:last-child{color:var(--ink)}
 .stages{display:flex;gap:4px}
-.stages span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;padding:6px 4px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.stages span{flex:1 1 0;width:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:600 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.05em;padding:6px 4px;border-radius:4px;background:var(--sunk);color:var(--muted)}
 .stages span.on{background:var(--accent);color:var(--accent-ink)}
 .stages span.won{background:var(--ok);color:#fff}
+@media(max-width:480px){.stages{gap:3px}.stages span{font-size:8.5px;letter-spacing:0;padding:6px 0;text-transform:none;font-weight:700}}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:40;font-size:13.5px;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 .banner{max-width:1240px;margin:0 auto}
 .matrix td.c{text-align:center;padding:6px 4px}
@@ -528,7 +534,7 @@ th{position:relative}
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js?v=20081c3b"></script>
+<script src="adapter.js?v=c423e966"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -645,7 +651,7 @@ const MEET_TYPES=["New lead meeting","Follow-up meeting"];
 function meetingsOf(l){if(Array.isArray(l.meetings))return l.meetings;
   return l.meeting?[{id:"m0",date:(l.meeting.date||"").slice(0,10),mode:l.meeting.mode||"",type:"New lead meeting",products:productsOf(l),notes:l.meeting.notes||"",legacy:true}]:[]}
 const reqDate=l=>l.requirementDate||(l.createdAt||"").slice(0,10);
-const OPEN=["New","Info Needed","Assigned","Meeting Done","Quotation Sent","On Hold"];
+const OPEN=["New","Info Needed","Assigned","Attended","Meeting Done","Quotation Sent","On Hold"];
 const BLOCKING=OPEN.concat(["Won"]);
 const STOP=new Set(["the","hotel","hotels","and","by","resort","resorts","spa","a","of","at","de","la","le"]);
 
@@ -963,7 +969,7 @@ function leadsSwitch(canCreate){const v=S.newView==="list"||S.newView==="events"
 function bindLeadsSwitch(){$("#newSeg")?.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.newView=b.dataset.v;render()})}
 /* ---------- Leads tab: list with filters, sorting, KPIs and export (one filter function feeds table, KPIs and export) ---------- */
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const LSTAT_ORDER=["New","Info Needed","Assigned","Meeting Done","Quotation Sent","On Hold","Won","Lost","Duplicate","Rejected"];
+const LSTAT_ORDER=["New","Info Needed","Assigned","Attended","Meeting Done","Quotation Sent","On Hold","Won","Lost","Duplicate","Rejected"];
 /* lead list status filter: the same status names a lead shows, plus "Open (all)" (matches the Open tile) */
 const LSTAT=Object.assign({"All":()=>true,"Open (all)":l=>OPEN.includes(l.status)},Object.fromEntries(LSTAT_ORDER.map(x=>[x,l=>l.status===x])));
 const NO_DEPT="Not recorded";
@@ -1199,7 +1205,7 @@ function qCard(l){const ch=dupChecks(l);const bad=ch.some(c=>c.lvl==="bad");cons
 function renderPipe(m){const isSales=!viewAll();if(!isSales&&!S.me)S.me="__all";const me=isSales?S.myEng:S.me;const sp=spNames();
   if(isSales&&!me){m.innerHTML=`<div class="panel empty">Your login isn't linked to a sales engineer name yet. Ask back office to link it under Users and access.</div>`;return}
   const q=nk(S.pq);const mine=S.leads.filter(l=>(me==="__all"?l.assignedTo:nk(l.assignedTo)===nk(me))&&(!q||nk(l.accountName+" "+l.ref+" "+l.product+" "+(l.country||"")).includes(q)));
-  const cols=[...(mine.some(l=>["New","Info Needed"].includes(l.status))?[["Pending","Awaiting approval"]]:[]),["Assigned","Assigned"],["Meeting Done","Meeting done"],["Quotation Sent","Quotation sent"],["Won","Won"],["Closed","Lost / on hold"]];
+  const cols=[...(mine.some(l=>["New","Info Needed"].includes(l.status))?[["Pending","Awaiting approval"]]:[]),["Assigned","Assigned"],["Attended","Attended"],["Meeting Done","Meeting done"],["Quotation Sent","Quotation sent"],["Won","Won"],["Closed","Lost / on hold"]];
   const inCol=(l,c)=>c==="Closed"?["Lost","On Hold"].includes(l.status):c==="Pending"?["New","Info Needed"].includes(l.status):l.status===c;
   const open=mine.filter(l=>OPEN.includes(l.status));const quoted=mine.filter(l=>l.status==="Quotation Sent").reduce((s,l)=>s+leadValue(l),0);
   const won=mine.filter(l=>l.status==="Won");const eod=new Date();eod.setHours(23,59,59,999);const due=open.filter(l=>fuOpen(l)&&fuDue(l)<=eod);
@@ -1208,7 +1214,7 @@ function renderPipe(m){const isSales=!viewAll();if(!isSales&&!S.me)S.me="__all";
    <div class="row" style="align-items:flex-end"><label class="f" style="min-width:200px">Search<input id="pq" placeholder="Property, ref or product" value="${esc(S.pq)}"></label>
    ${isSales?"":`<label class="f" style="min-width:200px">Sales engineer<select id="meSel">${`<option value="__all"${me==="__all"?" selected":""}>Everyone</option>`+sp.map(n=>`<option${n===me?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`}</div></div>
    ${!me?"":`
-   <div class="kpis"><div class="kpi"><div class="l">Open leads</div><div class="v">${open.length}</div><div class="s">${mine.filter(l=>l.status==="Assigned").length} not yet met</div></div>
+   <div class="kpis"><div class="kpi"><div class="l">Open leads</div><div class="v">${open.length}</div><div class="s">${mine.filter(l=>["Assigned","Attended"].includes(l.status)).length} not yet met</div></div>
      <div class="kpi"><div class="l">Quoted, awaiting order</div><div class="v">${fmtAED(quoted)}</div><div class="s">${mine.filter(l=>l.status==="Quotation Sent").length} quotation(s)</div></div>
      <div class="kpi"><div class="l">Won</div><div class="v">${fmtAED(won.reduce((s,l)=>s+leadValue(l),0))}</div><div class="s">${won.length} order(s)</div></div>
      <div class="kpi"><div class="l">Follow-ups due</div><div class="v" style="${due.length?"color:var(--bad)":""}">${due.length}</div><div class="s">today or overdue</div></div></div>
@@ -1236,11 +1242,11 @@ function newLeadsPanel(mine){const ls=mine.filter(isNewForMe).sort((a,b)=>b.assi
    ${ls.map(l=>`<tr class="click" data-open="${esc(l.id)}"><td class="mono">${esc(l.ref)}</td><td><b>${esc(l.accountName)}</b><div class="small muted">${esc(l.contact?.name||"")}</div></td><td>${esc(regionOf(l))}</td><td>${esc(l.product)}</td><td><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span></td><td style="white-space:nowrap">${fmtD(l.assignedAt)}</td></tr>`).join("")}
    </tbody></table></div><p class="small muted" style="margin:8px 0 0">Open a lead to see the details; it leaves this list once you've opened it.</p></div>`}
 const COL_CAP=25;
-function lcard(l){const stale=l.status==="Assigned"&&days(l.assignedAt)>(S.settings.slaContactDays||3);const urgent=stale&&days(l.assignedAt)<=60;const qst=l.status==="Quotation Sent"&&days(l.stageAt?.["Quotation Sent"])>(S.settings.quoteStaleDays||14);
+function lcard(l){const stale=["Assigned","Attended"].includes(l.status)&&days(l.assignedAt)>(S.settings.slaContactDays||3);const urgent=stale&&days(l.assignedAt)<=60;const qst=l.status==="Quotation Sent"&&days(l.stageAt?.["Quotation Sent"])>(S.settings.quoteStaleDays||14);
   const fu=fuOpen(l)&&fuDue(l)<=new Date(new Date().setHours(23,59,59,999));
   return`<button class="lc" data-open="${esc(l.id)}"><span class="row" style="gap:6px"><span class="mono muted">${esc(l.ref)}</span><span class="sp"></span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span>${flagChips(l)}${isUpsell(l)?`<span class="chip ups">Upsell</span>`:""}${isNewForMe(l)?`<span class="chip newl">New</span>`:""}</span>
    <b style="font-size:13.5px">${esc(l.accountName)}</b><span class="small muted">${esc(regionOf(l))} · received ${fmtD(reqDate(l))}</span><span class="small muted">${esc(l.product)}${viewAll()&&S.me==="__all"?" · "+esc(l.assignedTo):""}</span>
-   ${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
+   ${standChip(l)}${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
    ${urgent?`<span class="late">No meeting yet · assigned ${Math.floor(days(l.assignedAt))} days ago</span>`:stale?`<span class="small muted">No meeting logged · ${Math.floor(days(l.assignedAt))} days</span>`:""}${qst?`<span class="late">Quote open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days</span>`:""}${l.status==="Quotation Sent"&&l.quote?.targetDate?(tgtOverdue(l)?`<span class="late">Target ${fmtD(l.quote.targetDate)} passed</span>`:`<span class="small muted">Target ${fmtD(l.quote.targetDate)}</span>`):""}${fu?`<span class="late">Follow-up ${esc(fuLabel(l))}</span>`:fuOpen(l)?`<span class="small muted">Follow-up ${esc(fuLabel(l))}</span>`:""}</button>`}
 
 /* ======================= LEAD DRAWER (back office + sales) ======================= */
@@ -1429,8 +1435,8 @@ async function unWin(l,to,why,lr){if(!canUnwin(l))return false;if(!can("lead.sta
   if(to==="Lost")body.lost={reason:lr,notes:why,date:t};else if(l.lost)body.lost=null;
   return await patch(l,body,`Status changed from Won to ${to}${to==="Lost"?" ("+lr+")":""}${why?" · "+why:""}${l.order?" · order "+fmtAED(l.order.aed)+" moved to history":""}`)}
 function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return}
-  const stg=["New","Assigned","Meeting Done","Quotation Sent","Won"];const reachedIdx=Math.max(...stg.map((s,i)=>l.stageAt?.[s]?i:-1));
-  const inBO=l.status==="New"||l.status==="Info Needed";const ch=dupChecks(l);
+  const stg=["New","Assigned","Attended","Meeting Done","Quotation Sent","Won"];const reachedIdx=Math.max(...stg.map((s,i)=>l.stageAt?.[s]?i:-1));
+  const inBO=l.status==="New"||l.status==="Info Needed";const ch=dupChecks(l);const hideRest=needAccept(l)&&isMine(l)&&!can("lead.status_override")&&!l.deleted;
   const money=(o,lab)=>o?`<div><span>${lab}</span><span><b>${fmtAED(o.aed)}</b>${o.currency&&o.currency!=="AED"?` <span class="muted">(${esc(o.currency)} ${fmtN(o.value)})</span>`:""} · ${fmtD(o.date)}${o.no?` · <span class="mono">${esc(o.no)}</span>`:""}${o.notes?` · ${esc(o.notes)}`:""}</span></div>`:"";
   const lvTop=`${l.deleted?`<div class="notice bad" style="display:grid;gap:6px"><b>This lead was deleted on ${fmtD(l.deleted.at)} by ${esc(l.deleted.by||"someone")}.</b><span>Reason: ${esc(l.deleted.reason||"—")}${l.deleted.note?" · "+esc(l.deleted.note):""}. It is hidden from every list, count and report. Its details and history are kept.</span>${can("lead.remove")?`<span><button type="button" class="btn sm" id="restoreLead">Restore this lead</button></span>`:""}</div>`:""}${ruleFlags(l).length?`<div class="notice warn" style="display:grid;gap:2px"><b>Needs action</b>${ruleFlags(l).map(f=>`<span class="small">${esc(f.t)}</span>`).join("")}</div>`:""}`;
   $("#drawerHost").innerHTML=`<div class="scrim lvs" id="scrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Lead ${esc(l.ref)}">
@@ -1439,7 +1445,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
    <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
    <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
   </div>
-  <div class="lvb">
+  <div class="lvb${hideRest?" lv-acc":""}">
    ${lvTop}
   <div class="lvc"><p class="lvt">The lead</p>
    <div class="panel" style="padding:14px" id="detPanel">${(can("lead.edit_fields")||canAct(l))&&!l.deleted?`<div class="row" style="margin:-2px 0 8px"><span class="small muted">Lead details</span><span class="sp"></span><button type="button" class="btn sm" id="editAll">Edit details</button></div>`:""}<div class="timeline">
@@ -1452,13 +1458,18 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      <div id="detArea" style="display:contents"></div>
      ${l.rooms||l.pms||l.timeline?`<div><span>Qualification</span><span>${[l.rooms?l.rooms+" rooms":"",l.pms,l.timeline].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}
      ${l.notes?`<div><span>Requirement</span><span>${esc(l.notes)}</span></div>`:""}
+     ${l.reqNote&&(l.reqNote.text||l.reqNote.skip)?`<div><span>Requirement note</span><span>${l.reqNote.text?esc(l.reqNote.text):`<span class="muted">Skipped by ${esc(l.reqNote.by||"a manager")}: ${esc(l.reqNote.skip)}</span>`}<br><span class="small muted">${fmtD(l.reqNote.at)} · ${esc(l.reqNote.by||"")}</span></span></div>`:""}
+     ${flow().on&&standOf(l)&&OPEN.includes(l.status)?`<div><span>Where it stands</span><span><b>${esc(standOf(l))}</b> <span class="small muted">· ${fmtD(l.standing.at)}${l.standing.by?" · "+esc(l.standing.by):""}</span></span></div>`:""}
+     ${l.status==="On Hold"&&l.holdReason?`<div><span>On hold</span><span>${esc(l.holdReason.reason)}${l.holdReason.note?" · "+esc(l.holdReason.note):""}<br><span class="small muted">${fmtD(l.holdReason.at)}${l.holdReason.by?" · "+esc(l.holdReason.by):""}</span></span></div>`:""}
+     ${l.acceptedAt&&flow().on?`<div><span>Accepted</span><span>${fmtD(l.acceptedAt)}${l.acceptedBy?" · "+esc(l.acceptedBy):""}</span></div>`:""}
      <div><span>Assigned to</span><span>${l.assignedTo?`<b>${esc(l.assignedTo)}</b> · ${fmtD(l.assignedAt)}${l.priority?" · "+esc(l.priority)+" priority":""}`:"Not assigned"}</span></div>
+     ${(l.declines||[]).length&&!hideRest?`<div><span>Declined earlier</span><span style="display:grid;gap:3px">${l.declines.map(d=>`<span>${esc(d.eng||d.by||"—")} · ${fmtD(d.at)}<br><span class="small muted">${esc(d.reason||"")}${d.note?" · "+esc(d.note):""}</span></span>`).join("")}</span></div>`:""}
      ${money(l.meeting,"Deal estimate")}
      ${meetingsOf(l).length?`<div><span>Meetings (${meetingsOf(l).length})</span><span style="display:grid;gap:4px">${meetingsOf(l).slice().sort((a,b)=>a.date<b.date?1:-1).map(x=>`<span>${fmtD(x.date)} · ${x.mode?`<span class="chip ${x.mode==="Onsite"?"m-site":"m-on"}">${esc(x.mode)}</span>`:`<span class="chip">mode not recorded</span>`} ${esc(x.type||"")}<br><span class="small muted">${esc((x.products||[]).join(", "))}${x.notes?" · "+esc(x.notes):""}${x.by?" · "+esc(x.by):""}${(x.joined||[]).length?" · joined by "+esc(x.joined.join(", ")):""}</span>${(x.dateChanges||[]).length?`<span class="small muted">Date changed ${x.dateChanges.map(d=>`from ${fmtD(d.from)} to ${fmtD(d.to)} by ${esc(d.by||"—")} on ${fmtD(d.at)}`).join("; ")}</span>`:""}${l.status==="Won"&&can("meeting.edit_won")&&!l.deleted&&x.id?`<span><button type="button" class="btn sm" data-mdate="${esc(x.id)}">Change date</button></span>`:""}</span>`).join("")}</span></div>`:""}${quoteRow(l)}${money(l.order,"Order")}${l.status==="Won"&&!String(l.id).startsWith("C:")?`<div id="signRow"><span>Project sign-off</span><span>${S.drawer&&S.drawer.mode==="signoff"&&canSignOff()?`<span class="row" style="gap:6px"><input id="so-d" type="date" max="${todayISO()}" value="${esc(signOffOf(l)||todayISO())}" style="max-width:170px"><button class="btn sm pri" id="so-ok">Save</button><button class="btn sm" id="so-x">Cancel</button></span><span class="small muted" style="display:block;margin-top:3px">The day the project was signed off by the client. AMC and renewals count from this date.</span>`
        :signOffOf(l)?`<b>${fmtD(signOffOf(l))}</b> <span class="small muted">· entered by ${esc(l.signOff.by||"—")} · renewals count from this date</span>${canSignOff()?` <button class="btn sm" id="so-ed">Change</button>`:""}`
        :`<span class="chip warn" data-nosign>Not entered</span> <span class="small muted">renewals count from the order date until it is</span>${canSignOff()?` <button class="btn sm" id="so-ed">Enter sign-off date</button>`:""}`}</span></div>`:""}${l.status==="Won"&&ohipVal(l)>0?`<div><span>Of which OHIP</span><span>${fmtAED(ohipVal(l))} per year <span class="small muted">· ${l.order&&l.order.ohip!=null?"entered on the order":"from the quotation lines"} · counted in revenue and targets, shown separately</span></span></div>`:""}
      ${(l.wonChanges||[]).length?`<div><span>Order corrections</span><span style="display:grid;gap:3px">${l.wonChanges.map(c=>`<span>${c.kind==="ohip"?`OHIP part ${c.from?.ohip==null?"from the quotation lines":fmtAED(c.from.ohip)} → <b>${c.to?.ohip==null?"from the quotation lines":fmtAED(c.to.ohip)}</b>`:`${fmtAED(c.from?.aed)} → <b>${fmtAED(c.to?.aed)}</b>`} · ${fmtD(c.at)} · ${esc(c.by||"—")}${c.reason?`<br><span class="small muted">${esc(c.reason)}</span>`:""}</span>`).join("")}</span></div>`:""}
-     ${(l.contacts||[]).length?`<div><span>Contacts</span><span style="display:grid;gap:3px">${l.contacts.slice(-5).reverse().map(c=>`<span>${fmtD(c.at)} · <b>${esc(c.kind)}</b>${c.note?" · "+esc(c.note):""} <span class="small muted">· ${esc(c.by||"")}</span></span>`).join("")}${l.contacts.length>5?`<span class="small muted">${l.contacts.length-5} earlier in Activity</span>`:""}</span></div>`:""}
+     ${(l.contacts||[]).length?`<div><span>Contacts</span><span style="display:grid;gap:3px">${l.contacts.slice(-5).reverse().map(c=>`<span>${fmtD(c.at)} · <b>${esc(c.kind)}</b>${c.note?" · "+esc(c.note):""}${c.stand?` · <span class="chip">${esc(c.stand)}</span>`:""} <span class="small muted">· ${esc(c.by||"")}</span></span>`).join("")}${l.contacts.length>5?`<span class="small muted">${l.contacts.length-5} earlier in Activity</span>`:""}</span></div>`:""}
      ${fcEligible(l)?`<div><span>Forecast</span><span>${(()=>{const f=fcOf(l);return`<b>${FC_LABEL[f.cat]}</b>${f.month&&f.cat!=="omit"?" · "+ymLabel(f.month):""}${l.forecast?` <span class="small muted">· set ${fmtD(l.forecast.at)} by ${esc(l.forecast.by||"")}</span>`:` <span class="small muted">· not set yet</span>`}`})()}${canAct(l)?` <button type="button" class="btn sm" id="fcEdit" style="margin-left:6px">Change</button>`:""}</span></div>`:""}
      ${OPEN.includes(l.status)&&refsFor(l).length?`<div><span>Reference sites</span><span style="display:grid;gap:3px">${refsFor(l).map(v=>`<span>${esc(v.name)} <span class="small muted">· ${esc(ctryName(ctryOf(v.country)))} · ${esc(v.products.join(", "))}${v.note?" · "+esc(v.note):""}</span></span>`).join("")}</span></div>`:""}
      ${(l.statusChanges||[]).length?`<div><span>Status changes</span><span style="display:grid;gap:3px">${l.statusChanges.map(c=>`<span>${esc(c.from)} → <b>${esc(c.to)}</b> · ${fmtD(c.at)} · ${esc(c.by||"—")}<br><span class="small muted">${esc(c.reason||"")}${c.order?` · order ${fmtAED(c.order.aed)}${c.order.no?" ("+esc(c.order.no)+")":""} kept in history`:""}</span></span>`).join("")}</span></div>`:""}
@@ -1472,7 +1483,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   </div>
   <div class="lvc"><p class="lvt">What to do next · history</p>
    <div id="actArea"></div><div id="jointArea"></div>
-   <div class="panel" style="padding:14px"><h3 style="margin-bottom:8px">Activity</h3><div class="timeline">${(l.log||[]).slice().reverse().map(x=>`<div><span>${fmtD(x.t)}</span><span>${esc(x.a)}${x.by?` <span class="muted">· ${esc(x.by)}</span>`:x.byId?` <span class="muted">· <span data-uid="${esc(x.byId)}">${esc(S.names[x.byId]||"")}</span></span>`:""}</span></div>`).join("")}</div>
+   <div class="panel actlog" style="padding:14px"><h3 style="margin-bottom:8px">Activity</h3><div class="timeline">${(l.log||[]).slice().reverse().map(x=>`<div><span>${fmtD(x.t)}</span><span>${esc(x.a)}${x.by?` <span class="muted">· ${esc(x.by)}</span>`:x.byId?` <span class="muted">· <span data-uid="${esc(x.byId)}">${esc(S.names[x.byId]||"")}</span></span>`:""}</span></div>`).join("")}</div>
     ${canAct(l)&&!l.deleted?`<div class="row" style="margin-top:10px"><input id="noteIn" placeholder="Add a note"><button class="btn sm" id="noteBtn">Add</button></div>`:""}</div>
    <div id="delArea"></div>
   </div>
@@ -1604,11 +1615,24 @@ function drawProdArea(l){const P=$("#prodArea");if(!P)return;const cur=productsO
       await patch(l,body,`Upsell ${r.ref} for ${eng}: ${add.join(", ")}`+(rem.length?" · removed "+rem.join(", "):""));return}
     await patch(l,{products:next,product:next.join(", ")},"Products updated"+(add.length?" · added "+add.join(", "):"")+(rem.length?" · removed "+rem.join(", "):""))}}
 function actor(){return S.myEng||""}
+async function declineLead(l,reason,note){const t=nowISO();try{
+  if(window.__leadDecline)await window.__leadDecline(l.id,reason,note||"");
+  else await S.db.doc("leads/"+l.id).update({status:"New",assignedTo:null,assignedAt:null,acceptedAt:null,acceptedBy:null,declines:[...(l.declines||[]),{by:actor()||S.myName||"",eng:l.assignedTo||"",at:t,reason,note:note||""}],updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:`Declined by ${l.assignedTo||actor()}: ${reason}${note?" · "+note:""}`}]});
+  toast("Lead returned to the Lead Manager");closeDrawer();return true}catch(e){toast("Couldn't decline: "+(e.code||e.message));return false}}
 async function patch(l,data,logMsg,status){const t=nowISO();const body=Object.assign({},data,{updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:logMsg}]});
   if(status){body.status=status;body.stageAt=Object.assign({},l.stageAt||{},{[status]:t})}
   try{await S.db.doc("leads/"+l.id).update(body);if(S.drawer)S.drawer.mode=null;toast(logMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}}
 function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll()&&!can("lead.edit_own")?`<div class="small muted">Read-only for your role.</div>`:`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or a Lead Manager can update it.</div>`;return}if(l.deleted){A.innerHTML="";return}const mode=["prods","details","country","qtarget","share","signoff"].includes(S.drawer.mode)?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
   const inBO=l.status==="New"||l.status==="Info Needed";
+  if(needAccept(l)&&isMine(l)&&!can("lead.status_override")){
+    if(mode==="decline"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Decline this lead</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="dc-r">${opts(flow().declineReasons||[],"","Choose")}</select></label><label class="f">Note<input id="dc-n" maxlength="200" placeholder="Optional"></label><div class="small muted">The lead goes back to the Lead Manager to assign to someone else.</div><div class="small" id="dc-msg"></div><div class="row"><button class="btn bad" id="dc-ok">Decline lead</button><button class="btn" id="dc-x">Cancel</button></div></div></div>`;
+      $("#dc-x").onclick=()=>{S.drawer.mode=null;drawActions(l)};
+      $("#dc-ok").onclick=async e=>{const r=$("#dc-r").value;if(!r){$("#dc-msg").innerHTML=`<span style="color:var(--bad)">Choose a reason.</span>`;return}e.currentTarget.disabled=true;if(!await declineLead(l,r,$("#dc-n").value.trim()))e.currentTarget.disabled=false};return}
+    A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px"><h3>New lead for you</h3><p class="small muted" style="margin:0">Assigned on ${fmtD(assignedOn(l))}. Accept it to start working on it, or decline it if you can't take it.</p><div class="row"><button class="btn pri" id="acc-ok">Accept lead</button><button class="btn" id="acc-no">Decline</button></div></div>`;
+    $("#acc-ok").onclick=async e=>{e.currentTarget.disabled=true;const _a={acceptedAt:nowISO(),acceptedBy:actor()||S.myName||""};if(await patch(l,_a,"Accepted the lead")){Object.assign(l,_a);const m=S.leadMap[l.id];if(m&&m!==l)Object.assign(m,_a);S.drawer.mode="contact";drawDrawer()}else e.currentTarget.disabled=false};
+    $("#acc-no").onclick=()=>{S.drawer.mode="decline";drawActions(l)};return}
+  const reqOn=flow().on&&flow().reqNote;
+  const reqBlock=()=>reqOn?`<label class="f">Requirement note <span class="req">*</span><textarea id="md-req" rows="3" placeholder="What the client needs: solutions, number of rooms, current system, timeline, budget"></textarea><span class="small muted" id="md-rc" style="font-weight:400">0 / ${+flow().reqMin||1} characters</span></label>${can("lead.status_override")?`<label class="f">Skip the requirement note (override), reason<input id="md-ov" maxlength="200" placeholder="Only if the note can't be written yet"></label>`:""}`:"";
   const meetFields=()=>{const first=!meetingsOf(l).length;const lp=productsOf(l);const extra=prodList().map(p=>p.name).filter(n=>!lp.includes(n));
     return`<div class="grid2"><div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">Meeting held <span class="req">*</span><span class="seg" id="mt-mode"><button type="button" data-v="Online">Online</button><button type="button" data-v="Onsite">Onsite</button></span></div>
       <label class="f">Meeting type<select id="mt-type">${opts(MEET_TYPES,first?"New lead meeting":"Follow-up meeting")}</select></label></div>
@@ -1673,18 +1697,24 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
      <div class="row" style="margin-top:12px"><button class="btn pri" id="v-save" ${bad?"":""}>Verify and assign</button><button class="btn" id="v-info">Request info</button><button class="btn" id="v-dup">Duplicate</button><button class="btn bad" id="v-rej">Reject</button></div></div>`;
     $("#v-save").onclick=()=>{const who=$("#v-sp").value;if(!who){toast("Choose a sales engineer");return}const t=nowISO();
       const sub=S.vSub&&S.vSub.n?{subdivision:S.vSub.n}:{};S.vSubN=null;
-      patch(l,Object.assign({assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t},sub),`Verified and assigned to ${who}${sub.subdivision?" ("+sub.subdivision+")":""}${l.quote?" · quotation already sent":""}`,l.quote?"Quotation Sent":"Assigned")};
+      patch(l,Object.assign({assignedTo:who,priority:$("#v-pr").value,category:$("#v-cat").value,verifiedAt:t,assignedAt:t,acceptedAt:null,acceptedBy:null},sub),`Verified and assigned to ${who}${sub.subdivision?" ("+sub.subdivision+")":""}${l.quote?" · quotation already sent":""}`,l.quote?"Quotation Sent":"Assigned")};
     $("#v-sub")?.addEventListener("change",e=>{S.vSubN=e.target.value;const o=territoryOf(l.country,l.region,{c:S.vSub.c,n:e.target.value}).owner;const keep=$("#v-sp").value;drawActions(l);if(o&&$("#v-sp"))$("#v-sp").value=o;else if($("#v-sp"))$("#v-sp").value=keep;$("#v-sp")?.dispatchEvent(new Event("change"))});
     $("#v-info").onclick=()=>{S.drawer.mode="info";drawActions(l)};$("#v-dup").onclick=()=>{S.drawer.mode="dup";drawActions(l)};$("#v-rej").onclick=()=>{S.drawer.mode="rej";drawActions(l)};
     const tw=()=>{const w=$("#v-sp").value,o=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);$("#v-terr").innerHTML=o&&w&&nk(w)!==nk(o)?`<div class="notice warn" style="padding:6px 10px">${esc(territoryOf(l.country,l.region,S.vSub||subOf(l)).area)} is ${esc(o)}'s territory. Assign to ${esc(w)} only if that's agreed.</div>`:""};$("#v-sp").addEventListener("change",tw);tw();return}}
   if(mode==="meet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Meeting done</h3><div style="display:grid;gap:10px">${meetFields()}
       <label class="f" style="max-width:220px">Meeting date <span class="req">*</span><input id="md-date" type="date" max="${todayISO()}" value="${todayISO()}"></label>
-      <label class="f">Meeting notes<textarea id="md-notes" rows="3" placeholder="Who attended, what was discussed, agreed next step"></textarea></label>${nextFields(l)}<div class="small" id="md-msg"></div>
+      <label class="f">Meeting notes<textarea id="md-notes" rows="3" placeholder="Who attended, what was discussed, agreed next step"></textarea></label>${reqBlock()}${nextFields(l)}<div class="small" id="md-msg"></div>
       <div class="row"><button class="btn pri" id="md-save">Save meeting</button><button class="btn" id="md-x">Cancel</button><span class="small muted">The amount is entered with the quotation.</span></div></div></div>`;
-    bindMeet();$("#md-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
-    $("#md-save").onclick=async()=>{const r=readMeet($("#md-date").value,$("#md-notes").value.trim());if(r.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
+    bindMeet();if(flow().on&&flow().pmsAtMeeting&&pmsProducts(l).length)pmsInject(l,A,"at Meeting done");
+    $("#md-req")?.addEventListener("input",e=>{const n=e.target.value.trim().length,m=+flow().reqMin||1,c=$("#md-rc");c.textContent=n+" / "+m+" characters";c.style.color=n>=m?"var(--ok)":""});
+    $("#md-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
+    $("#md-save").onclick=async()=>{const r=readMeet($("#md-date").value,$("#md-notes").value.trim());if(r.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}
+      let rq=null;if(reqOn){const txt=($("#md-req").value||"").trim(),ov=(($("#md-ov")||{}).value||"").trim(),by=actor()||S.myName||"";
+        if(txt.length>=(+flow().reqMin||1))rq={text:txt,by,at:nowISO()};else if(ov.length>=3)rq={skip:ov,by,at:nowISO()};else{$("#md-msg").innerHTML=`<span style="color:var(--bad)">Add a few more details to the requirement note (at least ${+flow().reqMin||1} characters).</span>`;$("#md-req").focus();return}}
+      const pmx=flow().on&&flow().pmsAtMeeting?pmsFromForm(l):{body:{}};if(pmx.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(pmx.err)}</span>`;$("#ap-pms")?.focus();return}
+      const nx=readNext();if(nx.err){$("#md-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
       const{body,add}=meetBody(r.m);let ex="";try{ex=await meetProducts(l,r.m,body,add)}catch(e){$("#md-msg").innerHTML=`<span style="color:var(--bad)">Couldn't create the upsell lead (${esc(e.code||e.message)}).</span>`;return}
-      Object.assign(body,nx.body);await patch(l,body,`Meeting done · ${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${nx.txt||""}`,"Meeting Done")};return}
+      Object.assign(body,nx.body,pmx.body,rq?{reqNote:rq}:{});await patch(l,body,`Meeting done · ${r.m.type} (${r.m.mode}) · ${r.m.products.join(", ")}${ex}${pmx.txt||""}${rq&&rq.skip?" · requirement note skipped: "+rq.skip:""}${nx.txt||""}`,"Meeting Done")};return}
   if(mode==="contact"&&OPEN.includes(l.status)){A.innerHTML=contactForm(l);bindContact(l);return}
   if(mode==="logmeet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log a meeting</h3><div style="display:grid;gap:10px">${meetFields()}
       <label class="f" style="max-width:220px">Meeting date <span class="req">*</span><input id="lm-date" type="date" max="${todayISO()}" value="${todayISO()}"></label>
@@ -1736,13 +1766,27 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       if(!own&&why.length<3){M.innerHTML=`<span style="color:var(--bad)">Explain why the lead is no longer Won.</span>`;return}
       cfmOpen(`<h3>Move ${esc(l.ref)} from Won to ${esc(to)}?</h3><p class="small muted" style="margin:0">${l.order?`Revenue of <b>${fmtAED(orderVal(l))}</b> is removed from reports, the engineer's results and the lead generator's incentive. `:""}The order details stay in the lead's history and the change is recorded in the activity and the audit trail.</p>
         <div class="row"><button type="button" class="btn pri" id="uwOk">Change status</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,()=>unWin(l,to,why,lr),"#uwOk")};return}
+  if(mode==="hold"&&flow().on&&OPEN.includes(l.status)){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Put on hold</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="oh-r">${opts(flow().holdReasons||[],"","Choose")}</select></label><label class="f">Note<input id="oh-n" maxlength="200" placeholder="Optional"></label>
+      <input id="nx-n" type="hidden" value=""><div class="grid2"><label class="f">Bring it back on <span class="req">*</span><input id="nx-at" type="datetime-local" min="${localInput(new Date()).slice(0,10)}T00:00" value="${esc(nextDefault())}"></label></div><div class="nxq">${[["Next week",5],["In 2 weeks",10],["In a month",21]].map(([t,n])=>`<button type="button" class="btn sm" data-nxq="${n}">${t}</button>`).join("")}</div>
+      <div class="small muted">It comes back as a follow-up on that date.</div><div class="small" id="oh-msg"></div><div class="row"><button class="btn pri" id="oh-ok">Put on hold</button><button class="btn" id="oh-x">Cancel</button></div></div></div>`;
+    $("#oh-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
+    $("#oh-ok").onclick=async e=>{const r=$("#oh-r").value;if(!r){$("#oh-msg").innerHTML=`<span style="color:var(--bad)">Choose a reason.</span>`;return}const nx=readNext();if(nx.err){$("#oh-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
+      const n=$("#oh-n").value.trim(),t=nowISO();e.currentTarget.disabled=true;
+      const body=Object.assign({holdReason:{reason:r,note:n,at:t,by:actor()||S.myName||""}},nx.body,{followUpNote:"Revisit: "+r+(n?" · "+n:"")});
+      if(!await patch(l,body,`Put on hold: ${r}${n?" · "+n:""}${nx.txt}`,"On Hold"))e.currentTarget.disabled=false};return}
+  if(mode==="attov"&&can("lead.status_override")&&l.status==="Assigned"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Mark attended (override)</h3><div style="display:grid;gap:10px"><p class="small muted" style="margin:0">Normally the engineer logs a first contact and the lead moves to Attended by itself. Use this only if that can't be done. The reason goes in the activity and the audit trail.</p>
+      <label class="f">Reason <span class="req">*</span><input id="ao-r" maxlength="200"></label>${nextFields(l)}<div class="small" id="ao-msg"></div><div class="row"><button class="btn pri" id="ao-ok">Mark attended</button><button class="btn" id="ao-x">Cancel</button></div></div></div>`;
+    $("#ao-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
+    $("#ao-ok").onclick=async e=>{const w=$("#ao-r").value.trim();if(w.length<3){$("#ao-msg").innerHTML=`<span style="color:var(--bad)">Give the reason.</span>`;return}const nx=readNext();if(nx.err){$("#ao-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
+      e.currentTarget.disabled=true;const t=nowISO();if(!await patch(l,Object.assign({attendedOverride:{reason:w,by:actor()||S.myName||"",at:t},acceptedAt:l.acceptedAt||t,acceptedBy:l.acceptedBy||actor()||S.myName||""},nx.body),`Marked attended (override) · ${w}${nx.txt}`,"Attended"))e.currentTarget.disabled=false};return}
   if(mode==="reassign"){const o=ownerOf(l);A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Reassign</h3><div class="row"><select id="re-sp" style="flex:1">${opts(sp,o&&nk(o)!==nk(l.assignedTo)?o:l.assignedTo)}</select><button class="btn pri" id="re-save">Reassign</button><button class="btn" id="re-cancel">Cancel</button></div>${o?`<div class="small muted" style="margin-top:6px">Territory owner: <b>${esc(o)}</b></div>`:""}</div>`;
-    $("#re-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#re-save").onclick=()=>{const w=$("#re-sp").value;patch(l,{assignedTo:w,assignedAt:nowISO()},`Reassigned from ${l.assignedTo} to ${w}`)};return}
-  const s=l.status;const b=[];
-  if(OPEN.includes(s))b.push(`<button class="btn ${s==="Assigned"&&!firstTouch(l)?"pri":""}" data-m="contact">Log contact</button>`);
-  if(["Assigned","On Hold"].includes(s)&&!meetingsOf(l).length)b.push(`<button class="btn pri" data-m="meet">Meeting done</button>`);
+    $("#re-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#re-save").onclick=()=>{const w=$("#re-sp").value;patch(l,Object.assign({assignedTo:w,assignedAt:nowISO()},l.status==="Assigned"?{acceptedAt:null,acceptedBy:null}:{}),`Reassigned from ${l.assignedTo} to ${w}`)};return}
+  const s=l.status;const b=[];const seq=flowOn(l)&&!can("lead.status_override");   // a Lead Manager or Supervisor can skip a step
+  if(OPEN.includes(s))b.push(`<button class="btn ${s==="Assigned"&&!firstTouch(l)?"pri":""}" data-m="contact">${flow().on?"Log update":"Log contact"}</button>`);
+  if(flow().on&&flowOn(l)&&s==="Assigned"&&can("lead.status_override"))b.push(`<button class="btn" data-m="attov">Mark attended (override)</button>`);
+  if(seq?(s==="Attended"||(s==="On Hold"&&!meetingsOf(l).length&&l.stageAt?.Attended)):(["Assigned","Attended","On Hold"].includes(s)&&!meetingsOf(l).length))b.push(`<button class="btn pri" data-m="meet">Meeting done</button>`);
   if((meetingsOf(l).length||["Meeting Done","Quotation Sent","Won"].includes(s))&&(OPEN.includes(s)||s==="Won"))b.push(`<button class="btn ${s==="On Hold"?"pri":""}" data-m="logmeet">Log a meeting</button>`);
-  if(["Assigned","Meeting Done","On Hold"].includes(s))b.push(`<button class="btn ${s==="Meeting Done"?"pri":""}" data-m="quote">Quotation sent</button>`);
+  if(seq?(s==="Meeting Done"||(s==="On Hold"&&(meetingsOf(l).length||l.meeting))):["Assigned","Attended","Meeting Done","On Hold"].includes(s))b.push(`<button class="btn ${s==="Meeting Done"?"pri":""}" data-m="quote">Quotation sent</button>`);
   if(["Meeting Done","Quotation Sent","On Hold"].includes(s))b.push(`<button class="btn ok" data-m="won">Order won</button>`);
   if(["Quotation Sent"].includes(s))b.push(`<button class="btn" data-m="quote">Revise quotation</button>`);
   if(s==="Won"&&canUnwin(l)){if(l.order)b.push(`<button class="btn" data-m="fixorder">Upload revised quote</button>`);b.push(`<button class="btn" data-m="unwin">${can("lead.status_override")?"Change status":"Move back a stage"}</button>`)}
@@ -1756,10 +1800,10 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
       <label class="f">What to follow up on<input id="fuNote" maxlength="200" placeholder="e.g. Confirm number of scanners" value="${esc(l.followUpNote||"")}"></label></div>
       <div class="row"><button class="btn sm pri" id="fuSave">${l.nextFollowUp?"Update follow-up":"Set follow-up"}</button>${l.nextFollowUp?`<button class="btn sm ok" id="fuDone">Mark follow-up done</button><button class="btn sm" id="fuClear">Remove</button>`:""}<span class="small muted">${window.LD_HOSTED?"You'll get a reminder email at this time.":""}</span></div></div>`:""}</div>`:"";
   A.querySelectorAll("[data-m]").forEach(x=>x.onclick=()=>{S.drawer.mode=x.dataset.m;drawActions(l)});
-  A.querySelector("[data-hold]")?.addEventListener("click",()=>patch(l,{},"Put on hold","On Hold"));
-  A.querySelector("[data-reopen]")?.addEventListener("click",()=>{const back=l.quote?"Quotation Sent":(l.meeting||meetingsOf(l).length)?"Meeting Done":"Assigned";
+  A.querySelector("[data-hold]")?.addEventListener("click",()=>{if(flow().on){S.drawer.mode="hold";drawActions(l)}else patch(l,{},"Put on hold","On Hold")});
+  A.querySelector("[data-reopen]")?.addEventListener("click",()=>{const back=l.quote?"Quotation Sent":(l.meeting||meetingsOf(l).length)?"Meeting Done":(l.stageAt?.Attended&&flowOn(l))?"Attended":"Assigned";
     if(productState(l.accountKey,l.product).state==="blocked"&&productState(l.accountKey,l.product).lead.id!==l.id){toast("Another lead for this product is already open on this account");return}
-    patch(l,{lost:null},"Reopened",back)});
+    patch(l,{lost:null,holdReason:null},"Reopened",back)});
   $("#fuSave")?.addEventListener("click",()=>{const v=$("#fu").value,note=$("#fuNote").value.trim();if(!v){toast("Pick the date and time for the follow-up");return}
     const at=new Date(v);if(isNaN(at)){toast("That date and time isn't valid");return}if(at<new Date(Date.now()-6e4)){toast("Pick a time in the future");return}
     patch(l,{nextFollowUp:v,nextFollowUpAt:at.toISOString(),followUpNote:note,followUpRemindedFor:null},`Follow-up set for ${at.toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}${note?" · "+note:""}`)});
@@ -2251,7 +2295,7 @@ function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});bindPmsIssues(m
 /* ======================= PRODUCTS (Supervisor: report.products) =======================
    Every product with its leads, status and revenue. A lead with several products has one amount: it is shown in
    full under each of its products, marked "shared", and the total row counts every lead once. */
-const PV_STATUS=[["","All statuses"],["open","Open (not on hold)"],["Assigned","Assigned"],["Meeting Done","Meeting done"],["Quotation Sent","Quotation sent"],["Won","Won"],["Lost","Lost"],["On Hold","On hold"]];
+const PV_STATUS=[["","All statuses"],["open","Open (not on hold)"],["Assigned","Assigned"],["Attended","Attended"],["Meeting Done","Meeting done"],["Quotation Sent","Quotation sent"],["Won","Won"],["Lost","Lost"],["On Hold","On hold"]];
 function pvState(){return S.pv||(S.pv={status:"",cust:"",type:"",q:"",open:{}})}
 function productData(){const AF=af();const P=pvState();const custKeys=new Set(S.leads.filter(l=>l.status==="Won").map(accKey));
   const ls=S.leads.filter(l=>!["Duplicate","Rejected"].includes(l.status)).filter(inPeriod)
@@ -2480,12 +2524,26 @@ const ymLabel=(ym,short)=>{if(!ym)return"";const[y,m]=ym.split("-").map(Number);
       month is compared with what closed, so forecast accuracy is measured per engineer.
    3. Grow clients: cross-sell targets (client hotels × products they don't have), chain owners, reference sites. */
 const RULE_DEF={contactDays:2,meetingDays:14,staleDays:14,from:"2026-11-01",cutoff:5};
-const PROB_DEF={"Assigned":10,"Meeting Done":25,"Quotation Sent":50,"On Hold":10};
+const PROB_DEF={"Assigned":10,"Attended":15,"Meeting Done":25,"Quotation Sent":50,"On Hold":10};
 const FC_CATS=[["commit","Commit"],["best","Best case"],["pipeline","Pipeline"],["omit","Omit"]];
 const FC_LABEL=Object.fromEntries(FC_CATS);
 const CONTACT_KINDS=["Call","Email","WhatsApp","Visit"];
-const RULED=["Assigned","Meeting Done","Quotation Sent"];
+const RULED=["Assigned","Attended","Meeting Done","Quotation Sent"];
 const rules=()=>Object.assign({},RULE_DEF,S.settings.rules||{});
+/* ---------- guided stage flow (18 Nov 2026): Assigned → accept → Attended → Meeting done → Quotation sent ----------
+   settings.flow {on, from, accept, acceptDays, reqNote, reqMin, pmsAtMeeting, standing[], declineReasons[], holdReasons[]}.
+   Off until SQL 37 (or a Supervisor) switches it on. Leads assigned before `from` keep the old way of working. */
+const FLOW_DEF={on:false,from:"",accept:true,acceptDays:1,reqNote:true,reqMin:30,pmsAtMeeting:true,
+  standing:["Waiting for client reply","Meeting arranged","Client reviewing","Waiting for our team","Budget approval","Decision pending","No response"],
+  declineReasons:["Not my territory","Too many open leads","Conflict of interest","Other"],
+  holdReasons:["Client budget freeze","Project delayed","Waiting for chain decision","Other"]};
+const flow=()=>Object.assign({},FLOW_DEF,S.settings.flow||{});
+const flowOn=l=>{const F=flow();return !!F.on&&!!F.from&&String(assignedOn(l)).slice(0,10)>=F.from};
+const ownOutbound=l=>l.category==="Outbound"&&!!l.generatedBy&&nk(l.generatedBy)===nk(l.assignedTo);
+const needAccept=l=>flowOn(l)&&!!flow().accept&&l.status==="Assigned"&&!l.acceptedAt&&!ownOutbound(l);
+const standingList=()=>(flow().standing||[]).filter(Boolean);
+const standOf=l=>(l.standing&&l.standing.v)||"";
+const standChip=l=>{const v=standOf(l);return v&&OPEN.includes(l.status)&&flow().on?`<span class="chip" title="Where it stands">${esc(v)}</span>`:""};
 const stageProb=()=>Object.assign({},PROB_DEF,S.settings.stageProb||{});
 function workDaysBetween(a,b){let d=new Date(a);d.setHours(0,0,0,0);const e=new Date(b);e.setHours(0,0,0,0);let n=0;let g=0;while(d<e&&g++<4000){d.setDate(d.getDate()+1);const w=d.getDay();if(w!==0&&w!==6)n++}return n}   // Mon–Fri
 const assignedOn=l=>l.assignedAt||l.verifiedAt||l.createdAt||"";
@@ -2494,27 +2552,33 @@ function lastTouch(l){const t=(l.contacts||[]).map(c=>c.at).concat(meetingsOf(l)
 function ruleFlags(l){if(l.deleted||!RULED.includes(l.status)||!l.assignedTo)return[];const R=rules();const at=assignedOn(l);if(!at||at.slice(0,10)<R.from)return[];
   const F=[],now=new Date(),wd=workDaysBetween(at,now);
   if(l.status==="Assigned"&&!firstTouch(l)&&wd>R.contactDays)F.push({k:"contact",t:`No contact ${wd} working days after assignment (target ${R.contactDays})`,s:"No contact"});
-  if(l.status==="Assigned"&&!meetingsOf(l).length){const d=Math.floor(days(at));if(d>R.meetingDays)F.push({k:"meeting",t:`No meeting ${d} days after assignment (target ${R.meetingDays})`,s:"No meeting"})}
+  if(needAccept(l)&&wd>(+flow().acceptDays||1))F.push({k:"accept",t:`Not accepted ${wd} working days after assignment (target ${+flow().acceptDays||1})`,s:"Not accepted"});
+  if(["Assigned","Attended"].includes(l.status)&&!meetingsOf(l).length){const d=Math.floor(days(at));if(d>R.meetingDays)F.push({k:"meeting",t:`No meeting ${d} days after assignment (target ${R.meetingDays})`,s:"No meeting"})}
   if(!l.nextFollowUp){if(wd>R.contactDays||firstTouch(l))F.push({k:"next",t:"No next step scheduled",s:"No next step"})}else if(fuOverdue(l))F.push({k:"overdue",t:`Next step overdue (${fuLabel(l)})`,s:"Next step overdue"});
   const sd=Math.floor(days(lastTouch(l)));if(sd>R.staleDays)F.push({k:"stale",t:`No activity for ${sd} days (limit ${R.staleDays})`,s:`Quiet ${sd}d`});
   return F}
 const flagChips=l=>ruleFlags(l).map(f=>`<span class="late" title="${esc(f.t)}">${esc(f.s)}</span>`).join("");
 /* the "next step" every update must leave behind */
 function nextDefault(){const d=new Date();let n=0;while(n<2){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)n++}d.setHours(10,0,0,0);return localInput(d)}
-const nextFields=l=>`<div class="grid2"><label class="f">Next step on <span class="req">*</span><input id="nx-at" type="datetime-local" min="${localInput(new Date()).slice(0,10)}T00:00" value="${esc(l.nextFollowUp&&fuDue(l)>new Date()?localInput(fuDue(l)):nextDefault())}"></label>
+document.addEventListener("click",e=>{const b=e.target.closest("[data-nxq]");if(!b)return;const n=+b.dataset.nxq;const d=new Date();let k=0;while(k<n){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)k++}d.setHours(10,0,0,0);const i=$("#nx-at");if(i)i.value=localInput(d)});
+const nextFields=l=>`<div class="nxq" aria-label="Quick dates">${[["Next working day",1],["In 3 working days",3],["Next week",5]].map(([t,n])=>`<button type="button" class="btn sm" data-nxq="${n}">${t}</button>`).join("")}</div><div class="grid2"><label class="f">Next step on <span class="req">*</span><input id="nx-at" type="datetime-local" min="${localInput(new Date()).slice(0,10)}T00:00" value="${esc(l.nextFollowUp&&fuDue(l)>new Date()?localInput(fuDue(l)):nextDefault())}"></label>
   <label class="f">Next step<input id="nx-n" maxlength="200" placeholder="e.g. Send revised quote, call the GM" value="${esc(l.nextFollowUp&&fuDue(l)>new Date()?l.followUpNote||"":"")}"></label></div>`;
 function readNext(){const v=$("#nx-at")?.value;if(v===undefined)return{body:{}};if(!v)return{err:"Set the date of the next step."};const at=new Date(v);if(isNaN(at))return{err:"The next-step date isn't valid."};if(at<new Date(Date.now()-6e4))return{err:"The next step must be in the future."};
   const n=$("#nx-n").value.trim();return{body:{nextFollowUp:v,nextFollowUpAt:at.toISOString(),followUpNote:n,followUpRemindedFor:null},txt:` · next: ${at.toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}${n?" "+n:""}`}}
 /* quick "Log contact" (call, email, WhatsApp, visit) */
-function contactForm(l){return`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log contact</h3><div style="display:grid;gap:10px">
+const standField=()=>`<div class="f" style="display:grid;gap:6px;font-size:12.5px;font-weight:500;color:var(--muted)">Where it stands <span class="req">*</span><span class="seg segw" id="ct-s">${standingList().map(x=>`<button type="button" data-v="${esc(x)}" aria-pressed="false">${esc(x)}</button>`).join("")}</span></div>`;
+function contactForm(l){const F=flow().on,toAtt=F&&flowOn(l)&&l.status==="Assigned";return`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${F?"Log update":"Log contact"}</h3><div style="display:grid;gap:10px">
    <div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">How<span class="seg" id="ct-k">${CONTACT_KINDS.map((k,i)=>`<button type="button" data-v="${k}" aria-pressed="${i===0}">${k}</button>`).join("")}</span></div>
+   ${F?standField():""}
    <label class="f">What happened<input id="ct-n" maxlength="300" placeholder="e.g. Spoke to FOM, interested in kiosks, wants a demo"></label>${nextFields(l)}<div class="small" id="ct-msg"></div>
-   <div class="row"><button class="btn pri" id="ct-save">Save</button><button class="btn" id="ct-x">Cancel</button>${l.status==="Assigned"&&!meetingsOf(l).length?`<span class="small muted">Held a meeting? Use “Meeting done” instead.</span>`:""}</div></div></div>`}
-function bindContact(l){let kind=CONTACT_KINDS[0];$("#ct-k").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{kind=b.dataset.v;$("#ct-k").querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+   <div class="row"><button class="btn pri" id="ct-save">${toAtt?"Save and mark attended":"Save"}</button><button class="btn" id="ct-x">Cancel</button>${l.status==="Assigned"&&!meetingsOf(l).length?`<span class="small muted">Held a meeting? Use “Meeting done” instead.</span>`:""}</div></div></div>`}
+function bindContact(l){let kind=CONTACT_KINDS[0],stand="";$("#ct-k").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{kind=b.dataset.v;$("#ct-k").querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  $("#ct-s")?.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{stand=b.dataset.v;$("#ct-s").querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b));$("#ct-msg").innerHTML=""});
   $("#ct-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#ct-n").focus();
-  $("#ct-save").onclick=async()=>{const nx=readNext();if(nx.err){$("#ct-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}const t=nowISO();const note=$("#ct-n").value.trim();
-    const body=Object.assign({contacts:[...(l.contacts||[]),{id:"c"+Date.now().toString(36),at:t,kind,note,by:actor()||S.myName||"",byId:S.uid||null}]},l.firstContactAt?{}:{firstContactAt:t},nx.body);
-    $("#ct-save").disabled=true;if(!await patch(l,body,`${kind}${note?": "+note:""}${nx.txt}`))$("#ct-save").disabled=false}}
+  $("#ct-save").onclick=async()=>{if($("#ct-s")&&!stand){$("#ct-msg").innerHTML=`<span style="color:var(--bad)">Pick where it stands.</span>`;return}const nx=readNext();if(nx.err){$("#ct-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}const t=nowISO();const note=$("#ct-n").value.trim();
+    const toAtt=flow().on&&flowOn(l)&&l.status==="Assigned";
+    const body=Object.assign({contacts:[...(l.contacts||[]),Object.assign({id:"c"+Date.now().toString(36),at:t,kind,note,by:actor()||S.myName||"",byId:S.uid||null},stand?{stand}:{})]},l.firstContactAt?{}:{firstContactAt:t},nx.body,stand?{standing:{v:stand,at:t,by:actor()||S.myName||""}}:{});
+    $("#ct-save").disabled=true;if(!await patch(l,body,`${toAtt?"Attended · ":""}${kind}${note?": "+note:""}${stand?" · "+stand:""}${nx.txt}`,toAtt?"Attended":undefined))$("#ct-save").disabled=false}}
 /* ---------- forecast ---------- */
 const fcEligible=l=>!l.deleted&&["Meeting Done","Quotation Sent","On Hold"].includes(l.status);
 const fcOf=l=>l.forecast||{cat:"pipeline",month:ymKey(l.quote?.targetDate)||""};
@@ -2652,6 +2716,25 @@ function rulesPanel(){if(!can("settings.manage"))return"";const R=rules(),P=stag
 function bindRules(){$("#ruSave")?.addEventListener("click",async()=>{const v=id=>Math.round(+$(id).value);const r={contactDays:v("#ru-c"),meetingDays:v("#ru-m"),staleDays:v("#ru-s"),from:$("#ru-f").value||RULE_DEF.from,cutoff:Math.min(28,Math.max(1,v("#ru-cut")))};
   if(!(r.contactDays>0&&r.meetingDays>0&&r.staleDays>0)){toast("Enter numbers above zero");return}const p={};document.querySelectorAll("[data-prob]").forEach(i=>p[i.dataset.prob]=Math.min(100,Math.max(0,Math.round(+i.value||0))));
   const wd=Math.min(365,Math.max(0,Math.round(+($("#ru-won")||{}).value||0)));try{await S.db.doc("config/settings").update({rules:r,stageProb:p,wonEditDays:wd});Object.assign(S.settings,{rules:r,stageProb:p,wonEditDays:wd});toast("Rules saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}})}
+
+/* Supervisor settings: the guided stage flow (Assigned → accept → Attended → Meeting done → Quotation sent) */
+function flowPanel(){if(!can("settings.manage"))return"";const F=flow();const yn=(id,v)=>`<select id="${id}"><option value="1"${v?" selected":""}>Yes</option><option value="0"${v?"":" selected"}>No</option></select>`;
+  return`<div class="panel" id="flowPanel"><h3>Lead flow rules</h3><p class="small muted" style="margin:2px 0 10px;max-width:90ch">How a lead moves from Assigned to a quotation: the engineer accepts it, logs a first contact (it becomes Attended), fills in the requirement note and PMS at Meeting done, then sends the quotation. A Lead Manager or Supervisor can skip a step with a reason. Leads assigned before the start date keep the old way of working.</p>
+   <label class="pchk" style="margin:0 0 10px"><input type="checkbox" id="fl-on"${F.on?" checked":""}> Use the guided stage flow</label>
+   <div class="fgrid"><label class="f fsm">Applies to leads assigned from<input id="fl-from" type="date" value="${esc(F.from||todayISO())}"></label>
+    <label class="f fsm">Engineer must accept a new lead${yn("fl-acc",F.accept)}</label>
+    <label class="f fsm">Flag if not accepted after (working days)<input id="fl-ad" type="number" min="1" max="10" value="${+F.acceptDays||1}"></label>
+    <label class="f fsm">Requirement note at Meeting done${yn("fl-rn",F.reqNote)}</label>
+    <label class="f fsm">Note minimum (characters)<input id="fl-rm" type="number" min="10" max="300" value="${+F.reqMin||30}"></label>
+    <label class="f fsm">PMS integration at Meeting done${yn("fl-pms",F.pmsAtMeeting)}</label></div>
+   <div class="fgrid" style="margin-top:10px"><label class="f">Where it stands (one per line)<textarea id="fl-st" rows="7">${esc((F.standing||[]).join("\n"))}</textarea></label>
+    <label class="f">Reasons to decline a lead (one per line)<textarea id="fl-dr" rows="7">${esc((F.declineReasons||[]).join("\n"))}</textarea></label>
+    <label class="f">Reasons to put on hold (one per line)<textarea id="fl-hr" rows="7">${esc((F.holdReasons||[]).join("\n"))}</textarea></label></div>
+   <div class="row" style="margin-top:10px"><button type="button" class="btn pri" id="flSave">Save flow rules</button></div></div>`}
+function bindFlow(){$("#flSave")?.addEventListener("click",async()=>{const L=id=>[...new Set($(id).value.split("\n").map(x=>x.trim()).filter(Boolean))];
+  const f={on:$("#fl-on").checked,from:$("#fl-from").value||todayISO(),accept:$("#fl-acc").value==="1",acceptDays:Math.min(10,Math.max(1,Math.round(+$("#fl-ad").value||1))),reqNote:$("#fl-rn").value==="1",reqMin:Math.min(300,Math.max(10,Math.round(+$("#fl-rm").value||30))),pmsAtMeeting:$("#fl-pms").value==="1",standing:L("#fl-st"),declineReasons:L("#fl-dr"),holdReasons:L("#fl-hr")};
+  if(f.standing.length<2||!f.declineReasons.length||!f.holdReasons.length){toast("Add at least two “where it stands” options, one decline reason and one hold reason");return}
+  try{await S.db.doc("config/settings").update({flow:f});S.settings.flow=f;toast("Flow rules saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}})}
 
 /* ======================= SALES TARGETS (Management → Targets) =======================
    config/targets = {years:{"2026":{total, months:[12], engineers:{name:amount}}}}. Set by Management and Supervisor
@@ -3259,9 +3342,9 @@ function drawPms(l){const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);co
     ${pmsLocked(l)?`<div class="small muted" style="margin-top:6px">Chain standard PMS. A Lead Manager or Supervisor can change it for this hotel.</div>`:""}${l.pmsNote?`<div class="small muted" style="margin-top:6px">${esc(l.pmsNote)}</div>`:""}</div>`;
   $("#lp-e")?.addEventListener("click",()=>{S.drawer.pmsEdit=true;drawPms(l)})}
 /* quotation and order forms: ask for the PMS when it isn't recorded yet */
-function pmsInject(l,A){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||pmsMethods(p,l.pms)==null))return;const box=A.querySelector(".panel")||A;const sug=pmsOf(l)||accountPms(accKey(l));
+function pmsInject(l,A,when){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||pmsMethods(p,l.pms)==null))return;const box=A.querySelector(".panel")||A;const sug=pmsOf(l)||accountPms(accKey(l));
   const h=document.createElement("div");h.id="aPms";h.style.cssText="display:grid;gap:8px;margin-bottom:10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)";
-  h.innerHTML=`<div class="small"><b>PMS integration</b> · required from Quotation sent onwards${sug&&!pmsOf(l)?` (suggested from this hotel's other leads)`:""}</div>${pmsFields("ap",sug,pmsProducts(l),l.pmsIface)}`;
+  h.innerHTML=`<div class="small"><b>PMS integration</b> · required ${when||"from Quotation sent onwards"}${sug&&!pmsOf(l)?` (suggested from this hotel's other leads)`:""}</div>${pmsFields("ap",sug,pmsProducts(l),l.pmsIface)}`;
   const t=box.querySelector("h3");t?t.after(h):box.prepend(h);bindPmsFields("ap",pmsProducts(l),l.pmsIface,h)}
 function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead("ap",h);if(!isRealPms(r.pms))return{err:"Choose the hotel's PMS (PMS integration)."};{const pb=pmsBlock(r.pms,pmsProducts(l));if(pb)return{err:pb}}
   const it=Object.assign({},l.pmsIface||{},r.iface);return{body:{pms:r.pms,pmsIface:it},txt:` · PMS ${r.pms}`}}
@@ -4731,7 +4814,7 @@ function renderAcctMatrix(m){ensureTip();const M=mxState();const{prods,hotels}=m
 const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Sales engineers","Lead generators"]],
   ["terr","Territories & accounts","Territories, emirates and states, hotel chains",["Territories","Emirates and states","Hotel chains"]],
   ["prod","Products & PMS","Product catalog, PMS integrations",["Product catalog","PMS integrations"]],
-  ["sales","Sales rules","Source channels, rates and targets, activity rules",["Source channels","Rates and targets","Activity rules and forecast"]],
+  ["sales","Sales rules","Source channels, rates and targets, activity rules, lead flow",["Source channels","Rates and targets","Activity rules and forecast","Lead flow rules"]],
   ["amc","AMC & contracts","Renewal rates, line categories, reading rules, OHIP",["AMC and renewals","Contract line categories","Contract reading rules","OHIP rules"]],
   ["sys","Backup","Download a copy of all data",["Backup"]]];
 function renderSet(m){renderSetBase(m);if(can("settings.manage")&&!window.__NOSETSEC)setSections(m)}
@@ -4771,7 +4854,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   ${territoryPanel()}
   ${subTerrPanel()}
   ${chainsPanel()}
-  ${rulesPanel()}
+  ${rulesPanel()}${flowPanel()}
   ${pmsPanel()}
   ${genPanel()}
   ${amcPanel()}
@@ -4813,7 +4896,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindRules();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
+  bindChains(m);bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
