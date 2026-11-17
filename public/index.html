@@ -1063,6 +1063,7 @@ function countryOptions(sel){const cnt={};S.leads.forEach(l=>{const c=areaOf(l.c
   const known=all.includes(sel)||!sel?sel:(areaOf(sel).country||"");
   const o=c=>`<option value="${esc(c)}"${c===known?" selected":""}>${esc(COUNTRY_FULL[c]||c)}</option>`;
   return`<option value="">Choose country</option>${top.length?`<optgroup label="Most used">${top.map(c=>`<option value="${esc(c)}">${esc(COUNTRY_FULL[c]||c)}</option>`).join("")}</optgroup>`:""}<optgroup label="All countries">${all.map(o).join("")}</optgroup>`}
+function fillChainPms(){const f=S.form,fp=$("#f-pms");if(!f||!f.account||!fp||fp.value)return;const a=f.account;const o=chainStdOne((a.group?a.group+" ":"")+a.name,a.key);if(!o)return;if(![...fp.options].some(x=>x.value===o))fp.add(new Option(o,o));fp.value=o;const h=$("#chPmsHint");if(h)h.textContent="Chain standard PMS"}
 function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
   if(f.account){const a=f.account;const n=a.isNew?0:leadsFor(a.key).length;
     box.innerHTML=`<div class="acct"><div style="min-width:0;flex:1"><b>${esc(a.name)}</b> <span class="chip">${a.isNew?"New account":"Existing account"}</span>
@@ -1070,7 +1071,7 @@ function drawAcctBox(){const f=S.form,box=$("#acctBox");if(!box)return;
       <button type="button" class="btn sm" id="acctChange">Change</button></div>
       ${a.isNew?`<div class="grid3" style="margin-top:12px"><label class="f">Country <span class="req">*</span><select id="f-country">${countryOptions(a.country)}</select></label><label class="f">City<input id="f-city" placeholder="e.g. Dubai Marina, Riyadh" value="${esc(a.city||"")}"></label><label class="f">Group / chain<input id="f-group" placeholder="e.g. Marriott" value="${esc(a.group||"")}"></label></div>`:""}`;
     $("#acctChange").onclick=()=>{f.account=null;f.newName="";drawAcctBox();drawProducts()};
-    ["country","city","group"].forEach(k=>{const el=$("#f-"+k);if(el)el[el.tagName==="SELECT"?"onchange":"oninput"]=()=>{a[k]=el.value;if(k!=="group"&&$("#acctLoc"))$("#acctLoc").textContent=[a.city,a.country].filter(Boolean).join(", ")||"Country not set";if(k==="country"&&!S.form.regionManual)S.form.region="";if(k!=="group")syncRegion()}});syncRegion();return}
+    ["country","city","group"].forEach(k=>{const el=$("#f-"+k);if(el)el[el.tagName==="SELECT"?"onchange":"oninput"]=()=>{a[k]=el.value;if(k!=="group"&&$("#acctLoc"))$("#acctLoc").textContent=[a.city,a.country].filter(Boolean).join(", ")||"Country not set";if(k==="country"&&!S.form.regionManual)S.form.region="";if(k!=="group")syncRegion();if(k==="group")fillChainPms()}});syncRegion();fillChainPms();return}
   box.innerHTML=`<label class="f">Property / company name <span class="req">*</span><div class="ta"><input id="f-acct" autocomplete="off" placeholder="Start typing, e.g. Sheraton Johor Bahru" value="${esc(f.newName)}"><div class="sugg" id="sugg" hidden></div></div></label>`;
   const inp=$("#f-acct"),sg=$("#sugg");let hl=-1;
   const show=()=>{const q=inp.value.trim();f.newName=q;if(q.length<2){sg.hidden=true;return}
@@ -1111,6 +1112,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(!f.category)errs.push("Choose Inbound or Outbound");
   if(!v("f-pms")&&f.products.some(p=>!prodNoPms(p)))errs.push("Choose the hotel's PMS (or “Not known yet”)");
   {const pb=pmsBlock(v("f-pms"),f.products);if(pb)errs.push(pb)}
+  {const cs=chainStd(f.account&&f.account.name,f.account&&f.account.key);const cg=f.account&&f.account.isNew&&f.account.group?chainStd(f.account.group+" "+f.account.name,"").list:[];const L=cs.list.length?cs.list:cg;if(L.length&&!can("lead.status_override")&&v("f-pms")&&!L.some(x=>nk(x)===nk(v("f-pms"))))errs.push(`${cs.chain!=="Independent"?cs.chain:"This chain"} uses ${L.join(" or ")} as its standard PMS. Ask a Lead Manager or Supervisor if this hotel differs.`)}
   if(!v("f-source"))errs.push("Choose the source channel");
   if(!v("f-genby"))errs.push("Add who generated the lead");
   if(!v("f-reqdate"))errs.push("Add the date the requirement came in");else if(v("f-reqdate")>todayISO())errs.push("The requirement date can't be in the future");
@@ -1133,7 +1135,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
     const ref=await nextRef();const t=nowISO();const ps=f.products.slice();const evPick=f.event?evById(f.event):null;const evBy=evPick?(sales?S.myEng:(($("#f-evby")||{}).value||f.evBy||(evPick.people||[])[0]||"")):"";
     await S.db.doc("leads/"+ref).set({ref,accountKey:a.key,accountName:a.name,country:(a.country||S.accounts[a.key]?.country||"").trim(),
         contact:{name:v("f-cname"),title:v("f-ctitle"),email:v("f-cemail"),phone:v("f-cphone")},products:ps,product:ps.join(", "),category:sales?"Outbound":f.category,source:v("f-source"),
-        generatedBy:sales?S.myEng:own?myGen().name:v("f-genby"),department:sales?"Sales":own?(myGen().dept||""):(v("f-dept")||((genOf({generatedBy:v("f-genby")})||{}).dept||"")),...(own?{genEmail:String(S.myEmail||"").toLowerCase()}:{}),rooms:+v("f-rooms")||null,pms:v("f-pms"),timeline:v("f-when"),preferred:sales?(terr.owner||S.myEng):v("f-pref"),territoryOwner:terr.owner||"",notes:v("f-notes"),
+        generatedBy:sales?S.myEng:own?myGen().name:v("f-genby"),department:sales?"Sales":own?(myGen().dept||""):(v("f-dept")||((genOf({generatedBy:v("f-genby")})||{}).dept||"")),...(own?{genEmail:String(S.myEmail||"").toLowerCase()}:{}),rooms:+v("f-rooms")||null,pms:v("f-pms"),...(chainPmsMark(a.name,a.key,v("f-pms"))?{chainPms:true}:{}),timeline:v("f-when"),preferred:sales?(terr.owner||S.myEng):v("f-pref"),territoryOwner:terr.owner||"",notes:v("f-notes"),
         requirementDate:v("f-reqdate"),region:v("f-region"),subdivision:formSub()?.n||"",
         ...(evPick?{eventId:evPick.id,eventName:evPick.name,generatedBy:evBy,department:spNames().some(n=>nk(n)===nk(evBy))?"Sales":((genOf({generatedBy:evBy})||{}).dept||""),genEmail:own&&myGen()&&nk(myGen().name)===nk(evBy)?String(S.myEmail||"").toLowerCase():""}:{}),
         status:"New",assignedTo:sales&&ownLead?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},histRepeat:ps.some(p=>productState(a.key,p).state==="hist"),
@@ -1519,7 +1521,7 @@ function editAllDetails(l){const P=$("#detPanel");if(!P)return;const st=S.settin
      <label class="f">Email<input id="e-ce" type="email" value="${esc(c.email||"")}"></label><label class="f">Phone / WhatsApp<input id="e-cp" value="${esc(c.phone||"")}"></label></div></fieldset>
     <fieldset class="efs"><legend>Requirement and qualification</legend>
      <label class="f">Requirement / notes<textarea id="e-notes" rows="3">${esc(l.notes||"")}</textarea></label>
-     <div class="grid3" style="margin-top:10px"><label class="f">Rooms<input id="e-rooms" type="number" min="0" value="${esc(l.rooms??"")}"></label><label class="f">PMS<input id="e-pms" value="${esc(l.pms||"")}"></label><label class="f">Timeline<input id="e-when" value="${esc(l.timeline||"")}"></label></div></fieldset>
+     <div class="grid3" style="margin-top:10px"><label class="f">Rooms<input id="e-rooms" type="number" min="0" value="${esc(l.rooms??"")}"></label><label class="f">PMS<input id="e-pms" value="${esc(l.pms||"")}"${pmsLocked(l)?" disabled title=\"Chain standard PMS\"":""}></label><label class="f">Timeline<input id="e-when" value="${esc(l.timeline||"")}"></label></div></fieldset>
     <fieldset class="efs"><legend>Assignment</legend><div class="grid3">
      <label class="f">Assigned to<select id="e-as">${opts(spNames().concat(l.assignedTo&&!spNames().includes(l.assignedTo)?[l.assignedTo]:[]),l.assignedTo||"","Not assigned")}</select></label>
      <label class="f">Assigned on<input id="e-asd" type="date" max="${todayISO()}" value="${esc((l.assignedAt||"").slice(0,10))}"></label>
@@ -1553,7 +1555,7 @@ function editAllDetails(l){const P=$("#detPanel");if(!P)return;const st=S.settin
     const email=g("#e-ce");if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))errs.push("The email address doesn't look right");
     for(const id of["#e-req","#e-asd"])if(g(id)>today)errs.push("Dates can't be in the future");
     const body={category:g("#e-cat"),source:g("#e-src"),department:g("#e-dep"),generatedBy:g("#e-gen"),requirementDate:g("#e-req")||reqDate(l),region:g("#e-reg"),
-      contact:Object.assign({},c,{name:g("#e-cn"),title:g("#e-ct"),email,phone:g("#e-cp")}),notes:g("#e-notes"),rooms:g("#e-rooms")===""?null:+g("#e-rooms"),pms:g("#e-pms"),timeline:g("#e-when"),
+      contact:Object.assign({},c,{name:g("#e-cn"),title:g("#e-ct"),email,phone:g("#e-cp")}),notes:g("#e-notes"),rooms:g("#e-rooms")===""?null:+g("#e-rooms"),pms:g("#e-pms"),chainPms:chainPmsMark(l.accountName,accKey(l),g("#e-pms")),timeline:g("#e-when"),
       assignedTo:g("#e-as"),priority:g("#e-pr")};
     Object.assign(body,locBody());
     if(g("#e-asd"))body.assignedAt=g("#e-asd")===(l.assignedAt||"").slice(0,10)?l.assignedAt:g("#e-asd")+"T12:00:00.000Z";else if(body.assignedTo&&body.assignedTo!==l.assignedTo)body.assignedAt=nowISO();
@@ -2421,6 +2423,9 @@ async function exportFootprint(){if(!can("lead.export"))return;const b=$("#fpX")
     window.__audit?.("exported","report",name,`Customer footprint: ${C.length} countries, ${s2.length-1} clients, ${H.length} chains (${P.period})`);toast(name+" is ready")}
   catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code))}finally{const nb=$("#fpX");if(nb){nb.disabled=false;nb.textContent="Export to Excel"}}}
 /* Supervisor: Products & settings → Hotel chains */
+function cpPlan(){const L=[],A=[];let skip=0;for(const l of S.leads){if(l.deleted||isRealPms(l.pms))continue;const o=chainStdOne(l.accountName,accKey(l));if(!o)continue;if(pmsBlock(o,pmsProducts(l))){skip++;continue}L.push({l,o})}
+  for(const[k,a]of Object.entries(S.accounts||{})){if(!a||a.deleted||isRealPms(a.pms))continue;const o=chainStdOne(a.name,k);if(o)A.push({k,o})}return{L,A,skip}}
+function cpPlanHTML(){const P=(S.chainEd||{}).plan;if(!P)return"";return P.L.length||P.A.length?`${P.L.length} lead${P.L.length===1?"":"s"} and ${P.A.length} account${P.A.length===1?"":"s"} have no PMS and can be filled${P.skip?` (${P.skip} lead${P.skip===1?"":"s"} skipped: product not supported on that PMS)`:""}. <button type="button" class="btn sm pri" id="cpApply">Fill them in</button>`:`Nothing to fill in.${P.skip?` ${P.skip} lead${P.skip===1?"":"s"} skipped: product not supported on that PMS.`:""}`}
 function chainsPanel(){if(!can("settings.manage"))return"";const L=chainList();const C=S.chainEd||(S.chainEd={q:""});
   const accts=fpData();const big=accts.filter(a=>a.chain==="Independent").sort((a,b)=>b.client-a.client||b.leads.length-a.leads.length).slice(0,50);
   const ov=Object.entries(S.settings.chainOverrides||{}).filter(([,c])=>c);const names=L.map(c=>c.name).sort((a,b)=>a.localeCompare(b));
@@ -2432,12 +2437,27 @@ function chainsPanel(){if(!can("settings.manage"))return"";const L=chainList();c
     <div class="row" style="margin-top:8px"><button type="button" class="btn pri" id="chSave">Save brand list</button>${S.settings.chains?`<button type="button" class="btn" id="chReset">Restore the standard list</button>`:""}<span class="small" id="chMsg"></span></div></details>
    <details style="margin-top:10px" id="chOwnD"${C.own?" open":""}><summary style="cursor:pointer"><b>Chain owners</b> <span class="small muted">· the engineer responsible for winning each chain (shown in their Focus tab)</span></summary>
     <div class="tw" style="margin-top:8px"><table><thead><tr><th>Chain</th><th style="width:260px">Owner</th></tr></thead><tbody>${names.map(n=>`<tr><td>${esc(n)}</td><td><select data-chown="${esc(n)}"><option value="">No owner</option>${spNames().map(e=>`<option${(S.settings.chainOwners||{})[n]===e?" selected":""}>${esc(e)}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div></details>
+   <details style="margin-top:10px" id="chPmsD"${C.pms?" open":""}><summary style="cursor:pointer"><b>Standard PMS per chain</b> <span class="small muted">· ${Object.values(S.settings.chainPms||{}).filter(x=>x&&x.length).length} chains set · filled in automatically on new leads</span></summary>
+    <p class="small muted" style="margin:8px 0;max-width:90ch">Type the PMS the chain has decided on. For more than one, separate with commas. Sales can only pick from this list. A Lead Manager or Supervisor can change the PMS on a single hotel.</p>
+    <datalist id="chPmsL">${pmsCfg().list.map(x=>`<option value="${esc(x)}">`).join("")}</datalist>
+    <div class="tw"><table><thead><tr><th>Chain</th><th style="width:58%">Standard PMS</th></tr></thead><tbody>${names.map(n=>`<tr><td>${esc(n)}</td><td><input data-chpms="${esc(n)}" list="chPmsL" value="${esc(((S.settings.chainPms||{})[n]||[]).join(", "))}" placeholder="None" style="min-width:0"></td></tr>`).join("")}</tbody></table></div>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn pri" id="cpSave">Save standard PMS</button><button type="button" class="btn" id="cpCheck">Check leads with no PMS</button><span class="small" id="cpMsg">${cpPlanHTML()}</span></div></details>
    <details style="margin-top:10px"${C.open?" open":""} id="chIndD"><summary style="cursor:pointer"><b>Accounts marked Independent</b> <span class="small muted">· the 50 largest, clients first</span></summary>
     <div class="tw" style="margin-top:8px"><table><thead><tr><th>Account</th><th>Country</th><th>Status</th><th class="num">Leads</th><th style="width:240px">Chain</th></tr></thead><tbody>
     ${big.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(ctryName(a.country))}</td><td>${a.client?"Client":"Prospect"}</td><td class="num">${a.leads.length}</td><td><select data-chset="${esc(a.key)}"><option value="">Independent</option>${names.map(n=>`<option>${esc(n)}</option>`).join("")}</select></td></tr>`).join("")||`<tr><td colspan="5" class="empty">No independent accounts.</td></tr>`}</tbody></table></div></details>
    ${ov.length?`<details style="margin-top:10px"><summary style="cursor:pointer"><b>Set by hand (${ov.length})</b></summary><div class="tw" style="margin-top:8px"><table><thead><tr><th>Account</th><th>Chain</th><th></th></tr></thead><tbody>
     ${ov.map(([k,c])=>`<tr><td>${esc(accts.find(a=>a.key===k)?.name||allAccounts()[k]?.name||k)}</td><td>${esc(c)}</td><td><button type="button" class="btn sm" data-chun="${esc(k)}">Use detection</button></td></tr>`).join("")}</tbody></table></div></details>`:""}</div>`}
-function bindChains(m){if(!$("#chainsPanel"))return;const saveS=async(b,msg)=>{try{await S.db.doc("config/settings").update(b);Object.assign(S.settings,b);toast(msg);render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}};
+function bindChains(m){if(!$("#chainsPanel"))return;
+  $("#chPmsD")?.addEventListener("toggle",e=>{S.chainEd.pms=e.target.open});
+  $("#cpSave")?.addEventListener("click",async()=>{const o={},bad=[];m.querySelectorAll("[data-chpms]").forEach(i=>{const v=i.value.split(",").map(x=>x.trim()).filter(Boolean);const out=[];for(const x of v){const h=pmsCfg().list.find(y=>nk(y)===nk(x));if(h){if(!out.includes(h))out.push(h)}else bad.push(i.dataset.chpms+": "+x)}if(out.length)o[i.dataset.chpms]=out});
+    if(bad.length){$("#cpMsg").innerHTML=`<span style="color:var(--bad)">Not in the PMS list: ${esc(bad.slice(0,3).join("; "))}</span>`;return}
+    try{await S.db.doc("config/settings").update({chainPms:o});S.settings.chainPms=o;S.chainEd.pms=true;S.chainEd.plan=null;window.__audit?.("updated","settings","Standard PMS per chain",`${Object.keys(o).length} chains have a standard PMS`);toast("Standard PMS saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}});
+  $("#cpCheck")?.addEventListener("click",()=>{S.chainEd.plan=cpPlan();S.chainEd.pms=true;$("#cpMsg").innerHTML=cpPlanHTML();bindApply()});
+  const bindApply=()=>$("#cpApply")?.addEventListener("click",async e=>{const b=e.currentTarget;if(b.disabled)return;const P=S.chainEd.plan;if(!P)return;b.disabled=true;let n=0,na=0,f=0;
+    for(const{l,o}of P.L){try{await S.db.doc("leads/"+l.id).update({pms:o,pmsIface:null,chainPms:true,updatedAt:nowISO(),log:[...(l.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS set to ${o} (chain standard)`}]});n++}catch(_){f++}}
+    for(const{k,o}of P.A){try{await S.db.doc("accounts/"+k).update({pms:o});na++}catch(_){f++}}
+    window.__audit?.("updated","leads","Chain standard PMS",`Filled the standard PMS on ${n} leads and ${na} accounts that had none${f?` (${f} failed)`:""}`);S.chainEd.plan=null;toast(`PMS filled on ${n} lead${n===1?"":"s"} and ${na} account${na===1?"":"s"}${f?`, ${f} failed`:""}`);render()});
+  bindApply();const saveS=async(b,msg)=>{try{await S.db.doc("config/settings").update(b);Object.assign(S.settings,b);toast(msg);render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}};
   $("#chSave")?.addEventListener("click",()=>{const L=[];const seen=new Set();m.querySelectorAll("[data-chn]").forEach(i=>{const n=i.value.trim().replace(/\s+/g," ");const br=m.querySelector(`[data-chb="${i.dataset.chn}"]`).value.split(",").map(x=>x.trim()).filter(Boolean);if(n&&!seen.has(nk(n))){seen.add(nk(n));L.push({name:n,brands:[...new Set(br)]})}});
     const nn=$("#chNewN").value.trim(),nb=$("#chNewB").value.split(",").map(x=>x.trim()).filter(Boolean);if(nn){if(seen.has(nk(nn))){$("#chMsg").innerHTML=`<span style="color:var(--bad)">${esc(nn)} is already in the list.</span>`;return}L.push({name:nn,brands:nb.length?nb:[nn]})}
     saveS({chains:L},"Brand list saved")});
@@ -3011,7 +3031,7 @@ async function impSave(r,fu){const q=r.q;const t=nowISO();const sent=r.em?.sent|
 const IL_MAX=500;
 const IL_COLS=[["Hotel name","name",1,"The property, as the client writes it. An existing account is matched by name."],["Country","country",1,"Needed for a new account."],["City","city",0,""],["Group / chain","group",0,""],
  ["Contact person","cname",1,""],["Designation","ctitle",0,""],["Email","cemail",0,"Give an email or a phone number."],["Phone / WhatsApp","cphone",0,""],
- ["Products","products",1,"One or more products from the Lists sheet, separated by commas."],["Hotel PMS","pms",1,"From the Lists sheet. Use “Not known yet” if unsure."],["Rooms","rooms",0,"A number."],
+ ["Products","products",1,"One or more products from the Lists sheet, separated by commas."],["Hotel PMS","pms",1,"From the Lists sheet. Leave empty for a chain that has a standard PMS. Use “Not known yet” if unsure."],["Rooms","rooms",0,"A number."],
  ["Region","region",0,"From the Lists sheet. Left blank, it is worked out from the country."],["State / province / emirate","sub",0,"Helps to find the territory owner."],["Source channel","source",1,"From the Lists sheet. It decides Inbound or Outbound."],
  ["Requirement received on","reqdate",0,"A date, e.g. 17-Nov-2026. Left blank, today is used."],["Lead generated by","genby",1,"The person who brought the lead."],["Department","dept",0,"Left blank, it is taken from the person above."],
  ["Expected timeline","when",0,"From the Lists sheet."],["Preferred sales engineer","pref",0,"From the Lists sheet. Left blank, back office decides."],["Requirement / notes","notes",0,""]];
@@ -3037,8 +3057,10 @@ function ilEval(r){const v=r.v,E={},W=[],B=[],st=S.settings||{};const name=v.nam
   const names=prodList(false).map(p=>p.name);const given=String(v.products||"").split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean);const ps=[],bad=[];
   given.forEach(g=>{const m=names.find(n=>nk(n)===nk(g));if(m){if(!ps.includes(m))ps.push(m)}else bad.push(g)});r.ps=ps;
   if(!given.length)E.products="Products are missing";else if(bad.length)E.products=`Not a product: ${bad.join(", ")}`;
-  const pl=pmsCfg().list.concat([PMS_UNKNOWN]);const pm=pl.find(x=>nk(x)===nk(v.pms));r.pmsV=pm||"";
-  if(v.pms.trim()&&!pm)E.pms=`Not in the PMS list: ${v.pms.trim()}`;else if(!v.pms.trim()&&ps.some(p=>!prodNoPms(p)))E.pms="PMS is missing (use “Not known yet” if unsure)";
+  const pl=pmsCfg().list.concat([PMS_UNKNOWN]);let pm=pl.find(x=>nk(x)===nk(v.pms));
+  if(!v.pms.trim()){const o=chainStdOne(((v.group||"").trim()?v.group.trim()+" ":"")+(r.acc?r.acc.name:name),r.acc?r.acc.key:"");if(o)pm=pl.find(x=>nk(x)===nk(o))}
+  r.pmsV=pm||"";
+  if(v.pms.trim()&&!pm)E.pms=`Not in the PMS list: ${v.pms.trim()}`;else if(!v.pms.trim()&&!pm&&ps.some(p=>!prodNoPms(p)))E.pms="PMS is missing (use “Not known yet” if unsure)";
   if(pm&&ps.length){const pb=pmsBlock(pm,ps);if(pb)E.pms=pb}
   const sm=(st.sources||[]).find(x=>nk(x.name)===nk(v.source));r.cat=sm?sm.cat:"";r.srcName=sm?sm.name:"";
   if(!v.source.trim())E.source="Source channel is missing";else if(!sm)E.source=`Not a source channel: ${v.source.trim()}`;
@@ -3090,7 +3112,7 @@ async function ilCreate(r,file){const v=r.v,t=nowISO();const A=r.acc||(r.sim&&r.
   const ref=await nextRef();const ps=r.ps.slice();const sub=v.sub.trim();const terr=territoryOf(country,r.reg,sub||undefined)||{};const gen=genOf({generatedBy:v.genby});
   const dept=v.dept.trim()||(spNames().some(n=>nk(n)===nk(v.genby))?"Sales":(gen&&gen.dept)||"");
   await S.db.doc("leads/"+ref).set({ref,accountKey:key,accountName:name,country,contact:{name:v.cname.trim(),title:v.ctitle.trim(),email:v.cemail.trim(),phone:v.cphone.trim()},products:ps,product:ps.join(", "),category:r.cat,source:r.srcName,
-    generatedBy:v.genby.trim(),department:dept,rooms:+v.rooms||null,pms:r.pmsV,timeline:r.when,preferred:r.pref,territoryOwner:terr.owner||"",notes:v.notes.trim(),requirementDate:r.date,region:r.reg,subdivision:sub,
+    generatedBy:v.genby.trim(),department:dept,rooms:+v.rooms||null,pms:r.pmsV,...(chainPmsMark(((v.group||"").trim()?v.group.trim()+" ":"")+name,key,r.pmsV)?{chainPms:true}:{}),timeline:r.when,preferred:r.pref,territoryOwner:terr.owner||"",notes:v.notes.trim(),requirementDate:r.date,region:r.reg,subdivision:sub,
     status:"New",assignedTo:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},histRepeat:ps.some(p=>productState(key,p).state==="hist"),excelImport:{file:String(file).slice(0,80),row:r.n,at:t,by:actor()||""},
     log:[{t,by:actor()||"",byId:S.uid||null,a:`Lead imported from Excel (${String(file).slice(0,60)}, row ${r.n}) · ${ps.join(", ")} (generated by ${v.genby.trim()})`}]});return ref}
 async function ilRun(){const I=ilState();if(I.busy||!S.db)return;const go=I.rows.filter(ilIn);if(!go.length)return;I.busy="Importing…";render();const made=[],failed=[];let i=0;
@@ -3158,9 +3180,14 @@ const prodStandalone=p=>!!(prodList(true).find(x=>nk(x.name)===nk(p))||{}).stand
 const pmsProducts=l=>productsOf(l).filter(p=>!prodNoPms(p));
 function pmsMethods(p,pms){const M=pmsCfg().matrix;const k=Object.keys(M).find(x=>nk(x)===nk(p)&&M[x]);if(!k||!isRealPms(pms))return null;const row=M[k]||{};
   const c=Object.keys(row).find(x=>x!=="*"&&nk(x)===nk(pms));const m=(c?(row[c]||[]):(row["*"]||[])).slice();if(prodStandalone(p)&&!m.some(x=>nk(x)==="standalone"))m.push("Standalone");return m}
+/* chain standard PMS (Settings → Hotel chains → Standard PMS) */
+function chainStd(name,key){const c=chainOf(key||"",name||"").chain;const L=(((S.settings||{}).chainPms||{})[c]||[]).filter(Boolean);return{chain:c,list:L}}
+const chainStdOne=(name,key)=>{const s=chainStd(name,key);return s.list.length===1?s.list[0]:""};
+const chainPmsMark=(name,key,pms)=>!!pms&&chainStd(name,key).list.some(x=>nk(x)===nk(pms));
+const pmsLocked=l=>!!l.chainPms&&!can("lead.status_override");
 function accountPms(key){if(!key)return"";const a=S.accounts[key];let best=null;
   for(const l of S.leads)if(!l.deleted&&accKey(l)===key&&isRealPms(l.pms)&&(!best||(l.updatedAt||l.createdAt||"")>(best.updatedAt||best.createdAt||"")))best=l;
-  return best?best.pms:(a&&isRealPms(a.pms)?a.pms:"")}
+  return best?best.pms:(a&&isRealPms(a.pms)?a.pms:chainStdOne(a&&a.name,key))}
 const pmsOf=l=>isRealPms(l.pms)?l.pms:"";
 function ifaceOf(l,p){const v=(l.pmsIface||{})[p];if(v)return v;const m=pmsMethods(p,l.pms);return m&&m.length===1?m[0]:""}
 function pmsWarn(pms,ps){const bad=ps.filter(p=>{if(prodStrict(p))return false;const m=pmsMethods(p,pms);return m&&!m.length});return bad.length?`${bad.join(", ")} ${bad.length>1?"aren't":"isn't"} listed as working with ${pms}. Check with Support before quoting.`:""}
@@ -3190,17 +3217,18 @@ function drawPms(l){const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);co
     bindPmsFields("lp",hp,l.pmsIface,A);$("#lp-x").onclick=()=>{S.drawer.pmsEdit=false;drawPms(l)};
     $("#lp-save").onclick=async e=>{const r=pmsRead("lp",A);if(!isRealPms(r.pms)){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">Choose the hotel's PMS.</span>`;return}
       {const pb=pmsBlock(r.pms,hp);if(pb){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">${esc(pb)}</span>`;return}}e.currentTarget.disabled=true;
-      const note=$("#lp-note").value.trim();const ch=r.pms!==l.pms;const ok=await patch(l,{pms:r.pms,pmsIface:r.iface,pmsNote:note},`PMS: ${r.pms}${Object.keys(r.iface).length?" · "+Object.entries(r.iface).map(([p,m])=>p+" via "+m).join(", "):""}`);
+      {const cs=chainStd(l.accountName,accKey(l));if(cs.list.length&&!can("lead.status_override")&&!cs.list.some(x=>nk(x)===nk(r.pms))){$("#lp-msg").innerHTML=`<span style="color:var(--bad)">${esc(cs.chain)} uses ${esc(cs.list.join(" or "))} as its standard PMS. Ask a Lead Manager or Supervisor if this hotel differs.</span>`;return}}
+      const note=$("#lp-note").value.trim();const ch=r.pms!==l.pms;const ok=await patch(l,{pms:r.pms,pmsIface:r.iface,pmsNote:note,chainPms:chainPmsMark(l.accountName,accKey(l),r.pms)},`PMS: ${r.pms}${Object.keys(r.iface).length?" · "+Object.entries(r.iface).map(([p,m])=>p+" via "+m).join(", "):""}`);
       if(!ok){e.currentTarget.disabled=false;return}S.drawer.pmsEdit=false;
       if(ch&&$("#lp-all")?.checked){const others=S.leads.filter(x=>x.id!==l.id&&!x.deleted&&accKey(x)===accKey(l)&&OPEN.includes(x.status)&&canAct(x)&&x.pms!==r.pms&&!pmsBlock(r.pms,pmsProducts(x)));let n=0;
-        for(const x of others){try{await S.db.doc("leads/"+x.id).update({pms:r.pms,pmsIface:null,updatedAt:nowISO(),log:[...(x.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS set to ${r.pms} (same hotel as ${l.ref})`}]});n++}catch(_){}}
+        for(const x of others){try{await S.db.doc("leads/"+x.id).update({pms:r.pms,pmsIface:null,chainPms:chainPmsMark(x.accountName,accKey(x),r.pms),updatedAt:nowISO(),log:[...(x.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS set to ${r.pms} (same hotel as ${l.ref})`}]});n++}catch(_){}}
         if(n)toast(`PMS also set on ${n} other open lead${n===1?"":"s"} for this hotel`)}}
     return}
   const rows=hp.map(p=>{const m=pmsMethods(p,pms);const i=ifaceOf(l,p);return`<tr><td>${esc(p)}</td><td>${i?`<span class="iface${i==="Standalone"?" sa":""}">${esc(i)}</span>`:pms?`<span class="muted">not set</span>`:"—"}${m&&!m.length?` <span class="small" style="color:var(--warn)">not listed for ${esc(pms)}</span>`:""}</td></tr>`}).join("");
-  A.innerHTML=`<div class="panel" style="padding:14px"><div class="row"><h3>PMS integration</h3>${pms?`<span class="chip">${esc(pms)}</span>`:`<span class="chip warn">PMS not recorded</span>`}<span class="sp"></span>${canAct(l)&&!l.deleted?`<button type="button" class="btn sm${pms?"":" pri"}" id="lp-e">${pms?"Edit":"Add PMS"}</button>`:""}</div>
+  A.innerHTML=`<div class="panel" style="padding:14px"><div class="row"><h3>PMS integration</h3>${pms?`<span class="chip">${esc(pms)}</span>`:`<span class="chip warn">PMS not recorded</span>`}<span class="sp"></span>${canAct(l)&&!l.deleted&&!pmsLocked(l)?`<button type="button" class="btn sm${pms?"":" pri"}" id="lp-e">${pms?"Edit":"Add PMS"}</button>`:""}</div>
     ${!pms&&sug?`<div class="small" style="margin-top:6px">This hotel's other leads use <b>${esc(sug)}</b>.</div>`:""}
     ${pms&&hp.length?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Product</th><th>Interface</th></tr></thead><tbody>${rows}</tbody></table></div>`:""}
-    ${l.pmsNote?`<div class="small muted" style="margin-top:6px">${esc(l.pmsNote)}</div>`:""}</div>`;
+    ${pmsLocked(l)?`<div class="small muted" style="margin-top:6px">Chain standard PMS. A Lead Manager or Supervisor can change it for this hotel.</div>`:""}${l.pmsNote?`<div class="small muted" style="margin-top:6px">${esc(l.pmsNote)}</div>`:""}</div>`;
   $("#lp-e")?.addEventListener("click",()=>{S.drawer.pmsEdit=true;drawPms(l)})}
 /* quotation and order forms: ask for the PMS when it isn't recorded yet */
 function pmsInject(l,A){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||pmsMethods(p,l.pms)==null))return;const box=A.querySelector(".panel")||A;const sug=pmsOf(l)||accountPms(accKey(l));
