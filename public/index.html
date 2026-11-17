@@ -2760,8 +2760,36 @@ function parseQuote(L){const T=L.map(l=>l.t);const R={lines:[],totals:[],warn:[]
   const pi=idx(/^\s*Payment\s+terms/i);if(pi>=0)R.payment=T[pi].replace(/^\s*Payment\s+terms\s*:?\s*/i,"").trim();
   const bi=idx(/best\s+regards|kind\s+regards|^\s*regards,?\s*$|yours\s+(sincerely|faithfully)/i);if(bi>=0){const nx=T.slice(bi+1,bi+8).map(s=>s.trim()).filter(Boolean);R.by=nx[0]||"";if(nx[1]&&!/@|^(Email|Mobile|Phone|Tel)/i.test(nx[1]))R.byTitle=nx[1];
     const em=nx.join(" ").match(/[\w.+-]+@[\w-]+\.[\w.]+/);if(em)R.byEmail=em[0]}
+  if(!R.lines.length&&!R.no)parseProposal(L,R);
   if(!R.no)R.warn.push("No quote number found.");if(R.total==null)R.warn.push("No total found. Enter the amount yourself.");if(!R.lines.length)R.warn.push("No product lines found in a price table.");
   return R}
+/* Project proposal layout (not a Salesforce quote): "Document Number", "Prepared for", and a "Budgetary Proposal" table
+   with a one-time part and a yearly subscription part. The yearly part is counted inside the quote value and shown as a note. */
+function parseProposal(L,R){const T=L.map(l=>l.t);const idx=(re,from=0)=>{for(let i=from;i<T.length;i++)if(re.test(T[i]))return i;return-1};
+  const di=idx(/Document\s*(Number|No\.?)\s*:/i);if(di<0)return;
+  R.no=(T[di].match(/Document\s*(?:Number|No\.?)\s*:\s*([A-Z0-9][A-Z0-9\-\/.]{3,})/i)||[])[1]||"";R.proposal=true;
+  const pi=idx(/^\s*Prepared\s+for\s*$/i,di);if(pi>0){const sub=T.slice(di+1,pi).map(x=>x.trim()).filter(Boolean);R.subject=sub.join(" ").replace(/\s+/g," ").slice(0,200);R.client=(T.slice(pi+1,pi+4).map(x=>x.trim()).find(Boolean)||"")}
+  const dd=idx(/^\s*Date\s*:/i,di);if(dd>=0&&!R.date)R.date=qrDate(T[dd]);
+  let bi=-1;for(let k=0;k<T.length;k++)if(/Budgetary\s+Proposal/i.test(T[k])&&!/\.{4}/.test(T[k])){bi=k;break}if(bi<0)return;
+  const cm=T.slice(bi,bi+60).join(" ").match(/\((AED|USD|EUR|GBP|SAR|INR|QAR|OMR|KWD|BHD|ZAR)\)/);R.currency=cm?cm[1]:"";
+  const te=idx(/Total\s+Contract\s+Value/i,bi);const end=te>0?te:Math.min(T.length,bi+60);
+  const MON=/^\d{1,3}(?:,\d{3})+\.\d{2}$|^\d+\.\d{2}$/;let sec="once";const rows=[];
+  for(let i=bi;i<end;i++){const t=T[i];if(/Annual\s+Subscription\s*\/\s*Maintenance/i.test(t)&&!/\d\.\d{2}/.test(t))sec="year";
+    const its=L[i].items||[];const mi=its.filter(x=>MON.test(x.s.trim()));const lt=!mi.length?"":its.filter(x=>x.x<mi[0].x-12&&!/^\d{1,2}$/.test(x.s.trim())).map(x=>x.s.trim()).join(" ");if(mi.length&&!/Sub-?Total|^\s*Total\b|VAT/i.test(lt)){rows.push({i,y:L[i].y,p:L[i].p,x:mi[0].x,amt:qrNum(mi[0].s),sec,lt})}}
+  for(let k=rows.length-1;k>=1;k--){const prior=rows.slice(0,k).filter(r=>r.sec===rows[k].sec);if(!rows[k].lt&&prior.length>=1&&Math.abs(prior.reduce((a,r)=>a+r.amt,0)-rows[k].amt)<0.6)rows.splice(k,1)}
+  if(!rows.length)return;
+  const mx=rows.reduce((a,r)=>a+r.x,0)/rows.length;const used=new Set(rows.map(r=>r.i));
+  const lft=i=>(L[i].items||[]).filter(x=>x.x<mx-12&&!/^\d{1,2}$/.test(x.s.trim())).map(x=>x.s.trim()).join(" ").trim();
+  const txt=rows.map(()=>[]);
+  for(let i=bi+1;i<end;i++){if(/Unit\s*Price|Comments|^\s*No\s+Description|Project\s+Implementation|Annual\s+Subscription\s*\/|Sub-?Total/i.test(T[i]))continue;const t=lft(i);if(!t||t.length<3)continue;
+    let b=0,bd=1e9;rows.forEach((r,k)=>{if(r.p!==L[i].p)return;const d=Math.abs(r.y-L[i].y);if(d<bd){bd=d;b=k}});if(bd<80)txt[b].push({y:L[i].y,t})}
+  rows.forEach((r,k)=>{const item=txt[k].sort((a,b)=>b.y-a.y).map(x=>x.t).join(" ").replace(/\s+/g," ").replace(/\s*covering up to.*$/i,"").replace(/\s+-\s+/g,"-").trim();R.lines.push({sl:k+1,item:item||`Item ${k+1}`,desc:"",list:r.amt,unit:r.amt,qty:1,total:r.amt,product:qrProduct(item)||qrProduct(R.subject||""),recurring:r.sec==="year"})});
+  const tr=new RegExp("^\\s*(.*?(?:Total|VAT).*?)\\s{2,}([\\d,]+\\.\\d{2})\\s*$","i");R.totals=[];for(let i=te>=0?te:0;i<Math.min(T.length,(te>=0?te:0)+6);i++){const m=T[i].match(tr);if(m)R.totals.push({label:m[1].trim(),amount:qrNum(m[2])})}
+  const b4=R.totals.find(t=>/before\s+vat/i.test(t.label));const vat=R.totals.find(t=>/vat/i.test(t.label)&&!/before/i.test(t.label));const gr=[...R.totals].reverse().find(t=>/total\s+price/i.test(t.label));
+  if(b4){R.total=b4.amount;R.tax=vat?vat.amount:0;R.gross=gr?gr.amount:R.total+R.tax}
+  const sum=R.lines.reduce((a,x)=>a+x.total,0);R.lineCheck=R.total!=null?Math.abs(sum-R.total)<0.6:null;if(R.lineCheck===false)R.warn.push(`The line items add up to ${fmtN(sum)}, but the total before VAT is ${fmtN(R.total)}. Check the lines.`);
+  const yr=R.lines.filter(x=>x.recurring).reduce((a,x)=>a+x.total,0);if(yr){R.yearly=yr;const dm=T.join(" ").match(/includes up to ([\d,]+) documents/i);R.yearlyNote=`Includes a yearly subscription of ${R.currency||""} ${fmtN(yr)}${dm?` (up to ${dm[1]} documents a year)`:""}. It is counted in the quote value.`.replace(/\s+/g," ")}
+  R.warn.push("Read as a project proposal (not a Salesforce quote). Check the client, lines and amounts.")}
 /* the panel inside the quotation form */
 function qpdfBlock(){return`<div class="qpdf"><label class="btn" style="cursor:pointer"><input type="file" id="qpdfIn" accept="application/pdf,.pdf" hidden>Upload the quotation from Salesforce (PDF)</label><span class="small muted"><b>Required.</b> The amount (total before tax), the line items and the charges are read from it and saved with the lead. The PDF itself is read on this device only and isn't uploaded or stored.</span></div><div id="qpdfOut"></div><div id="qpdfGate"></div><div id="mlHost"></div>`}
 /* A quotation value comes from the uploaded Salesforce quote. Only someone with lead.status_override (Lead Manager,
@@ -2830,7 +2858,7 @@ function bindQpdf(l){const inp=$("#qpdfIn");if(!inp)return;S.qpdf=null;mlInit(l)
     catch(e){console.error(e);S.qpdf=null;O.innerHTML=`<div class="notice bad">Couldn't read this PDF: ${esc(e.message||String(e))}. ${can("lead.status_override")?"You can enter the amount by hand with a reason.":"Ask a Lead Manager or Supervisor to enter it by hand."}</div>`;quoteGate(l)}finally{inp.value=""}}}
 function qpdfFill(l,R){const set=(id,v)=>{const e=$(id);if(e&&v!=null&&v!=="")e.value=v};
   if(R.total!=null)set("#a-val",R.total);const cs=$("#a-cur");if(cs&&R.currency){if(![...cs.options].some(o=>o.value===R.currency))R.warn.push(`Currency ${R.currency} isn't in the exchange-rate list (Products & settings). Choose the currency yourself.`);else cs.value=R.currency}
-  if(R.date&&R.date<=todayISO())set("#a-date",R.date);set("#a-no",R.no);if(R.subject&&!$("#a-notes").value)set("#a-notes",R.subject.slice(0,200));
+  if(R.date&&R.date<=todayISO())set("#a-date",R.date);set("#a-no",R.no);if(R.subject&&!$("#a-notes").value)set("#a-notes",(R.subject+(R.yearlyNote?" · "+R.yearlyNote:"")).slice(0,300));
   ["#a-val","#a-cur"].forEach(id=>$(id)?.dispatchEvent(new Event("input",{bubbles:true})));$("#a-cur")?.dispatchEvent(new Event("change",{bubbles:true}))}
 function qpdfShow(l){const R=S.qpdf;const O=$("#qpdfOut");if(!R||!O)return;const cur=R.currency||"";const cat=prodList(true).map(p=>p.name);
   const same=R.client&&(nk(R.client).includes(nk(l.accountName).split(" ")[0])||nk(l.accountName).includes(nk(R.client).split(" ")[0]));
@@ -2844,15 +2872,15 @@ function qpdfShow(l){const R=S.qpdf;const O=$("#qpdfOut");if(!R||!O)return;const
     <div><span>Created by</span><span>${esc(R.by||"—")}${R.byTitle?` · ${esc(R.byTitle)}`:""}${R.byEmail?` · ${esc(R.byEmail)}`:""}</span></div>${R.payment?`<div><span>Payment terms</span><span>${esc(R.payment)}</span></div>`:""}</div>
    ${R.lines.length?`<div class="qli" style="margin-top:8px">${R.lines.map((x,i)=>`<div class="qlr"><div class="row" style="gap:8px;align-items:flex-start;flex-wrap:nowrap"><span class="muted" style="min-width:18px">${x.sl}</span><div style="flex:1;min-width:0"><b title="${esc(x.desc||"")}">${esc(x.item)}</b>
       <div class="row" style="gap:8px;margin-top:4px"><select data-qlp="${i}" aria-label="Lead Desk product for line ${x.sl}" style="max-width:240px;padding:4px 6px;font-size:12.5px"><option value="">— Service / other</option>${cat.map(c=>`<option${c===x.product?" selected":""}>${esc(c)}</option>`).join("")}</select>
-      <span class="small">${fmtN(x.qty)} × ${fmtN(x.unit)}${x.list&&x.unit!==x.list?` <s class="muted">${fmtN(x.list)}</s>`:""}</span></div></div><b class="num" style="white-space:nowrap">${esc(cur)} ${fmtN(x.total)}</b></div></div>`).join("")}
+      <span class="small">${fmtN(x.qty)} × ${fmtN(x.unit)}${x.list&&x.unit!==x.list?` <s class="muted">${fmtN(x.list)}</s>`:""}</span></div></div><b class="num" style="white-space:nowrap">${esc(cur)} ${fmtN(x.total)}${x.recurring?` <span class="small muted">/ year</span>`:""}</b></div></div>`).join("")}
      <div class="qtot">${R.totals.map(t=>`<div><span>${esc(t.label)}</span><b>${t.amount<0?"("+fmtN(-t.amount)+")":fmtN(t.amount)}</b></div>`).join("")}</div></div>
-    ${R.lineCheck?`<p class="small" style="color:var(--ok);margin:4px 0 0">✓ The line items add up to the quotation total.</p>`:""}`:""}
+    ${R.lineCheck?`<p class="small" style="color:var(--ok);margin:4px 0 0">✓ The line items add up to the quotation total.</p>`:""}${R.yearlyNote?`<p class="small" style="margin:4px 0 0"><span class="chip">Yearly</span> ${esc(R.yearlyNote)}</p>`:""}`:""}
    ${extra.length?`<p class="small muted" style="margin:6px 0 0">This quotation includes ${esc(extra.join(", "))}, which ${extra.length===1?"isn't":"aren't"} on this lead. Add ${extra.length===1?"it":"them"} with “Add or remove products” if needed (after a meeting this creates an upsell lead).</p>`:""}
    <p class="small muted" style="margin:6px 0 0">Amount, currency, date, quote number and notes above have been filled in. Check them, add the target date and next step, then save.</p></div>`;
   $("#qpdfClr").onclick=()=>{S.qpdf=null;O.innerHTML="";if(!can("lead.status_override")){const v=$("#a-val");if(v)v.value=""}mlSync(l)};O.querySelectorAll("[data-qlp]").forEach(s=>s.onchange=()=>{R.lines[+s.dataset.qlp].product=s.value})}
 /* what gets saved with the quotation (and the lead's contact, if ticked) */
 function qpdfExtra(l){const R=S.qpdf&&S.qpdf.leadId===l.id?S.qpdf:null;const MR=mlRows(l).filter(mlValid);if(!R&&!MR.length)return{q:{},lead:{}};
-  const q=R?{lines:R.lines.map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})),source:"Salesforce PDF",createdBy:R.by||"",createdByTitle:R.byTitle||"",createdByEmail:R.byEmail||"",validUntil:R.validUntil||"",paymentTerms:R.payment||"",quoteContact:R.contact?{name:R.contact,title:R.title||""}:null,discount:R.discount||0,subject:R.subject||"",charges:(R.totals||[]).map(t=>({label:t.label,amount:t.amount})),tax:R.tax||0,gross:R.gross!=null?R.gross:null,src:"upload"}:{};
+  const q=R?{lines:R.lines.map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total,...(x.recurring?{recurring:true}:{})})),yearly:R.yearly||0,source:"Salesforce PDF",createdBy:R.by||"",createdByTitle:R.byTitle||"",createdByEmail:R.byEmail||"",validUntil:R.validUntil||"",paymentTerms:R.payment||"",quoteContact:R.contact?{name:R.contact,title:R.title||""}:null,discount:R.discount||0,subject:R.subject||"",charges:(R.totals||[]).map(t=>({label:t.label,amount:t.amount})),tax:R.tax||0,gross:R.gross!=null?R.gross:null,src:"upload"}:{};
   if(MR.length){const by=actor()||S.myName||"",at=nowISO();
     const ml=MR.map(r=>({id:r.id||"ml"+Math.random().toString(36).slice(2,8),desc:String(r.desc).trim(),product:r.product||"",qty:+r.qty,unit:+r.unit,disc:+r.disc||0,total:mlLine(r),by:r.by||by,at:r.at||at}));
     q.manualLines=ml;q.manualState="pending";q.pdfTotal=R?R.total:0;q.manualTotal=mlRound(ml.reduce((s,x)=>s+x.total,0));
