@@ -153,6 +153,12 @@
     if (error) throw Object.assign(new Error(error.message), { code: error.code });
     return true;
   };
+  // Won without a quotation: reminders (supabase/40_won_without_quote.sql)
+  window.__remindWonQuotes = async (ids) => {
+    const { data, error } = await sb.rpc("remind_won_quotes", { p_ids: ids && ids.length ? ids : null });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return data;
+  };
   window.__saveEvents = async (list) => {
     const { error } = await sb.rpc("save_events", { p_events: list });
     if (error) throw Object.assign(new Error(error.message), { code: error.code });

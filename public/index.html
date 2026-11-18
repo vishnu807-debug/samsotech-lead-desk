@@ -174,7 +174,7 @@ tr.pbg td{background:var(--sunk);font-weight:600}
 .linkbtn{all:unset;cursor:pointer;color:var(--ink)}.linkbtn:hover b,.linkbtn:focus-visible b{color:var(--accent);text-decoration:underline}
 .gbar{height:9px;border-radius:6px;background:var(--sunk);overflow:hidden;display:flex}.gbar i{display:block;height:100%}
 .gfun{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.gfun button{all:unset;cursor:pointer;background:var(--sunk);border-radius:10px;padding:8px 10px;display:grid;gap:2px}.gfun button b{font-size:20px}.gfun button span{font-size:11.5px;color:var(--muted)}.gfun button[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
-@media(max-width:640px){.gfun{grid-template-columns:repeat(4,minmax(0,1fr))}.gml td:nth-child(3),.gml th:nth-child(3){display:none}}@media(max-width:400px){.gfun{grid-template-columns:repeat(3,minmax(0,1fr))}}.gfun button{min-width:0;overflow:hidden}.gfun button span{overflow-wrap:anywhere}td.sub{padding-left:22px}.del{text-decoration:line-through;color:var(--muted)}.nowrap{white-space:nowrap}
+@media(max-width:640px){.gfun{grid-template-columns:repeat(4,minmax(0,1fr))}.gml td:nth-child(3),.gml th:nth-child(3){display:none}}@media(max-width:400px){.gfun{grid-template-columns:repeat(3,minmax(0,1fr))}}.gfun button{min-width:0;overflow:hidden}.gfun button span{overflow-wrap:anywhere}.wqt{display:block}.wqm{display:none}.wqc{background:var(--sunk);border-radius:10px;padding:10px 12px;display:grid;gap:6px}.wqf{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end}.wqs{padding:2px 8px;border-radius:999px;font-size:12px;white-space:nowrap}@media(max-width:700px){.wqt{display:none}.wqm{display:grid;gap:8px}}td.sub{padding-left:22px}.del{text-decoration:line-through;color:var(--muted)}.nowrap{white-space:nowrap}
 .pbp{padding:12px 14px;margin-top:10px}.pbrow{display:grid;grid-template-columns:minmax(0,1fr) 70px auto auto;gap:8px;align-items:center}.pbqc+.pbqc{border-top:1px solid var(--line);margin-top:10px}
 @media(max-width:560px){.pbrow{grid-template-columns:minmax(0,1fr) 64px;}.pbrow .num{grid-column:1}}
 .subnav{display:flex;gap:6px;flex-wrap:wrap}
@@ -536,7 +536,7 @@ th{position:relative}
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js?v=c423e966"></script>
+<script src="adapter.js?v=9f78277a"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -1005,6 +1005,7 @@ function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLe
   const kpi=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:""}</div>`;
   m.innerHTML=`<section class="view">${leadsSwitch(canCreate)}
    <div class="vhead"><div><h2>${F.cb==="__others"?"Created for me":viewAll()?"All leads":"My leads"}</h2><p>${F.cb==="__others"?"Leads that someone else (AMC, Sales or Support) brought in and passed to you.":viewAll()?"Every lead across the sales team.":"Leads assigned to you."} Filters combine; click a lead to open it.</p></div></div>
+   ${wqBanner()}
    <div class="panel afbar lfbar">
     <div class="fgrid">
      <label class="f fsearch">Search<input id="lfQ" placeholder="Ref, property, product, contact" value="${esc(F.q)}"></label>
@@ -1191,7 +1192,7 @@ function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Inf
    ${can("lead.remove")&&(S.deletedLeads||[]).length?`<details class="panel"><summary style="cursor:pointer"><b>Deleted leads (${S.deletedLeads.length})</b> <span class="small muted">· kept for the audit trail, can be restored</span></summary>
     <div class="tw" style="margin-top:10px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status when deleted</th><th>Reason</th><th>Deleted by</th><th>When</th><th></th></tr></thead><tbody>
     ${S.deletedLeads.slice().sort((a,b)=>(a.deleted.at||"")<(b.deleted.at||"")?1:-1).map(l=>`<tr><td class="mono"><button class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td><td>${esc(l.deleted.prevStatus||l.status)}</td><td>${esc(l.deleted.reason||"—")}${l.deleted.note?`<div class="small muted">${esc(l.deleted.note)}</div>`:""}</td><td>${esc(l.deleted.by||"—")}</td><td style="white-space:nowrap">${fmtD(l.deleted.at)}</td><td><button type="button" class="btn sm" data-restore="${esc(l.id)}">Restore</button></td></tr>`).join("")}</tbody></table></div></details>`:""}
-   ${canFix()&&dataIssues().count?`<details class="panel" id="boDq" style="border-left:3px solid var(--warn)"${S.boDqOpen?" open":""}><summary style="cursor:pointer"><b>Data issues (${dataIssues().count})</b> <span class="small muted">· won leads without an order amount or a PMS, names not on the engineer list, leads with two names. Supervisor and Lead Manager only.</span></summary><div style="margin-top:10px">${issuesHTML().html}</div></details>`:""}
+   ${canFix()&&dataIssues().count?`<details class="panel" id="boDq" style="border-left:3px solid var(--warn)"${S.boDqOpen?" open":""}><summary style="cursor:pointer"><b>Data issues (${dataIssues().count})</b> <span class="small muted">· won leads without an order amount, a PMS or a quotation, names not on the engineer list, leads with two names. Supervisor and Lead Manager only.</span></summary><div style="margin-top:10px">${issuesHTML().html}</div></details>`:""}
    <div class="view" style="gap:10px">${q.length?q.map(qCard).join(""):`<div class="panel empty">${S.loaded.leads?"Nothing waiting. New leads appear here as soon as they are submitted.":"Loading the queue…"}</div>`}</div>
    <div class="grid2">
     <div class="panel"><h3>Open leads per sales engineer</h3>${Object.keys(load).length?`<div class="funnel">${Object.entries(load).sort((a,b)=>b[1]-a[1]).map(([n,c])=>{const mx=Math.max(...Object.values(load));return`<div class="frow"><span>${esc(n)}</span><div class="fbar"><i style="width:${c/mx*100}%"></i></div><span class="num">${c} open</span></div>`}).join("")}</div>`:`<p class="muted small">No leads assigned yet. Workload shows here so you can balance assignments.</p>`}</div>
@@ -1258,7 +1259,7 @@ function lcard(l){const stale=["Assigned","Attended"].includes(l.status)&&days(l
   const fu=fuOpen(l)&&fuDue(l)<=new Date(new Date().setHours(23,59,59,999));
   return`<button class="lc" data-open="${esc(l.id)}"><span class="row" style="gap:6px"><span class="mono muted">${esc(l.ref)}</span><span class="sp"></span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span>${flagChips(l)}${isUpsell(l)?`<span class="chip ups">Upsell</span>`:""}${isNewForMe(l)?`<span class="chip newl">New</span>`:""}</span>
    <b style="font-size:13.5px">${esc(l.accountName)}</b><span class="small muted">${esc(regionOf(l))} · received ${fmtD(reqDate(l))}</span><span class="small muted">${esc(l.product)}${viewAll()&&S.me==="__all"?" · "+esc(l.assignedTo):""}</span>
-   ${cbChip(l)}${standChip(l)}${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
+   ${cbChip(l)}${wqChip(l)}${standChip(l)}${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
    ${urgent?`<span class="late">No meeting yet · assigned ${Math.floor(days(l.assignedAt))} days ago</span>`:stale?`<span class="small muted">No meeting logged · ${Math.floor(days(l.assignedAt))} days</span>`:""}${qst?`<span class="late">Quote open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days</span>`:""}${l.status==="Quotation Sent"&&l.quote?.targetDate?(tgtOverdue(l)?`<span class="late">Target ${fmtD(l.quote.targetDate)} passed</span>`:`<span class="small muted">Target ${fmtD(l.quote.targetDate)}</span>`):""}${fu?`<span class="late">Follow-up ${esc(fuLabel(l))}</span>`:fuOpen(l)?`<span class="small muted">Follow-up ${esc(fuLabel(l))}</span>`:""}</button>`}
 
 /* ======================= LEAD DRAWER (back office + sales) ======================= */
@@ -1428,7 +1429,7 @@ function wonOwn(l){if(!l||l.status!=="Won"||l.deleted||!can("lead.won_own")||!is
 const canUnwin=l=>!!l&&l.status==="Won"&&!l.deleted&&(can("lead.status_override")||wonOwn(l));
 const wonDaysLeft=l=>{const t=Date.parse(wonStamp(l));return isNaN(t)?0:Math.max(0,Math.ceil((t+wonDays()*864e5-Date.now())/864e5))};
 const wonTouched=l=>(l.wonChanges||[]).length>0||(l.statusChanges||[]).some(c=>c.from==="Won");
-async function fixOrder(l,o,why,nq){if(!canUnwin(l)||!l.order)return false;const t=nowISO();const by=actor()||S.myName||"";const old=l.order;
+async function fixOrder(l,o,why,nq){if(!(canUnwin(l)||wqClean(l))||!l.order)return false;const t=nowISO();const by=actor()||S.myName||"";const old=l.order;
   const nw=Object.assign({},old,o,{correctedAt:t,correctedBy:by});
   const body={order:nw,orderHistory:[...(l.orderHistory||[]),Object.assign({},old,{replacedAt:t,replacedBy:by,reason:why||""})],
     wonChanges:[...(l.wonChanges||[]),{at:t,by,byId:S.uid||null,kind:"value",reason:why||"",from:{aed:old.aed,value:old.value,currency:old.currency||"AED",no:old.no||""},to:{aed:nw.aed,value:nw.value,currency:nw.currency||"AED",no:nw.no||""}}]};
@@ -1437,7 +1438,7 @@ async function fixOrder(l,o,why,nq){if(!canUnwin(l)||!l.order)return false;const
   if(sameV&&ohCh){const w=body.wonChanges[body.wonChanges.length-1];w.kind="ohip";w.from.ohip=old.ohip==null?null:+old.ohip;w.to.ohip=nw.ohip}
   return await patch(l,body,sameV&&ohCh?`OHIP part of the order set to ${nw.ohip==null?"the quotation lines":fmtAED(nw.ohip)}${why?" · "+why:""}`:`Order value changed from ${fmtAED(old.aed)} to ${fmtAED(nw.aed)}${nq?` · revised quotation${nq.no?" "+nq.no:""}${nq.src==="manual"?" entered by hand":" uploaded"}`:""}${(old.no||"")!==(nw.no||"")?` · order no. ${nw.no||"removed"}`:""}${why?" · "+why:""}`)}
 function wonChangeRows(){const out=[];(S.leads||[]).forEach(l=>{(l.statusChanges||[]).forEach(c=>{if(c.from==="Won")out.push({at:c.at,l,what:"Moved back to "+c.to,from:c.order?c.order.aed:null,to:null,by:c.by,reason:c.reason||""})});
-  (l.wonChanges||[]).forEach(c=>out.push(c.kind==="share"?{at:c.at,l,what:`Share changed: ${c.from&&c.from.to?c.from.pct+"% to "+c.from.to:"none"} → ${c.to&&c.to.to?c.to.pct+"% to "+c.to.to:"none"}`,from:null,to:null,by:c.by,reason:c.reason||""}:c.kind==="ohip"?{at:c.at,l,what:"OHIP part of the order set",from:c.from?c.from.ohip:null,to:c.to?c.to.ohip:null,by:c.by,reason:c.reason||""}:{at:c.at,l,what:"Order value changed"+(c.quoteNo?" · quote "+c.quoteNo:c.src==="manual"?" · entered by hand":""),from:c.from?c.from.aed:null,to:c.to?c.to.aed:null,by:c.by,reason:c.reason||""}))});return out.sort((a,b)=>a.at<b.at?1:-1)}
+  (l.wonChanges||[]).forEach(c=>out.push(c.kind==="share"?{at:c.at,l,what:`Share changed: ${c.from&&c.from.to?c.from.pct+"% to "+c.from.to:"none"} → ${c.to&&c.to.to?c.to.pct+"% to "+c.to.to:"none"}`,from:null,to:null,by:c.by,reason:c.reason||""}:c.kind==="ohip"?{at:c.at,l,what:"OHIP part of the order set",from:c.from?c.from.ohip:null,to:c.to?c.to.ohip:null,by:c.by,reason:c.reason||""}:{at:c.at,l,what:(c.from&&c.to&&Math.abs((+c.from.aed||0)-(+c.to.aed||0))<0.005?"Quotation uploaded":"Order value changed")+(c.quoteNo?" · quote "+c.quoteNo:c.src==="manual"?" · entered by hand":""),from:c.from?c.from.aed:null,to:c.to?c.to.aed:null,by:c.by,reason:c.reason||""}))});return out.sort((a,b)=>a.at<b.at?1:-1)}
 function wonChangesHTML(){const all=wonChangeRows();const since=new Date(Date.now()-365*864e5).toISOString();const rows=all.filter(r=>String(r.at)>=since);if(!all.length)return"";
   return`<div class="panel" id="wonChg"><h3>Changes after Won <span class="chip">${rows.length}</span></h3><p class="small muted" style="margin:2px 0 12px;max-width:90ch">Won orders that were moved back to an earlier stage or had their order value corrected in the last 12 months. Revenue, targets and incentives already use the new figures.</p>
    ${rows.length?`<div class="tw plain"><table><thead><tr><th>Date</th><th>Lead</th><th>Sales engineer</th><th>Change</th><th class="num">Before</th><th class="num">After</th><th>By</th><th>Reason</th></tr></thead><tbody>
@@ -1456,7 +1457,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   const lvTop=`${l.deleted?`<div class="notice bad" style="display:grid;gap:6px"><b>This lead was deleted on ${fmtD(l.deleted.at)} by ${esc(l.deleted.by||"someone")}.</b><span>Reason: ${esc(l.deleted.reason||"—")}${l.deleted.note?" · "+esc(l.deleted.note):""}. It is hidden from every list, count and report. Its details and history are kept.</span>${can("lead.remove")?`<span><button type="button" class="btn sm" id="restoreLead">Restore this lead</button></span>`:""}</div>`:""}${ruleFlags(l).length?`<div class="notice warn" style="display:grid;gap:2px"><b>Needs action</b>${ruleFlags(l).map(f=>`<span class="small">${esc(f.t)}</span>`).join("")}</div>`:""}`;
   $("#drawerHost").innerHTML=`<div class="scrim lvs" id="scrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Lead ${esc(l.ref)}">
   <div class="lvh">
-   <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
+   <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wqChip(l)}${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
    <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
    <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
   </div>
@@ -1760,21 +1761,22 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     pmsInject(l,A);bindAmount("order","Won","Order won");$("#a-aed").textContent="";if(mlP)$("#a-save").disabled=true;return}
   if(mode==="lost"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Mark as lost</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="l-r">${opts(["Price","Went with competitor","No budget","No response","Project cancelled","Not a fit","Other"],"","Choose")}</select></label><label class="f">Details / competitor<input id="l-n"></label><div class="row"><button class="btn bad" id="l-save">Mark lost</button><button class="btn" id="l-cancel">Cancel</button></div></div></div>`;
     $("#l-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#l-save").onclick=()=>{const r=$("#l-r").value;if(!r)return;patch(l,{lost:{reason:r,notes:$("#l-n").value.trim(),date:nowISO()}},"Lost: "+r,"Lost")};return}
-  if(mode==="fixorder"&&canUnwin(l)&&l.order){const own=!can("lead.status_override");const o=l.order;
-    A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:6px">New order value · upload the revised quote</h3><p class="small muted" style="margin:0 0 10px">The order value can only change through a new quotation. The lead stays Won and keeps its order date (${fmtD(o.date)}). The current value of <b>${fmtAED(o.aed)}</b> and its quotation are kept in the lead's history.${own?` You can do this for ${wonDaysLeft(l)} more day${wonDaysLeft(l)===1?"":"s"}.`:""}</p>
+  if(mode==="fixorder"&&(canUnwin(l)||wqClean(l))&&l.order){const own=!can("lead.status_override");const o=l.order;const cl=!hasQuoteFile(l);
+    A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:6px">${cl?"Upload the quotation":"New order value · upload the revised quote"}</h3><p class="small muted" style="margin:0 0 10px">${cl?`This lead was won without an uploaded quotation. Add the Salesforce PDF: the order value becomes the quotation's value (before tax). The lead stays Won and keeps its order date (${fmtD(o.date)}). The current value of <b>${fmtAED(o.aed)}</b> is kept in the lead's history.`:`The order value can only change through a new quotation. The lead stays Won and keeps its order date (${fmtD(o.date)}). The current value of <b>${fmtAED(o.aed)}</b> and its quotation are kept in the lead's history.`}${own&&canUnwin(l)&&!cl?` You can do this for ${wonDaysLeft(l)} more day${wonDaysLeft(l)===1?"":"s"}.`:""}</p>
      <div style="display:grid;gap:10px">${qpdfBlock()}
       <div class="grid3"><label class="f">New order value (before tax) <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,o.currency||"AED")}</select></label><label class="f">Quotation number<input id="a-no"></label></div>
       <input id="a-date" type="hidden" value="${todayISO()}"><input id="a-notes" type="hidden" value="">
-      <label class="f">Reason for the new value <span class="req">*</span><input id="fo-r" maxlength="300" placeholder="e.g. Client reduced the quantity on the PO"></label><div class="small muted" id="a-aed"></div><div class="small" id="fo-msg"></div>
-      <div class="row"><button class="btn pri" id="fo-ok">Save new value</button><button class="btn" id="fo-x">Cancel</button></div></div></div>`;
-    const upd=()=>{const v=+$("#a-val").value;$("#a-aed").textContent=v>0?"= "+fmtAED(toAED(v,$("#a-cur").value)):""};$("#a-val").oninput=upd;$("#a-cur").onchange=upd;
+      <label class="f">Reason for the new value <span class="req">*</span><input id="fo-r" maxlength="300" placeholder="e.g. Client reduced the quantity on the PO" value="${cl?"Quotation uploaded for a lead won without one":""}"></label><div class="small muted" id="a-aed"></div><div class="small" id="fo-diff" aria-live="polite"></div><div class="small" id="fo-msg"></div>
+      <div class="row"><button class="btn pri" id="fo-ok">${cl?"Save quotation":"Save new value"}</button><button class="btn" id="fo-x">Cancel</button></div></div></div>`;
+    const fod=()=>{const E=$("#fo-diff");if(!E)return;const v=+($("#a-val")||{}).value;if(!(v>0)){E.textContent="";return}const nw=toAED(v,$("#a-cur").value),d=nw-(+o.aed||0);E.innerHTML=`Order value: <b>${fmtAED(o.aed)}</b> → <b>${fmtAED(nw)}</b> (${Math.abs(d)<0.005?"no change":(d>0?"+":"−")+fmtAED(Math.abs(d))})`};
+    const upd=()=>{const v=+$("#a-val").value;$("#a-aed").textContent=v>0?"= "+fmtAED(toAED(v,$("#a-cur").value)):"";fod()};$("#a-val").oninput=upd;$("#a-cur").onchange=upd;const fpt=setInterval(()=>{if(!$("#fo-diff")){clearInterval(fpt);return}fod()},400);
     bindQpdf(l);quoteGate(l);$("#fo-x").onclick=()=>{S.qpdf=null;S.drawer.mode=null;drawDrawer()};
     $("#fo-ok").onclick=async e=>{const M=$("#fo-msg");const why=$("#fo-r").value.trim();let manual=null;
       if(mlRows(l).length&&!mlGood(l)){M.innerHTML=`<span style="color:var(--bad)">Fill in the description, quantity and price of every manual item, or remove it.</span>`;return}if(qOk(l)){$("#a-val").value=qTotal(l)}else if(own){M.innerHTML=`<span style="color:var(--bad)">Upload the revised quotation from Salesforce (PDF). If it can't be read, ask a Lead Manager or Supervisor.</span>`;return}
       else{const w2=(($("#a-why")||{}).value||"").trim();if(w2.length<3){M.innerHTML=`<span style="color:var(--bad)">Give the reason for entering the amount by hand.</span>`;return}manual={by:actor()||S.myName||"",at:nowISO(),reason:w2}}
       const v=+$("#a-val").value,c=$("#a-cur").value,no=$("#a-no").value.trim();if(!(v>0)){M.innerHTML=`<span style="color:var(--bad)">Enter the new order value.</span>`;return}
       if(why.length<3){M.innerHTML=`<span style="color:var(--bad)">Give the reason for the new order value.</span>`;$("#fo-r").focus();return}
-      const aed=toAED(v,c);if(Math.abs(aed-(+o.aed||0))<0.005&&no===((l.quote||{}).no||"")){M.innerHTML=`<span style="color:var(--bad)">This quotation has the same number and value as the current order.</span>`;return}
+      const aed=toAED(v,c);if(!cl&&Math.abs(aed-(+o.aed||0))<0.005&&no===((l.quote||{}).no||"")){M.innerHTML=`<span style="color:var(--bad)">This quotation has the same number and value as the current order.</span>`;return}
       const nq={value:v,currency:c,aed,date:$("#a-date").value||todayISO(),no,notes:$("#a-notes").value.trim(),targetDate:(l.quote||{}).targetDate||todayISO()};const qx=qpdfExtra(l);Object.assign(nq,qx.q);if(own&&mlPending(nq)){M.innerHTML=`<span style="color:var(--bad)">New or changed manual items need a Lead Manager or Supervisor. Ask them to enter this revised quotation.</span>`;return}if(manual){nq.src="manual";nq.manual=manual}S.qpdf=null;S.ml=null;pbQuoteLines(l,nq);
       e.currentTarget.disabled=true;S.drawer.mode=null;await fixOrder(l,{value:v,currency:c,aed,fromQuote:no},why,nq)};return}
   if(mode==="unwin"&&canUnwin(l)){const own=!can("lead.status_override");const T=wonTargets(l).filter(x=>!own||WON_PATH.includes(x[0]));
@@ -1814,7 +1816,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
   if(seq?(s==="Meeting Done"||(s==="On Hold"&&(meetingsOf(l).length||l.meeting))):["Assigned","Attended","Meeting Done","On Hold"].includes(s))b.push(`<button class="btn ${s==="Meeting Done"?"pri":""}" data-m="quote">Quotation sent</button>`);
   if(["Meeting Done","Quotation Sent","On Hold"].includes(s))b.push(`<button class="btn ok" data-m="won">Order won</button>`);
   if(["Quotation Sent"].includes(s))b.push(`<button class="btn" data-m="quote">Revise quotation</button>`);
-  if(s==="Won"&&canUnwin(l)){if(l.order)b.push(`<button class="btn" data-m="fixorder">Upload revised quote</button>`);b.push(`<button class="btn" data-m="unwin">${can("lead.status_override")?"Change status":"Move back a stage"}</button>`)}
+  if(s==="Won"&&(canUnwin(l)||wqClean(l))){if(l.order)b.push(`<button class="btn${!hasQuoteFile(l)?" pri":""}" data-m="fixorder">${!hasQuoteFile(l)?"Upload quotation":"Upload revised quote"}</button>`);if(canUnwin(l))b.push(`<button class="btn" data-m="unwin">${can("lead.status_override")?"Change status":"Move back a stage"}</button>`)}
   if(OPEN.includes(s)&&s!=="On Hold")b.push(`<button class="btn" data-hold="1">Put on hold</button>`);
   if(OPEN.includes(s))b.push(`<button class="btn bad" data-m="lost">Lost</button>`);
   if(["Lost","On Hold"].includes(s))b.push(`<button class="btn" data-reopen="1">Reopen</button>`);
@@ -2273,7 +2275,7 @@ function dataIssues(){const ls=S.leads.filter(l=>!["Duplicate","Rejected"].inclu
   const known=new Set(spList(true).map(x=>nk(x.name)));const odd={};
   ls.forEach(l=>{if(l.assignedTo&&!known.has(nk(l.assignedTo))&&!sharedOwners(l.assignedTo))(odd[l.assignedTo]=odd[l.assignedTo]||[]).push(l)});
   const shared=sharedLeads();
-  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length}}
+  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length+wqOpenL().length}}
 const wonAt=l=>l.stageAt?.Won||l.order?.date||l.updatedAt||l.createdAt||"";
 function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:{}});const cur=Object.keys(S.settings.fx||{AED:1});const sp=spNames();
   const sec1=`<div class="panel" id="dq-won"><div class="row" style="margin-bottom:6px"><h3>Won leads without an order amount</h3><span class="chip" style="${D.zero.length?"background:var(--bad-soft);color:var(--bad)":""}">${D.zero.length} with no revenue</span>${D.noOrder.length>D.zero.length?`<span class="chip">${D.noOrder.length-D.zero.length} using the quotation amount</span>`:""}</div>
@@ -2295,7 +2297,7 @@ function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:
       ${sh?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status</th><th class="num">Value</th><th>Generated by</th><th></th></tr></thead><tbody>${ls.map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td><td>${esc(l.generatedBy||"—")}</td><td class="num"><button type="button" class="btn sm" data-open="${esc(l.id)}">Open${can("lead.reassign")?" / reassign":""}</button></td></tr>`).join("")}</tbody></table></div>`:""}</div>`}).join("")}</div>`:`<p class="small" style="margin:0">Every lead is assigned to a name on the Sales engineer list.</p>`}</div>`;
   const sec3=`<div class="panel" id="dq-shared"><div class="row" style="margin-bottom:6px"><h3>Leads assigned to two people</h3><span class="chip" style="${D.shared.length?"background:var(--warn-soft);color:var(--warn)":""}">${D.shared.length}</span>${D.shared.length&&S.tab!=="bo"&&can("page.backoffice")?`<span class="sp"></span><button type="button" class="btn sm" id="dq-bo">Fix in Back office</button>`:""}</div>
     <p class="small muted" style="margin:0">${D.shared.length?`Combined names such as “${esc(D.shared[0].assignedTo)}”. Use “Move them to the queue” in the panel above to pick one engineer for each.`:"No lead is assigned to two people."}</p></div>`;
-  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}</div>`,D}}
+  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}${wqHTML(can("lead.status_override"))}</div>`,D}}
 function suggestEng(n){const k=nk(n);const sp=spNames();return sp.find(x=>nk(x).split(" ")[0]===k.split(" ")[0])||sp.find(x=>nk(x).startsWith(k)||k.startsWith(nk(x)))||""}
 function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});bindPmsIssues(m);
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
@@ -3375,6 +3377,72 @@ function pmsInject(l,A,when){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||
   const t=box.querySelector("h3");t?t.after(h):box.prepend(h);bindPmsFields("ap",pmsProducts(l),l.pmsIface,h)}
 function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead("ap",h);if(!isRealPms(r.pms))return{err:"Choose the hotel's PMS (PMS integration)."};{const pb=pmsBlock(r.pms,pmsProducts(l));if(pb)return{err:pb}}
   const it=Object.assign({},l.pmsIface||{},r.iface);return{body:{pms:r.pms,pmsIface:it},txt:` · PMS ${r.pms}`}}
+
+/* ---------- Won without a quotation (18 Nov 2026) ----------
+   Won leads with no quotation read from a PDF / e-mail (and no confirmed hand-entered one), won on or after
+   settings.wonQuoteFrom (default 1 January of this year). The list is calculated; nothing is stored on the lead except
+   quoteReminder {at, by, count}, written by the database when a reminder email goes out (40_won_without_quote.sql).
+   Sales fix it with "Upload quotation" (the fixorder form); the order value then follows the quotation. */
+const wqFrom=()=>{const v=String((S.settings||{}).wonQuoteFrom||"");return/^\d{4}-\d{2}-\d{2}$/.test(v)?v:new Date().getFullYear()+"-01-01"};
+const hasQuoteFile=l=>{const q=l&&l.quote;return!!q&&typeof q==="object"&&(q.src==="upload"||q.src==="manual"||q.manualState==="confirmed"||q.source==="Salesforce PDF"||q.source==="Email import")};
+const wqWon=l=>!!l&&l.status==="Won"&&!l.deleted&&(wonAt(l)||"").slice(0,10)>=wqFrom();
+const wqOpen=l=>wqWon(l)&&!hasQuoteFile(l);
+const wqClean=l=>!!l&&l.status==="Won"&&!l.deleted&&!hasQuoteFile(l)&&can("lead.won_own")&&isMine(l);
+const wqOpenL=()=>(S.leads||[]).filter(wqOpen);
+const wqDoneL=()=>(S.leads||[]).filter(l=>wqWon(l)&&hasQuoteFile(l)&&l.quoteReminder&&l.quoteReminder.at);
+const wqAge=l=>{const t=Date.parse(wonAt(l));return isNaN(t)?0:Math.max(0,Math.floor((Date.now()-t)/864e5))};
+const wqRem=l=>{const t=Date.parse((l.quoteReminder||{}).at||"");return isNaN(t)?null:Math.max(0,Math.floor((Date.now()-t)/864e5))};
+const wqVal=l=>+(l.order&&l.order.aed)||0;
+const wqSt=l=>hasQuoteFile(l)?"Quote uploaded":wqRem(l)==null?"Not reminded":"Reminded";
+const wqChip=l=>wqOpen(l)?`<span class="chip warn" title="Won without an uploaded quotation. Upload it so the order value is right.">Quote needed</span>`:"";
+const wqDays=n=>n===0?"today":n===1?"1 day ago":n+" days ago";
+const wqMon=l=>(wonAt(l)||"").slice(0,7);
+const wqMonLabel=k=>{const[y,m]=k.split("-");return(MONTHS[+m-1]||m).slice(0,3)+" "+y};
+function wqUpload(id){openDrawer(id);if(S.drawer&&S.leadMap[id]){S.drawer.mode="fixorder";drawDrawer()}}
+function wqBanner(){if(viewAll()||!can("lead.won_own"))return"";const L=wqOpenL().sort((a,b)=>wqAge(b)-wqAge(a));if(!L.length)return"";const tot=L.reduce((s,l)=>s+wqVal(l),0);const show=S.wqAll?L:L.slice(0,3);
+  return`<div class="notice warn" id="wqBan" role="status"><div class="row" style="gap:8px;flex-wrap:wrap"><b>${L.length} won lead${L.length===1?"":"s"} need${L.length===1?"s":""} the quotation uploaded</b><span class="small">Order value now ${fmtAED(tot)}. Upload the Salesforce PDF so the value is right.</span></div>
+   <div style="display:grid;gap:6px;margin-top:8px">${show.map(l=>`<div class="row" style="gap:8px;flex-wrap:wrap"><span class="mono small">${esc(l.ref)}</span><span style="min-width:0;flex:1">${esc(l.accountName)} <span class="muted small">· ${fmtAED(wqVal(l))} · won ${wqAge(l)} days ago</span></span><button type="button" class="btn sm pri" data-wqup="${esc(l.id)}">Upload quotation</button></div>`).join("")}</div>
+   ${L.length>3?`<button type="button" class="linkb" id="wqMore" style="margin-top:6px">${S.wqAll?"Show fewer":"Show all "+L.length}</button>`:""}</div>`}
+function wqRows(){const W=S.wq||(S.wq={eng:"",mon:"",st:""});return wqOpenL().concat(wqDoneL()).filter(l=>(!W.eng||(l.assignedTo||"—")===W.eng)&&(!W.mon||wqMon(l)===W.mon)&&(!W.st||wqSt(l)===W.st)).sort((a,b)=>(hasQuoteFile(a)-hasQuoteFile(b))||wqAge(b)-wqAge(a))}
+function wqHTML(remind){const open=wqOpenL(),done=wqDoneL();const W=S.wq||(S.wq={eng:"",mon:"",st:""});
+  if(!open.length&&!done.length)return remind?`<div class="panel" id="wq"><div class="row" style="gap:8px"><h3>Won without quotation</h3><span class="chip">0</span></div><p class="small" style="margin:6px 0 0">Every won lead since ${esc(fmtD(wqFrom()))} has an uploaded quotation.</p></div>`:"";
+  const all=open.concat(done);const engs=[...new Set(all.map(l=>l.assignedTo||"—"))].sort((a,b)=>a.localeCompare(b));const mons=[...new Set(all.map(wqMon))].filter(Boolean).sort().reverse();
+  const rows=wqRows();const tot=open.reduce((s,l)=>s+wqVal(l),0);const elig=rows.filter(l=>!hasQuoteFile(l)&&(wqRem(l)==null||wqRem(l)>=3));
+  const stat=l=>{const t=wqSt(l);const c=t==="Quote uploaded"?"background:var(--ok-soft);color:var(--ok)":t==="Reminded"?"background:var(--info-soft,var(--sunk));color:var(--text)":"background:var(--warn-soft);color:var(--warn)";return`<span class="wqs" style="${c}">${t}</span>`};
+  const last=l=>{const r=wqRem(l);return r==null?`<span class="muted">—</span>`:`${wqDays(r)}${!hasQuoteFile(l)&&r<3?`<div class="small muted">next in ${3-r} day${3-r===1?"":"s"}</div>`:""}`};
+  const acts=l=>`<button type="button" class="btn sm" data-open="${esc(l.id)}">Open</button>${remind&&!hasQuoteFile(l)&&(wqRem(l)==null||wqRem(l)>=3)?` <button type="button" class="btn sm" data-wqr="${esc(l.id)}">Remind</button>`:""}`;
+  return`<div class="panel" id="wq"><div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:6px"><h3>Won without quotation</h3><span class="chip" style="${open.length?"background:var(--warn-soft);color:var(--warn)":""}">${open.length} lead${open.length===1?"":"s"} · ${fmtAED(tot)}</span></div>
+   <p class="small muted" style="margin:0 0 10px;max-width:90ch">Won on or after ${esc(fmtD(wqFrom()))} with no uploaded quotation, so the order value may be wrong. The sales engineer opens the lead and uses <b>Upload quotation</b>; the order then takes the quotation's value.${remind?" A reminder email goes to each engineer every Monday, and never more than once in 3 days for the same lead.":""}</p>
+   <div class="wqf" style="margin-bottom:10px"><label class="f">Engineer<select data-wqf="eng">${opts(engs,W.eng,"All engineers")}</select></label>
+    <label class="f">Won in<select data-wqf="mon"><option value="">All months</option>${mons.map(k=>`<option value="${esc(k)}"${W.mon===k?" selected":""}>${esc(wqMonLabel(k))}</option>`).join("")}</select></label>
+    <label class="f">Status<select data-wqf="st"><option value="">All</option>${["Not reminded","Reminded","Quote uploaded"].map(x=>`<option${W.st===x?" selected":""}>${x}</option>`).join("")}</select></label>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="wqX"${rows.length?"":" disabled"}>Export Excel</button>${remind?`<button type="button" class="btn pri" id="wqAll"${elig.length?"":" disabled"} title="${elig.length?"":"Everything shown was reminded in the last 3 days or is done"}">Remind all${elig.length?" ("+elig.length+")":""}</button>`:""}</div></div>
+   ${rows.length?`<div class="wqt tw"><table><thead><tr><th>Lead</th><th>Property</th><th>Engineer</th><th class="num">Order value</th><th>Won</th><th class="num">Days</th><th>Last reminder</th><th>Status</th><th></th></tr></thead><tbody>
+   ${rows.map(l=>`<tr><td class="mono"><button type="button" class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td><td>${esc(l.assignedTo||"—")}</td><td class="num">${fmtAED(wqVal(l))}</td><td style="white-space:nowrap">${esc(fmtD(wonAt(l)))}</td><td class="num">${wqAge(l)}</td><td>${last(l)}</td><td>${stat(l)}</td><td style="white-space:nowrap">${acts(l)}</td></tr>`).join("")}</tbody></table></div>
+   <div class="wqm">${rows.map(l=>`<div class="wqc"><div class="row" style="gap:8px"><span class="mono small">${esc(l.ref)}</span><span class="sp"></span>${stat(l)}</div><div><b>${esc(l.accountName)}</b><div class="small muted">${esc(l.assignedTo||"—")} · won ${wqAge(l)} days ago</div></div><div class="row" style="gap:8px"><b>${fmtAED(wqVal(l))}</b><span class="small muted">Reminded: ${wqRem(l)==null?"never":wqDays(wqRem(l))}</span></div><div class="row" style="gap:8px">${acts(l)}</div></div>`).join("")}</div>`:`<p class="small" style="margin:0">Nothing matches these filters.</p>`}</div>`}
+async function wqRemind(ids){if(!can("lead.status_override")){toast("Only a Lead Manager or Supervisor can send reminders.");return}
+  if(!window.__remindWonQuotes){toast("Reminder emails work only with the Supabase version of Lead Desk.");return}
+  try{const r=await window.__remindWonQuotes(ids);if(!r||!r.mailer){toast("Automatic emails are not set up yet (see the README). Engineers still see the banner in Lead Desk.");return}
+    if(!r.eligible){toast(r.requested?"Nothing sent: these leads were reminded in the last 3 days.":"No lead needs a reminder.");return}
+    toast(`Reminder sent to ${r.engineers} engineer${r.engineers===1?"":"s"} for ${r.eligible} lead${r.eligible===1?"":"s"}.${r.skipped_recent?` ${r.skipped_recent} skipped (reminded in the last 3 days).`:""}${r.no_email?` ${r.no_email} have no linked login, so no email.`:""}`);
+    const t=nowISO();const set=new Set(ids||wqOpenL().map(l=>l.id));(S.leads||[]).forEach(l=>{if(set.has(l.id)&&wqOpen(l)&&(wqRem(l)==null||wqRem(l)>=3))l.quoteReminder={at:t,by:actor()||S.myName||"",count:((l.quoteReminder||{}).count||0)+1}});render()}
+  catch(e){toast("Couldn't send: "+(e.message||e.code||"error"))}}
+async function wqExport(){const rows=wqRows();if(!rows.length)return;const b=$("#wqX");const lab=b?.textContent;if(b){b.disabled=true;b.textContent="Preparing…"}
+  try{const X=await loadXLSX();const H=["Lead","Property","Country","Engineer","Order value (AED)","Won on","Days since won","Last reminder","Reminders sent","Status"];
+    const aoa=[H].concat(rows.map(l=>[l.ref,l.accountName,l.country||"",l.assignedTo||"",Math.round(wqVal(l)),String(wonAt(l)).slice(0,10),wqAge(l),(l.quoteReminder||{}).at?String(l.quoteReminder.at).slice(0,10):"",(l.quoteReminder||{}).count||0,wqSt(l)]));
+    const ws=X.utils.aoa_to_sheet(aoa);ws["!cols"]=H.map((h,c)=>({wch:Math.min(40,Math.max(h.length,...aoa.slice(1,300).map(r=>String(r[c]??"").length))+2)}));ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:H.length-1}})};
+    const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Won without quotation");const name="Won-without-quotation-"+todayISO()+".xlsx";
+    const blob=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});window.__lastExport={name,size:blob.size,rows:rows.length,fmt:"xlsx"};
+    if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+    toast(`${name} is ready: ${rows.length} lead${rows.length===1?"":"s"}`);window.__audit?.("exported","report",name,`Exported ${rows.length} won leads without quotation`,{})}
+  catch(e){if(e?.code==="cancelled"||e?.name==="AbortError")toast("Export cancelled");else toast("Export failed: "+(e?.message||e?.code||"unknown error"))}
+  finally{const nb=$("#wqX");if(nb){nb.disabled=false;nb.textContent=lab||"Export Excel"}}}
+if(!window.__wqBound){window.__wqBound=true;
+  document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-wqup],[data-wqr],#wqAll,#wqX,#wqMore");if(!t)return;
+    if(t.dataset.wqup){wqUpload(t.dataset.wqup);return}if(t.id==="wqMore"){S.wqAll=!S.wqAll;render();return}if(t.id==="wqX"){wqExport();return}
+    if(t.dataset.wqr){wqRemind([t.dataset.wqr]);return}if(t.id==="wqAll"){wqRemind(wqRows().filter(l=>!hasQuoteFile(l)&&(wqRem(l)==null||wqRem(l)>=3)).map(l=>l.id))}});
+  document.addEventListener("change",e=>{const t=e.target;if(!t.dataset||!t.dataset.wqf)return;(S.wq||(S.wq={eng:"",mon:"",st:""}))[t.dataset.wqf]=t.value;render()})}
+
 /* Back office → Data issues: won leads without a PMS */
 function noPmsWon(){return S.leads.filter(l=>!l.deleted&&l.status==="Won"&&!pmsOf(l)&&pmsProducts(l).length).sort((a,b)=>(wonAt(b)||"").localeCompare(wonAt(a)||""))}
 function pmsIssuesHTML(){const L=noPmsWon();const C=pmsCfg();const lim=L.slice(0,150);
@@ -4648,10 +4716,10 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
      ${subs.map(x=>`<tr><td><b>${esc(x.n)}</b> <span class="small muted">${x.c}</span></td><td>${esc(x.g||"—")}</td><td>${x.n==="Not set"?`<span class="muted">—</span>`:esc(territoryOf(x.c,"",{c:x.c,n:x.n}).owner||"—")}</td><td><span class="mono">${x.leads}</span>${dbar(x.leads,mxSL,"--c-main")}</td><td class="num">${x.acc.size}</td><td class="num">${x.orders}</td><td><span class="mono">${fmtAED(x.rev)}</span>${dbar(x.rev,mxSR,"--c-main")}</td><td class="num">${fmtP(pct(x.orders,x.leads))}</td></tr>`).join("")}
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
-   <div id="mg-won" data-sec="rev"></div><div id="mg-ml" data-sec="ops"></div><div id="mg-ops" data-sec="ops"></div>
+   <div id="mg-won" data-sec="rev"></div><div id="mg-wq" data-sec="ops"></div><div id="mg-ml" data-sec="ops"></div><div id="mg-ops" data-sec="ops"></div>
    <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div><div id="mg-gen" data-sec="gen"></div><div id="mg-base" data-sec="base"></div><div id="mg-cs" data-sec="cs"></div><div id="mg-ohip" data-sec="ohip"></div><div id="mg-cloud" data-sec="cloud"></div>
   </section>`;
-  mgmtOps($("#mg-ops"));{const y=$("#mg-ml");if(y){y.innerHTML=mlMgHTML();y.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}{const x=$("#mg-won");if(x){x.innerHTML=wonChangesHTML();x.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}
+  mgmtOps($("#mg-ops"));{const q=$("#mg-wq");if(q)q.innerHTML=wqHTML(false)}{const y=$("#mg-ml");if(y){y.innerHTML=mlMgHTML();y.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}{const x=$("#mg-won");if(x){x.innerHTML=wonChangesHTML();x.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
   if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
   if(MV==="tg"){const x=$("#mg-tg");x.innerHTML=targetsHTML();bindTargets(x)}
