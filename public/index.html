@@ -44,6 +44,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 h2{font-size:22px;font-weight:600} h3{font-size:16px;font-weight:600}
 .mono{font-family:var(--f-mono);font-size:12.5px}
 .muted{color:var(--muted)} .small{font-size:12.5px}
+.ldver{font-size:11.5px;color:var(--muted);text-align:center;padding-top:16px;padding-bottom:20px}@media print{.ldver{display:none}}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
 .topin{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:20px;padding-block:10px;flex-wrap:wrap}
@@ -565,6 +566,7 @@ th{position:relative}
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
+<footer class="gut ldver" id="ldver">Lead Desk · version 19 Nov 2026 · build 906f492</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
