@@ -227,6 +227,36 @@ button.mxi:hover{outline:2px solid currentColor;outline-offset:1px}button.mxi:fo
 .pvx>td{background:var(--sunk);padding:8px 10px 12px}
 .pvt tfoot td{font-weight:700;border-top:2px solid var(--line)}
 .pvcar{display:inline-block;width:12px;color:var(--muted)}
+/* world view */
+.mg-v-world>.panel.afbar,.mg-v-world>#mg-ov{display:none}
+.wdchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.wdchip{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);font:500 13px var(--f-body);white-space:nowrap}
+.wdchip:hover{border-color:var(--accent)}.wdchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.wdchip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.wdchip.sm{min-height:32px;padding:0 10px;font-size:12.5px}
+.wdmain{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+.wdmap svg{width:100%;height:auto;display:block;max-height:640px}
+.wt{cursor:pointer;outline:none}.wt rect{stroke:var(--surface);stroke-width:1}.wt:hover rect{stroke:var(--ink);stroke-width:2}.wt:focus-visible rect{stroke:var(--accent);stroke-width:3}.wt.sel rect{stroke:var(--accent);stroke-width:3.5}
+.wt text{font:600 10.5px var(--f-mono);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.wdleg{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;color:var(--muted);margin-top:10px}.wdleg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.wdleg .wdgrad i{width:120px;height:10px;border-radius:5px;margin:0;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 14%,var(--surface)),var(--accent))}
+.wdreal{width:100%;height:auto;display:block;max-height:640px}
+.wp{stroke:var(--surface);stroke-width:.6;vector-effect:non-scaling-stroke;cursor:pointer;outline:none}.wp:hover{stroke:var(--ink);stroke-width:1.6}.wp:focus-visible{stroke:var(--accent);stroke-width:2.6}.wp.sel{stroke:var(--accent);stroke-width:2.8}
+.wp.wd{stroke:var(--ink);stroke-width:.8}.wpx{stroke:var(--surface);stroke-width:.5;vector-effect:non-scaling-stroke;opacity:.55;pointer-events:none}
+.wdlab{font-family:var(--f-mono);font-weight:600;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.wdmap .seg button{all:unset;cursor:pointer;padding:5px 12px;font:500 12.5px var(--f-body);color:var(--muted)}.wdmap .seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}.wdmap .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.wdp h4{margin:16px 0 6px;font:600 12px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.wdkg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.wdk{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}.wdk .l{font-size:11.5px;color:var(--muted)}.wdk .v{font:600 15px var(--f-display);overflow-wrap:anywhere}
+.wdol>div{padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}.wdol>div:first-child{border-top:0;padding-top:0}.wdsrc{font-size:12px;color:var(--muted);margin-top:2px}.wdsrc a{color:var(--accent)}
+.wdold{background:var(--warn-soft);color:var(--warn)}
+.wdsc{display:flex;align-items:baseline;gap:8px}.wdsc b{font:700 30px var(--f-display)}
+.wdsb{display:grid;grid-template-columns:112px minmax(0,1fr) 28px 36px;gap:8px;align-items:center;font-size:12.5px;margin-top:6px}.wdbt{height:8px;background:var(--sunk);border-radius:6px;overflow:hidden}.wdbt i{display:block;height:100%;background:var(--accent)}
+.wdul{list-style:none;margin:0;padding:0}.wdul li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--line);font-size:13px}.wdul li:first-child{border-top:0}
+.wdgrp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.wdg{border:1px solid var(--line);border-left:4px solid;border-radius:8px;padding:10px 12px;min-width:0}.wdcl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.wdfs{border:1px solid var(--line);border-radius:8px;margin:10px 0 0;padding:8px 12px 12px;min-width:0}.wdfs legend{font:600 12.5px var(--f-body);padding:0 6px}
+.wdx,.wdscrim{display:none}
+@media (max-width:1000px){.wdmain{grid-template-columns:minmax(0,1fr)}
+ .wdp.sheet{position:fixed;left:0;right:0;bottom:0;max-height:80vh;overflow:auto;z-index:41;border-radius:16px 16px 0 0;box-shadow:var(--shadow);padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+ .wdscrim{display:block;position:fixed;inset:0;background:rgba(10,16,24,.45);z-index:40}.wdx{display:inline-flex;align-items:center;min-height:40px;padding:0 16px}}
+@media (max-width:700px){.wdgrp{grid-template-columns:1fr}.wdsb{grid-template-columns:96px minmax(0,1fr) 26px 34px}}
 /* the footprint view has its own filters and figures */
 .mg-v-fp>.panel.afbar,.mg-v-fp>#mg-ov,.mg-v-tg>.panel.afbar,.mg-v-tg>#mg-ov{display:none}
 .tgbar{height:4px;background:var(--sunk);border-radius:2px;margin-top:4px;overflow:hidden}.tgbar>span{display:block;height:100%}
@@ -673,8 +703,9 @@ const PERMISSIONS=[
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],["event.manage","Register events (exhibitions, roadshows) and who attended","Leads"],["lead.won_own","Change their own won leads for a limited number of days: move back a stage or correct the order value, no reason needed","Leads"],
  ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.import","Import new leads from an Excel sheet","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["page.renewals","Renewals page: AMC, subscriptions and OHIP due on won orders","Pages"],["renewal.manage","Update the status, notes and amount of any renewal (AMC team)","Renewals"],["lead.view_won","Read won orders only, for renewals (AMC team)","Renewals"],["contract.upload","Upload AMC contract PDFs and correct them while they wait for approval","Renewals"],["contract.approve","Approve or reject uploaded AMC contracts","Renewals"],["contract.view_all","See every approved AMC contract and the installed base","Renewals"],["contract.view_own","See the approved AMC contracts of their own clients","Renewals"],["lead.view_generated","See leads I generated, read-only, even when another engineer has them (Generated by me)","Leads"],["report.generators","Lead generators: leads by who brought them in, and their status (Management → Lead generators)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
+ ["report.world","Management → World view: tile map, country outlook, opportunity score, whitespace","Reports"],["outlook.manage","Enter or import market outlook data and set the opportunity score weights (World view)","Reports"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
+const DEFAULT_PERMS={"leadmanager": ["lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
@@ -994,11 +1025,11 @@ const LCOLS=[{k:"ref",label:"Ref"},{k:"recv",label:"Received",v:l=>reqDate(l)},{
 function filterLeads(F){const q=nk(F.q);
   return S.leads.filter(l=>viewAll()||isMine(l)).filter(LSTAT[F.status]||LSTAT.All).filter(l=>{const d=reqDate(l);
     return(!F.year||d.slice(0,4)===F.year)&&(!F.year||!F.month||+d.slice(5,7)===+F.month)&&(!F.region||regionOf(l)===F.region)&&(!F.eng||l.assignedTo===F.eng)
-      &&(F.cat==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.cat)&&(!F.dept||deptOf(l)===F.dept)&&(!F.cb||cbMatch(l,F.cb))&&(!F.team||(hasCb(l)&&genDept(l)===F.team))&&subMatch(l,F.sub)&&(!F.source||(l.source||"").trim()===F.source)
+      &&(F.cat==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.cat)&&(!F.dept||deptOf(l)===F.dept)&&(!F.cb||cbMatch(l,F.cb))&&(!F.team||(hasCb(l)&&genDept(l)===F.team))&&subMatch(l,F.sub)&&(!F.wc||ctryOf(l.country)===F.wc)&&(!F.source||(l.source||"").trim()===F.source)
       &&(!q||nk(l.ref+" "+l.accountName+" "+l.product+" "+(l.country||"")+" "+(l.contact?.name||"")+" "+(l.contact?.email||"")+" "+(l.generatedBy||"")).includes(q))})}
 function sortedLeads(F){return sortRows("leads",filterLeads(F),LCOLS,{k:"recv",d:-1})}
 function lfActive(F){const a=[];if(F.source)a.push(["source","Source: "+F.source]);if(F.dept)a.push(["dept","Department: "+F.dept]);if(F.cb)a.push(["cb","Created by: "+(F.cb==="__others"?"someone else (for me)":F.cb==="__me"?"me":F.cb)]);if(F.team)a.push(["team","Team: "+F.team]);if(F.year)a.push(["year","Year: "+F.year]);if(F.year&&F.month)a.push(["month","Month: "+MONTHS[F.month-1]]);
-  if(F.eng)a.push(["eng","Engineer: "+F.eng]);if(F.cat!=="All")a.push(["cat","Category: "+F.cat]);if(F.status!=="All")a.push(["status","Status: "+F.status]);if(F.region)a.push(["region","Region: "+F.region]);if(F.sub)a.push(["sub","Emirate / state: "+F.sub]);if(F.q)a.push(["q","Search: “"+F.q+"”"]);return a}
+  if(F.eng)a.push(["eng","Engineer: "+F.eng]);if(F.cat!=="All")a.push(["cat","Category: "+F.cat]);if(F.status!=="All")a.push(["status","Status: "+F.status]);if(F.region)a.push(["region","Region: "+F.region]);if(F.sub)a.push(["sub","Emirate / state: "+F.sub]);if(F.wc)a.push(["wc","Country: "+ctryName(F.wc)]);if(F.q)a.push(["q","Search: “"+F.q+"”"]);return a}
 function renderLeadList(m,canCreate){ensureTip();const F=lf();const all=sortedLeads(F);const total=all.length,ls=all.slice(0,F.n);
   const won=all.filter(l=>l.status==="Won"),inb=all.filter(l=>l.category!=="Outbound").length;const act=lfActive(F);
   const engs=[...new Set(spNames().concat(S.leads.map(l=>l.assignedTo).filter(Boolean)))].sort((a,b)=>a.localeCompare(b));
@@ -4615,8 +4646,305 @@ function bindCtrSetPanel(m){if(!$("#ctrCatPanel"))return;ctrLoad();const saveSet
 function drawCtrNote(l){const A=$("#recArea");if(!A||!l.accountKey||!canCV())return;const c=ctrLive().find(x=>x.accountKey===l.accountKey);if(!c)return;
   A.insertAdjacentHTML("beforeend",`<div class="notice info" style="margin-top:8px"><b>AMC contract ${esc(c.no)}</b> · ${fmtD(c.start)} to ${fmtD(c.end)} · ${ctrChip(c)} · ${ctrMoney(c,c.total)} a year${c.cur!=="AED"?` (${fmtAED(ctrFx(c,c.total))})`:""}. The Renewals page uses the contract's figures for this client.</div>`)}
 
+/* ======================= WORLD VIEW (Management → World view · permission report.world) =======================
+   A light tile map (one tile per country, no map library, no map images, nothing loaded from outside) with the same
+   figures as the other Management views: leads that are Duplicate or Rejected never count, a lead sits in the period of its
+   request date, revenue is the order value of Won leads. With a product chosen, a lead's amount is split like the Products
+   view does. Growth compares the period with the same dates a year earlier.
+   Market outlook (hotel pipeline, tourist arrivals, regulation) is typed or imported by Management with a source name, a web
+   link and a date for every figure; a figure without all three is never shown or used. Nothing is pre-filled and nothing is
+   fetched live. Saved in config/outlook (read: report.world, write: outlook.manage, checked again in the database, SQL 41).
+   Opportunity score (0-100) = performance + market growth + unreached market, weighted by Management (default 33/33/34). */
+const WD_RAW="Russia:20,1,RUS;Canada:0,2,CAN;USA:0,4,USA;China:23,5,CHN;Brazil:5,11,BRA;Australia:27,14,AUS;India:20,7,IND;Argentina:4,16,ARG;Kazakhstan:19,3,KAZ;Algeria:12,6,DZA;Saudi Arabia:16,6,SAU;Mexico:0,7,MEX;Indonesia:25,10,IDN;Libya:13,6,LBY;Iran:17,5,IRN;Mongolia:23,3,MNG;Peru:3,11,PER;Chad:13,8,TCD;Niger:12,7,NER;Angola:13,12,AGO;Mali:11,7,MLI;South Africa:14,14,ZAF;Colombia:3,9,COL;Ethiopia:16,9,ETH;Bolivia:4,12,BOL;Mauritania:10,7,MRT;Egypt:15,6,EGY;Tanzania:15,11,TZA;Nigeria:12,9,NGA;Venezuela:4,9,VEN;Pakistan:19,6,PAK;Namibia:13,13,NAM;Mozambique:15,13,MOZ;Turkey:15,4,TUR;Chile:3,15,CHL;Zambia:14,12,ZMB;Myanmar:22,7,MMR;Afghanistan:19,5,AFG;Somalia:17,9,SOM;Central African Republic:14,9,CAF;South Sudan:15,9,SSD;Ukraine:15,3,UKR;Madagascar:17,13,MDG;Botswana:14,13,BWA;Kenya:16,10,KEN;France:12,3,FRA;Yemen:17,8,YEM;Thailand:23,8,THA;Spain:11,4,ESP;Turkmenistan:18,4,TKM;Cameroon:13,9,CMR;Papua New Guinea:28,11,PNG;Sweden:13,1,SWE;Uzbekistan:19,4,UZB;Morocco:10,5,MAR;Iraq:16,5,IRQ;Paraguay:5,13,PRY;Zimbabwe:15,12,ZWE;Japan:27,5,JPN;Germany:12,2,DEU;Congo:13,10,COG;Finland:14,1,FIN;Vietnam:24,8,VNM;Malaysia:23,9,MYS;Norway:12,1,NOR;Ivory Coast:11,9,CIV;Poland:13,2,POL;Oman:18,7,OMN;Italy:13,4,ITA;Philippines:25,8,PHL;Ecuador:2,10,ECU;Burkina Faso:11,8,BFA;New Zealand:29,16,NZL;Gabon:12,10,GAB;Guinea:10,9,GIN;UK:11,2,GBR;Uganda:15,10,UGA;Ghana:12,8,GHA;Romania:14,3,ROU;Laos:23,7,LAO;Guyana:5,9,GUY;Belarus:14,2,BLR;Kyrgyzstan:20,4,KGZ;Senegal:10,8,SEN;Syria:15,5,SYR;Cambodia:24,9,KHM;Uruguay:5,15,URY;Tunisia:12,5,TUN;Suriname:5,10,SUR;Nepal:21,6,NPL;Bangladesh:22,6,BGD;Tajikistan:20,5,TJK;Greece:14,4,GRC;Nicaragua:2,8,NIC;North Korea:26,4,PRK;Malawi:16,12,MWI;Eritrea:16,8,ERI;Benin:11,10,BEN;Honduras:1,8,HND;Liberia:10,10,LBR;Bulgaria:14,5,BGR;Cuba:2,7,CUB;Guatemala:1,7,GTM;Iceland:9,1,ISL;South Korea:26,5,KOR;Hungary:13,3,HUN;Portugal:10,4,PRT;Jordan:16,4,JOR;Azerbaijan:17,4,AZE;Austria:12,4,AUT;UAE:17,6,ARE;Czech Republic:15,2,CZE;Serbia:13,5,SRB;Panama:2,9,PAN;Sierra Leone:9,9,SLE;Ireland:10,2,IRL;Georgia:16,3,GEO;Sri Lanka:20,9,LKA;Lithuania:15,1,LTU;Latvia:14,0,LVA;Togo:11,11,TGO;Croatia:11,3,HRV;Bosnia and Herzegovina:14,6,BIH;Costa Rica:1,9,CRI;Slovakia:16,2,SVK;Dominican Republic:3,7,DOM;Estonia:15,0,EST;Denmark:11,1,DNK;Netherlands:10,3,NLD;Switzerland:11,5,CHE;Bhutan:22,5,BTN;Guinea-Bissau:9,8,GNB;Moldova:17,3,MDA;Belgium:10,1,BEL;Lesotho:15,14,LSO;Armenia:18,5,ARM;Albania:14,7,ALB;Equatorial Guinea:12,11,GNQ;Burundi:14,10,BDI;Haiti:3,8,HTI;Rwanda:14,11,RWA;North Macedonia:13,7,MKD;Djibouti:15,8,DJI;Belize:0,8,BLZ;El Salvador:0,9,SLV;Israel:15,7,ISR;Slovenia:13,0,SVN;Fiji:29,13,FJI;Kuwait:18,6,KWT;Eswatini:16,14,SWZ;Montenegro:11,6,MNE;Gambia:9,7,GMB;Jamaica:2,6,JAM;Lebanon:16,7,LBN;Cyprus:17,7,CYP;Palestine:14,8,PSE;Qatar:18,8,QAT;Bahamas:3,6,BHS;Kosovo:16,1,XKX;Luxembourg:12,0,LUX;Trinidad and Tobago:4,8,TTO;Vanuatu:29,12,VUT;Cape Verde:8,8,CPV;Samoa:28,12,WSM;Singapore:23,10,SGP;Brunei:25,9,BRN;Timor-Leste:26,11,TLS;Taiwan:25,7,TWN;Mauritius:18,13,MUS;Comoros:16,11,COM;Bahrain:19,7,BHR;Sao Tome and Principe:13,11,STP;Hong Kong:24,7,HKG;Malta:10,6,MLT;Maldives:20,10,MDV;Seychelles:18,11,SYC;Macau:24,6,MAC;DR Congo:12,12,COD;Sudan:17,10,SDN;Andorra:9,4,AND;Liechtenstein:9,3,LIE;Monaco:9,5,MCO;San Marino:11,0,SMR;Vatican City:9,2,VAT;Guam:28,8,GUM;Kiribati:29,10,KIR;Marshall Islands:29,9,MHL;Micronesia:28,9,FSM;Nauru:28,10,NRU;New Caledonia:28,13,NCL;Palau:27,9,PLW;Solomon Islands:29,11,SLB;Tonga:29,14,TON;Tuvalu:27,11,TUV;French Polynesia:28,14,PYF;Antigua and Barbuda:4,7,ATG;Aruba:5,8,ABW;Barbados:5,7,BRB;Bermuda:4,5,BMU;Cayman Islands:1,6,CYM;Curacao:3,10,CUW;Dominica:6,8,DMA;Grenada:4,10,GRD;Puerto Rico:4,6,PRI;Saint Kitts and Nevis:5,6,KNA;Saint Lucia:6,7,LCA;Saint Vincent and the Grenadines:6,9,VCT;Turks and Caicos:3,5,TCA;British Virgin Islands:6,6,VGB;US Virgin Islands:5,5,VIR";
+const WD_T=(()=>{const o={};for(const s of WD_RAW.split(";")){const i=s.indexOf(":");const[x,y,c]=s.slice(i+1).split(",");o[s.slice(0,i)]={x:+x,y:+y,c}}return o})();
+const WD_CW=36,WD_CH=28,WD_COLS=30,WD_ROWS=17;
+const WD_METRICS=[["rev","Revenue"],["orders","Orders won"],["win","Win rate"],["growth","Growth vs last year"],["pipe","Pipeline value"],["score","Opportunity score"]];
+const WD_GROUPS=[["grow","Win and grow","We sell well and the market is growing: protect and expand","--ok"],["invest","Invest","The market is growing but we sell little: put effort here","--accent"],
+  ["maintain","Maintain","We sell well in a slower market: keep serving it","--warn"],["review","Review","We sell little in a slower market: check it is worth the effort","--muted"]];
+const WD_W0={perf:33,growth:33,reach:34,arrCap:15,roomsCap:40000,whiteCap:25};
+function wdState(){return S.wd||(S.wd={period:"ytd",from:"",to:"",prod:"",metric:"rev",region:"",sel:"",wsC:"",wsQ:"",ed:null,imp:null,allC:false})}
+const wdReg=n=>guessRegion(n)||"No region";
+const wdCtryS=c=>{const s=String(c||"").trim();if(!s||s==="-")return"";const a=ctryOf(s);return a==="Unknown"?"":a};
+const wdCtry=l=>wdCtryS(l.country);
+const wdOut=()=>S.outlook||{countries:{},weights:WD_W0};
+const wdWeights=()=>Object.assign({},WD_W0,wdOut().weights||{});
+const wdSrcOK=s=>!!(s&&s.name&&/^https?:\/\//i.test(s.url||"")&&/^\d{4}-\d{2}-\d{2}$/.test(s.date||""));
+const wdStale=s=>!!(s&&s.date&&Date.now()-new Date(s.date+"T12:00:00").getTime()>365*864e5);
+function wdOutlookOf(c){const o=(wdOut().countries||{})[c]||{};
+  return{pipe:o.pipeline&&(o.pipeline.rooms!=null||o.pipeline.hotels!=null)&&wdSrcOK(o.pipeline.src)?o.pipeline:null,arr:o.arrivals&&o.arrivals.pct!=null&&wdSrcOK(o.arrivals.src)?o.arrivals:null,reg:o.regulatory&&o.regulatory.text&&wdSrcOK(o.regulatory.src)?o.regulatory:null,raw:o}}
+const wdHasOutlook=c=>{const o=wdOutlookOf(c);return!!(o.pipe||o.arr||o.reg)};
+const wdShiftYear=d=>{const x=new Date(d+"T12:00:00");x.setFullYear(x.getFullYear()-1);return ymd(x)};
+function wdRange(P){const[f,t]=periodRange(P);return{f,t,pf:f?wdShiftYear(f):null,pt:f?wdShiftYear(t||todayISO()):null}}
+function wdVisible(P,f,t){return S.leads.filter(l=>(viewAll()||isMine(l))&&!["Duplicate","Rejected"].includes(l.status)).filter(l=>{const d=reqDate(l);return(!f||d>=f)&&(!t||d<=t)}).filter(l=>!P.prod||pbProdsOf(l).includes(P.prod))}
+/* every figure for the chosen filters */
+function wdCompute(P){const R=wdRange(P);const ls=wdVisible(P,R.f,R.t),pl=R.f?wdVisible(P,R.pf,R.pt):[];const w=l=>P.prod?pbShare(l,P.prod):1;
+  const C={},cell=k=>C[k]||(C[k]={country:k,n:0,orders:0,rev:0,pipe:0,prev:0,onMap:!!WD_T[k],region:k?wdReg(k):"",});
+  const add=(l,o,prev)=>{const g=cell(wdCtry(l));if(prev){if(l.status==="Won")g.prev+=orderVal(l)*w(l);return}g.n++;if(l.status==="Won"){g.orders++;g.rev+=orderVal(l)*w(l)}if(["Meeting Done","Quotation Sent"].includes(l.status))g.pipe+=leadValue(l)*w(l)};
+  ls.forEach(l=>add(l));pl.forEach(l=>add(l,0,1));
+  for(const k of Object.keys(WD_T))if(wdHasOutlook(k))cell(k);
+  const G=Object.values(C);G.forEach(g=>{g.growth=!R.f?null:g.prev>0?(g.rev-g.prev)/g.prev:g.rev>0?Infinity:null;g.win=g.n?g.orders/g.n:null});
+  const RG={},reg=(l,prev)=>{const r=regionOf(l);const o=RG[r]||(RG[r]={region:r,acc:new Set,n:0,orders:0,rev:0,pipe:0,prev:0});if(prev){if(l.status==="Won")o.prev+=orderVal(l)*w(l);return}o.acc.add(accKey(l));o.n++;if(l.status==="Won"){o.orders++;o.rev+=orderVal(l)*w(l)}if(["Meeting Done","Quotation Sent"].includes(l.status))o.pipe+=leadValue(l)*w(l)};
+  ls.forEach(l=>reg(l));pl.forEach(l=>reg(l,1));
+  const regions=Object.values(RG).map(o=>Object.assign(o,{accounts:o.acc.size,win:o.n?o.orders/o.n:null,growth:!R.f?null:o.prev>0?(o.rev-o.prev)/o.prev:o.rev>0?Infinity:null}));
+  const sum=k=>ls.reduce((s,l)=>s+(k==="rev"?(l.status==="Won"?orderVal(l)*w(l):0):k==="pipe"?(["Meeting Done","Quotation Sent"].includes(l.status)?leadValue(l)*w(l):0):0),0);
+  const tot={n:ls.length,orders:ls.filter(l=>l.status==="Won").length,rev:sum("rev"),pipe:sum("pipe"),prev:pl.reduce((s,l)=>s+(l.status==="Won"?orderVal(l)*w(l):0),0)};
+  tot.win=tot.n?tot.orders/tot.n:null;tot.growth=!R.f?null:tot.prev>0?(tot.rev-tot.prev)/tot.prev:tot.rev>0?Infinity:null;
+  const D={R,ls,C,regions,tot,none:C[""]||null,off:G.filter(g=>g.country&&!g.onMap),W:wdWeights()};D.A=wdAccts();wdScores(D);return D}
+/* every hotel account we know, once, with its country, chain and whether it has ever bought */
+function wdAccts(){const A={},all=allAccounts();
+  const acc=(k,name)=>A[k]||(A[k]={key:k,name:name||"(no name)",country:"",leads:0,won:false,hist:false,contract:false,last:"",_d:"",engs:{},sts:[]});
+  for(const l of S.leads){if(["Duplicate","Rejected"].includes(l.status))continue;const k=accKey(l),a=acc(k,l.accountName);a.leads++;a.sts.push({status:l.status});if(l.status==="Won")a.won=true;const d=reqDate(l);if(d>a.last)a.last=d;
+    if(l.country&&d>=a._d){a._d=d;a.country=wdCtry(l)}if(l.assignedTo)a.engs[l.assignedTo]=(a.engs[l.assignedTo]||0)+1}
+  for(const[k,x]of Object.entries(all)){const a=A[k]||(x.name?acc(k,x.name):null);if(!a)continue;if(!a.country)a.country=wdCtryS(x.country);const r=S.registry[k];if(r&&r.w)a.hist=true;if(x.contract)a.contract=true}
+  if(typeof canCV==="function"&&canCV())try{for(const c of ctrLive()){const k=c.accountKey||"name:"+nk(c.client);const a=A[k]||acc(k,c.accountName||c.client);a.contract=true;if(!a.country)a.country=wdCtryS(c.country)}}catch(e){}
+  const out=Object.values(A);const cl=new Map();
+  for(const a of out){a.client=a.won||a.hist||a.contract;a.status=acctStatus(a.sts);a.eng=Object.entries(a.engs).sort((x,y)=>y[1]-x[1])[0]?.[0]||"";const c=chainOf(a.key,a.name);a.chain=c.chain;a.chainHow=c.how;if(a.client&&a.chain!=="Independent"){const s=cl.get(a.chain)||new Set;s.add(a.country);cl.set(a.chain,s)}}
+  for(const a of out)a.chainElsewhere=a.chain!=="Independent"&&[...(cl.get(a.chain)||[])].some(c=>c&&c!==a.country);
+  return out}
+const wdClamp=(x,a=0,b=100)=>Math.max(a,Math.min(b,x));
+/* opportunity score: performance + market growth + unreached market (each 0-100) */
+function wdScores(D){const W=D.W;const withLeads=Object.values(D.C).filter(g=>g.country&&g.n>0);const N=withLeads.length;
+  const byC={};D.A.forEach(a=>{if(!a.country)return;const o=byC[a.country]||(byC[a.country]={na:0,nc:0});o.na++;if(!a.client)o.nc++});
+  for(const g of Object.values(D.C)){if(!g.country)continue;g.perf=!N?0:N===1?(g.rev>0?100:0):withLeads.filter(x=>x.rev<g.rev).length/(N-1)*100;
+    const o=wdOutlookOf(g.country);const parts=[];if(o.arr)parts.push(wdClamp(o.arr.pct/W.arrCap*100));if(o.pipe&&o.pipe.rooms!=null)parts.push(wdClamp(o.pipe.rooms/W.roomsCap*100));
+    g.growthS=parts.length?parts.reduce((a,b)=>a+b,0)/parts.length:null;
+    const b=byC[g.country]||{na:0,nc:0};g.na=b.na;g.nc=b.nc;g.reach=!b.na?100:wdClamp(.5*(b.nc/b.na*100)+.5*(b.nc/W.whiteCap*100));
+    g.score=g.growthS==null?null:Math.round((W.perf*g.perf+W.growth*g.growthS+W.reach*g.reach)/100);
+    g.group=g.growthS==null?"":g.perf>=50?(g.growthS>=50?"grow":"maintain"):(g.growthS>=50?"invest":"review")}}
+const wdGrowthTxt=v=>v==null?"—":v===Infinity?"New":(v>0?"+":"")+Math.round(v*100)+"%";
+function wdFmt(m,g){if(!g)return"—";switch(m){case"rev":return fmtAED(g.rev);case"orders":return fmtN(g.orders);case"win":return g.n?fmtP(g.win):"—";case"growth":return wdGrowthTxt(g.growth);case"pipe":return fmtAED(g.pipe);case"score":return g.score==null?"—":String(g.score)}return""}
+function wdVal(m,g,P){if(!g)return null;switch(m){case"rev":return g.rev||null;case"orders":return g.orders||null;case"win":return g.n>=MIN_CONV?g.win:null;case"growth":return g.growth;case"pipe":return g.pipe||null;case"score":return g.score}return null}
+/* colour of one tile: [fill, text colour] */
+function wdShade(m,v,max,g){const mix=(c,t)=>`color-mix(in srgb,var(${c}) ${Math.round(14+t*76)}%,var(--surface))`;
+  if(m==="score"){if(!g||!g.group)return["var(--sunk)","var(--muted)"];const c=WD_GROUPS.find(x=>x[0]===g.group)[3];const t=(g.score||0)/100;return[mix(c,Math.max(.25,t)),t>.5?"#fff":"var(--ink)"]}
+  if(v==null||(m!=="growth"&&!(v>0)))return["var(--sunk)","var(--muted)"];
+  if(m==="growth"){const t=v===Infinity?1:wdClamp(Math.abs(v),0,1);return[mix(v>=0?"--ok":"--bad",Math.max(.2,t)),t>.5?"#fff":"var(--ink)"]}
+  const t=Math.sqrt(v/(max||1));return[mix("--accent",t),t>.55?"#fff":"var(--ink)"]}
+function wdMax(D,m,P){let mx=0;for(const g of Object.values(D.C)){const v=wdVal(m,g,P);if(v!=null&&v!==Infinity&&v>mx)mx=v}return mx}
+function wdBox(P){const names=Object.keys(WD_T).filter(n=>!P.region||wdReg(n)===P.region);if(!names.length)return[0,0,WD_COLS,WD_ROWS];
+  let x0=99,y0=99,x1=0,y1=0;for(const n of names){const t=WD_T[n];x0=Math.min(x0,t.x);y0=Math.min(y0,t.y);x1=Math.max(x1,t.x);y1=Math.max(y1,t.y)}
+  if(!P.region)return[0,0,WD_COLS,WD_ROWS];return[x0,y0,x1-x0+1,y1-y0+1]}
+function wdTilesHTML(D,P){const m=P.metric,mx=wdMax(D,m,P);const[bx,by,bw,bh]=wdBox(P);const names=Object.keys(WD_T).filter(n=>!P.region||wdReg(n)===P.region);
+  const pad=4,vb=`${bx*WD_CW-pad} ${by*WD_CH-pad} ${bw*WD_CW+pad*2} ${bh*WD_CH+pad*2}`;
+  const tiles=names.map(n=>{const t=WD_T[n],g=D.C[n],v=wdVal(m,g,P),[fill,ink]=wdShade(m,v,mx,g);const full=ctryName(n);
+    const tip=g&&(g.n||wdHasOutlook(n))?`${full}: ${wdFmt(m,g)}${m==="rev"||m==="orders"||m==="pipe"?"":""} · ${g.n} lead${g.n===1?"":"s"}, ${fmtAED(g.rev)} won${g.group?" · "+WD_GROUPS.find(x=>x[0]===g.group)[1]:""}`:`${full}: no leads in this period`;
+    return`<g class="wt${P.sel===n?" sel":""}" data-wdc="${esc(n)}" tabindex="0" role="button" aria-label="${esc(tip)}" data-tip="${esc(tip)}"><rect x="${t.x*WD_CW}" y="${t.y*WD_CH}" width="${WD_CW-3}" height="${WD_CH-3}" rx="5" style="fill:${fill}"/><text x="${t.x*WD_CW+(WD_CW-3)/2}" y="${t.y*WD_CH+(WD_CH-3)/2}" style="fill:${ink}">${esc(t.c)}</text></g>`}).join("");
+  return`<svg viewBox="${vb}" role="group" aria-label="World tile map, one tile per country" preserveAspectRatio="xMidYMid meet">${tiles}</svg>`}
+/* real country outlines: public/world-map.js (about 125 KB, Natural Earth public-domain shapes, simplified), loaded only when this view opens */
+function wdEnsureMap(){if(window.WORLD_MAP){S.wdMap="ok";return}if(S.wdMap==="loading"||S.wdMap==="fail")return;S.wdMap="loading";
+  const sc=document.createElement("script");sc.src="world-map.js?v=1";sc.onload=()=>{S.wdMap=window.WORLD_MAP?"ok":"fail";if(S.tab==="mgmt"&&S.mgView==="world")render()};sc.onerror=()=>{S.wdMap="fail";if(S.tab==="mgmt"&&S.mgView==="world")render()};document.head.appendChild(sc)}
+function wdZoomBox(M,P){const[x0,y0,x1,y1]=M.box;if(!P.region)return[x0,-196,x1-x0,y1+196+4];
+  const names=Object.keys(M.c).filter(n=>wdReg(n)===P.region);if(!names.length)return[x0,-196,x1-x0,y1+200];
+  const q=(a,f)=>{const v=a.slice().sort((p,r)=>p-r);return v[Math.min(v.length-1,Math.max(0,Math.round(f*(v.length-1))))]};
+  const xs=names.map(n=>M.c[n].p[0]),ys=names.map(n=>M.c[n].p[1]);const t=names.length>10?.07:0;
+  let a=q(xs,t),b=q(xs,1-t),c=q(ys,t),d=q(ys,1-t);const px=Math.max(46,(b-a)*.28),py=Math.max(30,(d-c)*.3);a-=px;b+=px;c-=py;d+=py;
+  let w=b-a,h=d-c;const ar=1.75;if(w/h<ar){const nw=h*ar;a-=(nw-w)/2;w=nw}else{const nh=w/ar;c-=(nh-h)/2;h=nh}return[a,c,w,h]}
+function wdRealHTML(D,P){const M=window.WORLD_MAP,m=P.metric,mx=wdMax(D,m,P);const[bx,by,bw,bh]=wdZoomBox(M,P);const names=Object.keys(M.c).sort((a,b)=>(a===P.sel)-(b===P.sel));
+  const inR=n=>!P.region||wdReg(n)===P.region;const r0=Math.max(1.6,bw/260),fs=Math.max(2.6,bw/150);let shapes="",dots="",labs="";
+  for(const n of names){const o=M.c[n],g=D.C[n],v=wdVal(m,g,P),[fill,ink]=wdShade(m,v,mx,g),full=ctryName(n);
+    if(!inR(n)){if(o.d)shapes+=`<path d="${o.d}" class="wpx" style="fill:var(--sunk)"/>`;continue}
+    const tip=g&&(g.n||wdHasOutlook(n))?`${full}: ${wdFmt(m,g)} · ${g.n} lead${g.n===1?"":"s"}, ${fmtAED(g.rev)} won${g.group?" · "+WD_GROUPS.find(x=>x[0]===g.group)[1]:""}`:`${full}: no leads in this period`;
+    const at=`data-wdc="${esc(n)}" tabindex="0" role="button" aria-label="${esc(tip)}" data-tip="${esc(tip)}"`;
+    if(o.d)shapes+=`<path d="${o.d}" class="wp${P.sel===n?" sel":""}" ${at} style="fill:${fill}"/>`;
+    if(o.dot)dots+=`<circle cx="${o.p[0]}" cy="${o.p[1]}" r="${r0}" class="wp wd${P.sel===n?" sel":""}" ${at} style="fill:${fill}"/>`;
+    if(P.region&&o.b&&(o.b[2]-o.b[0])>bw*.06&&!o.dot)labs+=`<text x="${o.p[0]}" y="${o.p[1]}" class="wdlab" style="font-size:${fs}px;fill:${ink}">${esc(WD_T[n]?WD_T[n].c:n.slice(0,3).toUpperCase())}</text>`}
+  return`<svg viewBox="${bx.toFixed(1)} ${by.toFixed(1)} ${bw.toFixed(1)} ${bh.toFixed(1)}" role="group" aria-label="World map, click a country" preserveAspectRatio="xMidYMid meet" class="wdreal"><defs><clipPath id="wdclip"><rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}"/></clipPath></defs><g clip-path="url(#wdclip)">${shapes}${dots}${labs}</g></svg>`}
+function wdMapHTML(D,P){if(P.style!=="tiles"&&!window.WORLD_MAP)wdEnsureMap();
+  if(P.style!=="tiles"&&window.WORLD_MAP)return wdRealHTML(D,P);
+  if(P.style!=="tiles"&&S.wdMap==="loading")return`<div class="small muted" style="padding:60px 0;text-align:center">Loading the map…</div>`;
+  return(P.style!=="tiles"&&S.wdMap==="fail"?`<p class="small muted" style="margin:0 0 6px">The country outlines could not be loaded (file <code>world-map.js</code> missing or offline), so the tile map is shown instead.</p>`:"")+wdTilesHTML(D,P)}
+function wdLegendHTML(D,P){const m=P.metric,mx=wdMax(D,m,P);
+  if(m==="score")return`<div class="wdleg">${WD_GROUPS.map(([k,t,d,c])=>`<span data-tip="${esc(d)}"><i style="background:var(${c})"></i>${t}</span>`).join("")}<span><i style="background:var(--sunk);border:1px solid var(--line)"></i>No outlook yet</span></div>`;
+  if(m==="growth")return`<div class="wdleg"><span><i style="background:var(--bad)"></i>Down</span><span><i style="background:var(--ok)"></i>Up (darker = bigger)</span><span class="muted">“New” = sold this period, nothing in the same dates last year</span><span><i style="background:var(--sunk);border:1px solid var(--line)"></i>No comparison</span></div>`;
+  return`<div class="wdleg"><span class="wdgrad"><i></i></span><span>0</span><span>→</span><span><b>${wdFmt(m,{rev:mx,orders:mx,pipe:mx,win:mx,n:1,score:mx})}</b></span>${m==="win"?`<span class="muted">Countries with fewer than ${MIN_CONV} leads are not coloured</span>`:""}<span><i style="background:var(--sunk);border:1px solid var(--line)"></i>None</span></div>`}
+
+const wdSrcHTML=s=>wdSrcOK(s)?`<div class="wdsrc">Estimate · <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)}</a> · ${fmtD(s.date+"T12:00:00")}${wdStale(s)?` <span class="chip wdold">may be out of date</span>`:""}</div>`:""
+const wdPipeTxt=p=>[p.rooms!=null?fmtN(+p.rooms)+" rooms":"",p.hotels!=null?(p.rooms!=null?"in ":"")+fmtN(+p.hotels)+" hotels":"",p.year?"opening by "+p.year:""].filter(Boolean).join(" · ");
+const wdArrTxt=a=>(a.pct>0?"+":"")+(+a.pct)+"% a year"+(a.year?" ("+a.year+")":"");
+const wdCanEdit=()=>can("outlook.manage");
+function wdPanelHTML(D,P){const c=P.sel;if(!c)return`<div class="panel wdp" id="wdPanel"><h3>Country</h3><p class="small muted" style="margin:6px 0 0">Select a country on the map, or a row in the list below, to see our numbers, the market outlook and the hotels we haven't sold to.</p></div>`;
+  const g=D.C[c]||{country:c,n:0,orders:0,rev:0,pipe:0,prev:0,win:null,growth:null,perf:0,reach:100,growthS:null,score:null,group:"",na:0,nc:0},o=wdOutlookOf(c),W=D.W;
+  const accts=D.A.filter(a=>a.country===c);const cl=accts.filter(a=>a.client),ws=accts.filter(a=>!a.client&&a.leads>0);
+  const ch={};accts.forEach(a=>{if(a.chain==="Independent")return;const x=ch[a.chain]||(ch[a.chain]={n:0,c:0});x.n++;if(a.client)x.c++});
+  const chains=Object.entries(ch).sort((x,y)=>y[1].c-x[1].c||y[1].n-x[1].n).slice(0,6);const indep=accts.filter(a=>a.chain==="Independent").length;
+  const grp=g.group?WD_GROUPS.find(x=>x[0]===g.group):null;
+  const bar=(l,v,w,tip)=>`<div class="wdsb" data-tip="${esc(tip)}"><span>${l}</span><span class="wdbt"><i style="width:${v==null?0:v}%"></i></span><span class="mono">${v==null?"—":Math.round(v)}</span><span class="small muted">${w}%</span></div>`;
+  const kp=(l,v)=>`<div class="wdk"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+  return`<div class="wdscrim" id="wdScrim"></div><aside class="panel wdp sheet" id="wdPanel" role="region" aria-label="${esc(ctryName(c))}">
+   <div class="row" style="align-items:flex-start;gap:8px;flex-wrap:nowrap"><div style="min-width:0"><h3 style="margin:0">${esc(ctryName(c))}</h3><div class="small muted">${esc(wdReg(c))}</div></div><span class="sp"></span>${grp?`<span class="chip wdgc" style="background:color-mix(in srgb,var(${grp[3]}) 16%,var(--surface));color:var(${grp[3]})" data-tip="${esc(grp[2])}">${grp[1]}</span>`:""}<button type="button" class="btn sm wdx" id="wdClose" aria-label="Close">Close</button></div>
+   <div class="wdkg">${kp("Revenue",fmtAED(g.rev))}${kp("Orders won",fmtN(g.orders))}${kp("Win rate",g.n?fmtP(g.win):"—")}${kp("Leads",fmtN(g.n))}${kp("Pipeline",fmtAED(g.pipe))}${kp("Growth",wdGrowthTxt(g.growth))}</div>
+   <p class="small muted" style="margin:6px 0 0">${esc(periodText(P))}${P.prod?" · "+esc(P.prod):""}. ${g.growth==null&&D.R.f?"No sales in the same dates last year to compare with.":!D.R.f?"Growth needs a period (not All time).":""}</p>
+   <h4>Market outlook</h4>
+   ${o.pipe||o.arr||o.reg?`<div class="wdol">${o.pipe?`<div><b>Hotel pipeline</b><div>${esc(wdPipeTxt(o.pipe))}</div>${wdSrcHTML(o.pipe.src)}</div>`:""}${o.arr?`<div><b>Tourist arrivals growth</b><div>${esc(wdArrTxt(o.arr))}</div>${wdSrcHTML(o.arr.src)}</div>`:""}${o.reg?`<div><b>Regulation and compliance</b><div>${esc(o.reg.text)}</div>${wdSrcHTML(o.reg.src)}</div>`:""}</div>`
+     :`<p class="small muted" style="margin:0">No sourced market outlook for this country yet.${wdCanEdit()?` <button type="button" class="linkb" data-wdadd="${esc(c)}"><b>Add it →</b></button>`:""}</p>`}
+   <h4>Opportunity score</h4>
+   ${g.score==null?`<p class="small muted" style="margin:0">Needs market growth data (arrivals growth or hotel pipeline with a source). Performance is <b>${Math.round(g.perf||0)}</b> and unreached market is <b>${Math.round(g.reach)}</b> out of 100.</p>`
+     :`<div class="wdsc"><b>${g.score}</b><span class="small muted">out of 100</span></div>`}
+   <div class="wdsbs">${bar("Performance",g.perf||0,W.perf,"How well we already sell here: revenue compared with other countries")}${bar("Market growth",g.growthS,W.growth,"From the sourced outlook: tourist arrivals growth and hotel pipeline")}${bar("Unreached market",g.reach,W.reach,"Hotels we know here that have not bought, and how many there are")}</div>
+   <h4>Hotel chains here</h4>
+   ${chains.length?`<ul class="wdul">${chains.map(([n,x])=>`<li><span>${esc(n)}</span><span class="muted">${x.n} hotel${x.n===1?"":"s"} · ${x.c} client${x.c===1?"":"s"}</span></li>`).join("")}${indep?`<li><span class="muted">Independent / other</span><span class="muted">${indep}</span></li>`:""}</ul>`:`<p class="small muted" style="margin:0">${accts.length?`${accts.length} hotel${accts.length===1?"":"s"}, none matched to a chain.`:"No hotels known here yet."}</p>`}
+   <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button type="button" class="btn pri" data-wdleads="${esc(c)}">Open leads for this country</button>${ws.length?`<button type="button" class="btn" data-wdws="${esc(c)}">${ws.length} hotel${ws.length===1?"":"s"} not sold to</button>`:""}</div>
+  </aside>`}
+function wdRegionsHTML(D,P){const R=D.regions.slice().sort((a,b)=>b.rev-a.rev||b.n-a.n);const mx=Math.max(1,...R.map(r=>r.rev));
+  return`<div class="panel"><h3>Regions</h3><p class="small muted" style="margin:2px 0 10px">Same regions as Management → Regions. Select one to zoom the map.</p>
+   <div class="tw plain"><table class="wdreg"><thead><tr><th>Region</th><th style="min-width:130px">Revenue</th><th class="num">Orders</th><th class="num">Win rate</th><th class="num">Growth</th></tr></thead><tbody>
+   ${R.map(r=>`<tr class="click${P.region===r.region?" xopen":""}" data-wdr="${esc(r.region)}" tabindex="0"><td><b>${esc(r.region)}</b><div class="small muted">${fmtN(r.n)} leads · ${fmtN(r.accounts)} accounts</div></td><td><span class="mono">${fmtAED(r.rev)}</span>${dbar(r.rev,mx,"--c-main")}</td><td class="num">${fmtN(r.orders)}</td><td class="num">${r.n?fmtP(r.win):"—"}</td><td class="num">${wdGrowthTxt(r.growth)}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">No leads for these filters.</td></tr>`}
+   </tbody><tfoot><tr><td><b>All regions</b></td><td class="mono">${fmtAED(D.tot.rev)}</td><td class="num">${fmtN(D.tot.orders)}</td><td class="num">${D.tot.n?fmtP(D.tot.win):"—"}</td><td class="num">${wdGrowthTxt(D.tot.growth)}</td></tr></tfoot></table></div></div>`}
+function wdGroupsHTML(D,P){const sc=Object.values(D.C).filter(g=>g.country&&g.group);
+  return`<div class="panel"><h3>Where to focus</h3><p class="small muted" style="margin:2px 0 10px">Opportunity score groups. Only countries with a sourced market outlook can be grouped.</p>
+   ${sc.length?`<div class="wdgrp">${WD_GROUPS.map(([k,t,d,c])=>{const L=sc.filter(g=>g.group===k).sort((a,b)=>b.score-a.score);return`<div class="wdg" style="border-left-color:var(${c})"><div class="row"><b>${t}</b><span class="chip">${L.length}</span></div><div class="small muted">${esc(d)}</div><div class="wdcl">${L.map(g=>`<button type="button" class="wdchip sm" data-wdc="${esc(g.country)}" data-tip="${esc(ctryName(g.country)+": score "+g.score)}">${esc(g.country)} <b>${g.score}</b></button>`).join("")||`<span class="small muted">None</span>`}</div></div>`}).join("")}</div>`
+     :`<div class="notice info">No market outlook has been entered yet, so no country can be scored. ${wdCanEdit()?"Add it in <b>Market outlook data</b> below, or import it from Excel.":"Management can add it."}</div>`}</div>`}
+const WD_TCOLS=[{k:"name",label:"Country"},{k:"region",label:"Region"},{k:"n",label:"Leads",num:1},{k:"orders",label:"Orders",num:1},{k:"win",label:"Win rate",num:1,tip:"Orders ÷ leads"},{k:"rev",label:"Revenue",num:1},{k:"growth",label:"Growth",num:1,tip:"Against the same dates a year earlier",v:r=>r.growth===Infinity?1e9:r.growth},{k:"pipe",label:"Pipeline",num:1,tip:"Leads at Meeting done or Quotation sent"},{k:"score",label:"Score",num:1,tip:"Opportunity score, 0-100"}];
+function wdTableHTML(D,P){const rows=Object.values(D.C).filter(g=>g.n>0||g.country&&wdHasOutlook(g.country)).map(g=>Object.assign({},g,{name:g.country||"Country not set",region:g.country?(g.onMap?g.region:"Not on the map"):"—"}));
+  const sr=sortRows("wdc",rows,WD_TCOLS,{k:"rev",d:-1});const show=P.allC?sr:sr.slice(0,25);
+  const cell=r=>`<td class="num">${fmtN(r.n)}</td><td class="num">${fmtN(r.orders)}</td><td class="num">${r.n?fmtP(r.win):"—"}</td><td class="num">${r.rev?fmtAED(r.rev):"—"}</td><td class="num">${wdGrowthTxt(r.growth)}</td><td class="num">${r.pipe?fmtAED(r.pipe):"—"}</td><td class="num">${r.score==null?"—":r.score+(r.group?` <span class="small muted">${WD_GROUPS.find(x=>x[0]===r.group)[1]}</span>`:"")}</td>`;
+  return`<div class="panel"><div class="row"><h3>All countries</h3><span class="sp"></span><span class="small muted">${sr.length} with leads or outlook</span></div>
+   <div class="tw"><table class="pvt"><thead><tr>${WD_TCOLS.map(c=>th("wdc",c)).join("")}</tr></thead><tbody>
+   ${show.map(r=>`<tr class="${r.country&&r.onMap?"click":""}${P.sel===r.country&&r.country?" xopen":""}" ${r.country&&r.onMap?`data-wdc="${esc(r.country)}" tabindex="0"`:""}><td><b>${esc(r.country?ctryName(r.country):r.name)}</b></td><td class="small">${esc(r.region)}</td>${cell(r)}</tr>`).join("")||`<tr><td colspan="9" class="empty">No leads for these filters.</td></tr>`}
+   </tbody><tfoot><tr><td><b>All countries</b></td><td class="small muted">${D.none?`incl. ${fmtN(D.none.n)} with no country`:""}</td><td class="num">${fmtN(D.tot.n)}</td><td class="num">${fmtN(D.tot.orders)}</td><td class="num">${D.tot.n?fmtP(D.tot.win):"—"}</td><td class="num">${fmtAED(D.tot.rev)}</td><td class="num">${wdGrowthTxt(D.tot.growth)}</td><td class="num">${fmtAED(D.tot.pipe)}</td><td></td></tr></tfoot></table></div>
+   ${sr.length>25?`<div style="margin-top:8px"><button type="button" class="btn sm" id="wdAll">${P.allC?"Show the top 25 only":"Show all "+sr.length}</button></div>`:""}</div>`}
+/* hotels we know that have never bought */
+function wdWhitespace(D,c){return D.A.filter(a=>!a.client&&a.leads>0&&a.country&&(!c||a.country===c)).sort((x,y)=>(y.chainElsewhere-x.chainElsewhere)||y.last.localeCompare(x.last))}
+function wdWsHTML(D,P){const W=wdWhitespace(D,P.wsC);const byC={};D.A.forEach(a=>{if(a.country&&!a.client&&a.leads>0)byC[a.country]=(byC[a.country]||0)+1});const cs=Object.keys(byC).sort((a,b)=>byC[b]-byC[a]||a.localeCompare(b));
+  return`<div class="panel" id="wdWs"><div class="row" style="gap:10px;flex-wrap:wrap"><h3>Whitespace: hotels we haven't sold to</h3><span class="sp"></span>${can("report.world")?`<button type="button" class="btn sm" id="wdWsX">Export to Excel</button>`:""}</div>
+   <p class="small muted" style="margin:2px 0 10px">Hotels and chains we already know from our own leads and accounts that have no order from us. Hotels of a chain that already buys from us elsewhere come first.</p>
+   <label class="f" style="max-width:320px">Country<select id="wdWsC"><option value="">All countries (${fmtN(Object.values(byC).reduce((a,b)=>a+b,0))} hotels)</option>${cs.map(c=>`<option value="${esc(c)}"${P.wsC===c?" selected":""}>${esc(ctryName(c))} (${byC[c]})</option>`).join("")}</select></label>
+   <div class="tw" style="margin-top:10px"><table class="pvl"><thead><tr><th>Hotel</th><th>Country</th><th>Chain</th><th>Status</th><th class="num">Leads</th><th>Last lead</th><th>Engineer</th></tr></thead><tbody>
+   ${W.slice(0,40).map(a=>`<tr class="click" data-wda="${esc(a.key)}"><td><b>${esc(a.name)}</b></td><td>${esc(ctryName(a.country))}</td><td>${a.chain==="Independent"?`<span class="muted">Independent</span>`:esc(a.chain)}${a.chainElsewhere?` <span class="chip" style="background:var(--ok-soft);color:var(--ok)" data-tip="This chain already has a client in another country">client elsewhere</span>`:""}</td><td>${esc(a.status)}</td><td class="num">${a.leads}</td><td>${fmtD(a.last)}</td><td>${esc(a.eng||"—")}</td></tr>`).join("")||`<tr><td colspan="7" class="empty">Nothing here: every known hotel in this selection has bought.</td></tr>`}
+   </tbody></table></div>${W.length>40?`<p class="small muted" style="margin:6px 0 0">Showing 40 of ${fmtN(W.length)}. The Excel export has the full list.</p>`:""}</div>`}
+
+/* ----- market outlook: table, form, Excel template and import ----- */
+const WD_HEAD=["Country","Pipeline rooms","Pipeline hotels","Pipeline year (opening by)","Pipeline source name","Pipeline source link","Pipeline source date","Arrivals growth % a year","Arrivals year","Arrivals source name","Arrivals source link","Arrivals source date","Regulatory driver","Regulatory source name","Regulatory source link","Regulatory source date"];
+const wdDl=async(name,blob)=>{if(S.downloads)await S.downloads.save({filename:name,data:blob});else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}};
+const WD_MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+function wdEnsureSub(){if(wdEnsureSub.done||!S.db)return;wdEnsureSub.done=1;S.db.doc("config/outlook").onSnapshot(s=>{S.outlookExists=s.exists;S.outlook=s.exists?s.data():{countries:{},weights:WD_W0};S.outlookLoaded=true;softRender()},()=>{S.outlookLoaded=true;S.outlook=S.outlook||{countries:{},weights:WD_W0}})}
+async function wdSave(doc,msg){doc=Object.assign({},doc,{updatedAt:nowISO()});try{await S.db.doc("config/outlook").set(doc);S.outlook=doc;S.outlookExists=true;if(msg)toast(msg);render();return true}
+  catch(e){toast(/permission|row-level|42501|invalid_argument|not saved/i.test(e.message||e.code||"")?(/not saved/i.test(e.message||"")?e.message:"You can't change the market outlook. Run supabase/41_world_view.sql, or ask a Supervisor."):"Couldn't save: "+(e.message||e.code));return false}}
+function wdOutlookPanel(P){const O=wdOut(),ed=wdCanEdit(),rows=Object.keys(O.countries||{}).sort((a,b)=>a.localeCompare(b));const W=wdWeights();
+  const cellItem=(m,ok,txt)=>!m?`<span class="muted">—</span>`:ok?`<div>${esc(txt)}</div>${wdSrcHTML(m.src)}`:`<span class="chip wdold" data-tip="Every figure needs a source name, a web link and a date. Until then it is not shown or used.">source missing – not used</span>`;
+  const imp=P.imp;
+  return`<div class="panel" id="wdOut"><div class="row" style="gap:10px;flex-wrap:wrap"><h3>Market outlook data</h3><span class="sp"></span>${ed?`<button type="button" class="btn sm" id="wdTpl">Download Excel template</button><label class="btn sm" for="wdFile" style="cursor:pointer">Import from Excel</label><input type="file" id="wdFile" accept=".xlsx,.xls" hidden><button type="button" class="btn sm pri" id="wdNew">Add a country</button>`:""}</div>
+   <p class="small muted" style="margin:2px 0 10px">Hotel pipeline, tourist arrivals growth and regulation per country. <b>Every figure needs a source name, a web link and the source date.</b> Nothing is fetched live and nothing is pre-filled: figures are the estimates you enter, shown with their source and date. Figures older than 12 months are tagged “may be out of date”.${ed?"":" Only Management can change them."}</p>
+   ${imp?`<div class="notice ${imp.errs.length?"warn":"info"}" style="margin-bottom:10px"><b>${imp.name}</b>: ${imp.ok.length} countr${imp.ok.length===1?"y is":"ies are"} ready to save${imp.errs.length?`, ${imp.errs.length} problem${imp.errs.length===1?"":"s"} found. Rows with a problem are skipped`:""}.${imp.errs.length?`<ul class="wdul" style="margin:6px 0 0">${imp.errs.slice(0,8).map(e=>`<li>${esc(e)}</li>`).join("")}${imp.errs.length>8?`<li class="muted">…and ${imp.errs.length-8} more</li>`:""}</ul>`:""}
+     <div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn sm pri" id="wdImpOK"${imp.ok.length?"":" disabled"}>Save ${imp.ok.length} countr${imp.ok.length===1?"y":"ies"}</button><button type="button" class="btn sm" id="wdImpNo">Cancel</button></div></div>`:""}
+   ${P.ed!==null&&ed?wdFormHTML(P):""}
+   <div class="tw"><table class="pvl wdot"><thead><tr><th>Country</th><th>Hotel pipeline</th><th>Tourist arrivals growth</th><th>Regulation and compliance</th>${ed?"<th></th>":""}</tr></thead><tbody>
+   ${rows.map(c=>{const o=O.countries[c]||{};const p=o.pipeline,a=o.arrivals,r=o.regulatory;return`<tr><td><b>${esc(ctryName(c))}</b></td><td>${cellItem(p&&(p.rooms!=null||p.hotels!=null)?p:null,p&&wdSrcOK(p.src),p?wdPipeTxt(p):"")}</td><td>${cellItem(a&&a.pct!=null?a:null,a&&wdSrcOK(a.src),a?wdArrTxt(a):"")}</td><td>${cellItem(r&&r.text?r:null,r&&wdSrcOK(r.src),r?r.text:"")}</td>${ed?`<td class="num" style="white-space:nowrap"><button type="button" class="btn sm" data-wded="${esc(c)}">Edit</button> <button type="button" class="btn sm" data-wdrm="${esc(c)}">Remove</button></td>`:""}</tr>`}).join("")||`<tr><td colspan="${ed?5:4}" class="empty">No market outlook entered yet.${ed?" Download the Excel template, fill it in with sources, and import it, or add a country by hand.":""}</td></tr>`}
+   </tbody></table></div>
+   ${ed?`<details class="wdw" style="margin-top:12px"${P.wOpen?" open":""}><summary><b>How the opportunity score is built</b> and its weights</summary>
+    <p class="small muted" style="margin:8px 0">Score = <b>performance</b> (how well we sell there, revenue against other countries) + <b>market growth</b> (from the sourced outlook: arrivals growth and hotel pipeline) + <b>unreached market</b> (known hotels that haven't bought, and how many). Each part is 0-100. The weights must add up to 100.</p>
+    <div class="fgrid">${[["perf","Performance %"],["growth","Market growth %"],["reach","Unreached market %"]].map(([k,t])=>`<label class="f">${t}<input type="number" min="0" max="100" step="1" id="wdw-${k}" value="${W[k]}" style="width:110px"></label>`).join("")}<div class="f"><span class="small muted">Total</span><div id="wdwTot" class="mono" style="margin-top:8px"><b>${W.perf+W.growth+W.reach}</b></div></div></div>
+    <div class="fgrid" style="margin-top:8px">${[["arrCap","Arrivals growth that scores 100 (% a year)"],["roomsCap","Hotel pipeline that scores 100 (rooms)"],["whiteCap","Unsold hotels that score 100"]].map(([k,t])=>`<label class="f">${t}<input type="number" min="1" step="1" id="wdw-${k}" value="${W[k]}" style="width:150px"></label>`).join("")}</div>
+    <div class="row" style="gap:8px;margin-top:10px"><button type="button" class="btn sm pri" id="wdWSave">Save weights</button><button type="button" class="btn sm" id="wdWReset">Back to 33 / 33 / 34</button></div></details>`:""}</div>`}
+function wdFormHTML(P){const c=P.ed,o=(wdOut().countries||{})[c]||{},p=o.pipeline||{},a=o.arrivals||{},r=o.regulatory||{};const v=x=>x==null?"":esc(String(x));
+  const src=(k,s)=>`<label class="f">Source name<input id="wdf-${k}n" value="${v((s||{}).name)}" placeholder="Who published it"></label><label class="f">Source link<input id="wdf-${k}u" type="url" value="${v((s||{}).url)}" placeholder="https://…"></label><label class="f">Source date<input id="wdf-${k}d" type="date" value="${v((s||{}).date)}"></label>`;
+  return`<div class="panel wdform" style="margin-bottom:12px;background:var(--sunk)"><div class="row"><h4 style="margin:0">${c?"Edit "+esc(ctryName(c)):"Add a country"}</h4></div>
+   <div class="fgrid" style="margin-top:8px"><label class="f">Country<select id="wdf-c"${c?" disabled":""}><option value="">Choose…</option>${Object.keys(WD_T).sort().map(n=>`<option value="${esc(n)}"${n===c||n===P.edNew?" selected":""}>${esc(ctryName(n))}</option>`).join("")}</select></label></div>
+   <fieldset class="wdfs"><legend>Hotel pipeline</legend><div class="fgrid"><label class="f">Rooms<input id="wdf-pr" type="number" min="0" value="${v(p.rooms)}"></label><label class="f">Hotels<input id="wdf-ph" type="number" min="0" value="${v(p.hotels)}"></label><label class="f">Opening by (year)<input id="wdf-py" type="number" min="2000" max="2100" value="${v(p.year)}"></label>${src("p",p.src)}</div></fieldset>
+   <fieldset class="wdfs"><legend>Tourist arrivals growth</legend><div class="fgrid"><label class="f">Growth % a year<input id="wdf-ap" type="number" step="0.1" value="${v(a.pct)}"></label><label class="f">Year<input id="wdf-ay" type="number" min="2000" max="2100" value="${v(a.year)}"></label>${src("a",a.src)}</div></fieldset>
+   <fieldset class="wdfs"><legend>Regulation and compliance driver</legend><div class="fgrid"><label class="f" style="flex:1 1 100%">What is changing<textarea id="wdf-rt" rows="2" style="width:100%">${v(r.text)}</textarea></label>${src("r",r.src)}</div></fieldset>
+   <p class="small muted" style="margin:6px 0 8px">Leave a whole block empty to leave it out. A block with a figure needs all three source fields.</p>
+   <div class="row" style="gap:8px"><button type="button" class="btn sm pri" id="wdEdSave">Save</button><button type="button" class="btn sm" id="wdEdNo">Cancel</button></div></div>`}
+function wdReadForm(){const g=id=>($("#wdf-"+id)?.value||"").trim();const num=s=>s===""?null:Number(s.replace(/,/g,""));const out={},errs=[];
+  const grp=(key,label,has,vals,k)=>{if(!has)return;const s={name:g(k+"n"),url:g(k+"u"),date:g(k+"d")};if(!s.name||!/^https?:\/\//i.test(s.url)||!/^\d{4}-\d{2}-\d{2}$/.test(s.date)){errs.push(`${label}: add the source name, a link starting with http, and the source date`);return}out[key]=Object.assign(vals,{src:s})};
+  const pr=num(g("pr")),ph=num(g("ph")),py=num(g("py")),ap=num(g("ap")),ay=num(g("ay")),rt=g("rt");
+  if([pr,ph,py,ap,ay].some(x=>x!==null&&!isFinite(x)))errs.push("Numbers only in the figure boxes");
+  grp("pipeline","Hotel pipeline",pr!==null||ph!==null,Object.fromEntries([["rooms",pr],["hotels",ph],["year",py]].filter(x=>x[1]!==null)),"p");
+  grp("arrivals","Tourist arrivals",ap!==null,Object.fromEntries([["pct",ap],["year",ay]].filter(x=>x[1]!==null)),"a");
+  grp("regulatory","Regulation",!!rt,{text:rt},"r");return{out,errs}}
+function wdDate(v){if(v==null||v==="")return"";if(v instanceof Date)return isNaN(v)?"":ymd(new Date(v.getTime()+12*36e5));if(typeof v==="number")return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10);
+  const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);const p=Date.parse(s);return isNaN(p)?"":ymd(new Date(p+12*36e5))}
+const wdNum=v=>{if(v==null||String(v).trim()==="")return null;const n=Number(String(v).replace(/[,%\s]/g,""));return isFinite(n)?n:NaN};
+function wdParseSheet(rows){const ok={},errs=[];const t=x=>String(x??"").trim();
+  rows.slice(1).forEach((r,i)=>{const line=i+2,name=t(r[0]);if(!name)return;if(!r.slice(1).some(x=>t(x)!==""))return;
+    const c=WD_T[name]?name:wdCtryS(name);if(!c||!WD_T[c]){errs.push(`Row ${line}: “${name}” is not a country Lead Desk knows`);return}
+    const e={},bad=m=>errs.push(`Row ${line} · ${c}: ${m}`);
+    const grp=(key,label,vals,has,si,extra)=>{if(!has)return;const s={name:t(r[si]),url:t(r[si+1]),date:wdDate(r[si+2])};if(!s.name||!/^https?:\/\//i.test(s.url)||!s.date){bad(`${label} needs the source name, a link starting with http, and the source date`);return false}e[key]=Object.assign(vals,{src:s});return true};
+    const pr=wdNum(r[1]),ph=wdNum(r[2]),py=wdNum(r[3]),ap=wdNum(r[7]),ay=wdNum(r[8]),rt=t(r[12]);
+    if([pr,ph,py,ap,ay].some(x=>Number.isNaN(x)))return bad("a figure is not a number");
+    grp("pipeline","hotel pipeline",Object.fromEntries([["rooms",pr],["hotels",ph],["year",py]].filter(x=>x[1]!==null)),pr!==null||ph!==null,4);
+    grp("arrivals","tourist arrivals",Object.fromEntries([["pct",ap],["year",ay]].filter(x=>x[1]!==null)),ap!==null,9);
+    grp("regulatory","regulation",{text:rt},!!rt,13);
+    if(Object.keys(e).length&&!errs.some(x=>x.startsWith(`Row ${line} `)))ok[c]=Object.assign(ok[c]||{},e)});
+  return{ok,errs}}
+async function wdImportFile(f){try{const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:"array",cellDates:true});const ws=wb.Sheets["Outlook"]||wb.Sheets[wb.SheetNames[0]];const rows=X.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
+    const R=wdParseSheet(rows);const P=wdState();P.imp={name:f.name,ok:Object.keys(R.ok),data:R.ok,errs:R.errs};render()}catch(e){toast("Couldn't read that file: "+(e?.message||e))}}
+async function wdTemplate(){const b=$("#wdTpl");if(b){b.disabled=true;b.textContent="Preparing…"}
+  try{const X=await loadXLSX();const wb=X.utils.book_new();const D=wdCompute(Object.assign({},wdState(),{prod:"",period:"all",region:""}));
+    const names=Object.values(D.C).filter(g=>g.country&&g.onMap&&g.n>0).sort((a,b)=>b.rev-a.rev||b.n-a.n).map(g=>g.country);
+    const s1=[WD_HEAD].concat(names.map(n=>[n]));const ws=X.utils.aoa_to_sheet(s1);ws["!cols"]=WD_HEAD.map((h,i)=>({wch:i===0?24:i===12?46:Math.max(14,Math.min(30,h.length+2))}));X.utils.book_append_sheet(wb,ws,"Outlook");
+    const how=[["How to fill this sheet"],[""],["1. One row per country. The country names we have leads in are already listed. Add other countries from the “Countries” sheet."],["2. Fill only what you have a source for. Empty cells are ignored, and nothing already saved is erased by an empty cell."],
+      ["3. Every figure needs its SOURCE NAME, a web LINK (starting with http) and the source DATE (like 2026-01-15) in the same block."],["4. Hotel pipeline: rooms and/or hotels expected, and the year they open by. Arrivals: tourist arrivals growth in % a year (for example 7.5). Regulatory driver: one short sentence."],
+      ["5. These are estimates from the source you name. Lead Desk shows them as “Estimate · source · date” and tags anything older than 12 months “may be out of date”."],["6. Rows with a missing source, a bad number or an unknown country are skipped and listed when you import, so you can fix them."]];
+    const w2=X.utils.aoa_to_sheet(how);w2["!cols"]=[{wch:120}];X.utils.book_append_sheet(wb,w2,"How to fill");
+    const w3=X.utils.aoa_to_sheet([["Country names Lead Desk understands"]].concat(Object.keys(WD_T).sort().map(n=>[n])));w3["!cols"]=[{wch:36}];X.utils.book_append_sheet(wb,w3,"Countries");
+    const name=`LeadDesk_Market_Outlook_Template.xlsx`;await wdDl(name,new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:WD_MIME}));toast(name+" is ready")}
+  catch(e){if(e?.code!=="cancelled")toast("Couldn't make the template: "+(e?.message||e))}finally{const nb=$("#wdTpl");if(nb){nb.disabled=false;nb.textContent="Download Excel template"}}}
+async function wdExportWs(D,P){if(!can("report.world"))return;const b=$("#wdWsX");if(b){b.disabled=true;b.textContent="Preparing…"}
+  try{const X=await loadXLSX();const wb=X.utils.book_new();const L=wdWhitespace(D,P.wsC);
+    const s1=[["Hotel","Country","Region","Chain","Chain already a client elsewhere","Status","Leads","Last lead","Engineer"]].concat(L.map(a=>[a.name,ctryName(a.country),wdReg(a.country),a.chain==="Independent"?"Independent / other":a.chain,a.chainElsewhere?"Yes":"",a.status,a.leads,a.last||"",a.eng||""]));
+    const byC={};D.A.forEach(a=>{if(!a.country)return;const o=byC[a.country]||(byC[a.country]={n:0,c:0});o.n++;if(a.client)o.c++});
+    const s2=[["Country","Region","Hotels known","Clients","Not sold to","Share not sold to %"]].concat(Object.entries(byC).sort((a,b)=>(b[1].n-b[1].c)-(a[1].n-a[1].c)).map(([c,o])=>[ctryName(c),wdReg(c),o.n,o.c,o.n-o.c,o.n?Math.round((o.n-o.c)/o.n*100):0]));
+    [[s1,"Whitespace",[36,22,18,22,16,14,8,12,18]],[s2,"By country",[28,18,14,10,12,18]]].forEach(([d,n,w])=>{const ws=X.utils.aoa_to_sheet(d);ws["!cols"]=w.map(x=>({wch:x}));X.utils.book_append_sheet(wb,ws,n)});
+    const name=`LeadDesk_Whitespace_${P.wsC?P.wsC.replace(/\W+/g,"_")+"_":""}${ymd(new Date())}.xlsx`;await wdDl(name,new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:WD_MIME}));
+    window.__audit?.("exported","report",name,`Whitespace: ${L.length} hotels${P.wsC?" in "+P.wsC:""}`);toast(name+" is ready")}
+  catch(e){if(e?.code!=="cancelled")toast("Export failed: "+(e?.message||e?.code))}finally{const nb=$("#wdWsX");if(nb){nb.disabled=false;nb.textContent="Export to Excel"}}}
+/* ----- the page ----- */
+function worldHTML(){wdEnsureSub();const P=wdState();const D=wdCompute(P);S.wdD=D;const regs=regionList();
+  const prods=[...new Set(S.leads.flatMap(l=>pbProdsOf(l)))].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  const kpi=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:""}</div>`;
+  const nOn=Object.values(D.C).filter(g=>g.country&&g.orders>0).length;const off=D.off.reduce((s,g)=>s+g.n,0),noC=D.none?D.none.n:0;
+  return`<div class="view wd" style="gap:14px">
+   <div class="panel afbar"><div class="fgrid">
+    <label class="f">Period<select id="wdP">${PERIODS.map(([v,t])=>`<option value="${v}"${P.period===v?" selected":""}>${t}</option>`).join("")}</select></label>
+    ${P.period==="custom"?`<label class="f">From<input type="date" id="wdFrom" value="${esc(P.from)}"></label><label class="f">To<input type="date" id="wdTo" value="${esc(P.to)}"></label>`:""}
+    <label class="f">Product<select id="wdProd"><option value="">All products</option>${prods.map(p=>`<option${p===P.prod?" selected":""}>${esc(p)}</option>`).join("")}</select></label>
+    <label class="f">Colour the map by<select id="wdM">${WD_METRICS.map(([v,t])=>`<option value="${v}"${P.metric===v?" selected":""}>${t}</option>`).join("")}</select></label></div></div>
+   <div class="kpis">${kpi("Revenue",fmtAED(D.tot.rev),periodText(P))}${kpi("Orders won",fmtN(D.tot.orders),`${fmtN(nOn)} countr${nOn===1?"y":"ies"} with orders`)}${kpi("Win rate",D.tot.n?fmtP(D.tot.win):"—","orders ÷ leads")}${kpi("Growth vs last year",D.tot.prev>0?wdGrowthTxt(D.tot.growth):"—",!D.R.f?"choose a period to compare":D.tot.prev>0?`was ${fmtAED(D.tot.prev)} in the same dates`:"nothing recorded in the same dates last year")}${kpi("Pipeline value",fmtAED(D.tot.pipe),"Meeting done or Quotation sent")}</div>
+   <div class="wdchips" role="group" aria-label="Zoom to a region"><button type="button" class="wdchip" data-wdreg="" aria-pressed="${!P.region}">World</button>${regs.map(r=>`<button type="button" class="wdchip" data-wdreg="${esc(r)}" aria-pressed="${P.region===r}">${esc(r)}</button>`).join("")}</div>
+   <div class="wdmain"><div class="panel wdmap"><div class="row" style="margin-bottom:6px"><h3 style="margin:0">${esc(WD_METRICS.find(m=>m[0]===P.metric)[1])}${P.region?" · "+esc(P.region):""}</h3><span class="sp"></span><span class="seg" role="group" aria-label="Map style"><button type="button" data-wdstyle="map" aria-pressed="${P.style!=="tiles"}">Map</button><button type="button" data-wdstyle="tiles" aria-pressed="${P.style==="tiles"}">Tiles</button></span></div>
+     ${wdMapHTML(D,P)}${wdLegendHTML(D,P)}
+     ${off||noC?`<p class="small muted" style="margin:8px 0 0">${noC?`${fmtN(noC)} lead${noC===1?" has":"s have"} no country`:""}${noC&&off?" and ":""}${off?`${fmtN(off)} lead${off===1?" is":"s are"} in a place that isn't a country Lead Desk knows`:""}: they are in the totals and the list below, not on the map.`:""}</div>
+    ${wdPanelHTML(D,P)}</div>
+   <div class="grid2" style="align-items:start">${wdRegionsHTML(D,P)}${wdGroupsHTML(D,P)}</div>
+   ${wdTableHTML(D,P)}${wdWsHTML(D,P)}${wdOutlookPanel(P)}</div>`}
+function bindWorld(m){const P=wdState();const set=(k,v)=>{P[k]=v;render()};const pick=c=>{P.sel=P.sel===c?"":c;render();if(P.sel&&innerWidth>1000)document.getElementById("wdPanel")?.scrollIntoView({block:"nearest"})};
+  $("#wdP")&&($("#wdP").onchange=e=>set("period",e.target.value));$("#wdFrom")&&($("#wdFrom").onchange=e=>set("from",e.target.value));$("#wdTo")&&($("#wdTo").onchange=e=>set("to",e.target.value));
+  $("#wdProd")&&($("#wdProd").onchange=e=>set("prod",e.target.value));$("#wdM")&&($("#wdM").onchange=e=>set("metric",e.target.value));
+  m.querySelectorAll("[data-wdstyle]").forEach(b=>b.onclick=()=>set("style",b.dataset.wdstyle));
+  m.querySelectorAll("[data-wdreg]").forEach(b=>b.onclick=()=>{P.region=b.dataset.wdreg;P.sel="";render()});
+  m.querySelectorAll("[data-wdr]").forEach(r=>{const f=()=>{P.region=P.region===r.dataset.wdr?"":r.dataset.wdr;render()};r.onclick=f;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+  m.querySelectorAll("[data-wdc]").forEach(g=>{g.onclick=()=>pick(g.dataset.wdc);g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(g.dataset.wdc)}}});
+  const cl=()=>{P.sel="";render()};$("#wdClose")?.addEventListener("click",cl);$("#wdScrim")?.addEventListener("click",cl);
+  if(!bindWorld.esc){bindWorld.esc=1;document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.wd&&S.wd.sel&&innerWidth<=1000&&document.getElementById("wdPanel")){S.wd.sel="";render()}})}
+  $("#wdAll")?.addEventListener("click",()=>set("allC",!P.allC));
+  m.querySelectorAll("[data-wdleads]").forEach(b=>b.onclick=()=>{S.lf=Object.assign(LF_RESET(),{wc:b.dataset.wdleads});S.tab="new";S.tabChosen=true;try{history.replaceState(null,"","#new")}catch(_){}render();scrollTo(0,0)});
+  m.querySelectorAll("[data-wdws]").forEach(b=>b.onclick=()=>{P.wsC=b.dataset.wdws;P.sel="";render();document.getElementById("wdWs")?.scrollIntoView({block:"start"})});
+  $("#wdWsC")&&($("#wdWsC").onchange=e=>set("wsC",e.target.value));$("#wdWsX")?.addEventListener("click",()=>wdExportWs(S.wdD,P));
+  m.querySelectorAll("[data-wda]").forEach(r=>r.onclick=()=>{const k=r.dataset.wda;const ls=S.leads.filter(l=>accKey(l)===k).sort((a,b)=>reqDate(b).localeCompare(reqDate(a)));if(ls[0])openDrawer(ls[0].id)});
+  m.querySelectorAll("[data-wdadd]").forEach(b=>b.onclick=()=>{P.ed="";P.edNew=b.dataset.wdadd;P.sel="";render();document.getElementById("wdOut")?.scrollIntoView({block:"start"})});
+  $("#wdNew")?.addEventListener("click",()=>{P.ed="";P.edNew="";render()});m.querySelectorAll("[data-wded]").forEach(b=>b.onclick=()=>{P.ed=b.dataset.wded;P.edNew="";render();document.getElementById("wdOut")?.scrollIntoView({block:"start"})});
+  $("#wdEdNo")?.addEventListener("click",()=>{P.ed=null;P.edNew="";render()});
+  $("#wdEdSave")?.addEventListener("click",async()=>{const c=P.ed||$("#wdf-c").value;if(!c)return toast("Choose a country first");const R=wdReadForm();if(R.errs.length)return toast(R.errs[0]);if(!Object.keys(R.out).length)return toast("Enter at least one figure, with its source");
+    const O=wdOut(),doc=Object.assign({},O,{countries:Object.assign({},O.countries||{}),weights:wdWeights()});doc.countries[c]=Object.assign({},doc.countries[c]||{},R.out);
+    for(const k of["pipeline","arrivals","regulatory"])if(!R.out[k]&&P.ed)delete doc.countries[c][k];
+    if(await wdSave(doc,`Saved the outlook for ${ctryName(c)}`)){window.__audit?.("updated","outlook",c,`Market outlook for ${c} saved`);P.ed=null;P.edNew="";render()}});
+  m.querySelectorAll("[data-wdrm]").forEach(b=>b.onclick=async()=>{const c=b.dataset.wdrm;if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm remove";return}
+    const O=wdOut(),doc=Object.assign({},O,{countries:Object.assign({},O.countries||{}),weights:wdWeights()});delete doc.countries[c];if(await wdSave(doc,`Removed the outlook for ${ctryName(c)}`))window.__audit?.("removed","outlook",c,`Market outlook for ${c} removed`)});
+  $("#wdTpl")?.addEventListener("click",wdTemplate);$("#wdFile")?.addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)wdImportFile(f);e.target.value=""});
+  $("#wdImpNo")?.addEventListener("click",()=>{P.imp=null;render()});
+  $("#wdImpOK")?.addEventListener("click",async()=>{const I=P.imp;if(!I||!I.ok.length)return;const O=wdOut(),doc=Object.assign({},O,{countries:Object.assign({},O.countries||{}),weights:wdWeights()});
+    for(const c of I.ok)doc.countries[c]=Object.assign({},doc.countries[c]||{},I.data[c]);
+    if(await wdSave(doc,`Saved the outlook for ${I.ok.length} countr${I.ok.length===1?"y":"ies"}`)){window.__audit?.("imported","outlook",I.name,`Market outlook imported from Excel: ${I.ok.length} countries${I.errs.length?`, ${I.errs.length} rows skipped`:""}`);P.imp=null;render()}});
+  const wt=()=>{const s=["perf","growth","reach"].reduce((a,k)=>a+(+($("#wdw-"+k)?.value||0)),0);const t=$("#wdwTot");if(t)t.innerHTML=`<b style="color:var(${s===100?"--ok":"--bad"})">${s}</b>${s===100?"":" · must be 100"}`;const b=$("#wdWSave");if(b)b.disabled=s!==100;return s};
+  ["perf","growth","reach"].forEach(k=>$("#wdw-"+k)?.addEventListener("input",wt));$("#wdw-perf")&&wt();
+  $("#wdWReset")?.addEventListener("click",()=>{["perf","growth","reach"].forEach((k,i)=>$("#wdw-"+k).value=[33,33,34][i]);wt()});
+  $("#wdWSave")?.addEventListener("click",async()=>{if(wt()!==100)return;const w={};for(const k of Object.keys(WD_W0)){const v=+($("#wdw-"+k)?.value);if(!isFinite(v)||v<0)return toast("Check the weight boxes");w[k]=v}
+    const O=wdOut(),doc=Object.assign({},O,{countries:O.countries||{},weights:w});P.wOpen=true;if(await wdSave(doc,"Saved the score weights"))window.__audit?.("updated","outlook","weights",`Opportunity score weights set to ${w.perf}/${w.growth}/${w.reach}`)});
+  $("#wdOut details")?.addEventListener("toggle",e=>{P.wOpen=e.target.open})}
+
 const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
-const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(can("report.generators")?[["gen","Lead generators"]]:[]).concat(canPB()?[["pb","Price book"]]:[]).concat(canCV()?[["base","Installed base"],["ohip","OHIP charges"],["cloud","Cloud hosting"],["cs","Customer Success"]]:[]);
+const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.world")?[["world","World view"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(can("report.generators")?[["gen","Lead generators"]]:[]).concat(canPB()?[["pb","Price book"]]:[]).concat(canCV()?[["base","Installed base"],["ohip","OHIP charges"],["cloud","Cloud hosting"],["cs","Customer Success"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
     {k:"orders",label:"Orders",num:1},{k:"rev",label:"Revenue",num:1},{k:"rpa",label:"Rev / account",num:1,tip:"Revenue ÷ accounts the engineer has leads on"},{k:"conv",label:"Conversion",num:1,tip:"Orders closed ÷ leads"}];
@@ -4717,11 +5045,12 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-won" data-sec="rev"></div><div id="mg-wq" data-sec="ops"></div><div id="mg-ml" data-sec="ops"></div><div id="mg-ops" data-sec="ops"></div>
-   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div><div id="mg-gen" data-sec="gen"></div><div id="mg-base" data-sec="base"></div><div id="mg-cs" data-sec="cs"></div><div id="mg-ohip" data-sec="ohip"></div><div id="mg-cloud" data-sec="cloud"></div>
+   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-world" data-sec="world"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div><div id="mg-gen" data-sec="gen"></div><div id="mg-base" data-sec="base"></div><div id="mg-cs" data-sec="cs"></div><div id="mg-ohip" data-sec="ohip"></div><div id="mg-cloud" data-sec="cloud"></div>
   </section>`;
   mgmtOps($("#mg-ops"));{const q=$("#mg-wq");if(q)q.innerHTML=wqHTML(false)}{const y=$("#mg-ml");if(y){y.innerHTML=mlMgHTML();y.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}{const x=$("#mg-won");if(x){x.innerHTML=wonChangesHTML();x.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
   if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
+  if(MV==="world"){const x=$("#mg-world");x.innerHTML=worldHTML();bindWorld(x)}
   if(MV==="tg"){const x=$("#mg-tg");x.innerHTML=targetsHTML();bindTargets(x)}
   if(MV==="gen"){const x=$("#mg-gen");x.innerHTML=generatorsHTML();bindGenerators(x)}
   if(MV==="pb"){const x=$("#mg-pb");x.innerHTML=priceBookHTML();bindPriceBook(x)}
