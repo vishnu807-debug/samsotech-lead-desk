@@ -359,6 +359,7 @@ td.mono{white-space:nowrap}.fgrid select,.fgrid input{height:38px}.fexp{margin-l
 .lc .amt{font:500 13px var(--f-mono)}
 .lc .late{color:var(--bad);font-size:11.5px;font-weight:500}
 /* KPIs + charts */
+.vrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}.vmic{display:inline-flex;align-items:center;gap:6px;min-height:36px}.vmic svg{width:16px;height:16px;flex:none}.vmic.on{border-color:var(--bad);color:var(--bad)}.vmic.on::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--bad);animation:vpulse 1.1s ease-in-out infinite}.vlang{width:auto;max-width:150px;min-height:36px;font-size:13px}.vst{font-size:12.5px;min-width:0;overflow-wrap:anywhere}@keyframes vpulse{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){.vmic.on::after{animation:none}}@media(max-width:700px){.vmic,.vlang{min-height:40px}}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .kpi .l{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -2628,7 +2629,7 @@ const standField=()=>`<div class="f" style="display:grid;gap:6px;font-size:12.5p
 function contactForm(l){const F=flow().on,toAtt=F&&flowOn(l)&&l.status==="Assigned";return`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${F?"Log update":"Log contact"}</h3><div style="display:grid;gap:10px">
    <div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">How<span class="seg" id="ct-k">${CONTACT_KINDS.map((k,i)=>`<button type="button" data-v="${k}" aria-pressed="${i===0}">${k}</button>`).join("")}</span></div>
    ${F?standField():""}
-   <label class="f">What happened<input id="ct-n" maxlength="300" placeholder="e.g. Spoke to FOM, interested in kiosks, wants a demo"></label>${nextFields(l)}<div class="small" id="ct-msg"></div>
+   <label class="f">What happened<textarea id="ct-n" rows="2" maxlength="300" style="min-height:56px" placeholder="e.g. Spoke to FOM, interested in kiosks, wants a demo"></textarea></label>${nextFields(l)}<div class="small" id="ct-msg"></div>
    <div class="row"><button class="btn pri" id="ct-save">${toAtt?"Save and mark attended":"Save"}</button><button class="btn" id="ct-x">Cancel</button>${l.status==="Assigned"&&!meetingsOf(l).length?`<span class="small muted">Held a meeting? Use “Meeting done” instead.</span>`:""}</div></div></div>`}
 function bindContact(l){let kind=CONTACT_KINDS[0],stand="";$("#ct-k").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{kind=b.dataset.v;$("#ct-k").querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   $("#ct-s")?.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{stand=b.dataset.v;$("#ct-s").querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b));$("#ct-msg").innerHTML=""});
@@ -2698,7 +2699,7 @@ function refsFor(l){const ps=new Set(productsOf(l).map(nk));const c=ctryOf(l.cou
 async function saveRefs(next,msg){try{if(S.refsExists)await S.db.doc("config/references").update({refs:next});else{await S.db.doc("config/references").set({refs:next});S.refsExists=true}S.refs={refs:next};toast(msg);render()}
   catch(e){toast(/permission|42501|row-level/i.test(e.message||"")?"Only a Lead Manager or Supervisor can change reference sites (and supabase/18_focus.sql must be run).":"Couldn't save: "+(e.message||e.code))}}
 /* ---------- the Focus tab ---------- */
-function focusState(){const F=S.focus||(S.focus={eng:viewAll()?"":S.myEng,open:{act:true,fc:true,xs:true,ch:true,ref:false},refQ:"",refP:""});if(!viewAll())F.eng=S.myEng;return F}
+function focusState(){const F=S.focus||(S.focus={eng:viewAll()?"":S.myEng,open:{wq:true,act:true,fc:true,xs:true,ch:true,ref:false},refQ:"",refP:""});if(!viewAll())F.eng=S.myEng;if(F.open.wq===undefined)F.open.wq=true;return F}
 function renderFocus(m){if(S.imp)return renderImport(m);const F=focusState();const eng=F.eng;const team=viewAll();const mine=l=>!eng||l.assignedTo===eng;const ls=S.leads.filter(l=>!l.deleted);
   const flagged=ls.filter(l=>mine(l)&&ruleFlags(l).length).sort((a,b)=>ruleFlags(b).length-ruleFlags(a).length||assignedOn(a).localeCompare(assignedOn(b)));
   const fcl=ls.filter(l=>mine(l)&&fcEligible(l)).sort((a,b)=>(a.quote?.targetDate||"9").localeCompare(b.quote?.targetDate||"9")||leadValue(b)-leadValue(a));
@@ -2736,19 +2737,22 @@ function renderFocus(m){if(S.imp)return renderImport(m);const F=focusState();con
     ${RF.map(v=>`<tr><td>${esc(v.name)}</td><td>${esc(ctryName(ctryOf(v.country)))}</td><td class="small">${esc(v.products.join(", "))}</td><td class="small">${esc(v.note||"—")}</td><td class="small">${fmtD(v.at)} · ${esc(v.by||"")}</td>${can("account.manage")?`<td class="num"><button type="button" class="btn sm" data-rfdel="${esc(v.key)}">Remove</button></td>`:""}</tr>`).join("")||`<tr><td colspan="6" class="empty">No reference sites${F.refP||F.refQ?" for these filters":" yet"}.</td></tr>`}</tbody></table></div>
     ${can("account.manage")?`<div class="dqform" style="margin-top:10px"><label class="f">Client hotel<select id="rfA">${opts(cli.map(a=>a.key),"","Choose a client")}</select></label><label class="f">Products<input id="rfPs" placeholder="Filled from what they bought"></label><label class="f">Contact / note<input id="rfN" maxlength="200" placeholder="e.g. GM Mr X happy to take calls"></label><div class="row" style="align-self:end"><button type="button" class="btn pri" id="rfAdd">Add reference</button></div></div>`:""}`;
   const fn=flagged.length;
+  const wql=wqFocusL(eng);const wqv=wql.reduce((x,l)=>x+wqVal(l),0);
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Focus</h2><p>${eng?esc(eng)+": ":""}what needs doing today, this month's forecast, and where to grow.</p></div>${can("lead.edit_all")||(can("lead.edit_own")&&S.myEng)?`<div class="row"><button type="button" class="btn" id="fImp" title="Add quotations that were emailed but not entered">Import quotations</button></div>`:""}
     ${team?`<div class="row"><label class="f fsm" style="min-width:200px">Engineer<select id="fEng"><option value="">Whole team</option>${sp.map(n=>`<option${n===eng?" selected":""}>${esc(n)}</option>`).join("")}</select></label></div>`:""}</div>
    <div class="kpis"><div class="kpi"><div class="l">Leads needing action</div><div class="v" style="${fn?"color:var(--bad)":""}">${fn}</div><div class="s">contact, meeting, next step or quiet</div></div>
+    <div class="kpi" id="fkWq"><div class="l">Won, quote missing</div><div class="v" style="${wql.length?"color:var(--bad)":""}">${wql.length}</div><div class="s">${wql.length?"order value now "+fmtAED(wqv):"every won lead has its quotation"}</div></div>
     ${myTargetKpi(eng)}<div class="kpi"><div class="l">Commit ${ymLabel(m0,true)}</div><div class="v">${fmtAED(FT.c)}</div><div class="s">best case ${fmtAED(FT.b)}</div></div>
     <div class="kpi"><div class="l">Cross-sell targets</div><div class="v">${xs.reduce((s,a)=>s+a.miss.length,0)}</div><div class="s">across ${xs.length} client hotels</div></div>
     <div class="kpi"><div class="l">Chain hotels to win</div><div class="v">${ch.reduce((s,c)=>s+c.open.length,0)}</div><div class="s">${ch.length} chain${ch.length===1?"":"s"}${eng?" owned":""}</div></div></div>
+   ${sec("wq","Won, upload the quotation",wql.length,`<div id="fwq">${wqFocusBody(wql,eng)}</div>`,wql.length?`<span class="small muted"> · ${fmtAED(wqv)} order value to confirm</span>`:"")}
    ${sec("act","Needs action",fn,actBody,`<span class="small muted"> · first contact in ${R.contactDays} working days, meeting in ${R.meetingDays} days, always a next step, never quiet more than ${R.staleDays} days</span>`)}
    ${sec("fc",`Forecast call · ${ymLabel(m0)}`,fcl.length,fcBody)}
    ${sec("xs","Cross-sell targets",xs.length,xsBody)}
    ${sec("ch","Hotel chains to win",ch.reduce((s,c)=>s+c.open.length,0),chBody)}
    ${sec("ref","Reference sites",Object.keys(refs()).length,refBody)}</section>`;
   m.querySelectorAll("details.fsec").forEach(d=>d.ontoggle=()=>{F.open[d.dataset.sec]=d.open});
-  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});$("#fImp")?.addEventListener("click",()=>{impState();render();scrollTo(0,0)});{const rn=renNotice();if(rn){m.querySelector(".vhead")?.insertAdjacentHTML("afterend",rn);$("#renGo")?.addEventListener("click",()=>{S.tab="renew";render();scrollTo(0,0)})}}
+  $("#fEng")&&($("#fEng").onchange=e=>{F.eng=e.target.value;render()});$("#fwqMore")?.addEventListener("click",()=>{S.fwqAll=!S.fwqAll;render()});$("#fImp")?.addEventListener("click",()=>{impState();render();scrollTo(0,0)});{const rn=renNotice();if(rn){m.querySelector(".vhead")?.insertAdjacentHTML("afterend",rn);$("#renGo")?.addEventListener("click",()=>{S.tab="renew";render();scrollTo(0,0)})}}
   m.querySelectorAll("[data-feng]").forEach(r=>r.onclick=()=>{F.eng=r.dataset.feng;render();scrollTo(0,0)});
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{e.stopPropagation();openDrawer(b.dataset.open)});
   m.querySelectorAll("[data-flog]").forEach(b=>b.onclick=()=>{openDrawer(b.dataset.flog);S.drawer.mode="contact";drawDrawer()});
@@ -3409,6 +3413,46 @@ function pmsInject(l,A,when){if(pmsOf(l)&&pmsProducts(l).every(p=>ifaceOf(l,p)||
 function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead("ap",h);if(!isRealPms(r.pms))return{err:"Choose the hotel's PMS (PMS integration)."};{const pb=pmsBlock(r.pms,pmsProducts(l));if(pb)return{err:pb}}
   const it=Object.assign({},l.pmsIface||{},r.iface);return{body:{pms:r.pms,pmsIface:it},txt:` · PMS ${r.pms}`}}
 
+/* ---------- Voice to text (19 Nov 2026) ----------
+   A "Speak" button under the notes fields (new lead, edit details, meeting done, log contact / update, next step).
+   Uses the browser's own speech recognition (SpeechRecognition / webkitSpeechRecognition): nothing is downloaded or
+   stored by Lead Desk, the text is typed into the field and saved with the form like typed text. Where the browser has
+   no speech recognition (e.g. Firefox) no button is shown. The browser may send the audio to its provider. */
+const VOICE_SEL="#f-notes,#f-mnotes,#e-notes,#md-notes,#md-req,#ct-n,#nx-n";
+const VOICE_LANGS=[["en-GB","English (UK)"],["en-US","English (US)"],["ar-AE","Arabic"],["hi-IN","Hindi"],["fr-FR","French"],["es-ES","Spanish"],["de-DE","German"],["ru-RU","Russian"],["tr-TR","Turkish"],["zh-CN","Chinese"]];
+const voiceSR=()=>window.SpeechRecognition||window.webkitSpeechRecognition||null;
+function voiceLang(){let v="";try{v=localStorage.getItem("ld.voicelang")||""}catch(e){}if(VOICE_LANGS.some(x=>x[0]===v))return v;const n=(navigator.language||"en").toLowerCase().slice(0,2);return(VOICE_LANGS.find(x=>x[0].slice(0,2)===n)||VOICE_LANGS[0])[0]}
+const VOICE_ERR={"not-allowed":"The microphone is blocked. Allow it for this site in the browser settings, then try again.","service-not-allowed":"The microphone is blocked. Allow it for this site in the browser settings, then try again.","no-speech":"Didn't hear anything. Tap Speak and try again.","audio-capture":"No microphone found.","network":"Voice typing needs an internet connection.","language-not-supported":"This browser can't understand that language."};
+const VOICE_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>';
+function voiceUI(v,on,msg){if(!v||!v.btn)return;v.btn.classList.toggle("on",!!on);v.btn.setAttribute("aria-pressed",on?"true":"false");v.btn.querySelector(".vt").textContent=on?"Stop":"Speak";if(v.st)v.st.textContent=msg||""}
+function voiceStop(msg){const v=window.__voice;if(!v)return;v.user=true;window.__voice=null;try{v.rec.stop()}catch(e){}voiceUI(v,false,msg||"")}
+function voiceStart(el,row){
+  const R=voiceSR();if(!R)return;const prev=window.__voice;if(prev){const same=prev.el===el;voiceStop();if(same)return}
+  const v={el,btn:row.querySelector(".vmic"),st:row.querySelector(".vst"),user:false,base:el.value,fin:"",t0:0,quick:0};const rec=new R();v.rec=rec;
+  rec.lang=voiceLang();rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+  const join=(a,b)=>!a?b:!b?a:(/\s$/.test(a)?a:a+" ")+b;
+  rec.onresult=e=>{if(window.__voice!==v)return;if(!el.isConnected){voiceStop();return}let f="",i2="";for(let i=0;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)f+=r[0].transcript;else i2+=r[0].transcript}
+    let val=join(v.base,(f+i2).replace(/\s+/g," ").trim());const mx=+el.getAttribute("maxlength")||0;let cut=false;if(mx&&val.length>mx){val=val.slice(0,mx);cut=true}
+    el.value=val;el.dispatchEvent(new Event("input",{bubbles:true}));voiceUI(v,true,cut?"Limit of "+mx+" characters reached. Stop and shorten it, or use the longer notes field.":"Listening… speak now")};
+  rec.onerror=e=>{if(window.__voice!==v)return;const m=VOICE_ERR[e.error];if(e.error==="aborted")return;v.err=true;voiceStop(m||"Voice typing stopped ("+(e.error||"error")+").")};
+  rec.onend=()=>{if(window.__voice!==v||v.user)return;
+    if(!el.isConnected){voiceStop();return}
+    if(Date.now()-v.t0<700&&++v.quick>=2){voiceStop("Voice typing stopped. Tap Speak to start again.");return}
+    v.base=el.value;try{v.t0=Date.now();rec.start()}catch(x){voiceStop("Voice typing stopped. Tap Speak to start again.")}};
+  window.__voice=v;try{v.t0=Date.now();rec.start();voiceUI(v,true,"Listening… speak now")}catch(x){window.__voice=null;voiceUI(v,false,"Couldn't start the microphone. Try again.")}}
+function voiceEnhance(){const v=window.__voice;if(v&&!v.el.isConnected)voiceStop();if(!voiceSR())return;
+  document.querySelectorAll(VOICE_SEL).forEach(el=>{if(el.dataset.voice)return;el.dataset.voice="1";const lab=(el.closest("label")?.firstChild?.textContent||"notes").trim()||"notes";
+    const row=document.createElement("div");row.className="vrow";
+    row.innerHTML=`<button type="button" class="btn sm vmic" aria-pressed="false" title="Speak instead of typing. Your browser turns the speech into text; depending on the browser, the audio may be processed by its provider."><span aria-hidden="true">${VOICE_ICON}</span><span class="vt">Speak</span></button><select class="vlang" aria-label="Speaking language">${VOICE_LANGS.map(x=>`<option value="${x[0]}"${x[0]===voiceLang()?" selected":""}>${x[1]}</option>`).join("")}</select><span class="vst small muted" role="status" aria-live="polite"></span>`;
+    row.querySelector(".vmic").setAttribute("aria-label","Speak instead of typing: "+lab.replace(/\s*\*$/,"").toLowerCase());
+    el.insertAdjacentElement("afterend",row);row.querySelector(".vmic").addEventListener("click",ev=>{ev.preventDefault();voiceStart(el,row)});
+    row.querySelector(".vlang").addEventListener("change",ev=>{try{localStorage.setItem("ld.voicelang",ev.target.value)}catch(e){}document.querySelectorAll(".vlang").forEach(x=>x.value=ev.target.value);if(window.__voice)voiceStop("Language changed. Tap Speak to start again.")})})}
+if(!window.__voiceBound){window.__voiceBound=true;let q=0;const go=()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;voiceEnhance()})};
+  const start=()=>{new MutationObserver(go).observe(document.body,{childList:true,subtree:true});go()};
+  if(document.body)start();else document.addEventListener("DOMContentLoaded",start);
+  document.addEventListener("click",e=>{if(window.__voice&&!(e.target.closest&&e.target.closest(".vrow")))voiceStop()},true);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)voiceStop()})}
+
 /* ---------- Won without a quotation (18 Nov 2026) ----------
    Won leads with no quotation read from a PDF / e-mail (and no confirmed hand-entered one), won on or after
    settings.wonQuoteFrom (default 1 January of this year). The list is calculated; nothing is stored on the lead except
@@ -3434,6 +3478,16 @@ function wqBanner(){if(viewAll()||!can("lead.won_own"))return"";const L=wqOpenL(
   return`<div class="notice warn" id="wqBan" role="status"><div class="row" style="gap:8px;flex-wrap:wrap"><b>${L.length} won lead${L.length===1?"":"s"} need${L.length===1?"s":""} the quotation uploaded</b><span class="small">Order value now ${fmtAED(tot)}. Upload the Salesforce PDF so the value is right.</span></div>
    <div style="display:grid;gap:6px;margin-top:8px">${show.map(l=>`<div class="row" style="gap:8px;flex-wrap:wrap"><span class="mono small">${esc(l.ref)}</span><span style="min-width:0;flex:1">${esc(l.accountName)} <span class="muted small">· ${fmtAED(wqVal(l))} · won ${wqAge(l)} days ago</span></span><button type="button" class="btn sm pri" data-wqup="${esc(l.id)}">Upload quotation</button></div>`).join("")}</div>
    ${L.length>3?`<button type="button" class="linkb" id="wqMore" style="margin-top:6px">${S.wqAll?"Show fewer":"Show all "+L.length}</button>`:""}</div>`}
+/* Focus tab: the same list for one engineer (or the whole team), so it sits next to the day's work (19 Nov 2026) */
+function wqFocusL(eng){return wqOpenL().filter(l=>!eng||l.assignedTo===eng).sort((a,b)=>wqAge(b)-wqAge(a))}
+function wqFocusBody(L0,eng){const tot=L0.reduce((s,l)=>s+wqVal(l),0);const L=S.fwqAll?L0:L0.slice(0,5);
+  if(!L0.length)return`<p class="small" style="margin:0">Every won lead${eng?" for "+esc(eng):""} since ${esc(fmtD(wqFrom()))} has an uploaded quotation.</p>`;
+  const act=l=>wqClean(l)?`<button type="button" class="btn sm pri" data-wqup="${esc(l.id)}">Upload quotation</button>`:`<button type="button" class="btn sm" data-open="${esc(l.id)}">Open</button>`;
+  return`<p class="small muted" style="margin:0 0 10px;max-width:90ch">Won on or after ${esc(fmtD(wqFrom()))} with no quotation uploaded, so the order value may be wrong (${fmtAED(tot)} in total). Use <b>Upload quotation</b> and add the Salesforce PDF: the order then takes the quotation's value (before tax). The lead stays Won.</p>
+   <div class="wqt tw"><table><thead><tr><th>Lead</th><th>Property</th>${eng?"":"<th>Engineer</th>"}<th class="num">Order value</th><th>Won</th><th class="num">Days</th><th></th></tr></thead><tbody>
+   ${L.map(l=>`<tr><td class="mono"><button type="button" class="linkb" data-open="${esc(l.id)}">${esc(l.ref)}</button></td><td>${esc(l.accountName)}</td>${eng?"":`<td>${esc(l.assignedTo||"—")}</td>`}<td class="num">${fmtAED(wqVal(l))}</td><td style="white-space:nowrap">${esc(fmtD(wonAt(l)))}</td><td class="num">${wqAge(l)}</td><td class="num" style="white-space:nowrap">${act(l)}</td></tr>`).join("")}</tbody></table></div>
+   <div class="wqm">${L.map(l=>`<div class="wqc"><div class="row" style="gap:8px"><span class="mono small">${esc(l.ref)}</span><span class="sp"></span><span class="small muted">won ${wqAge(l)} days ago</span></div><div><b>${esc(l.accountName)}</b>${eng?"":`<div class="small muted">${esc(l.assignedTo||"—")}</div>`}</div><div class="row" style="gap:8px"><b>${fmtAED(wqVal(l))}</b><span class="sp"></span>${act(l)}</div></div>`).join("")}</div>
+   ${L0.length>5?`<button type="button" class="linkb" id="fwqMore" style="margin-top:8px">${S.fwqAll?"Show the oldest 5 only":"Show all "+L0.length}</button>`:""}`}
 function wqRows(){const W=S.wq||(S.wq={eng:"",mon:"",st:""});return wqOpenL().concat(wqDoneL()).filter(l=>(!W.eng||(l.assignedTo||"—")===W.eng)&&(!W.mon||wqMon(l)===W.mon)&&(!W.st||wqSt(l)===W.st)).sort((a,b)=>(hasQuoteFile(a)-hasQuoteFile(b))||wqAge(b)-wqAge(a))}
 function wqHTML(remind){const open=wqOpenL(),done=wqDoneL();const W=S.wq||(S.wq={eng:"",mon:"",st:""});
   if(!open.length&&!done.length)return remind?`<div class="panel" id="wq"><div class="row" style="gap:8px"><h3>Won without quotation</h3><span class="chip">0</span></div><p class="small" style="margin:6px 0 0">Every won lead since ${esc(fmtD(wqFrom()))} has an uploaded quotation.</p></div>`:"";
