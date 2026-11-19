@@ -2860,7 +2860,7 @@ function loadPDFJS(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
   s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)};s.onerror=()=>{PDFJS_P=null;rej(new Error("Couldn't load the PDF reader. Check the internet connection and try again."))};document.head.appendChild(s)}))}
 async function pdfLines(file){const lib=await loadPDFJS();const doc=await lib.getDocument({data:file instanceof Uint8Array?file.slice():new Uint8Array(await file.arrayBuffer())}).promise;const out=[];const fields=[];
   for(let p=1;p<=Math.min(doc.numPages,15);p++){const pg=await doc.getPage(p);const tc=await pg.getTextContent();const rows=[];try{(await pg.getAnnotations()).forEach(a=>{const v=a&&a.subtype==="Widget"&&typeof a.fieldValue==="string"?a.fieldValue.trim():"";if(v&&a.rect)fields.push({p,x:a.rect[0],y:a.rect[1],y2:a.rect[3],v})})}catch(e){}
-    for(const it of tc.items){if(!it.str||!it.str.trim())continue;const x=it.transform[4],y=it.transform[5];let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r)rows.push(r={y,items:[]});r.items.push({x,w:it.width||0,s:it.str})}
+    for(const it of tc.items){if(!it.str||!it.str.trim())continue;const x=it.transform[4],y=it.transform[5];let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r)rows.push(r={y,items:[]});r.items.push({x,w:it.width||0,s:it.str,f:it.fontName||""})}
     rows.sort((a,b)=>b.y-a.y);let prev=null;
     for(const r of rows){r.items.sort((a,b)=>a.x-b.x);let t="",end=null;for(const i of r.items){if(end!=null){const g=i.x-end;t+=g>12?"   ":g>1.5?" ":""}t+=i.s;end=i.x+i.w}
       out.push({p,y:r.y,gap:prev==null||prev.p!==p?99:prev.y-r.y,t:t.replace(/\s+$/,""),items:r.items});prev={p,y:r.y}}}
@@ -2870,8 +2870,8 @@ function qrDate(s){let m=String(s||"").match(/(\d{1,2})[\s\-]+([A-Za-z]{3,9})[\s
   m=String(s||"").match(/(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;return""}
 const qrNum=s=>{const neg=/^\(.*\)$/.test(String(s).trim())||/^-/.test(String(s).trim());const v=parseFloat(String(s).replace(/[()\-,\s]/g,""));return isNaN(v)?null:(neg?-v:v)};
 /* item text → Lead Desk product (most specific first; only products that exist in the catalog are used) */
-const QR_RULES=[[/accessor|adaptor|adapter|cable|stylus|\bstand\b/i,"Hardware (iPad / Tablet)"],[/\bohip\b/i,"OHIP Integration / Migration"],[/\bedocs?\b/i,"eDOCS"],[/vmobile|mobile check-?in/i,"vMobile / Mobile Check-in"],
-  [/\bereg\b|regcard|digital folio/i,"eREG"],[/kiosk/i,"easyKIOSK"],[/tap\s*&?\s*smile/i,"Tap & Smile"],[/check-?out\s*box/i,"Check-out Box"],[/drop\s*box/i,"Dropbox"],[/samsosign/i,"SamsoSign"],[/\bengage\b/i,"Engage"],[/\bmirror\b/i,"Mirror"],
+const QR_RULES=[[/check[\s-]*out[\s-]*box/i,"Check-out Box"],[/accessor|adaptor|adapter|cable|stylus|\bstand\b/i,"Hardware (iPad / Tablet)"],[/\bohip\b/i,"OHIP Integration / Migration"],[/\bedocs?\b/i,"eDOCS"],[/vmobile|mobile check-?in/i,"vMobile / Mobile Check-in"],
+  [/\bereg\b|regcard|digital folio/i,"eREG"],[/kiosk/i,"easyKIOSK"],[/tap\s*&?\s*smile/i,"Tap & Smile"],[/drop\s*box/i,"Dropbox"],[/samsosign/i,"SamsoSign"],[/\bengage\b/i,"Engage"],[/\bmirror\b/i,"Mirror"],
   [/e-?invoic/i,"e-Invoicing"],[/opera cloud migration/i,"OPERA Cloud Migration"],[/server migration/i,"Server Migration"],[/opera interface/i,"OPERA Interface"],[/\bamc\b|annual maintenance/i,"AMC Renewal"],[/passport|id[\s\/-]*card|id scann|scanner/i,"Passport / ID Scanner"],[/\bvicas\b/i,"VICAS"]];
 function qrProduct(text){const cat=prodList(true).map(p=>p.name);const has=n=>cat.find(c=>nk(c)===nk(n));
   if(/install|training|freight|insurance|travel|shipping/i.test(text)&&!/licen|app\b|module|interface|system/i.test(text))return"";
@@ -2881,7 +2881,7 @@ function parseQuote(L){const T=L.map(l=>l.t);const R={lines:[],totals:[],warn:[]
   if(!R.date){const i=idx(/\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}/i);if(i>=0)R.date=qrDate(T[i])}
   const ai=idx(/^\s*Kind\s*Att(n|ention)/i);
   if(qi>=0&&ai>qi){const blk=T.slice(qi+1,ai).map(s=>s.trim()).filter(Boolean);R.client=blk[0]||"";R.address=blk.slice(1);const last=blk[blk.length-1]||"";const c=areaOf(last).country||areaOf((last.split(",").pop()||"").trim()).country;R.country=c||""}
-  if(ai>=0){R.contact=(T[ai].match(/Kind\s*Att(?:n|ention)\.?\s*:?\s*(.+)/i)||[])[1]?.trim()||"";const nx=(T[ai+1]||"").trim();if(nx&&!/^(Subject|Reference|Dear)/i.test(nx)&&nx.length<70&&nk(nx)!==nk(R.client||""))R.title=nx}
+  if(ai>=0){R.contact=(T[ai].match(/Kind\s*Att(?:n|ention)\.?\s*:?\s*(.+)/i)||[])[1]?.trim()||"";const tl=[];for(let i=ai+1;i<T.length&&i<=ai+4;i++){const x=(T[i]||"").trim();if(!x||/^(Subject|Reference|Dear)\b/i.test(x)||/:\s/.test(x))break;tl.push(x)}const nx=tl.join(" ");if(nx&&nx.length<120&&nk(nx)!==nk(R.client||""))R.title=nx}
   const si=idx(/^\s*Subject\s*:/i);if(si>=0){let s=T[si].replace(/^\s*Subject\s*:\s*/i,"").trim();for(let i=si+1;i<si+3&&i<T.length;i++){const x=T[i].trim();if(!x||/^(Reference|Dear)/i.test(x))break;s+=" "+x}R.subject=s}
   const ci=idx(/Commercial\s+Proposal|Price\s+Schedule|Pricing/i);const from=ci>=0?ci:0;
   const curM=T.slice(from,from+8).join(" ").match(/\((USD|AED|EUR|GBP|SAR|INR|MYR|QAR|OMR|KWD|BHD|ZAR|[A-Z]{3})\)/);R.currency=curM?curM[1]:"";
@@ -2895,7 +2895,10 @@ function parseQuote(L){const T=L.map(l=>l.t);const R={lines:[],totals:[],warn:[]
       rows.forEach((ri,k)=>{const m=T[ri].match(rowRe);const part=rows.length===1?b:b.filter(i=>i>=(k?rows[k-1]+1:b[0])&&i<=(k<rows.length-1?ri:b[b.length-1]));
         const moneyDesc=m[2]&&/^\(?[\d,]+\.\d{2}\)?$/.test(m[2].trim());const txt=part.map(i=>i===ri?(moneyDesc?"":m[2]||""):T[i]).map(s=>s.trim()).filter(Boolean);
         const std=moneyDesc?qrNum(m[2]):qrNum(m[3]),spl=moneyDesc?qrNum(m[3]):(m[4]?qrNum(m[4]):null),qty=qrNum(m[5]),tot=qrNum(m[6]);
-        const title=txt[0]||`Item ${m[1]}`;const desc=txt.slice(1).join(" ");R.lines.push({sl:+m[1],item:title,desc,list:std,unit:spl!=null?spl:std,qty,total:tot,product:qrProduct(title)||qrProduct(desc)})})}
+        /* the item name is in its own (bold) font and can wrap onto a second or third row: take every leading row in that font */
+        const fOf=i=>((L[i].items||[]).find(x=>/[A-Za-z]/.test(x.s))||{}).f||"";const f0=fOf(part[0]);let nT=1;
+        if(f0&&part[0]!==ri&&part.some(i=>fOf(i)&&fOf(i)!==f0)){nT=0;while(nT<part.length&&nT<4&&part[nT]!==ri&&fOf(part[nT])===f0&&!rowRe.test(T[part[nT]]))nT++;nT=Math.max(1,nT)}
+        const title=txt.slice(0,nT).join(" ")||`Item ${m[1]}`;const desc=txt.slice(nT).join(" ");const row1=txt[0]||"";R.lines.push(Object.assign({sl:+m[1],item:title,desc,list:std,unit:spl!=null?spl:std,qty,total:tot,product:qrProduct(title)||qrProduct(desc)},nT>1&&row1&&row1!==title?{itemRow1:row1}:{}))})}
     for(let i=te;i<Math.min(T.length,te+14);i++){const m=T[i].match(totRe);if(m)R.totals.push({label:m[1].trim().replace(/\s{2,}/g," "),amount:qrNum(m[2])});else if(R.totals.length&&/Validity|Price Terms|Payment/i.test(T[i]))break}}
   const net=[...R.totals].reverse().find(t=>/net|grand/i.test(t.label))||[...R.totals].reverse().find(t=>/total/i.test(t.label));R.total=net?net.amount:null;
   /* the quotation value is the total BEFORE tax: after discount, with freight / delivery, without VAT */
@@ -3633,7 +3636,7 @@ function pbStd(it,qty,ctx){const v=pbVer(it,ctx.date);if(!v)return null;const re
   if(it.unit==="once")return{amt:toAED(price,cur),note:"one-time per property"};
   return{amt:toAED(price*(+qty||1),cur),note:""}}
 /* effective mapping of a quote line: saved approval, else a rule, else nothing */
-function pbMapOf(x){if(x&&x.m&&x.m.st&&x.m.st!=="wait"&&x.m.it)return x.m;const k=pbKey(x&&x.item);const r=k&&pbRules().find(r=>r.key===k);return r?Object.assign({it:r.it,st:"auto",rule:r.id},r.ty?{ty:r.ty,un:r.un,yr:r.yr,pr:r.pr,if:r.if,nm:r.nm}:{}):null}
+function pbMapOf(x){if(x&&x.m&&x.m.st&&x.m.st!=="wait"&&x.m.it)return x.m;const k=pbKey(x&&x.item);let r=k&&pbRules().find(r=>r.key===k);if(!r&&x&&x.itemRow1){const k1=pbKey(x.itemRow1);r=k1&&pbRules().find(r=>r.key===k1)}return r?Object.assign({it:r.it,st:"auto",rule:r.id},r.ty?{ty:r.ty,un:r.un,yr:r.yr,pr:r.pr,if:r.if,nm:r.nm}:{}):null}
 function pbMapLines(lines){return(lines||[]).map(x=>{if(x.m&&x.m.st==="ok")return x;const m=pbMapOf(Object.assign({},x,{m:null}));return Object.assign({},x,{m:m||{st:"wait"}})})}
 const pbPending=l=>(l.quote&&Array.isArray(l.quote.lines)?l.quote.lines:[]).filter(x=>!pbMapOf(x));
 const pbYearly=it=>!!(it&&(it.yearly||it.unit==="room"));
