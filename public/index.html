@@ -580,7 +580,7 @@ th{position:relative}
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 19 Nov 2026 · build 7c8d4dd</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 20 Nov 2026 · build 18a0fc9</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
@@ -3235,6 +3235,7 @@ const regHosted=()=>!!window.__reg;
 const regQK=s=>String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 const regYear=()=>+S.settings.regYear||new Date().getFullYear();
 function regS(){return S.regS||(S.regS={scr:"",tab:"",rows:[],acc:null,loaded:false,loading:false,err:"",drafts:[],eng:"",busy:"",res:null,open:"",ed:null,ver:{},pg:{},pn:0,zoom:1,mob:"pic",wd:null,filt:"",ticked:{}})}
+const regFull=()=>S.role==="supervisor"||S.role==="leadmanager";
 const regApprover=()=>regHosted()&&can("order.register_approve");
 function regAccNow(){const a=regS().acc;if(!a||a.ended_at)return null;const t=todayISO();return a.from_date<=t&&t<=a.to_date?a:null}
 const regCan=()=>regHosted()&&!!S.role&&(S.role==="supervisor"||!!regAccNow());
@@ -3300,7 +3301,7 @@ async function regPick(files){const R=regS();let skipped=0,dup=0;const have=R.dr
   if(skipped)toast(`Only ${REG_MAX} quotations at a time. ${skipped} file${skipped===1?" was":"s were"} left out; submit these first, then add the rest.`);else if(dup)toast("Already chosen");
   R.res=null;let n=0;for(const f of add){R.busy=`Reading ${++n} of ${add.length}…`;render();const d=await regRead(f);if(d.q)d.dup=regDupInfo(d.q.no,have.length,have.concat([d]));have.push(d)}
   R.busy="";render()}
-async function regSubmit(){const R=regS();if(R.busy)return;const eng=isSales()?S.myEng:R.eng;if(!eng){toast("Choose the engineer these orders are for");return}
+async function regSubmit(){const R=regS();if(R.busy)return;const eng=regFull()?R.eng:S.myEng;if(!eng){toast(regFull()?"Choose the engineer these orders are for":"Your sign-in is not linked to an engineer name. Ask a Supervisor.");return}
   const go=R.drafts.filter(d=>d.inc&&!regCheck(d).skip&&!regCheck(d).B.length);if(!go.length)return;
   const batch="B"+ymd(new Date()).replace(/-/g,"")+"-"+Math.random().toString(36).slice(2,6);const made=[],failed=[];let i=0,nopic=0;
   for(const d of go){R.busy=`Submitting ${++i} of ${go.length}…`;render();const id="R"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -3318,10 +3319,10 @@ function renderReg(m){const R=regS();regLoad();const tabs=regTabs();if(!tabs.som
   if(R.tab==="up")regUpBind(m)}
 function regAccText(){const a=regAccNow();if(S.role==="supervisor")return"As a Supervisor you can always register orders.";if(!a)return"";const left=Math.max(0,Math.round((Date.parse(a.to_date)-Date.parse(todayISO()))/864e5));return`Your access runs until <b>${esc(fmtD(a.to_date))}</b> (${left===0?"today is the last day":left+" day"+(left===1?"":"s")+" left"}).`}
 function regUpHTML(){const R=regS();if(!regCan())return`<div class="panel"><p class="small muted" style="margin:0">You don't have access to register orders. A Supervisor can give you access for a period of time.</p></div>`;
-  const sp=spNames();const lm=!isSales();const ready=R.drafts.filter(d=>d.inc&&!regCheck(d).skip&&!regCheck(d).B.length);
+  const sp=spNames();const lm=regFull();const ready=R.drafts.filter(d=>d.inc&&!regCheck(d).skip&&!regCheck(d).B.length);
   return`<div class="panel" style="padding:12px 14px"><div class="small muted">${regAccText()}</div>
     <div class="small muted" style="margin-top:4px">Drop the approved Salesforce quotation PDFs of orders already won (up to ${REG_MAX} at a time). They are read on this device and are never stored. A Lead Manager or Supervisor checks each one against a small picture of its pages before it becomes a Won order.</div></div>
-   ${lm?`<div class="panel" style="padding:12px 14px"><label class="f" style="max-width:320px">These orders were won by <span class="req">*</span><select id="rgEng">${opts(sp,R.eng,"Choose the sales engineer")}</select></label></div>`:`<div class="small muted">Registered for <b>${esc(S.myEng||"you")}</b>.</div>`}
+   ${lm?`<div class="panel" style="padding:12px 14px"><label class="f" style="max-width:320px">These orders were won by <span class="req">*</span><select id="rgEng">${opts(sp,R.eng,"Choose the sales engineer")}</select></label></div>`:`<div class="small ${S.myEng?"muted":""}"${S.myEng?"":` style="color:var(--bad)"`}>${S.myEng?`Registered for <b>${esc(S.myEng)}</b>.`:"Your sign-in is not linked to an engineer name, so you cannot register orders yet. Ask a Supervisor to link it."}</div>`}
    <div class="panel imdrop" id="rgDrop"><div><b>Drop the quotation PDFs here</b> <span class="muted">or</span> <label class="btn sm" style="cursor:pointer">Choose files<input type="file" id="rgFile" accept="application/pdf,.pdf" multiple hidden></label></div>${R.busy?`<div class="small" id="rgBusy">${esc(R.busy)}</div>`:""}</div>
    ${R.res?regResHTML():""}
    ${R.drafts.length?`<div class="row" style="margin:6px 0"><b>${R.drafts.length} quotation${R.drafts.length===1?"":"s"} read</b><span class="sp"></span><button class="btn" type="button" data-rga="clear">Clear list</button><button class="btn pri" type="button" id="rgSubmit" data-rga="submit"${ready.length&&!R.busy?"":" disabled"}>Submit ${ready.length} for approval</button></div>
