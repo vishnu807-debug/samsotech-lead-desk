@@ -542,6 +542,20 @@ th{position:relative}
 .setj button{appearance:none;border:0;cursor:pointer;font:500 12.5px var(--f-body);color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:99px}
 @media(max-width:860px){.setw{display:block}.setn{position:static;display:flex;overflow-x:auto;gap:6px;padding:6px;margin-bottom:12px;max-height:none;align-items:center}
  .setn input{margin:0;min-width:150px;flex:0 0 150px}.setr{display:flex;gap:6px}.setn button{white-space:nowrap;padding:7px 12px;font-size:13px;flex:0 0 auto}.setn button small{display:none}.setc .panel{scroll-margin-top:120px}}
+
+/* Register closed orders (19 Nov 2026) */
+.rgtabs{margin:0 0 12px;flex-wrap:wrap}.rgtabs button{white-space:nowrap}
+.rglist{display:grid;gap:10px}
+.rgt td,.rgt th{vertical-align:top}.rgt td .btn{margin:2px 2px 2px 0}
+.rvgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+.rvpic{position:sticky;top:8px;min-width:0}.rvval{min-width:0}
+.rvimg{max-height:calc(100vh - 190px);min-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.rvimg img{display:block;max-width:none;height:auto}
+.rvtool{flex-wrap:wrap;gap:8px}
+.rvmob{display:none;margin:0 0 10px}
+.rvlines{max-height:260px;overflow:auto}
+@media(max-width:900px){.rvgrid{grid-template-columns:minmax(0,1fr)}.rvpic{position:static}.rvmob{display:inline-flex}.rvgrid[data-m="pic"] .rvval{display:none}.rvgrid[data-m="val"] .rvpic{display:none}.rvimg{max-height:70vh}}
+.rcrow{cursor:pointer}.rcrow:hover{background:var(--accent-soft)}
 </style>
 
 <header class="top gut">
@@ -566,13 +580,13 @@ th{position:relative}
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 19 Nov 2026 · build 906f492</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 19 Nov 2026 · build 7c8d4dd</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js?v=9f78277a"></script>
+<script src="adapter.js?v=00b06ed6"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -707,11 +721,11 @@ const PERMISSIONS=[
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],["event.manage","Register events (exhibitions, roadshows) and who attended","Leads"],["lead.won_own","Change their own won leads for a limited number of days: move back a stage or correct the order value, no reason needed","Leads"],
- ["lead.export","Export leads (Excel / CSV)","Leads"],["lead.import","Import new leads from an Excel sheet","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["page.renewals","Renewals page: AMC, subscriptions and OHIP due on won orders","Pages"],["renewal.manage","Update the status, notes and amount of any renewal (AMC team)","Renewals"],["lead.view_won","Read won orders only, for renewals (AMC team)","Renewals"],["contract.upload","Upload AMC contract PDFs and correct them while they wait for approval","Renewals"],["contract.approve","Approve or reject uploaded AMC contracts","Renewals"],["contract.view_all","See every approved AMC contract and the installed base","Renewals"],["contract.view_own","See the approved AMC contracts of their own clients","Renewals"],["lead.view_generated","See leads I generated, read-only, even when another engineer has them (Generated by me)","Leads"],["report.generators","Lead generators: leads by who brought them in, and their status (Management → Lead generators)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
+ ["lead.export","Export leads (Excel / CSV)","Leads"],["order.register_approve","Approve or reject registered closed orders (Focus → Registered orders)","Leads"],["lead.import","Import new leads from an Excel sheet","Leads"],["lead.edit_fields","Edit every field on a lead (contact, source, amounts, meetings…)","Leads"],["report.deck","Create the sales performance presentation (PowerPoint)","Reports"],["report.products","Product-wise leads, status and revenue (Management → Products)","Reports"],["page.renewals","Renewals page: AMC, subscriptions and OHIP due on won orders","Pages"],["renewal.manage","Update the status, notes and amount of any renewal (AMC team)","Renewals"],["lead.view_won","Read won orders only, for renewals (AMC team)","Renewals"],["contract.upload","Upload AMC contract PDFs and correct them while they wait for approval","Renewals"],["contract.approve","Approve or reject uploaded AMC contracts","Renewals"],["contract.view_all","See every approved AMC contract and the installed base","Renewals"],["contract.view_own","See the approved AMC contracts of their own clients","Renewals"],["lead.view_generated","See leads I generated, read-only, even when another engineer has them (Generated by me)","Leads"],["report.generators","Lead generators: leads by who brought them in, and their status (Management → Lead generators)","Reports"],["report.footprint","Customer footprint by country and hotel chain (Management)","Reports"],["targets.manage","Set sales targets (Management → Targets)","Reports"],["account.manage","Merge, delete and restore accounts","Accounts"],
  ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
  ["report.world","Management → World view: tile map, country outlook, opportunity score, whitespace","Reports"],["outlook.manage","Enter or import market outlook data and set the opportunity score weights (World view)","Reports"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
+const DEFAULT_PERMS={"leadmanager": ["order.register_approve","lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
@@ -1029,7 +1043,7 @@ function leadYears(){return[...new Set(S.leads.map(l=>reqDate(l).slice(0,4)).fil
 const LCOLS=[{k:"ref",label:"Ref"},{k:"recv",label:"Received",v:l=>reqDate(l)},{k:"acct",label:"Property",v:l=>l.accountName||""},{k:"source",label:"Source",v:l=>l.source||""},{k:"region",label:"Region",v:regionOf},
   {k:"prod",label:"Products",v:l=>l.product||""},{k:"cat",label:"Category",v:l=>l.category||""},{k:"status",label:"Status",v:l=>l.status},{k:"eng",label:"Engineer",v:l=>l.assignedTo||""},{k:"cb",label:"Created by",v:l=>hasCb(l)?genName(l):""},{k:"val",label:"Value",num:1,v:leadValue}];
 function filterLeads(F){const q=nk(F.q);
-  return S.leads.filter(l=>viewAll()||isMine(l)).filter(LSTAT[F.status]||LSTAT.All).filter(l=>{const d=reqDate(l);
+  return S.leads.filter(l=>!l.registered&&(viewAll()||isMine(l))).filter(LSTAT[F.status]||LSTAT.All).filter(l=>{const d=reqDate(l);
     return(!F.year||d.slice(0,4)===F.year)&&(!F.year||!F.month||+d.slice(5,7)===+F.month)&&(!F.region||regionOf(l)===F.region)&&(!F.eng||l.assignedTo===F.eng)
       &&(F.cat==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===F.cat)&&(!F.dept||deptOf(l)===F.dept)&&(!F.cb||cbMatch(l,F.cb))&&(!F.team||(hasCb(l)&&genDept(l)===F.team))&&subMatch(l,F.sub)&&(!F.wc||ctryOf(l.country)===F.wc)&&(!F.source||(l.source||"").trim()===F.source)
       &&(!q||nk(l.ref+" "+l.accountName+" "+l.product+" "+(l.country||"")+" "+(l.contact?.name||"")+" "+(l.contact?.email||"")+" "+(l.generatedBy||"")).includes(q))})}
@@ -1214,7 +1228,7 @@ function nameParts(n){return String(n||"").split(/\s*(?:,|&|\/|\+|\band\b)\s*|\s
 function sharedOwners(n){if(!n)return null;const sp=spNames();if(sp.some(x=>nk(x)===nk(n)))return null;const ps=nameParts(n);if(ps.length<2)return null;
   const hit=ps.map(p=>sp.find(x=>nk(x)===nk(p)));return hit.every(Boolean)?hit:null}
 const sharedLeads=()=>S.leads.filter(l=>OPEN.includes(l.status)&&!["New","Info Needed"].includes(l.status)&&sharedOwners(l.assignedTo));
-function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").sort((a,b)=>a.createdAt<b.createdAt?-1:1);
+function renderBO(m){if(regApprover())regLoad();const q=S.leads.filter(l=>l.status==="New"||l.status==="Info Needed").sort((a,b)=>a.createdAt<b.createdAt?-1:1);
   const recent=S.leads.filter(l=>l.verifiedAt).sort((a,b)=>a.verifiedAt<b.verifiedAt?1:-1).slice(0,12);
   const sla=S.settings.slaVerifyHours||24;
   const load={};S.leads.filter(l=>l.assignedTo&&OPEN.includes(l.status)).forEach(l=>load[l.assignedTo]=(load[l.assignedTo]||0)+1);
@@ -1222,6 +1236,7 @@ function renderBO(m){const q=S.leads.filter(l=>l.status==="New"||l.status==="Inf
    <div class="vhead"><div><h2>Verification queue</h2><p>Check each lead for duplicates, then verify and assign it to a sales engineer, ask the submitter for more information, or close it as a duplicate or invalid.</p></div>
    <div class="row">${can("page.settings")?`<button class="btn sm" id="goSet">Manage products and engineers</button>`:""}<span class="chip">${q.length} waiting</span><span class="chip" style="${q.some(l=>days(l.createdAt)*24>sla)?"background:var(--bad-soft);color:var(--bad)":""}">${q.filter(l=>days(l.createdAt)*24>sla).length} past ${sla}h SLA</span></div></div>
    ${can("account.manage")?renameReqsHTML():""}
+   ${regBoHTML()}
    ${can("lead.status_override")?manualQHTML():""}
    ${can("lead.reassign")&&sharedLeads().length?`<div class="panel" style="border-left:3px solid var(--warn)"><div class="row" style="margin-bottom:6px"><h3>${sharedLeads().length} leads are assigned to two people</h3><span class="sp"></span><button class="btn pri sm" id="unshare" type="button">Move them to the queue</button></div>
     <p class="small muted" style="margin:0 0 10px">Each lead should have one engineer. Moving them removes the combined name and puts them in the queue below, where you pick one engineer. Meetings, products and notes stay on the lead.</p>
@@ -1254,7 +1269,7 @@ function qCard(l){const ch=dupChecks(l);const bad=ch.some(c=>c.lvl==="bad");cons
 /* ======================= 3. SALES PIPELINE ======================= */
 function renderPipe(m){const isSales=!viewAll();if(!isSales&&!S.me)S.me="__all";const me=isSales?S.myEng:S.me;const sp=spNames();
   if(isSales&&!me){m.innerHTML=`<div class="panel empty">Your login isn't linked to a sales engineer name yet. Ask back office to link it under Users and access.</div>`;return}
-  const q=nk(S.pq);const mine=S.leads.filter(l=>(me==="__all"?l.assignedTo:nk(l.assignedTo)===nk(me))&&(!q||nk(l.accountName+" "+l.ref+" "+l.product+" "+(l.country||"")).includes(q)));
+  const q=nk(S.pq);const mine=S.leads.filter(l=>!l.registered&&(me==="__all"?l.assignedTo:nk(l.assignedTo)===nk(me))&&(!q||nk(l.accountName+" "+l.ref+" "+l.product+" "+(l.country||"")).includes(q)));
   const cols=[...(mine.some(l=>["New","Info Needed"].includes(l.status))?[["Pending","Awaiting approval"]]:[]),["Assigned","Assigned"],["Attended","Attended"],["Meeting Done","Meeting done"],["Quotation Sent","Quotation sent"],["Won","Won"],["Closed","Lost / on hold"]];
   const inCol=(l,c)=>c==="Closed"?["Lost","On Hold"].includes(l.status):c==="Pending"?["New","Info Needed"].includes(l.status):l.status===c;
   const open=mine.filter(l=>OPEN.includes(l.status));const quoted=mine.filter(l=>l.status==="Quotation Sent").reduce((s,l)=>s+leadValue(l),0);
@@ -1463,7 +1478,7 @@ function bindEvents(m){const P=m.querySelector("#evPanel");if(!P)return;const go
 const wonDays=()=>{const v=S.settings.wonEditDays;const d=Math.round(+v);return v==null||v===""||!(d>=0)?30:d};
 const wonStamp=l=>l.stageAt?.Won||l.order?.date||"";
 function wonOwn(l){if(!l||l.status!=="Won"||l.deleted||!can("lead.won_own")||!isMine(l))return false;const t=Date.parse(wonStamp(l));return!isNaN(t)&&Date.now()-t<=wonDays()*864e5}
-const canUnwin=l=>!!l&&l.status==="Won"&&!l.deleted&&(can("lead.status_override")||wonOwn(l));
+const canUnwin=l=>!!l&&!l.registered&&l.status==="Won"&&!l.deleted&&(can("lead.status_override")||wonOwn(l));
 const wonDaysLeft=l=>{const t=Date.parse(wonStamp(l));return isNaN(t)?0:Math.max(0,Math.ceil((t+wonDays()*864e5-Date.now())/864e5))};
 const wonTouched=l=>(l.wonChanges||[]).length>0||(l.statusChanges||[]).some(c=>c.from==="Won");
 async function fixOrder(l,o,why,nq){if(!(canUnwin(l)||wqClean(l))||!l.order)return false;const t=nowISO();const by=actor()||S.myName||"";const old=l.order;
@@ -1494,7 +1509,7 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
   const lvTop=`${l.deleted?`<div class="notice bad" style="display:grid;gap:6px"><b>This lead was deleted on ${fmtD(l.deleted.at)} by ${esc(l.deleted.by||"someone")}.</b><span>Reason: ${esc(l.deleted.reason||"—")}${l.deleted.note?" · "+esc(l.deleted.note):""}. It is hidden from every list, count and report. Its details and history are kept.</span>${can("lead.remove")?`<span><button type="button" class="btn sm" id="restoreLead">Restore this lead</button></span>`:""}</div>`:""}${ruleFlags(l).length?`<div class="notice warn" style="display:grid;gap:2px"><b>Needs action</b>${ruleFlags(l).map(f=>`<span class="small">${esc(f.t)}</span>`).join("")}</div>`:""}`;
   $("#drawerHost").innerHTML=`<div class="scrim lvs" id="scrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Lead ${esc(l.ref)}">
   <div class="lvh">
-   <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wqChip(l)}${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
+   <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wqChip(l)}${l.registered?`<span class="chip" title="Won before it was entered in Lead Desk. Registered from the approved quotation; it is not a lead.">Registered order</span>`:""}${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
    <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
    <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
   </div>
@@ -2064,8 +2079,8 @@ async function createDeck(){if(!can("report.deck")){toast("Your role can't creat
 /* ======================= AUDIT TRAIL (Supervisor) =======================
    Rows come from the database table audit_log (supabase/10_audit_trail.sql): every change is written by
    database triggers, plus sign-in / export events sent by the app. Read-only; nobody can edit or delete it. */
-const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"]];
-const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored"};
+const AUD_ENT=[["","Everything"],["lead","Leads"],["account","Accounts"],["user","Users"],["settings","Settings"],["permissions","Roles and permissions"],["session","Sign-ins"],["report","Exports and presentations"],["registered order","Registered orders"],["registration access","Registered orders: access"]];
+const AUD_ACT={created:"Created",updated:"Updated",deleted:"Deleted",merged:"Merged",signed_in:"Signed in",renamed:"Renamed",signed_out:"Signed out",password_changed:"Password changed",password_reset:"Password reset",sign_in_created:"Sign-in created",exported:"Exported",presentation:"Presentation",restored:"Restored",lead_deleted:"Deleted",lead_restored:"Restored",submitted:"Submitted",approved:"Approved",rejected:"Rejected",withdrawn:"Withdrawn",expired:"Expired",pictures_deleted:"Pictures deleted",access_given:"Access given",access_changed:"Access changed",access_ended:"Access ended"};
 const AUD_FIELD={assignedTo:"Assigned to",assignedAt:"Assigned on",status:"Status",stageAt:"Stage dates",accountName:"Property",accountKey:"Account",country:"Country",region:"Region",subdivision:"Emirate / state",contact:"Contact",products:"Products",product:"Products (text)",category:"Category",source:"Source",generatedBy:"Generated by",department:"Department",requirementDate:"Requirement date",notes:"Requirement",meeting:"Deal estimate (old meeting amount)",quoteHistory:"Earlier quotations",upsells:"Upsell leads",lines:"Quotation lines",years:"Sales targets",contacts:"Contacts",firstContactAt:"First contact",forecast:"Forecast",forecastHist:"Forecast history",rules:"Activity rules",stageProb:"Stage probabilities",chainOwners:"Chain owners",refs:"Reference sites",chains:"Hotel chain brand list",chainOverrides:"Hotel chain set by hand",statusChanges:"Status changes",orderHistory:"Earlier orders",display_name:"Display name",name:"Name",leads:"Leads updated",type:"Lead type",parentId:"Upsell of",upsellCredit:"Upsell revenue counted for engineers",upsellIncentivePct:"Upsell incentive %",incentivePct:"Lead generator incentive %",deletions:"Delete history",meetings:"Meetings",quote:"Quotation",order:"Order",lost:"Lost",priority:"Priority",preferred:"Preferred engineer",nextFollowUp:"Follow-up",nextFollowUpAt:"Follow-up (UTC)",followUpNote:"Follow-up note",verifiedAt:"Verified on",dupOf:"Duplicate of",rejectReason:"Reject reason",formerAssignee:"Former assignee",assigneeSeenAt:"Seen by engineer",role:"Role",engineer:"Engineer",active:"Active",deleted:"Removed",mergedInto:"Merged into",territories:"Territories",salespeople:"Sales engineers",roles:"Role permissions",known:"Permission list"};
 function audState(){return S.aud||(S.aud={from:ymd(new Date(Date.now()-6*864e5)),to:ymd(new Date()),actor:"",entity:"",q:"",rows:[],done:false,loading:false,err:"",open:{},page:0})}
 function audVal(v){if(v==null||v==="")return`<span class="muted">—</span>`;if(typeof v==="string")return esc(v.length>160?v.slice(0,160)+"…":v);if(typeof v==="number"||typeof v==="boolean")return esc(String(v));
@@ -2185,20 +2200,21 @@ function analytics(F){const[f,t]=periodRange(F);
   if(F.status){ls=ls.filter(l=>A[accKey(l)].status===F.status);for(const k in A)if(A[k].status!==F.status)delete A[k]}
   const E={};for(const l of ls){if(!l.assignedTo)continue;
     const e=E[l.assignedTo]||(E[l.assignedTo]={name:l.assignedTo,acc:new Set,cust:new Set,regions:{},leads:0,inb:0,outb:0,orders:0,rev:0,ohip:0,inbConv:0,outbConv:0,inbOrders:0,outbOrders:0,inbRev:0,outbRev:0,noVal:0});
-    const k=accKey(l),ob=l.category==="Outbound";e.acc.add(k);e.leads++;const r=regionOf(l);e.regions[r]=(e.regions[r]||0)+1;ob?e.outb++:e.inb++;
-    if(reachedMeeting(l))ob?e.outbConv++:e.inbConv++;
-    if(l.status==="Won"&&engCredit(l)){const v0=orderVal(l);e.orders++;e.cust.add(k);if(!v0)e.noVal++;if(ob)e.outbOrders++;else e.inbOrders++;
+    const k=accKey(l),rg=!!l.registered,ob=l.category==="Outbound";e.acc.add(k);const r=regionOf(l);e.regions[r]=(e.regions[r]||0)+(rg?0:1);if(!rg){e.leads++;ob?e.outb++:e.inb++}
+    if(!rg&&reachedMeeting(l))ob?e.outbConv++:e.inbConv++;
+    if(l.status==="Won"&&engCredit(l)){const v0=orderVal(l);e.orders++;if(rg)e.regOrders=(e.regOrders||0)+1;e.cust.add(k);if(!v0)e.noVal++;if(!rg){if(ob)e.outbOrders++;else e.inbOrders++}
       for(const[nm,fr]of engParts(l)){const x=nm===l.assignedTo?e:(E[nm]||(E[nm]={name:nm,acc:new Set,cust:new Set,regions:{[r]:0},leads:0,inb:0,outb:0,orders:0,rev:0,ohip:0,inbConv:0,outbConv:0,inbOrders:0,outbOrders:0,inbRev:0,outbRev:0,noVal:0}));
-        const v=v0*fr;x.rev+=v;x.ohip+=ohipVal(l)*fr;if(ob)x.outbRev+=v;else x.inbRev+=v;if(fr<1){if(x===e)e.shareOut=(e.shareOut||0)+v0*(1-fr);else x.shareIn=(x.shareIn||0)+v}}}}
+        const v=v0*fr;x.rev+=v;x.ohip+=ohipVal(l)*fr;if(rg)x.regRev=(x.regRev||0)+v;else if(ob)x.outbRev+=v;else x.inbRev+=v;if(fr<1){if(x===e)e.shareOut=(e.shareOut||0)+v0*(1-fr);else x.shareIn=(x.shareIn||0)+v}}}}
   const won=ls.filter(l=>l.status==="Won");
-  const tot={leads:ls.length,accounts:Object.keys(A).length,orders:won.length,rev:won.reduce((s,l)=>s+orderVal(l),0),ohip:won.reduce((s,l)=>s+ohipVal(l),0),noVal:won.filter(l=>!orderVal(l)).length,unassigned:ls.filter(l=>!l.assignedTo).length,
-    custAcc:Object.values(A).filter(a=>a.status==="Customer").length,stageTracked:ls.filter(l=>l.stageAt&&Object.keys(l.stageAt).length).length};
+  const tot={leads:ls.filter(l=>!l.registered).length,regOrders:won.filter(l=>l.registered).length,regRev:won.filter(l=>l.registered).reduce((s,l)=>s+orderVal(l),0),accounts:Object.keys(A).length,orders:won.length,rev:won.reduce((s,l)=>s+orderVal(l),0),ohip:won.reduce((s,l)=>s+ohipVal(l),0),noVal:won.filter(l=>!orderVal(l)).length,unassigned:ls.filter(l=>!l.assignedTo).length,
+    custAcc:Object.values(A).filter(a=>a.status==="Customer").length,stageTracked:ls.filter(l=>!l.registered&&l.stageAt&&Object.keys(l.stageAt).length).length};
   const engs=Object.values(E).map(e=>{const regs=Object.entries(e.regions).sort((a,b)=>b[1]-a[1]);return Object.assign(e,{accounts:e.acc.size,custAcc:e.cust.size,region:regs[0][0],regionMore:regs.length-1,
-    conv:pct(e.orders,e.leads),rpa:e.acc.size?e.rev/e.acc.size:0,rpc:e.cust.size?e.rev/e.cust.size:0,aov:e.orders?e.rev/e.orders:0,share:pct(e.rev,tot.rev),
+    conv:pct(e.orders-(e.regOrders||0),e.leads),rpa:e.acc.size?e.rev/e.acc.size:0,rpc:e.cust.size?e.rev/e.cust.size:0,aov:e.orders?e.rev/e.orders:0,share:pct(e.rev,tot.rev),
     inbRate:pct(e.inbOrders,e.inb),outbRate:pct(e.outbOrders,e.outb),inbAov:e.inbOrders?e.inbRev/e.inbOrders:0,outbAov:e.outbOrders?e.outbRev/e.outbOrders:0})});
-  const src={};for(const c of["Inbound","Outbound"]){const s=ls.filter(l=>(l.category==="Outbound"?"Outbound":"Inbound")===c);const w=s.filter(l=>l.status==="Won");
+  const src={};for(const c of["Inbound","Outbound"]){const s=ls.filter(l=>!l.registered&&(l.category==="Outbound"?"Outbound":"Inbound")===c);const w=s.filter(l=>l.status==="Won");
     src[c]={leads:s.length,conv:s.filter(reachedMeeting).length,orders:w.length,rev:w.reduce((a,l)=>a+orderVal(l),0)}}
-  const R={};for(const l of ls){const r=regionOf(l);const o=R[r]||(R[r]={region:r,acc:new Set,leads:0,orders:0,rev:0,ohip:0});o.acc.add(accKey(l));o.leads++;if(l.status==="Won"){o.orders++;o.rev+=orderVal(l);o.ohip+=ohipVal(l)}}
+  {const w=ls.filter(l=>l.registered&&l.status==="Won");src.Registered={leads:0,conv:0,orders:w.length,rev:w.reduce((a,l)=>a+orderVal(l),0)}}
+  const R={};for(const l of ls){const r=regionOf(l);const o=R[r]||(R[r]={region:r,acc:new Set,leads:0,orders:0,rev:0,ohip:0});o.acc.add(accKey(l));if(!l.registered)o.leads++;if(l.status==="Won"){o.orders++;o.rev+=orderVal(l);o.ohip+=ohipVal(l)}}
   return{ls,A,accounts:Object.values(A),engs,tot,src,regions:Object.values(R).map(r=>Object.assign(r,{accounts:r.acc.size})),range:[f,t]}}
 
 /* ---------- shared controls ---------- */
@@ -2705,7 +2721,7 @@ async function saveRefs(next,msg){try{if(S.refsExists)await S.db.doc("config/ref
   catch(e){toast(/permission|42501|row-level/i.test(e.message||"")?"Only a Lead Manager or Supervisor can change reference sites (and supabase/18_focus.sql must be run).":"Couldn't save: "+(e.message||e.code))}}
 /* ---------- the Focus tab ---------- */
 function focusState(){const F=S.focus||(S.focus={eng:viewAll()?"":S.myEng,open:{wq:true,act:true,fc:true,xs:true,ch:true,ref:false},refQ:"",refP:""});if(!viewAll())F.eng=S.myEng;if(F.open.wq===undefined)F.open.wq=true;return F}
-function renderFocus(m){if(S.imp)return renderImport(m);const F=focusState();const eng=F.eng;const team=viewAll();const mine=l=>!eng||l.assignedTo===eng;const ls=S.leads.filter(l=>!l.deleted);
+function renderFocus(m){if(S.imp)return renderImport(m);if(S.regS&&S.regS.scr)return renderReg(m);regLoad();const F=focusState();const eng=F.eng;const team=viewAll();const mine=l=>!eng||l.assignedTo===eng;const ls=S.leads.filter(l=>!l.deleted);
   const flagged=ls.filter(l=>mine(l)&&ruleFlags(l).length).sort((a,b)=>ruleFlags(b).length-ruleFlags(a).length||assignedOn(a).localeCompare(assignedOn(b)));
   const fcl=ls.filter(l=>mine(l)&&fcEligible(l)).sort((a,b)=>(a.quote?.targetDate||"9").localeCompare(b.quote?.targetDate||"9")||leadValue(b)-leadValue(a));
   const m0=ymKey(todayISO());const fr=forecastFor(ls.filter(mine),m0);const FT=fr.reduce((o,r)=>({c:o.c+r.commit,b:o.b+r.best}),{c:0,b:0});
@@ -2743,10 +2759,10 @@ function renderFocus(m){if(S.imp)return renderImport(m);const F=focusState();con
     ${can("account.manage")?`<div class="dqform" style="margin-top:10px"><label class="f">Client hotel<select id="rfA">${opts(cli.map(a=>a.key),"","Choose a client")}</select></label><label class="f">Products<input id="rfPs" placeholder="Filled from what they bought"></label><label class="f">Contact / note<input id="rfN" maxlength="200" placeholder="e.g. GM Mr X happy to take calls"></label><div class="row" style="align-self:end"><button type="button" class="btn pri" id="rfAdd">Add reference</button></div></div>`:""}`;
   const fn=flagged.length;
   const wql=wqFocusL(eng);const wqv=wql.reduce((x,l)=>x+wqVal(l),0);
-  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Focus</h2><p>${eng?esc(eng)+": ":""}what needs doing today, this month's forecast, and where to grow.</p></div>${can("lead.edit_all")||(can("lead.edit_own")&&S.myEng)?`<div class="row"><button type="button" class="btn" id="fImp" title="Add quotations that were emailed but not entered">Import quotations</button></div>`:""}
+  m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Focus</h2><p>${eng?esc(eng)+": ":""}what needs doing today, this month's forecast, and where to grow.</p></div>${regBtn()}${can("lead.edit_all")||(can("lead.edit_own")&&S.myEng)?`<div class="row"><button type="button" class="btn" id="fImp" title="Add quotations that were emailed but not entered">Import quotations</button></div>`:""}
     ${team?`<div class="row"><label class="f fsm" style="min-width:200px">Engineer<select id="fEng"><option value="">Whole team</option>${sp.map(n=>`<option${n===eng?" selected":""}>${esc(n)}</option>`).join("")}</select></label></div>`:""}</div>
    <div class="kpis"><div class="kpi"><div class="l">Leads needing action</div><div class="v" style="${fn?"color:var(--bad)":""}">${fn}</div><div class="s">contact, meeting, next step or quiet</div></div>
-    <div class="kpi" id="fkWq"><div class="l">Won, quote missing</div><div class="v" style="${wql.length?"color:var(--bad)":""}">${wql.length}</div><div class="s">${wql.length?"order value now "+fmtAED(wqv):"every won lead has its quotation"}</div></div>
+    ${regClosedKpi(eng)}<div class="kpi" id="fkWq"><div class="l">Won, quote missing</div><div class="v" style="${wql.length?"color:var(--bad)":""}">${wql.length}</div><div class="s">${wql.length?"order value now "+fmtAED(wqv):"every won lead has its quotation"}</div></div>
     ${myTargetKpi(eng)}<div class="kpi"><div class="l">Commit ${ymLabel(m0,true)}</div><div class="v">${fmtAED(FT.c)}</div><div class="s">best case ${fmtAED(FT.b)}</div></div>
     <div class="kpi"><div class="l">Cross-sell targets</div><div class="v">${xs.reduce((s,a)=>s+a.miss.length,0)}</div><div class="s">across ${xs.length} client hotels</div></div>
     <div class="kpi"><div class="l">Chain hotels to win</div><div class="v">${ch.reduce((s,c)=>s+c.open.length,0)}</div><div class="s">${ch.length} chain${ch.length===1?"":"s"}${eng?" owned":""}</div></div></div>
@@ -3204,6 +3220,289 @@ async function impSave(r,fu){const q=r.q;const t=nowISO();const sent=r.em?.sent|
     requirementDate:o.date,region:"",subdivision:"",status:"New",assignedTo:mine?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},
     quote:o,contacts:[ct],firstContactAt:sent,...nx,log:[entry(`Lead created from an imported quotation · ${ps.join(", ")} · for ${eng}`),entry(lg)]});
   return`Created ${ref}${mine?" · waiting for approval":""}`}
+
+/* ======================= REGISTER CLOSED ORDERS (19 Nov 2026) =======================
+   Orders already won this year are registered from their approved Salesforce quotation PDFs. A salesperson (or a Lead Manager
+   for someone) with time-limited access (SQL 42, table reg_access) reads the PDFs here (never uploaded), checks the preview and
+   submits. The read figures wait in table reg_orders together with at most 3 small page pictures. A Lead Manager or Supervisor
+   (order.register_approve) compares the picture with the values side by side, corrects if needed and approves: reg_decide() then
+   creates the account (if new) and the Won order in one database step. The pictures are deleted by the database on approve,
+   reject, withdraw and after 30 days. An approved registered order is a Won lead flagged doc.registered. It is kept out of
+   S.leads-based lead counts (lead list, pipelines, conversion, generator credit) but counts in revenue, targets, products,
+   accounts, installed base and renewals. Nothing here changes incentives. */
+const REG_MAX=20;
+const regHosted=()=>!!window.__reg;
+const regQK=s=>String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+const regYear=()=>+S.settings.regYear||new Date().getFullYear();
+function regS(){return S.regS||(S.regS={scr:"",tab:"",rows:[],acc:null,loaded:false,loading:false,err:"",drafts:[],eng:"",busy:"",res:null,open:"",ed:null,ver:{},pg:{},pn:0,zoom:1,mob:"pic",wd:null,filt:"",ticked:{}})}
+const regApprover=()=>regHosted()&&can("order.register_approve");
+function regAccNow(){const a=regS().acc;if(!a||a.ended_at)return null;const t=todayISO();return a.from_date<=t&&t<=a.to_date?a:null}
+const regCan=()=>regHosted()&&!!S.role&&(S.role==="supervisor"||!!regAccNow());
+const regMine=r=>!!S.myEmail&&String(r.created_by||"").toLowerCase()===S.myEmail.toLowerCase();
+const regRow=id=>regS().rows.find(r=>r.id===id);
+const regOwnBlock=r=>S.role!=="supervisor"&&regMine(r);
+function regDaysLeft(r){const t=Date.parse(r.created_at);return isNaN(t)?null:Math.max(0,30-Math.floor((Date.now()-t)/864e5))}
+const REG_ST={pending:["Waiting for approval","warn"],approved:["Approved","ok"],rejected:["Rejected","bad"],withdrawn:["Withdrawn",""],expired:["Expired, upload again",""]};
+const regChip=s=>{const x=REG_ST[s]||[s,""];return`<span class="chip ${x[1]}">${esc(x[0])}</span>`};
+function regErr(e){const c=e&&e.code,m=(e&&e.message)||"";if(c==="23505"||/already/i.test(m))return"This quotation is already registered or already in Lead Desk.";if(c==="42501"||/row-level|not allowed|access/i.test(m)&&!/approve/i.test(m))return"You don't have access to register orders right now (it may have ended).";return m||"Couldn't save."}
+async function regLoad(force){const R=regS();if(!regHosted()||R.loading||(R.loaded&&!force))return;R.loading=true;
+  try{try{await window.__reg.expire()}catch(e){}
+    const[a,rows]=await Promise.all([window.__reg.access.mine(),window.__reg.list()]);R.acc=a;R.rows=rows||[];R.err="";R.loaded=true}
+  catch(e){R.err=(e&&e.message)||"Couldn't load registered orders.";R.loaded=true}
+  R.loading=false;if(R.scr||["focus","bo","mgmt"].includes(S.tab))render()}
+async function regPullLead(ref){try{const s=await S.db.doc("leads/"+ref).get();if(s.exists){const l=Object.assign({id:ref},s.data());S.allLeads=(S.allLeads||[]).filter(x=>x.id!==ref).concat([l]);S.leadMap[ref]=l;ldSplit()}}catch(e){}}
+function regGo(tab,id){const R=regS();R.scr="hub";R.tab=tab||"";R.open=id||"";R.ed=null;R.mob="pic";R.pn=0;R.zoom=1;S.tab="focus";try{history.replaceState(null,"","#focus")}catch(_){}render();scrollTo(0,0)}
+function regBtn(){if(!regHosted())return"";const R=regS();const n=regApprover()?R.rows.filter(r=>r.status==="pending"&&!regOwnBlock(r)).length:0;
+  if(!(regCan()||regApprover()||R.rows.length))return"";
+  return`<div class="row"><button type="button" class="btn" id="fReg" data-rga="go" title="Register orders that were already won, and approve registered orders">Registered orders${n?` <span class="chip warn">${n} to approve</span>`:""}</button></div>`}
+function regBoHTML(){if(!regApprover())return"";const R=regS();const n=R.rows.filter(r=>r.status==="pending"&&!regOwnBlock(r)).length;
+  const chk=S.leads.filter(l=>!l.deleted&&l.registered&&(l.registered.similar||[]).length&&!l.regReview);
+  let h="";if(n)h+=`<div class="panel" id="regBo" style="border-left:3px solid var(--warn)"><div class="row"><h3>${n} registered order${n===1?"":"s"} waiting for approval</h3><span class="sp"></span><button class="btn pri sm" type="button" data-rga="go" data-tab="ap">Review them</button></div><p class="small muted" style="margin:2px 0 0">Compare each quotation picture with the values read, then approve or reject.</p></div>`;
+  if(chk.length&&can("account.manage"))h+=`<div class="panel" id="regChk"><h3>Registered orders: check the account <span class="chip">${chk.length}</span></h3><p class="small muted" style="margin:2px 0 10px">A similar account already existed when these orders were approved. Merge the accounts if they are the same hotel.</p>
+    <div class="tw plain"><table><thead><tr><th>Order</th><th>Account</th><th>Similar to</th><th></th></tr></thead><tbody>${chk.map(l=>`<tr><td><span class="mono">${esc(l.ref)}</span><div class="small muted">${esc(l.order?.fromQuote||"")}</div></td><td><b>${esc(l.accountName)}</b></td><td class="small">${(l.registered.similar||[]).map(s=>esc(s.name)).join(", ")}</td><td><button class="btn sm" type="button" data-rga="merge" data-key="${esc(l.accountKey)}">Merge accounts</button> <button class="btn sm" type="button" data-rga="keep" data-id="${esc(l.id)}">Keep separate</button></td></tr>`).join("")}</tbody></table></div></div>`;
+  return h}
+/* ---------- reading the PDFs ---------- */
+function regDupInfo(no,i,drafts){const k=regQK(no);if(!k)return"";const l=impDup(no);if(l)return`Already on ${l.ref} (${l.accountName}, ${l.status})`;
+  const r=regS().rows.find(x=>["pending","approved"].includes(x.status)&&(x.qkey===k||regQK((x.doc||{}).quoteNo)===k));if(r)return`Already registered (${(REG_ST[r.status]||[r.status])[0].toLowerCase()})`;
+  if(drafts.some((x,j)=>j<i&&x.q&&regQK(x.q.no)===k))return"The same quotation number is earlier in this batch";return""}
+function regAccMatch(client){const c=findAccounts(client||"",5).filter(a=>a.score>=.6);if(!c.length)return{kind:"new",key:"",cands:[]};
+  const b=c[0];if(b.score>=.96)return{kind:"existing",key:b.key,cands:c};return{kind:"",key:"",cands:c}}
+function regPagesWanted(L,q){const pp=ctrPricePages(L,q);return[...new Set([1].concat(pp))].slice(0,3)}
+async function regRead(f){const d={file:f.name,size:f.size,inc:true};
+  try{if(!/\.pdf$/i.test(f.name))throw new Error("Not a PDF file.");const L=await pdfLines(f);if(!L.length||L.map(l=>l.t).join("").length<120)throw new Error("No text could be read. This looks like a scanned copy; a PDF saved from Salesforce is needed.");
+    const q=parseQuote(L);if(!q.no&&q.total==null&&!q.lines.length)throw new Error("This doesn't look like a Salesforce quotation (no quote number or total found).");
+    d.q=q;const fx=S.settings.fx||{AED:1};d.cur=fx[q.currency]?q.currency:"AED";d.curWarn=q.currency&&!fx[q.currency]?q.currency:"";d.amt=q.total;d.date=q.date||"";d.pms="";
+    d.ps=[...new Set((q.lines||[]).map(x=>x.product).filter(Boolean))];if(!d.ps.length){const p=qrProduct(q.subject||"");if(p)d.ps.push(p)}
+    d.am=regAccMatch(q.client);d.acc={kind:d.am.kind,key:d.am.key};
+    try{d.pages=await pdfPageImages(f,regPagesWanted(L,q))}catch(e){d.pages=[]}}
+  catch(e){d.err=(e&&e.message)||"Could not be read."}
+  return d}
+function regUnmatched(d){const ls=pbMapLines((d.q.lines||[]).map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total})));return ls.filter(x=>!x.m||x.m.st==="wait").length}
+function regCheck(d){const B=[],W=[];if(d.err)return{B:[d.err],W,skip:true};if(d.dup)return{B,W,skip:true,why:d.dup};const q=d.q;
+  if(!q.no)B.push("The quotation number could not be read.");if(!(q.client||"").trim())B.push("The client name is missing on the quotation.");
+  if(!(+d.amt>0))B.push("Enter the quoted amount.");if(d.curWarn)B.push(`Currency ${d.curWarn} isn't in the exchange-rate list. Choose the currency.`);
+  if(!d.date)B.push("Enter the order date.");else if(+d.date.slice(0,4)!==regYear())B.push(`The order date must be in ${regYear()}.`);else if(d.date>todayISO())B.push("The order date is in the future.");
+  if(d.acc.kind==="")B.push("Choose the account: a similar one already exists.");if(!d.ps.length)B.push("Choose the product.");
+  if(!q.contact)W.push("No contact person on the quotation.");if(!q.country)W.push("No country on the quotation.");
+  const s=(q.lines||[]).reduce((a,x)=>a+(+x.total||0),0);if((q.lines||[]).length&&q.total!=null&&Math.abs(s-q.total)>Math.max(1,Math.abs(q.total)*.005))W.push(`The lines add up to ${fmtAED(toAED(s,d.cur))}, the quotation total is ${fmtAED(toAED(q.total,d.cur))}.`);
+  const u=regUnmatched(d);if(u)W.push(`${u} line${u===1?"":"s"} not matched to the price book yet.`);
+  if(!(d.pages||[]).length)W.push("No picture could be made, so the approver can't compare it with the paper.");return{B,W}}
+function regDocOf(d,eng,id){const q=d.q;const ac=d.acc.kind==="existing"?allAccounts()[d.acc.key]:null;const ct={name:q.contact||"",title:q.title||"",email:"",phone:""};
+  const sim=(d.am.cands||[]).filter(a=>a.key!==(ac?ac.key:"")).map(a=>({key:a.key,name:a.name}));
+  const doc={quoteNo:q.no,client:ac?ac.name:q.client.trim(),country:q.country||(ac&&ac.country)||"",contact:ct,products:d.ps.slice(),cur:d.cur,value:+d.amt,aed:toAED(d.amt,d.cur),orderDate:d.date,quoteDate:q.date||"",pms:d.pms||"",
+    accChoice:{kind:d.acc.kind,key:d.acc.kind==="existing"?d.acc.key:"",name:ac?ac.name:q.client.trim()},accSimilar:sim,
+    lines:(q.lines||[]).map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total,...(x.recurring?{recurring:true}:{})})),
+    meta:{by:q.by||"",byTitle:q.byTitle||"",byEmail:q.byEmail||"",validUntil:q.validUntil||"",payment:q.payment||"",discount:q.discount||0,subject:q.subject||"",tax:q.tax||0,gross:q.gross||0,yearly:q.yearly||0},
+    flags:regCheck(d).W,fileName:d.file,pageNums:(d.pages||[]).map(p=>p.n),submittedAt:nowISO(),submittedBy:S.myName||S.myEmail||""};
+  doc.read={client:doc.client,acc:doc.accChoice.kind+"|"+doc.accChoice.key,country:doc.country,cn:ct.name,ct:ct.title,ce:"",cp:"",date:doc.orderDate,amt:doc.value,cur:doc.cur,pms:doc.pms};return doc}
+async function regPick(files){const R=regS();let skipped=0,dup=0;const have=R.drafts;
+  const add=[];for(const f of files){if(have.some(x=>x.file===f.name&&x.size===f.size)||add.some(x=>x.name===f.name&&x.size===f.size)){dup++;continue}if(have.length+add.length>=REG_MAX){skipped++;continue}add.push(f)}
+  if(skipped)toast(`Only ${REG_MAX} quotations at a time. ${skipped} file${skipped===1?" was":"s were"} left out; submit these first, then add the rest.`);else if(dup)toast("Already chosen");
+  R.res=null;let n=0;for(const f of add){R.busy=`Reading ${++n} of ${add.length}…`;render();const d=await regRead(f);if(d.q)d.dup=regDupInfo(d.q.no,have.length,have.concat([d]));have.push(d)}
+  R.busy="";render()}
+async function regSubmit(){const R=regS();if(R.busy)return;const eng=isSales()?S.myEng:R.eng;if(!eng){toast("Choose the engineer these orders are for");return}
+  const go=R.drafts.filter(d=>d.inc&&!regCheck(d).skip&&!regCheck(d).B.length);if(!go.length)return;
+  const batch="B"+ymd(new Date()).replace(/-/g,"")+"-"+Math.random().toString(36).slice(2,6);const made=[],failed=[];let i=0,nopic=0;
+  for(const d of go){R.busy=`Submitting ${++i} of ${go.length}…`;render();const id="R"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    try{await window.__reg.insert({id,batch,engineer:eng,qkey:regQK(d.q.no),doc:regDocOf(d,eng,id)});try{await window.__reg.putPages(id,d.pages||[])}catch(e){nopic++}made.push(d)}catch(e){failed.push({d,why:regErr(e)})}}
+  R.drafts=R.drafts.filter(d=>!made.includes(d));R.busy="";R.res={made:made.length,failed,nopic,at:nowISO(),batch};await regLoad(true);render()}
+/* ---------- screens ---------- */
+function regTabs(){const t=[];if(regCan())t.push(["up","Register orders"]);if(regApprover())t.push(["ap","To approve"]);t.push(["my","My submissions"]);if(regApprover())t.push(["all","All registered orders"]);return t}
+function renderReg(m){const R=regS();regLoad();const tabs=regTabs();if(!tabs.some(t=>t[0]===R.tab))R.tab=tabs[0][0];
+  if(R.open&&regRow(R.open)&&R.tab==="ap")return regReview(m);R.open="";
+  const nAp=R.rows.filter(r=>r.status==="pending"&&!regOwnBlock(r)).length;
+  m.innerHTML=`<section class="view" id="rgRoot"><div class="vhead"><div><h2>Registered orders</h2><p>Orders already won this year, registered from their approved quotations. They are recorded as Won, but they are not leads.</p></div><div class="row"><button type="button" class="btn" id="rgBack" data-rga="back">Back to Focus</button></div></div>
+   ${!regHosted()?`<div class="notice warn">This needs the hosted Lead Desk database.</div>`:""}${R.err?`<div class="notice bad">${esc(R.err)}</div>`:""}
+   <div class="seg rgtabs" id="rgTabs" role="tablist">${tabs.map(([k,t])=>`<button type="button" role="tab" data-rga="tab" data-tab="${k}" aria-pressed="${R.tab===k}">${esc(t)}${k==="ap"&&nAp?` <span class="chip warn">${nAp}</span>`:""}</button>`).join("")}</div>
+   <div id="rgBody">${R.tab==="up"?regUpHTML():R.tab==="ap"?regApHTML():R.tab==="my"?regListHTML(R.rows.filter(regMine),false):regAllHTML()}</div></section>`;
+  if(R.tab==="up")regUpBind(m)}
+function regAccText(){const a=regAccNow();if(S.role==="supervisor")return"As a Supervisor you can always register orders.";if(!a)return"";const left=Math.max(0,Math.round((Date.parse(a.to_date)-Date.parse(todayISO()))/864e5));return`Your access runs until <b>${esc(fmtD(a.to_date))}</b> (${left===0?"today is the last day":left+" day"+(left===1?"":"s")+" left"}).`}
+function regUpHTML(){const R=regS();if(!regCan())return`<div class="panel"><p class="small muted" style="margin:0">You don't have access to register orders. A Supervisor can give you access for a period of time.</p></div>`;
+  const sp=spNames();const lm=!isSales();const ready=R.drafts.filter(d=>d.inc&&!regCheck(d).skip&&!regCheck(d).B.length);
+  return`<div class="panel" style="padding:12px 14px"><div class="small muted">${regAccText()}</div>
+    <div class="small muted" style="margin-top:4px">Drop the approved Salesforce quotation PDFs of orders already won (up to ${REG_MAX} at a time). They are read on this device and are never stored. A Lead Manager or Supervisor checks each one against a small picture of its pages before it becomes a Won order.</div></div>
+   ${lm?`<div class="panel" style="padding:12px 14px"><label class="f" style="max-width:320px">These orders were won by <span class="req">*</span><select id="rgEng">${opts(sp,R.eng,"Choose the sales engineer")}</select></label></div>`:`<div class="small muted">Registered for <b>${esc(S.myEng||"you")}</b>.</div>`}
+   <div class="panel imdrop" id="rgDrop"><div><b>Drop the quotation PDFs here</b> <span class="muted">or</span> <label class="btn sm" style="cursor:pointer">Choose files<input type="file" id="rgFile" accept="application/pdf,.pdf" multiple hidden></label></div>${R.busy?`<div class="small" id="rgBusy">${esc(R.busy)}</div>`:""}</div>
+   ${R.res?regResHTML():""}
+   ${R.drafts.length?`<div class="row" style="margin:6px 0"><b>${R.drafts.length} quotation${R.drafts.length===1?"":"s"} read</b><span class="sp"></span><button class="btn" type="button" data-rga="clear">Clear list</button><button class="btn pri" type="button" id="rgSubmit" data-rga="submit"${ready.length&&!R.busy?"":" disabled"}>Submit ${ready.length} for approval</button></div>
+   <div class="rglist">${R.drafts.map((d,i)=>regCard(d,i)).join("")}</div>`:""}`}
+function regResHTML(){const x=regS().res;return`<div class="panel" id="rgRes" style="border-left:3px solid ${x.failed.length?"var(--warn)":"var(--ok)"}"><b>${x.made} quotation${x.made===1?"":"s"} sent for approval.</b> <span class="small muted">They are not counted anywhere until a Lead Manager or Supervisor approves them.</span>
+   ${x.nopic?`<div class="small" style="color:var(--warn)">${x.nopic} could not store a picture; the approver will have no picture for ${x.nopic===1?"it":"them"}.</div>`:""}
+   ${x.failed.length?`<div style="margin-top:6px">${x.failed.map(f=>`<div class="small" style="color:var(--bad)"><b>${esc(f.d.q.no)}</b> · ${esc(f.d.q.client||"")}: ${esc(f.why)}</div>`).join("")}</div>`:""}</div>`}
+function regCard(d,i){if(d.err)return`<div class="imc panel" data-rgd="${i}"><div class="imh"><span class="small mono muted">${esc(d.file)}</span><span class="chip bad">Can't read</span><button class="btn sm" type="button" data-rga="drop" data-i="${i}">Remove</button></div><div class="notice bad" style="padding:6px 10px">${esc(d.err)}</div></div>`;
+  const q=d.q,C=regCheck(d);const st=C.skip?`<span class="chip">Skipped</span>`:C.B.length?`<span class="chip warn">Needs a detail</span>`:`<span class="chip ok">Ready</span>`;const fx=Object.keys(S.settings.fx||{AED:1});
+  const am=d.am.cands||[];const accSel=am.length?`<label class="f fsm">Account <span class="req">*</span><select data-rgf="acc" data-i="${i}">${d.acc.kind===""?`<option value="">Choose…</option>`:""}${am.map(a=>`<option value="ex:${esc(a.key)}"${d.acc.kind==="existing"&&d.acc.key===a.key?" selected":""}>Use existing: ${esc(a.name)}${a.country?" ("+esc(a.country)+")":""}</option>`).join("")}<option value="new"${d.acc.kind==="new"?" selected":""}>Create a new account: ${esc(q.client||"")}</option></select></label>`:"";
+  const prodSel=!d.ps.length?`<label class="f fsm">Product <span class="req">*</span><select data-rgf="prod" data-i="${i}">${opts(prodList(false).map(p=>p.name),"","Choose")}</select></label>`:"";
+  return`<div class="imc panel${C.skip?" imoff":""}" data-rgd="${i}"><div class="imh"><label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-rgf="inc" data-i="${i}"${d.inc&&!C.skip?" checked":""}${C.skip?" disabled":""}> <span class="mono">${esc(q.no||"No quote number")}</span></label>${st}<button class="btn sm" type="button" data-rga="drop" data-i="${i}">Remove</button></div>
+   <div class="imb"><div style="display:grid;gap:6px;min-width:0"><div class="small muted mono">${esc(d.file)}</div>
+     <div><b>${esc(q.client||"Client not found")}</b>${q.country?` <span class="small muted">· ${esc(q.country)}</span>`:""}<div class="small muted">${q.contact?esc(q.contact)+(q.title?" · "+esc(q.title):""):"No contact on the quote"}${q.date?" · quoted "+fmtD(q.date):""}${q.by?" · prepared by "+esc(q.by):""}</div></div>
+     <div class="small">${d.ps.length?d.ps.map(p=>`<span class="chip">${esc(p)}</span>`).join(" "):`<span class="muted">No product recognised</span>`} <span class="muted">· ${(q.lines||[]).length} line${(q.lines||[]).length===1?"":"s"} · ${(d.pages||[]).length} picture${(d.pages||[]).length===1?"":"s"}</span></div>
+     ${d.dup?`<div class="small muted">${esc(d.dup)}. Nothing to register.</div>`:""}${C.B.map(w=>`<div class="small" style="color:var(--bad)">${esc(w)}</div>`).join("")}${C.W.map(w=>`<div class="small" style="color:var(--warn)">${esc(w)}</div>`).join("")}</div>
+    ${C.skip?"":`<div class="imf"><div class="row" style="gap:6px;flex-wrap:nowrap"><label class="f fsm" style="flex:1">Order amount<input type="number" min="0" step="0.01" data-rgf="amt" data-i="${i}" value="${d.amt??""}"></label><label class="f fsm" style="width:86px">Currency<select data-rgf="cur" data-i="${i}">${opts(fx,d.cur)}</select></label></div>
+     <div class="small muted" style="margin-top:-4px">${+d.amt>0?"= "+fmtAED(toAED(d.amt,d.cur)):""}</div>
+     <label class="f fsm">Order date <span class="req">*</span><input type="date" data-rgf="date" data-i="${i}" value="${esc(d.date||"")}"></label>
+     <label class="f fsm">Hotel PMS<select data-rgf="pms" data-i="${i}"><option value="">Unknown</option>${pmsCfg().list.map(p=>`<option${d.pms===p?" selected":""}>${esc(p)}</option>`).join("")}</select></label>${accSel}${prodSel}</div>`}</div></div>`}
+function regUpBind(m){const R=regS();const f=$("#rgFile");if(f)f.onchange=e=>{const fl=[...e.target.files];e.target.value="";regPick(fl)};
+  const dr=$("#rgDrop");if(dr){dr.ondragover=e=>{e.preventDefault();dr.classList.add("on")};dr.ondragleave=()=>dr.classList.remove("on");dr.ondrop=e=>{e.preventDefault();dr.classList.remove("on");regPick([...e.dataTransfer.files])}}
+  const eg=$("#rgEng");if(eg)eg.onchange=e=>{R.eng=e.target.value;render()}}
+function regListHTML(rows,wide){const R=regS();if(!rows.length)return`<div class="panel"><p class="small muted" style="margin:0">Nothing here yet.</p></div>`;
+  return`<div class="tw"><table class="rgt"><thead><tr><th>Quotation</th><th>Client</th><th>For</th><th class="num">Order value</th><th>Order date</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(r=>{const d=r.doc||{};const L=r.lead_ref?S.leads.find(l=>l.ref===r.lead_ref):null;
+    const wdI=R.wd&&R.wd.id===r.id;return`<tr data-rgr="${esc(r.id)}"><td><span class="mono">${esc(d.quoteNo||"")}</span></td><td><b>${esc(d.client||"")}</b><div class="small muted">${esc(d.country||"")}</div></td><td>${esc(r.engineer||"")}</td><td class="num">${fmtAED(d.aed||0)}</td><td>${esc(d.orderDate?fmtD(d.orderDate):"")}</td>
+     <td>${regChip(r.status)}${r.status==="pending"?`<div class="small muted">${regDaysLeft(r)} days left</div>`:""}${r.status==="rejected"&&d.rejectReason?`<div class="small" style="color:var(--bad)">${esc(d.rejectReason)}</div>`:""}${r.status==="withdrawn"&&d.withdrawReason?`<div class="small muted">${esc(d.withdrawReason)}</div>`:""}</td>
+     <td>${r.status==="pending"&&(regMine(r)||regApprover())&&!wide?`<button class="btn sm" type="button" data-rga="wdraw" data-id="${esc(r.id)}">Withdraw</button>`:""}${L?` <button class="btn sm" type="button" data-open="${esc(L.id)}">Open</button>`:""}
+      ${wide&&r.status==="approved"&&S.role==="supervisor"?(wdI?`<div class="row" style="gap:6px;margin-top:4px"><input id="rgWdWhy" placeholder="Reason" style="min-width:140px" value="${esc(R.wd.why||"")}"><button class="btn bad sm" type="button" data-rga="wdok" data-id="${esc(r.id)}">Withdraw order</button><button class="btn sm" type="button" data-rga="wdno">Cancel</button></div>`:`<button class="btn sm" type="button" data-rga="wdap" data-id="${esc(r.id)}">Withdraw order…</button>`):""}${wide&&r.status==="pending"?` <button class="btn sm" type="button" data-rga="rev" data-id="${esc(r.id)}"${regOwnBlock(r)?" disabled title=\"You can't approve your own batch\"":""}>Review</button>`:""}</td></tr>`}).join("")}</tbody></table></div>`}
+function regApHTML(){const R=regS();const rows=R.rows.filter(r=>r.status==="pending");if(!rows.length)return`<div class="panel"><p class="small muted" style="margin:0">No registered orders are waiting for approval.</p></div>`;
+  const by={};rows.forEach(r=>(by[r.batch]=by[r.batch]||[]).push(r));const tk=Object.keys(R.ticked).filter(k=>R.ticked[k]&&regRow(k)&&regRow(k).status==="pending"&&R.ver[k]);
+  return`<div class="row" style="margin-bottom:8px"><span class="small muted">Open each order, check it against the quotation picture, and tick <b>Verified</b>. Then you can approve verified orders together.</span><span class="sp"></span><button class="btn pri" type="button" data-rga="bulk"${tk.length?"":" disabled"}>Approve ${tk.length} ticked</button></div>
+   ${Object.entries(by).map(([b,rs])=>`<div class="panel" style="padding:0"><div class="row" style="padding:10px 14px"><b>${esc(rs[0].created_by||"")}</b><span class="small muted">for ${esc(rs[0].engineer||"")} · ${rs.length} order${rs.length===1?"":"s"} · sent ${esc(fmtD((rs[0].created_at||"").slice(0,10)))}</span></div>
+    <div class="tw plain"><table class="rgt"><thead><tr><th></th><th>Quotation</th><th>Client</th><th class="num">Order value</th><th>Order date</th><th>Flags</th><th></th></tr></thead><tbody>${rs.map(r=>{const d=r.doc||{};const own=regOwnBlock(r);const v=!!R.ver[r.id];
+     return`<tr data-rgr="${esc(r.id)}"><td><input type="checkbox" data-rga="tick" data-id="${esc(r.id)}" aria-label="Tick ${esc(d.quoteNo||"")}"${v&&!own?"":" disabled"}${R.ticked[r.id]&&v?" checked":""}></td><td><span class="mono">${esc(d.quoteNo||"")}</span></td><td><b>${esc(d.client||"")}</b><div class="small muted">${esc(d.country||"")}</div></td><td class="num">${fmtAED(d.aed||0)}</td><td>${esc(d.orderDate?fmtD(d.orderDate):"")}</td>
+      <td class="small">${v?`<span class="chip ok">Verified</span> `:""}${(d.flags||[]).length?`<span class="chip warn">${d.flags.length} flag${d.flags.length===1?"":"s"}</span>`:`<span class="muted">none</span>`}<div class="muted">${regDaysLeft(r)} days left</div></td>
+      <td>${own?`<span class="small muted">Your own batch: another approver needed</span>`:`<button class="btn sm pri" type="button" data-rga="rev" data-id="${esc(r.id)}">Review</button>`} <button class="btn sm" type="button" data-rga="wdraw" data-id="${esc(r.id)}">Withdraw</button></td></tr>`}).join("")}</tbody></table></div></div>`).join("")}`}
+function regAllHTML(){const R=regS();const f=R.filt;const rows=R.rows.filter(r=>!f||r.status===f);
+  return`<div class="row" style="margin-bottom:8px"><label class="f fsm">Show<select id="rgFilt"><option value="">All statuses</option>${Object.entries(REG_ST).map(([k,v])=>`<option value="${k}"${f===k?" selected":""}>${esc(v[0])}</option>`).join("")}</select></label></div>${regListHTML(rows,true)}`}
+/* ---------- side-by-side review ---------- */
+function regEdInit(row){const d=row.doc||{},A=d.accChoice||{kind:"new"},c=d.contact||{};return{id:row.id,name:d.accChoice&&d.accChoice.name||d.client||"",acc:{kind:A.kind||"new",key:A.key||""},country:d.country||"",cn:c.name||"",ct:c.title||"",ce:c.email||"",cp:c.phone||"",date:d.orderDate||"",amt:d.value,cur:d.cur||"AED",pms:d.pms||"",ver:!!regS().ver[row.id],why:"",rj:false,rjWhy:"",err:""}}
+function regEdits(row,e){const r=(row.doc||{}).read||{};const o=[];const c=(lab,a,b)=>{if(String(a??"")!==String(b??""))o.push({field:lab,from:a??"",to:b??""})};
+  const an=e.acc.kind==="existing"?(allAccounts()[e.acc.key]||{}).name||e.acc.key:e.name.trim();const ao=(r.acc||"").startsWith("existing|")?(allAccounts()[r.acc.split("|")[1]]||{}).name||r.acc.split("|")[1]:r.client||"";
+  c("Account",ao,an);c("Country",r.country,e.country.trim());c("Contact name",r.cn,e.cn.trim());c("Contact title",r.ct,e.ct.trim());c("Contact email",r.ce,e.ce.trim());c("Contact phone",r.cp,e.cp.trim());c("Order date",r.date,e.date);c("Amount",r.amt,+e.amt);c("Currency",r.cur,e.cur);c("PMS",r.pms,e.pms);return o}
+function regPagesOf(id){const R=regS();if(R.pg[id])return R.pg[id];if(R.pgBusy===id)return null;R.pgBusy=id;
+  window.__reg.pages(id).then(L=>{R.pg[id]=L||[]}).catch(e=>{R.pg[id]=[];R.pgErr=(e&&e.message)||"Couldn't load the picture"}).finally(()=>{R.pgBusy="";if(R.open===id)render()});return null}
+function regFlagsNow(row,e){const W=(row.doc.flags||[]).slice();const B=[];if(!(+e.amt>0))B.push("Enter the amount.");if(!e.date)B.push("Enter the order date.");else if(+e.date.slice(0,4)!==regYear())B.push(`The order date must be in ${regYear()}.`);else if(e.date>todayISO())B.push("The order date is in the future.");
+  if(e.acc.kind==="new"&&!e.name.trim())B.push("Enter the account name.");if(e.acc.kind==="existing"&&!allAccounts()[e.acc.key])B.push("Choose the account.");if(!e.cur||!(S.settings.fx||{AED:1})[e.cur])B.push("Choose the currency.");return{W,B}}
+function regReview(m){const R=regS();const row=regRow(R.open);if(!row){R.open="";return renderReg(m)}if(!R.ed||R.ed.id!==row.id)R.ed=regEdInit(row);const e=R.ed,d=row.doc;const pages=regPagesOf(row.id);const F=regFlagsNow(row,e);const edits=regEdits(row,e);
+  const cands=findAccounts(d.client||e.name,5).filter(a=>a.score>=.6);if(e.acc.kind==="existing"&&!cands.some(a=>a.key===e.acc.key)&&allAccounts()[e.acc.key])cands.unshift(Object.assign({score:1},allAccounts()[e.acc.key]));
+  const pg=pages||[];const pn=Math.min(R.pn,Math.max(0,pg.length-1));const fx=Object.keys(S.settings.fx||{AED:1});const own=regOwnBlock(row);
+  const lines=(d.lines||[]);const ls=lines.reduce((a,x)=>a+(+x.total||0),0);
+  const pic=`<div class="rvpic" data-mob="pic"><div class="panel" style="padding:10px"><div class="row rvtool"><b>Quotation picture</b><span class="sp"></span>${pg.length>1?`<span class="seg" id="rvPages">${pg.map((p,i)=>`<button type="button" data-rga="pg" data-i="${i}" aria-pressed="${i===pn}">Page ${p.n}</button>`).join("")}</span>`:""}
+     <span class="seg" id="rvZoom"><button type="button" data-rga="zoom" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-rga="zoom" data-z="0" aria-label="Fit to width">${Math.round(R.zoom*100)}%</button><button type="button" data-rga="zoom" data-z="1" aria-label="Zoom in">+</button></span></div>
+     <div class="rvimg" id="rvImg" tabindex="0" aria-label="Quotation page picture">${pages===null?`<p class="small muted" style="padding:12px;margin:0">Loading the picture…</p>`:pg.length?`<img alt="Quotation page ${pg[pn].n}" src="${esc(pg[pn].img)}" style="width:${Math.round(R.zoom*100)}%">`:`<p class="small muted" style="padding:12px;margin:0">${R.pgErr?esc(R.pgErr):"No picture was stored for this order, so it can't be compared with the paper. Reject it and ask for it to be registered again."}</p>`}</div></div></div>`;
+  const val=`<div class="rvval" data-mob="val"><div class="panel" style="padding:12px 14px;display:grid;gap:10px">
+     <div class="row"><b class="mono">${esc(d.quoteNo)}</b>${regChip(row.status)}<span class="sp"></span><span class="small muted">for ${esc(row.engineer)} · sent by ${esc(row.created_by||"")}</span></div>
+     ${own?`<div class="notice warn" style="padding:6px 10px">This is your own batch. Another Lead Manager or a Supervisor has to approve it.</div>`:""}
+     ${F.B.map(w=>`<div class="notice bad" style="padding:6px 10px">${esc(w)}</div>`).join("")}${F.W.map(w=>`<div class="notice warn" style="padding:6px 10px">${esc(w)}</div>`).join("")}
+     <div class="grid2"><label class="f">Account<select id="rvAcc">${cands.map(a=>`<option value="ex:${esc(a.key)}"${e.acc.kind==="existing"&&e.acc.key===a.key?" selected":""}>Existing: ${esc(a.name)}${a.country?" ("+esc(a.country)+")":""}</option>`).join("")}<option value="new"${e.acc.kind==="new"?" selected":""}>New account</option></select></label>
+      <label class="f">${e.acc.kind==="new"?"New account name":"Account name"}<input id="rvName" value="${esc(e.acc.kind==="existing"?((allAccounts()[e.acc.key]||{}).name||e.name):e.name)}"${e.acc.kind==="existing"?" disabled":""}></label></div>
+     <div class="grid2"><label class="f">Country<input id="rvCountry" value="${esc(e.country)}"></label><label class="f">Hotel PMS<select id="rvPms"><option value="">Unknown</option>${pmsCfg().list.map(p=>`<option${e.pms===p?" selected":""}>${esc(p)}</option>`).join("")}</select></label></div>
+     <div class="grid2"><label class="f">Contact person<input id="rvCn" value="${esc(e.cn)}"></label><label class="f">Title<input id="rvCt" value="${esc(e.ct)}"></label></div>
+     <div class="grid2"><label class="f">Contact email<input id="rvCe" type="email" value="${esc(e.ce)}"></label><label class="f">Contact phone<input id="rvCp" value="${esc(e.cp)}"></label></div>
+     <div class="grid3"><label class="f">Amount (before tax)<input id="rvAmt" type="number" min="0" step="0.01" value="${e.amt??""}"></label><label class="f">Currency<select id="rvCur">${opts(fx,e.cur)}</select></label><label class="f">Order date<input id="rvDate" type="date" value="${esc(e.date)}"></label></div>
+     <div class="small muted" id="rvAed">${+e.amt>0?"= "+fmtAED(toAED(e.amt,e.cur)):""}</div>
+     <div><div class="small muted" style="margin-bottom:4px">Products: ${(d.products||[]).map(p=>`<span class="chip">${esc(p)}</span>`).join(" ")||"—"} · quoted ${d.quoteDate?esc(fmtD(d.quoteDate)):"—"}${(d.meta||{}).by?" · prepared by "+esc(d.meta.by):""}</div>
+      <div class="tw plain rvlines"><table><thead><tr><th>Line item</th><th class="num">Qty</th><th class="num">Total</th></tr></thead><tbody>${lines.map(x=>`<tr><td>${esc(x.item||"")}</td><td class="num">${x.qty??""}</td><td class="num">${x.total!=null?(+x.total).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):""}</td></tr>`).join("")||`<tr><td colspan="3" class="muted">No line items were read.</td></tr>`}</tbody><tfoot><tr><td colspan="2"><b>Lines add up to</b></td><td class="num"><b>${ls.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}</b></td></tr></tfoot></table></div></div>
+     <div id="rvWhyBox" ${edits.length?"":"hidden"}><div class="small" style="margin-bottom:4px"><b>${edits.length} correction${edits.length===1?"":"s"}:</b> <span id="rvEditList">${edits.map(x=>esc(x.field)).join(", ")}</span></div><label class="f">Reason for the correction <span class="req">*</span><input id="rvWhy" value="${esc(e.why)}" placeholder="e.g. contact name misread"></label></div>
+     <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="rvVer" style="width:18px;height:18px;flex:none;margin:0"${e.ver?" checked":""}${own?" disabled":""}> I have checked these figures against the quotation picture (Verified)</label>
+     <div id="rvRjBox" ${e.rj?"":"hidden"}><label class="f">Reason for rejecting <span class="req">*</span><input id="rvRjWhy" value="${esc(e.rjWhy)}" placeholder="What is wrong? The salesperson sees this."></label></div>
+     <div class="small" id="rvErr" style="color:var(--bad)">${esc(e.err||"")}</div>
+     <div class="row"><button class="btn pri" type="button" id="rvOk" data-rga="ok"${own?" disabled":""}>Approve order</button><button class="btn bad" type="button" id="rvNo" data-rga="no"${own?" disabled":""}>${e.rj?"Confirm reject":"Reject…"}</button><button class="btn" type="button" data-rga="rvback">Back to the list</button></div></div></div>`;
+  m.innerHTML=`<section class="view" id="rgRoot"><div class="vhead"><div><h2>Check ${esc(d.quoteNo)}</h2><p>${esc(d.client||"")} · ${fmtAED(d.aed||0)} · order date ${esc(d.orderDate?fmtD(d.orderDate):"—")}</p></div><div class="row"><button type="button" class="btn" data-rga="rvback">Back to the list</button></div></div>
+   <div class="seg rvmob" id="rvMob" role="tablist"><button type="button" data-rga="mob" data-m="pic" aria-pressed="${R.mob==="pic"}">Quote picture</button><button type="button" data-rga="mob" data-m="val" aria-pressed="${R.mob==="val"}">Values read</button></div>
+   <div class="rvgrid" id="rvGrid" data-m="${R.mob}">${pic}${val}</div></section>`;
+  regRvBind(m,row)}
+function regRvBind(m,row){const R=regS(),e=R.ed;const g=(id,fn)=>{const x=m.querySelector(id);if(x)x.addEventListener("input",fn);return x};
+  const upd=()=>{const ed=regEdits(row,e);const b=$("#rvWhyBox");if(b){b.hidden=!ed.length;const l=$("#rvEditList");if(l)l.innerHTML=ed.map(x=>esc(x.field)).join(", ")}const a=$("#rvAed");if(a)a.textContent=+e.amt>0?"= "+fmtAED(toAED(e.amt,e.cur)):""};
+  $("#rvAcc")?.addEventListener("change",ev=>{const v=ev.target.value;if(v==="new")e.acc={kind:"new",key:""};else e.acc={kind:"existing",key:v.slice(3)};const A=e.acc.kind==="existing"?allAccounts()[e.acc.key]:null;if(A&&!e.country)e.country=A.country||"";if(e.acc.kind==="new"&&!e.name)e.name=row.doc.client||"";render()});
+  g("#rvName",ev=>{e.name=ev.target.value;upd()});g("#rvCountry",ev=>{e.country=ev.target.value;upd()});g("#rvCn",ev=>{e.cn=ev.target.value;upd()});g("#rvCt",ev=>{e.ct=ev.target.value;upd()});g("#rvCe",ev=>{e.ce=ev.target.value;upd()});g("#rvCp",ev=>{e.cp=ev.target.value;upd()});
+  g("#rvAmt",ev=>{e.amt=ev.target.value===""?"":+ev.target.value;upd()});g("#rvDate",ev=>{e.date=ev.target.value;upd()});g("#rvWhy",ev=>{e.why=ev.target.value});g("#rvRjWhy",ev=>{e.rjWhy=ev.target.value});
+  $("#rvCur")?.addEventListener("change",ev=>{e.cur=ev.target.value;upd()});$("#rvPms")?.addEventListener("change",ev=>{e.pms=ev.target.value;upd()});
+  $("#rvVer")?.addEventListener("change",ev=>{e.ver=ev.target.checked;R.ver[row.id]=e.ver});
+  $("#rvDate")?.addEventListener("change",ev=>{e.date=ev.target.value;upd()})}
+/* ---------- the Won order made on approval ---------- */
+function regVals(row,e){return{acc:e.acc,name:e.name,country:e.country,cn:e.cn,ct:e.ct,ce:e.ce,cp:e.cp,date:e.date,amt:+e.amt,cur:e.cur,pms:e.pms}}
+function regLeadDoc(row,e,edits,why){const d=row.doc,t=nowISO(),eng=row.engineer;const m=d.meta||{};
+  let A=e.acc.kind==="existing"?allAccounts()[e.acc.key]:null;const nm=String(A?A.name:e.name||"").trim().replace(/\s+/g," ");let key=A?A.key:keyOf(nm);
+  if(!A){const ex=allAccounts()[key];if(ex&&!ex.deleted)A=ex}
+  const name=A?A.name:nm;if(A)key=A.key;const country=(String(e.country||"").trim()||(A&&A.country)||"");
+  const acct=A?null:{name,key,country,city:"",group:"",region:"",domain:emailDomain(e.ce),createdAt:t,createdBy:S.uid||null,fromSheet:!!S.registry[key]};
+  const cm=ccFind(key,{name:e.cn,email:e.ce,phone:e.cp},"");const cx=cm&&cm.kind!=="name"?cm.contact:{};
+  const contact={name:e.cn||cx.name||"",title:e.ct||cx.title||"",email:e.ce||cx.email||"",phone:e.cp||cx.phone||""};
+  const aed=toAED(e.amt,e.cur);const date=e.date;const ps=(d.products||[]).slice();
+  const lines=pbMapLines((d.lines||[]).map(x=>({item:x.item,product:x.product||"",unit:x.unit,list:x.list,qty:x.qty,total:x.total,...(x.recurring?{recurring:true}:{})})));
+  const quote={value:+e.amt,currency:e.cur,aed,date:d.quoteDate||date,no:d.quoteNo,notes:String(m.subject||"").slice(0,200),lines,source:"Salesforce PDF",src:"pdf",registered:true,createdBy:m.by||"",createdByTitle:m.byTitle||"",createdByEmail:m.byEmail||"",validUntil:m.validUntil||"",paymentTerms:m.payment||"",discount:m.discount||0,subject:m.subject||"",...(m.yearly?{yearly:m.yearly}:{}),...(m.tax?{tax:m.tax}:{}),...(m.gross?{gross:m.gross}:{})};
+  const order={value:+e.amt,currency:e.cur,aed,date,fromQuote:d.quoteNo,no:d.quoteNo,registered:true};
+  const sim=(d.accSimilar||[]).filter(s=>s.key!==key);
+  const lead={ref:"",accountKey:key,accountName:name,country,contact,products:ps,product:ps.join(", "),category:"Registered",source:"Registered order",generatedBy:"",department:"Sales",rooms:null,pms:e.pms||"",...(!isRealPms(e.pms)?{pmsUnknown:true}:{}),
+    timeline:"",preferred:eng,territoryOwner:"",notes:`Registered order: ${d.quoteNo} was won before it was entered in Lead Desk.`,requirementDate:date,region:"",subdivision:"",status:"Won",assignedTo:eng,priority:"",createdAt:t,createdBy:S.uid||null,
+    stageAt:{Won:date+"T09:00:00.000Z"},quote,order,registered:{id:row.id,batch:row.batch,by:row.created_by||"",at:row.created_at,engineer:eng,...(sim.length?{similar:sim}:{})},
+    log:[{t,by:actor()||S.myName||"",byId:S.uid||null,a:`Registered order approved · ${d.quoteNo} · ${fmtAED(aed)} · for ${eng} · sent by ${row.created_by||"?"}${edits.length?` · ${edits.length} correction${edits.length===1?"":"s"} (${edits.map(x=>x.field).join(", ")}): ${why}`:""}`}]};
+  return{lead,acct}}
+async function regApprove(row,e,bulk){const F=regFlagsNow(row,e);if(F.B.length)throw new Error(F.B[0]);const edits=regEdits(row,e);if(edits.length&&e.why.trim().length<3)throw new Error("Give the reason for the correction.");
+  const{lead,acct}=regLeadDoc(row,e,edits,e.why.trim());const at=nowISO();
+  const doc=Object.assign({},row.doc,{final:regVals(row,e),edits:(row.doc.edits||[]).concat(edits.map(x=>Object.assign({},x,{by:S.myEmail||"",at,reason:e.why.trim()})))});
+  const ref=await window.__reg.decide({id:row.id,action:"approve",doc,lead,acct});await regPullLead(ref);return ref}
+async function regBulk(){const R=regS();const ids=Object.keys(R.ticked).filter(k=>R.ticked[k]&&R.ver[k]&&regRow(k)&&regRow(k).status==="pending"&&!regOwnBlock(regRow(k)));if(!ids.length)return;R.busy="Approving…";render();let ok=0;const bad=[];
+  for(const id of ids){const row=regRow(id);try{await regApprove(row,regEdInit(row),true);ok++;delete R.ticked[id]}catch(e){bad.push((row.doc.quoteNo||id)+": "+((e&&e.message)||"failed"))}}
+  R.busy="";await regLoad(true);toast(`${ok} order${ok===1?"":"s"} approved${bad.length?`, ${bad.length} not approved (${bad[0]})`:""}`);render()}
+/* ---------- actions (one delegated listener) ---------- */
+async function regAct(a,b){const R=regS();
+  if(a==="go")return regGo(b.dataset.tab||"");
+  if(a==="back"){R.scr="";R.open="";R.ed=null;render();scrollTo(0,0);return}
+  if(a==="tab"){R.tab=b.dataset.tab;R.open="";R.ed=null;render();return}
+  if(a==="clear"){R.drafts=[];R.res=null;render();return}
+  if(a==="drop"){R.drafts.splice(+b.dataset.i,1);render();return}
+  if(a==="submit")return regSubmit();
+  if(a==="rev"){R.open=b.dataset.id;R.ed=null;R.mob="pic";R.pn=0;R.zoom=1;R.tab="ap";render();scrollTo(0,0);return}
+  if(a==="rvback"){delete R.pg[R.open];R.open="";R.ed=null;render();scrollTo(0,0);return}
+  if(a==="mob"){R.mob=b.dataset.m;render();return}
+  if(a==="pg"){R.pn=+b.dataset.i;render();return}
+  if(a==="zoom"){const z=+b.dataset.z;const st=[.75,1,1.5,2,3];let i=st.findIndex(x=>x>=R.zoom-.01);if(i<0)i=1;R.zoom=z===0?1:st[Math.max(0,Math.min(st.length-1,i+z))];render();return}
+  if(a==="tick"){R.ticked[b.dataset.id]=b.checked;render();return}
+  if(a==="bulk")return regBulk();
+  if(a==="merge"){openMerge(b.dataset.key);return}
+  if(a==="keep"){try{await S.db.doc("leads/"+b.dataset.id).update({regReview:{by:S.myName||S.myEmail||"",at:nowISO(),kept:true},updatedAt:nowISO()});toast("Kept separate")}catch(e){toast("Couldn't save: "+(e.message||e.code))}return}
+  if(a==="wdraw"){const id=b.dataset.id;try{await window.__reg.decide({id,action:"withdraw"});toast("Withdrawn");await regLoad(true);render()}catch(e){toast(regErr(e))}return}
+  if(a==="wdap"){R.wd={id:b.dataset.id,why:""};render();return}
+  if(a==="wdno"){R.wd=null;render();return}
+  if(a==="wdok"){const why=(($("#rgWdWhy")||{}).value||"").trim();if(why.length<3){toast("Give the reason for withdrawing");return}try{await window.__reg.withdrawApproved(b.dataset.id,why);R.wd=null;toast("Order withdrawn");await regLoad(true);S.allLeads=(S.allLeads||[]).map(x=>x);render()}catch(e){toast(regErr(e))}return}
+  if(a==="ok"){const row=regRow(R.open);if(!row||!R.ed)return;const e=R.ed;e.err="";if(!e.ver){e.err="Tick “Verified” once you have checked the figures against the picture.";render();return}
+    b.disabled=true;try{const ref=await regApprove(row,e);toast(`Approved · ${ref}`);R.open="";R.ed=null;delete R.pg[row.id];delete R.ver[row.id];await regLoad(true);render()}catch(x){e.err=regErr(x);render()}return}
+  if(a==="no"){const row=regRow(R.open);if(!row||!R.ed)return;const e=R.ed;if(!e.rj){e.rj=true;render();$("#rvRjWhy")?.focus();return}
+    if(e.rjWhy.trim().length<3){e.err="Give the reason for rejecting.";render();return}
+    try{await window.__reg.decide({id:row.id,action:"reject",reason:e.rjWhy.trim()});toast("Rejected");R.open="";R.ed=null;delete R.pg[row.id];delete R.ver[row.id];await regLoad(true);render()}catch(x){e.err=regErr(x);render()}return}
+  if(a==="acc-give")return regAccGive();
+  if(a==="acc-end"){try{await window.__reg.access.end(b.dataset.email);toast("Access ended");await regAccLoad(true)}catch(e){toast(regErr(e))}return}
+  if(a==="acc-ext"){const t=new Date(Date.now()+14*864e5);try{await window.__reg.access.set(b.dataset.email,todayISO(),ymd(t));toast("Access extended by 14 days");await regAccLoad(true)}catch(e){toast(regErr(e))}return}
+  if(a==="yr"){const y=+(($("#rgYear")||{}).value||0);if(!(y>=2000&&y<=2100)){toast("Enter a year");return}try{await S.db.doc("config/settings").update({regYear:y});S.settings.regYear=y;toast("Year saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}return}}
+function regFieldChange(el){const R=regS();const i=+el.dataset.i,d=R.drafts[i];if(!d)return;const k=el.dataset.rgf;
+  if(k==="inc"){d.inc=el.checked}else if(k==="amt"){d.amt=el.value===""?"":+el.value}else if(k==="cur"){d.cur=el.value;d.curWarn=""}else if(k==="date"){d.date=el.value}else if(k==="pms"){d.pms=el.value}
+  else if(k==="acc"){const v=el.value;d.acc=v===""?{kind:"",key:""}:v==="new"?{kind:"new",key:""}:{kind:"existing",key:v.slice(3)}}else if(k==="prod"){d.ps=el.value?[el.value]:[]}
+  if(el.type==="number"||el.type==="date"){const C=regCheck(d);const c=el.closest(".imc");if(c){const hint=c.querySelector(".imf .small.muted");if(hint&&k==="amt")hint.textContent=+d.amt>0?"= "+fmtAED(toAED(d.amt,d.cur)):""}}else render()}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-rga]");if(!b||b.tagName==="INPUT")return;if(b.disabled)return;regAct(b.dataset.rga,b)});
+document.addEventListener("change",e=>{const t=e.target;if(t.matches&&t.matches("[data-rga=tick]")){regAct("tick",t);return}if(t.matches&&t.matches("[data-rgf]")){regFieldChange(t);if(t.dataset.rgf==="amt"||t.dataset.rgf==="date")render();return}if(t.id==="rgFilt"){regS().filt=t.value;render()}});
+/* ---------- access settings (Supervisor) ---------- */
+async function regAccLoad(force){const A=S.regAccS||(S.regAccS={list:null,busy:false});if(!regHosted()||A.busy||(A.list&&!force))return;A.busy=true;try{A.list=await window.__reg.access.list();A.err=""}catch(e){A.list=A.list||[];A.err=regErr(e)}A.busy=false;render()}
+async function regAccGive(){const em=($("#raUser")||{}).value,f=($("#raFrom")||{}).value,t=($("#raTo")||{}).value;if(!em){toast("Choose the user");return}if(!f||!t||t<f){toast("Choose a start date and an end date");return}
+  try{await window.__reg.access.set(em,f,t);toast("Access saved");await regAccLoad(true)}catch(e){toast(regErr(e))}}
+function regAccessPanel(){if(!can("settings.manage")||!regHosted())return"";const A=S.regAccS||{};const L=A.list||[];const us=Object.entries(S.users||{}).filter(([,u])=>u&&u.active!==false&&u.role!=="amc").map(([em,u])=>Object.assign({},u,{email:em})).sort((a,b)=>String(a.email).localeCompare(String(b.email)));const today=todayISO();const t14=ymd(new Date(Date.now()+14*864e5));
+  const st=a=>a.ended_at?["Ended",""]:a.to_date<today?["Finished",""]:a.from_date>today?["Not started","warn"]:["Active","ok"];
+  return`<div class="panel" id="regAccPanel"><h3>Register closed orders</h3><p class="small muted" style="margin:2px 0 10px;max-width:90ch">Give a user access, for a period of time, to register orders already won by uploading approved quotations (Focus → Registered orders). A Supervisor always has access. Lead Managers approve the orders (permission <b>order.register_approve</b>, under Roles and permissions). The database refuses uploads outside the dates.</p>
+   ${A.err?`<div class="notice bad">${esc(A.err)}</div>`:""}
+   <div class="tw plain"><table><thead><tr><th>User</th><th>From</th><th>To</th><th>Status</th><th></th></tr></thead><tbody>${L.length?L.map(a=>{const s=st(a);return`<tr><td>${esc(a.email)}</td><td>${esc(fmtD(a.from_date))}</td><td>${esc(fmtD(a.to_date))}</td><td><span class="chip ${s[1]}">${s[0]}</span></td><td><button class="btn sm" type="button" data-rga="acc-ext" data-email="${esc(a.email)}">Extend 14 days</button> ${s[0]==="Active"||s[0]==="Not started"?`<button class="btn sm" type="button" data-rga="acc-end" data-email="${esc(a.email)}">End now</button>`:""}</td></tr>`}).join(""):`<tr><td colspan="5" class="muted">Nobody has been given access yet.</td></tr>`}</tbody></table></div>
+   <div class="grid3" style="margin-top:12px;align-items:end"><label class="f">User<select id="raUser"><option value="">Choose a user</option>${us.map(u=>`<option value="${esc(u.email)}">${esc(u.name||u.email)} · ${esc(u.role)}</option>`).join("")}</select></label><label class="f">From<input type="date" id="raFrom" value="${today}"></label><label class="f">To<input type="date" id="raTo" value="${t14}"></label></div>
+   <div class="row" style="margin-top:10px"><button class="btn pri" type="button" data-rga="acc-give">Give access</button><span class="sp"></span><label class="f fsm" style="max-width:150px">Year being registered<input type="number" id="rgYear" min="2000" max="2100" value="${regYear()}"></label><button class="btn" type="button" data-rga="yr">Save year</button></div></div>`}
+/* ---------- Closed orders per salesperson (Management view, Focus tile) ---------- */
+function regClosedF(y){return Object.assign({},AF_DEF,{period:"custom",from:y+"-01-01",to:y+"-12-31",region:"",sub:"",src:"All",eng:"",status:""})}
+function regPendingBy(){const o={};if(!regS().loaded)return null;regS().rows.filter(r=>r.status==="pending").forEach(r=>{o[r.engineer]=(o[r.engineer]||0)+1});return o}
+function regClosedKpi(eng){const y=regYear();const R=analytics(Object.assign(regClosedF(y),{eng:eng||""}));const t=R.tot;
+  return`<div class="kpi" id="fkClosed"><div class="l">Closed in ${y}</div><div class="v">${fmtAED(t.rev)}</div><div class="s">${t.orders} order${t.orders===1?"":"s"}${t.regOrders?` · ${t.regOrders} registered (${fmtAED(t.regRev)})`:""}</div></div>`}
+function regClosedHTML(){const y=+S.rcY||regYear();const F=regClosedF(y);const R=analytics(F);const E=R.engs.filter(e=>e.orders||e.regOrders).slice().sort((a,b)=>b.rev-a.rev);const T=R.tot;const pend=regPendingBy();
+  const sumRev=E.reduce((s,e)=>s+e.rev,0),sumN=E.reduce((s,e)=>s+e.orders,0);const accRev=R.accounts.reduce((s,a)=>s+a.rev,0);
+  const tie=Math.round(sumRev)===Math.round(T.rev)&&Math.round(accRev)===Math.round(T.rev)&&sumN===T.orders;
+  const yrs=[...new Set([regYear(),regYear()-1,y])].sort((a,b)=>b-a);
+  const wonOf=n=>R.ls.filter(l=>l.status==="Won"&&engParts(l).some(([nm])=>nm===n)).sort((a,b)=>(wonAt(b)||"").localeCompare(wonAt(a)||""));
+  return`<section class="view"><div class="vhead"><div><h2>Closed orders ${y}</h2><p>What each salesperson has closed. Registered orders (won before they were entered in Lead Desk) are shown next to the orders closed through leads.</p></div><div class="row"><label class="f fsm">Year<select id="rcY">${yrs.map(v=>`<option${v===y?" selected":""}>${v}</option>`).join("")}</select></label><button class="btn" type="button" id="rcX">Export to Excel</button></div></div>
+   <div class="kpis"><div class="kpi"><div class="l">Closed in ${y}</div><div class="v">${fmtAED(T.rev)}</div><div class="s">${T.orders} order${T.orders===1?"":"s"}</div></div><div class="kpi"><div class="l">Registered orders</div><div class="v">${fmtAED(T.regRev||0)}</div><div class="s">${T.regOrders||0} order${T.regOrders===1?"":"s"}</div></div><div class="kpi"><div class="l">Closed through leads</div><div class="v">${fmtAED(T.rev-(T.regRev||0))}</div><div class="s">${T.orders-(T.regOrders||0)} order${T.orders-(T.regOrders||0)===1?"":"s"}</div></div>${pend?`<div class="kpi"><div class="l">Waiting for approval</div><div class="v">${Object.values(pend).reduce((a,b)=>a+b,0)}</div><div class="s">not counted in any total</div></div>`:""}</div>
+   <div class="panel"><div class="tw"><table id="rcTable"><thead><tr><th>Salesperson</th><th class="num">Orders</th><th class="num">Closed (AED)</th><th class="num">Registered orders</th><th class="num">Registered (AED)</th><th class="num">Through leads</th><th class="num">Through leads (AED)</th>${pend?`<th class="num">Waiting</th>`:""}</tr></thead><tbody>${E.length?E.map(e=>`<tr class="rcrow" data-rcr="${esc(e.name)}" tabindex="0"><td><b>${esc(e.name)}</b></td><td class="num">${e.orders}</td><td class="num">${fmtAED(e.rev)}</td><td class="num">${e.regOrders||0}</td><td class="num">${fmtAED(e.regRev||0)}</td><td class="num">${e.orders-(e.regOrders||0)}</td><td class="num">${fmtAED(e.rev-(e.regRev||0))}</td>${pend?`<td class="num">${pend[e.name]||0}</td>`:""}</tr>${S.rcOpen===e.name?`<tr><td colspan="${pend?8:7}" style="padding:0"><div class="tw plain"><table><thead><tr><th>Order</th><th>Client</th><th>Product</th><th>Order date</th><th class="num">Value (AED)</th><th></th></tr></thead><tbody>${wonOf(e.name).map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}</td><td class="small">${esc(productsOf(l).join(", "))}</td><td>${esc(fmtD((wonAt(l)||"").slice(0,10)))}</td><td class="num">${fmtAED(orderVal(l))}</td><td>${l.registered?`<span class="chip">Registered</span> `:""}<button class="btn sm" type="button" data-open="${esc(l.id)}">Open</button></td></tr>`).join("")}</tbody></table></div></td></tr>`:""}`).join(""):`<tr><td colspan="${pend?8:7}" class="muted">No orders closed in ${y}.</td></tr>`}</tbody><tfoot><tr><td><b>Total</b></td><td class="num"><b>${T.orders}</b></td><td class="num"><b>${fmtAED(T.rev)}</b></td><td class="num"><b>${T.regOrders||0}</b></td><td class="num"><b>${fmtAED(T.regRev||0)}</b></td><td class="num"><b>${T.orders-(T.regOrders||0)}</b></td><td class="num"><b>${fmtAED(T.rev-(T.regRev||0))}</b></td>${pend?`<td class="num"><b>${Object.values(pend).reduce((a,b)=>a+b,0)}</b></td>`:""}</tr></tfoot></table></div>
+   <p class="small" id="rcTie" style="margin:8px 0 0;color:var(--${tie?"ok":"bad"})">${tie?`✓ Matches Management → Engineers and Revenue per account for ${y} (${fmtAED(T.rev)}, ${T.orders} orders).`:`The salesperson rows (${fmtAED(sumRev)}) do not add up to the Management total (${fmtAED(T.rev)}). Orders without a sales engineer are not listed here.`}</p>
+   <p class="small muted" style="margin:4px 0 0">Orders are dated like the Engineers view (the date the requirement came in; for registered orders, the order date). Click a name to see their orders.</p></div></section>`}
+function bindRegClosed(x){x.querySelectorAll("[data-rcr]").forEach(r=>{const go=()=>{S.rcOpen=S.rcOpen===r.dataset.rcr?"":r.dataset.rcr;render()};r.onclick=go;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
+  $("#rcY")?.addEventListener("change",e=>{S.rcY=+e.target.value;render()});
+  $("#rcX")?.addEventListener("click",async()=>{const y=+S.rcY||regYear();const R=analytics(regClosedF(y));let X;try{X=await loadXLSX()}catch(e){toast("Couldn't load the spreadsheet tool.");return}
+    const E=R.engs.filter(e=>e.orders||e.regOrders).slice().sort((a,b)=>b.rev-a.rev);const hdr=["Salesperson","Orders","Closed (AED)","Registered orders","Registered (AED)","Through leads","Through leads (AED)"];
+    const rows=E.map(e=>[e.name,e.orders,Math.round(e.rev),e.regOrders||0,Math.round(e.regRev||0),e.orders-(e.regOrders||0),Math.round(e.rev-(e.regRev||0))]).concat([["Total",R.tot.orders,Math.round(R.tot.rev),R.tot.regOrders||0,Math.round(R.tot.regRev||0),R.tot.orders-(R.tot.regOrders||0),Math.round(R.tot.rev-(R.tot.regRev||0))]]);
+    const det=[["Salesperson","Order","Client","Product","Order date","Value (AED)","Type"]];E.forEach(e=>R.ls.filter(l=>l.status==="Won"&&engParts(l).some(([nm])=>nm===e.name)).forEach(l=>det.push([e.name,l.ref,l.accountName,productsOf(l).join(", "),(wonAt(l)||"").slice(0,10),Math.round(orderVal(l)),l.registered?"Registered":"Through lead"])));
+    const wb=X.utils.book_new();const w1=X.utils.aoa_to_sheet([hdr].concat(rows));w1["!cols"]=hdr.map(h=>({wch:Math.max(14,h.length+4)}));X.utils.book_append_sheet(wb,w1,"Closed "+y);const w2=X.utils.aoa_to_sheet(det);w2["!cols"]=[22,14,34,28,12,14,14].map(w=>({wch:w}));X.utils.book_append_sheet(wb,w2,"Orders");
+    const name=`closed-orders-${y}.xlsx`;try{await ilSaveFile(name,new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:IL_XLSX}));toast(name+" is ready")}catch(e){if(e?.code!=="cancelled")toast("Couldn't save the file")}})}
 
 /* ======================= IMPORT LEADS FROM EXCEL (17 Nov 2026) =======================
    Leads > Import leads (permission lead.import, plus lead.create). A sheet is read in the browser (never stored), each row is
@@ -3881,7 +4180,7 @@ const GEN_B=[["wait","Waiting approval"],["asg","Assigned"],["meet","Meeting"],[
 function genBucket(l){const s=l.status;if(s==="Won")return"won";if(["Lost","Duplicate","Rejected"].includes(s))return"lost";if(s==="Quotation Sent")return"quote";if(s==="Meeting Done")return"meet";if(["New","Info Needed"].includes(s))return"wait";return"asg"}
 function genStats(ls){const o={n:0,wonV:0,pipe:0,dup:0,rej:0};GEN_B.forEach(([k])=>o[k]=0);ls.forEach(l=>{if(l.status==="Duplicate"){o.dup++;return}if(l.status==="Rejected"){o.rej++;return}o.n++;const b=genBucket(l);o[b]++;if(b==="won")o.wonV+=orderVal(l);if(b==="meet"||b==="quote")o.pipe+=leadValue(l)});
   const dec=o.won+o.lost;o.conv=o.n?o.won/o.n:null;const incV=evIncOn()?o.wonV:ls.filter(l=>l.status==="Won"&&!l.eventId).reduce((a,l)=>a+orderVal(l),0);o.inc=incV*((+S.settings.incentivePct||0)/100);return o}
-function genScope(){const AF=af();return S.leads.filter(l=>!l.deleted&&!isUpsell(l)).filter(inPeriod).filter(l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src))}
+function genScope(){const AF=af();return S.leads.filter(l=>!l.deleted&&!l.registered&&!isUpsell(l)).filter(inPeriod).filter(l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src))}
 function genState(){const has=genList().some(x=>x.dept==="Marketing");return S.genv||(S.genv={dept:has?"Marketing":"",sel:""})}
 const genChip=b=>`<span class="chip ${b==="won"?"ok":b==="lost"?"bad":b==="wait"?"warn":""}">${esc((GEN_B.find(x=>x[0]===b)||[])[1]||b)}</span>`;
 function genLeadRows(ls,showGen){return ls.map(l=>{const b=genBucket(l);const amt=b==="won"?orderVal(l):(l.quote&&+l.quote.aed)||0;
@@ -3917,9 +4216,9 @@ function bindGenerators(m){const G=genState();$("#genD").onchange=e=>{G.dept=e.t
     window.__lastExport={name,rows:S2.length-1};const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}}
 /* ---------- "My leads" tab for a linked lead generator ---------- */
 function renderMineOld(m){const g=myGen();if(!g){m.innerHTML=`<section class="view"><div class="notice">Your sign-in isn't linked to a lead generator yet. A Supervisor links it in Products &amp; settings → Lead generators.</div></section>`;return}
-  const M=S.minev||(S.minev={f:""});const all=(S.leads.concat(S.genOnly||[])).filter(l=>!l.deleted&&!isUpsell(l)&&genMatch(g,l)).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  const M=S.minev||(S.minev={f:""});const all=(S.leads.concat(S.genOnly||[])).filter(l=>!l.deleted&&!l.registered&&!isUpsell(l)&&genMatch(g,l)).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
   const y=String(new Date().getFullYear());const st=genStats(all),yr=genStats(all.filter(l=>l.status==="Won"&&ymKey(wonAt(l)).startsWith(y)));
-  const co=genStats(S.leads.filter(l=>!l.deleted&&!isUpsell(l)));const list=M.f?all.filter(l=>genBucket(l)===M.f):all;
+  const co=genStats(S.leads.filter(l=>!l.deleted&&!l.registered&&!isUpsell(l)));const list=M.f?all.filter(l=>genBucket(l)===M.f):all;
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>${g.eng?"Generated by me":"My leads"}</h2><p>${g.eng?"Leads you generated yourself, whoever works on them now. Leads with another engineer are read-only.":`Leads you brought in${g.dept?` (${esc(g.dept)})`:""} and where they are now`}</p></div>${can("page.leads")?`<button type="button" class="btn pri" id="mNew">+ New lead</button>`:""}</div>
    <div class="gfun"><button type="button" data-mf=""${!M.f?' aria-pressed="true"':""}><b>${fmtN(st.n)}</b><span>Generated</span></button>${GEN_B.map(([k,t])=>`<button type="button" data-mf="${k}"${M.f===k?' aria-pressed="true"':""}><b>${fmtN(st[k])}</b><span>${t}</span></button>`).join("")}</div>
    <div class="kpis"><div class="kpi"><div class="l">Won revenue ${y}</div><div class="v">${fmtAED(yr.wonV)}</div><div class="s">${+S.settings.incentivePct&&!g.eng?`incentive ${fmtAED(yr.inc)} (${S.settings.incentivePct}%)`:"won orders this year"}</div></div>
@@ -3940,7 +4239,7 @@ const gcVal=l=>l.status==="Won"?orderVal(l):leadValue(l);
 function gcRows(ls){return[["Lead","Hotel","Product","Created by","Team","Created on","Assigned to","Stage","Value (AED)","Next follow-up","Last update"]].concat(ls.map(l=>[l.ref,l.accountName||"",productsOf(l).join(", "),genName(l),genDept(l),gcDay(l),l.assignedTo||"Not assigned yet",l.status,Math.round(gcVal(l))||"",fuOpen(l)?fuLabel(l):"",String(l.updatedAt||"").slice(0,10)]))}
 function renderMine(m){const g=myGen();if(!g){m.innerHTML=`<section class="view"><div class="notice">Your sign-in isn't linked to a lead generator yet. A Supervisor links it in Products &amp; settings → Lead generators.</div></section>`;return}
   const M=S.minev||(S.minev={f:""});
-  const mine=(S.leads.concat(S.genOnly||[])).filter(l=>!l.deleted&&!isUpsell(l)&&genMatch(g,l));
+  const mine=(S.leads.concat(S.genOnly||[])).filter(l=>!l.deleted&&!l.registered&&!isUpsell(l)&&genMatch(g,l));
   const base=mine.filter(l=>(M.own||!g.eng?true:gcFor(g,l))&&(g.eng||M.own||gcFor(g,l)||true)).filter(l=>M.own||gcFor(g,l));
   const dr=base.filter(l=>(!M.from||gcDay(l)>=M.from)&&(!M.to||gcDay(l)<=M.to));
   const nDup=dr.filter(l=>l.status==="Duplicate").length,nRej=dr.filter(l=>l.status==="Rejected").length;
@@ -4019,7 +4318,7 @@ function genDashHTML(g,ls){const now=new Date();const ym=ymKey(now.toISOString()
   const months=[...Array(6)].map((_,i)=>addMonths(ym,i-5));const M=months.map(k=>{const L=ls.filter(l=>made(l)===k);const s=genStats(L);return{k,n:s.n,won:s.won,mid:s.meet+s.quote,wait:s.wait+s.asg,lost:s.lost}});
   const top=Math.max(tg,...M.map(x=>x.n),1);const h=v=>v/top*100;
   const real=x=>!["Duplicate","Rejected"].includes(x.status);const reach=(L,st)=>{const R=L.filter(real);if(!R.length)return null;const ok=R.filter(l=>st==="won"?l.status==="Won":st==="quote"?(l.status==="Won"||l.status==="Quotation Sent"||!!(l.stageAt&&l.stageAt["Quotation Sent"])||!!(l.quote&&+l.quote.aed)):(["Won","Quotation Sent","Meeting Done"].includes(l.status)||!!(l.stageAt&&(l.stageAt["Meeting Done"]||l.stageAt["Quotation Sent"]))||meetingsOf(l).length>0));return ok.length/R.length};
-  const co=S.leads.filter(l=>!l.deleted&&!isUpsell(l));const F=[["Meeting","meet"],["Quotation","quote"],["Won","won"]].map(([t,k])=>[t,reach(ls,k),viewAll()?reach(co,k):null]);const pc=v=>v==null?"—":Math.round(v*100)+"%";
+  const co=S.leads.filter(l=>!l.deleted&&!l.registered&&!isUpsell(l));const F=[["Meeting","meet"],["Quotation","quote"],["Won","won"]].map(([t,k])=>[t,reach(ls,k),viewAll()?reach(co,k):null]);const pc=v=>v==null?"—":Math.round(v*100)+"%";
   const since=new Date(Date.now()-7*864e5).toISOString();const ev=[];
   ls.forEach(l=>{Object.entries(l.stageAt||{}).forEach(([st,at])=>{if(at&&at>=since&&st!=="New")ev.push({l,st,at})})});ev.sort((a,b)=>b.at.localeCompare(a.at));
   const day=iso=>{const d=new Date(iso);const t=new Date();const dd=Math.round((new Date(t.toDateString())-new Date(d.toDateString()))/864e5);return dd<=0?"Today":dd===1?"Yesterday":d.toLocaleDateString("en-GB",{weekday:"short"})};
@@ -4038,7 +4337,7 @@ function genDashHTML(g,ls){const now=new Date();const ym=ymKey(now.toISOString()
 function genTargetsPanel(){const ppl=genList().map(g=>g).concat(spNames().filter(n=>!genList().some(x=>nk(x.name)===nk(n))).map(n=>({name:n,dept:"Sales",eng:true})));if(!ppl.length)return"";const T=tgState();const E=T.edit&&can("targets.manage");const now=ymKey(new Date().toISOString());
   return`<div class="panel" id="genTg"><h3>Lead generators · leads per month</h3><p class="small muted" style="margin:2px 0 10px">Monthly target for the leads each person brings in themselves. Marketing see it on My leads, sales engineers on Generated by me.${E?"":can("targets.manage")?" Click <b>Edit targets</b> above to change.":""}</p>
    <div class="tw"><table><thead><tr><th>Person</th><th>Department</th><th class="num">Target / month</th><th class="num">This month</th></tr></thead><tbody>
-   ${ppl.map(g=>{const n=S.leads.filter(l=>!l.deleted&&!isUpsell(l)&&genMatch(g,l)&&ymKey(l.createdAt||reqDate(l))===now).length;const t=genTarget(g.name);
+   ${ppl.map(g=>{const n=S.leads.filter(l=>!l.deleted&&!l.registered&&!isUpsell(l)&&genMatch(g,l)&&ymKey(l.createdAt||reqDate(l))===now).length;const t=genTarget(g.name);
      return`<tr><td>${esc(g.name)}</td><td>${esc(g.dept||"—")}</td><td class="num">${E?`<input type="number" min="0" step="1" data-tgg="${esc(g.name)}" value="${t||""}" placeholder="0" style="max-width:110px;text-align:right">`:t||"—"}</td><td class="num">${n}${t?` <span class="small muted">(${Math.round(n/t*100)}%)</span>`:""}</td></tr>`}).join("")}</tbody></table></div></div>`}
 
 /* ======================= RECURRING REVENUE AND RENEWALS (Renewals tab) =======================
@@ -5013,7 +5312,7 @@ function bindWorld(m){const P=wdState();const set=(k,v)=>{P[k]=v;render()};const
     const O=wdOut(),doc=Object.assign({},O,{countries:O.countries||{},weights:w});P.wOpen=true;if(await wdSave(doc,"Saved the score weights"))window.__audit?.("updated","outlook","weights",`Opportunity score weights set to ${w.perf}/${w.growth}/${w.reach}`)});
   $("#wdOut details")?.addEventListener("toggle",e=>{P.wOpen=e.target.open})}
 
-const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["reg","Regions"],["ops","Pipeline health"]];
+const MG_VIEWS=[["ov","Overview"],["eng","Engineers"],["io","Inbound vs outbound"],["rev","Revenue per account"],["closed","Closed orders"],["reg","Regions"],["ops","Pipeline health"]];
 const mgViews=()=>MG_VIEWS.concat(can("targets.manage")?[["tg","Targets"]]:[]).concat(can("report.footprint")?[["fp","Customer footprint"]]:[]).concat(can("report.world")?[["world","World view"]]:[]).concat(can("report.products")?[["prod","Products"]]:[]).concat(can("report.generators")?[["gen","Lead generators"]]:[]).concat(canPB()?[["pb","Price book"]]:[]).concat(canCV()?[["base","Installed base"],["ohip","OHIP charges"],["cloud","Cloud hosting"],["cs","Customer Success"]]:[]);
 function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;const MV=mgViews().some(v=>v[0]===S.mgView)?S.mgView:"ov";
   const ecols=[{k:"name",label:"Engineer"},{k:"region",label:"Region"},{k:"accounts",label:"Accounts",num:1},{k:"leads",label:"Leads",num:1},{k:"outb",label:"Outbound",num:1},{k:"inb",label:"Inbound",num:1},
@@ -5085,7 +5384,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     <div class="tw"><table><thead><tr>${pcols.map(c=>th("perf"+src,c)).join("")}</tr></thead><tbody>
      ${pr.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td class="num">${I?x.inb:x.outb}</td><td class="num">${I?x.inbConv:x.outbConv}</td><td class="num">${I?x.inbOrders:x.outbOrders}</td><td class="num">${fmtP(I?x.inbRate:x.outbRate)}${(I?x.inb:x.outb)<MIN_CONV?` <span class="small muted" data-tip="Fewer than ${MIN_CONV} leads: not ranked">·</span>`:""}</td><td class="num">${fmtAED(I?x.inbRev:x.outbRev)}</td><td class="num">${(I?x.inbOrders:x.outbOrders)?fmtAED(I?x.inbAov:x.outbAov):"—"}</td></tr>`).join("")||`<tr><td colspan="7" class="empty">No ${src.toLowerCase()} leads for these filters.</td></tr>`}
      ${pr.length?`<tr class="tot"><td><b>Team</b></td><td class="num">${fmtN(R.src[src].leads)}</td><td class="num">${fmtN(R.src[src].conv)}</td><td class="num">${fmtN(R.src[src].orders)}</td><td class="num">${fmtP(pct(R.src[src].orders,R.src[src].leads))}</td><td class="num">${fmtAED(R.src[src].rev)}</td><td class="num">${R.src[src].orders?fmtAED(R.src[src].rev/R.src[src].orders):"—"}</td></tr>`:""}
-    </tbody></table></div></div>
+    </tbody></table></div>${(R.src.Registered&&R.src.Registered.orders)?`<p class="small muted" style="margin:8px 0 0">Not included above: ${R.src.Registered.orders} registered order${R.src.Registered.orders===1?"":"s"} (${fmtAED(R.src.Registered.rev)}). They were won before they were entered in Lead Desk, so they are not leads. They are in the revenue totals.</p>`:""}</div>
 
    <div id="mg-rpa" class="panel" data-sec="rev"><div class="row" style="margin-bottom:12px"><h3>Revenue per account</h3></div>
     <div class="ins">
@@ -5115,9 +5414,10 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
     </tbody></table></div><p class="small muted" style="margin:6px 0 0">“Not set” are UAE/US leads whose location doesn't name an emirate or state; set it from the lead's details.</p></div>`:""}
    ${gaps.length?`<div class="notice info" data-sec="ov"><b>About these numbers.</b> ${gaps.map(esc).join(" ")}${canFix()&&can("page.backoffice")&&dataIssues().count?` <button type="button" class="linkb" id="goDq"><b>Fix these in Back office →</b></button>`:""}</div>`:""}
    <div id="mg-won" data-sec="rev"></div><div id="mg-wq" data-sec="ops"></div><div id="mg-ml" data-sec="ops"></div><div id="mg-ops" data-sec="ops"></div>
-   <div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-world" data-sec="world"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div><div id="mg-gen" data-sec="gen"></div><div id="mg-base" data-sec="base"></div><div id="mg-cs" data-sec="cs"></div><div id="mg-ohip" data-sec="ohip"></div><div id="mg-cloud" data-sec="cloud"></div>
+   <div id="mg-closed" data-sec="closed"></div><div id="mg-prod" data-sec="prod"></div><div id="mg-fp" data-sec="fp"></div><div id="mg-world" data-sec="world"></div><div id="mg-tg" data-sec="tg"></div><div id="mg-pb" data-sec="pb"></div><div id="mg-gen" data-sec="gen"></div><div id="mg-base" data-sec="base"></div><div id="mg-cs" data-sec="cs"></div><div id="mg-ohip" data-sec="ohip"></div><div id="mg-cloud" data-sec="cloud"></div>
   </section>`;
   mgmtOps($("#mg-ops"));{const q=$("#mg-wq");if(q)q.innerHTML=wqHTML(false)}{const y=$("#mg-ml");if(y){y.innerHTML=mlMgHTML();y.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}{const x=$("#mg-won");if(x){x.innerHTML=wonChangesHTML();x.querySelectorAll("[data-wc]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.wc))}}
+  if(MV==="closed"){const x=$("#mg-closed");regLoad();x.innerHTML=regClosedHTML();bindRegClosed(x)}
   if(MV==="prod"){const x=$("#mg-prod");x.innerHTML=productsHTML();bindProducts(x)}
   if(MV==="fp"){const x=$("#mg-fp");x.innerHTML=footprintHTML();bindFootprint(x)}
   if(MV==="world"){const x=$("#mg-world");x.innerHTML=worldHTML();bindWorld(x)}
@@ -5142,7 +5442,7 @@ function renderMgmt(m){ensureTip();const F=af(),R=analytics(F),T=R.tot,E=R.engs;
 
 /* ---------- Management: pipeline health and operations (follows the same filters) ---------- */
 function inPeriod(l){const[f,t]=periodRange(af());const d=reqDate(l);return(!f||d>=f)&&(!t||d<=t)}
-function mgmtOps(m){const AF=af();const inReg=l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(!AF.eng||l.assignedTo===AF.eng)&&(viewAll()||isMine(l));const all=S.leads.filter(inPeriod).filter(inReg).filter(l=>AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src);
+function mgmtOps(m){const AF=af();const inReg=l=>(!AF.region||regionOf(l)===AF.region)&&subMatch(l,AF.sub||"")&&(!AF.eng||l.assignedTo===AF.eng)&&(viewAll()||isMine(l));const all=S.leads.filter(l=>!l.registered).filter(inPeriod).filter(inReg).filter(l=>AF.src==="All"||(l.category==="Outbound"?"Outbound":"Inbound")===AF.src);
   const valid=all.filter(l=>!["Duplicate","Rejected"].includes(l.status));
   const has=(l,s)=>!!l.stageAt?.[s];
   const F=[["Submitted",valid.length],["Verified & assigned",valid.filter(l=>has(l,"Assigned")).length],["Meeting done",valid.filter(l=>has(l,"Meeting Done")).length],["Quotation sent",valid.filter(l=>has(l,"Quotation Sent")).length],["Won",valid.filter(l=>l.status==="Won").length]];
@@ -5152,7 +5452,7 @@ function mgmtOps(m){const AF=af();const inReg=l=>(!AF.region||regionOf(l)===AF.r
   const dupRate=all.length?all.filter(l=>l.status==="Duplicate").length/all.length:0;const nDup=all.filter(l=>l.status==="Duplicate").length,nRej=all.filter(l=>l.status==="Rejected").length;
   const verH=valid.filter(l=>l.verifiedAt).map(l=>(new Date(l.verifiedAt)-new Date(l.createdAt))/36e5);const avgVer=verH.length?verH.reduce((a,b)=>a+b,0)/verH.length:null;
   const grp=(keyF,src)=>{const g={};(src||valid).forEach(l=>{const ks=[].concat(keyF(l)||"—");ks.forEach(k=>{const o=g[k]||(g[k]={n:0,meet:0,quote:0,won:0,wonV:0,pipe:0,lost:0});o.n++;if(has(l,"Meeting Done"))o.meet++;if(has(l,"Quotation Sent"))o.quote++;if(l.status==="Won"){o.won++;o.wonV+=leadValue(l)}if(l.status==="Lost")o.lost++;if(["Meeting Done","Quotation Sent"].includes(l.status))o.pipe+=leadValue(l)})});return Object.entries(g).sort((a,b)=>b[1].wonV-a[1].wonV||b[1].n-a[1].n)};
-  const cat={Inbound:{n:0,v:0,w:0},Outbound:{n:0,v:0,w:0}};S.leads.filter(inPeriod).filter(inReg).filter(l=>!["Duplicate","Rejected"].includes(l.status)).forEach(l=>{const c=cat[l.category]||cat.Inbound;c.n++;if(l.status==="Won"){c.w++;c.v+=leadValue(l)}});
+  const cat={Inbound:{n:0,v:0,w:0},Outbound:{n:0,v:0,w:0}};S.leads.filter(l=>!l.registered).filter(inPeriod).filter(inReg).filter(l=>!["Duplicate","Rejected"].includes(l.status)).forEach(l=>{const c=cat[l.category]||cat.Inbound;c.n++;if(l.status==="Won"){c.w++;c.v+=leadValue(l)}});
   const rep={};valid.filter(l=>l.assignedTo).forEach(l=>{const o=rep[l.assignedTo]||(rep[l.assignedTo]={a:0,open:0,stale:0,meet:0,quote:0,won:0,v:0,lost:0,ttq:[]});o.a++;if(OPEN.includes(l.status))o.open++;
     if(l.status==="Assigned"&&days(l.assignedAt)>(S.settings.slaContactDays||3))o.stale++;if(has(l,"Meeting Done"))o.meet++;if(has(l,"Quotation Sent")){o.quote++;o.ttq.push((new Date(l.stageAt["Quotation Sent"])-new Date(l.assignedAt||l.createdAt))/864e5)}if(l.status==="Won"&&engCredit(l)){o.won++;o.v+=leadValue(l)}if(l.status==="Lost")o.lost++});
   const gen=grp(l=>l.generatedBy,valid.filter(l=>!isUpsell(l))).slice(0,10);const inc=(S.settings.incentivePct||0)/100;
@@ -5215,7 +5515,7 @@ function grpTable(rows,label,showPipe){return`<div class="tw"><table><thead><tr>
   ${rows.map(([n,o])=>`<tr><td>${esc(n)}${showPipe?` <span class="chip ${catOf(n)==="Outbound"?"outb":"inb"}">${catOf(n)==="Outbound"?"Out":"In"}</span>`:""}</td><td class="num">${o.n}</td><td class="num">${o.meet}</td><td class="num">${o.quote}</td><td class="num">${o.won}</td><td class="num">${o.n?(o.won/o.n*100).toFixed(0)+"%":"—"}</td>${showPipe?`<td class="num">${fmtAED(o.pipe)}</td>`:""}<td class="num">${fmtAED(o.wonV)}</td></tr>`).join("")||`<tr><td colspan="8" class="empty">No leads in this period.</td></tr>`}</tbody></table></div>`}
 function weeklySeries(n){const out=[];const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));
   for(let i=n-1;i>=0;i--){const s=new Date(d);s.setDate(s.getDate()-7*i);const e=new Date(s);e.setDate(e.getDate()+7);
-    const ls=S.leads.filter(l=>{const c=new Date(reqDate(l)+"T12:00:00");return c>=s&&c<e&&(!af().region||regionOf(l)===af().region)&&!["Duplicate","Rejected"].includes(l.status)});
+    const ls=S.leads.filter(l=>{if(l.registered)return false;const c=new Date(reqDate(l)+"T12:00:00");return c>=s&&c<e&&(!af().region||regionOf(l)===af().region)&&!["Duplicate","Rejected"].includes(l.status)});
     out.push({label:s.toLocaleDateString("en-GB",{day:"2-digit",month:"short"}),in:ls.filter(l=>l.category!=="Outbound").length,out:ls.filter(l=>l.category==="Outbound").length})}return out}
 function weekChart(ws,target){const W=760,H=200,pl=34,pb=26,pt=10;const mx=Math.max(target*1.2,...ws.map(w=>w.in+w.out),1);const step=Math.ceil(mx/4/5)*5||5;const top=step*4;
   const bw=(W-pl-10)/ws.length;const y=v=>pt+(H-pt-pb)*(1-v/top);
@@ -5371,7 +5671,7 @@ function renderAcctMatrix(m){ensureTip();const M=mxState();const{prods,hotels}=m
 /* ======================= 6. SETTINGS (editors) ======================= */
 /* ---- Products & settings in sections: every block is still rendered (so nothing about saving changes); this only
    decides which blocks are shown. S.setSec = section key (remembered on the device), S.setJump = block to scroll to. */
-const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Sales engineers","Lead generators"]],
+const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Register closed orders","Sales engineers","Lead generators"]],
   ["terr","Territories & accounts","Territories, emirates and states, hotel chains",["Territories","Emirates and states","Hotel chains"]],
   ["prod","Products & PMS","Product catalog, PMS integrations",["Product catalog","PMS integrations"]],
   ["sales","Sales rules","Source channels, rates and targets, activity rules, lead flow",["Source channels","Rates and targets","Activity rules and forecast","Lead flow rules"]],
@@ -5414,6 +5714,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   ${territoryPanel()}
   ${subTerrPanel()}
   ${chainsPanel()}
+  ${regAccessPanel()}
   ${rulesPanel()}${flowPanel()}
   ${pmsPanel()}
   ${genPanel()}
@@ -5456,7 +5757,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
+  bindChains(m);if($("#regAccPanel"))regAccLoad();bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}

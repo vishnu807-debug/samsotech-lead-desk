@@ -141,6 +141,78 @@
       return data || [];
     },
   };
+  // Register closed orders (supabase/42_register_orders.sql): orders waiting for approval, their page pictures, access dates.
+  // Approving goes through reg_decide(), which creates the account and the Won order in one database step.
+  const regE = (error) => Object.assign(new Error(error.message), { code: error.code });
+  window.__reg = {
+    async list() {
+      const out = [];
+      for (let from = 0; ; ) {
+        const { data, error } = await sb.from("reg_orders").select("id,status,batch,engineer,qkey,doc,lead_ref,created_by,created_at,decided_by,decided_at").order("created_at", { ascending: false }).range(from, from + 999);
+        if (error) throw regE(error);
+        out.push(...(data || []));
+        if (!data || data.length < 1000) break;
+        from += data.length;
+      }
+      return out;
+    },
+    async insert(row) {
+      const { error } = await sb.from("reg_orders").insert({ id: row.id, batch: row.batch, engineer: row.engineer, qkey: row.qkey, doc: row.doc });
+      if (error) throw regE(error);
+      return true;
+    },
+    async pages(id) {
+      const { data, error } = await sb.from("reg_pages").select("n,img").eq("reg_id", id).order("n");
+      if (error) throw regE(error);
+      return data || [];
+    },
+    async putPages(id, pages) {
+      const rows = (pages || []).slice(0, 3).map((p) => ({ reg_id: id, n: p.n, img: p.img }));
+      if (!rows.length) return true;
+      const { error } = await sb.from("reg_pages").insert(rows);
+      if (error) throw regE(error);
+      return true;
+    },
+    async decide(a) {
+      const { data, error } = await sb.rpc("reg_decide", { p_id: a.id, p_action: a.action, p_reason: a.reason || "", p_doc: a.doc || null, p_lead: a.lead || null, p_acct: a.acct || null });
+      if (error) throw regE(error);
+      return data;
+    },
+    async withdrawApproved(id, reason) {
+      const { error } = await sb.rpc("reg_withdraw_approved", { p_id: id, p_reason: reason });
+      if (error) throw regE(error);
+      return true;
+    },
+    async expire() {
+      const { data, error } = await sb.rpc("reg_expire");
+      if (error) throw regE(error);
+      return data;
+    },
+    access: {
+      async mine() {
+        const { data: u } = await sb.auth.getUser();
+        const email = String((u && u.user && u.user.email) || "").toLowerCase();
+        const { data, error } = await sb.from("reg_access").select("email,from_date,to_date,ended_at");
+        if (error) throw regE(error);
+        return (data || []).find((r) => String(r.email).toLowerCase() === email) || null;
+      },
+      async list() {
+        const { data, error } = await sb.from("reg_access").select("email,from_date,to_date,ended_at,set_by,at").order("email");
+        if (error) throw regE(error);
+        return data || [];
+      },
+      async set(email, from, to) {
+        const { error } = await sb.rpc("reg_access_set", { p_email: email, p_from: from, p_to: to });
+        if (error) throw regE(error);
+        return true;
+      },
+      async end(email) {
+        const { error } = await sb.rpc("reg_access_end", { p_email: email });
+        if (error) throw regE(error);
+        return true;
+      },
+    },
+  };
   // Guided stage flow (supabase/37_stage_flow.sql): an engineer declines an assigned lead; it returns to back office
   window.__leadDecline = async (id, reason, note) => {
     const { error } = await sb.rpc("lead_decline", { p_id: id, p_reason: reason, p_note: note || "" });
