@@ -600,6 +600,17 @@ input.err,select.err,textarea.err{border-color:var(--bad)!important}
 .rvlines{max-height:260px;overflow:auto}
 @media(max-width:900px){.rvgrid{grid-template-columns:minmax(0,1fr)}.rvpic{position:static}.rvmob{display:inline-flex}.rvgrid[data-m="pic"] .rvval{display:none}.rvgrid[data-m="val"] .rvpic{display:none}.rvimg{max-height:70vh}}
 .rcrow{cursor:pointer}.rcrow:hover{background:var(--accent-soft)}
+/* ---- account profile (20 Nov 2026) ---- */
+.apks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.apks .kpi{min-width:0}.apv{font-size:22px!important}
+.apleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-bottom:6px}.apleg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}
+.apy{padding:9px 0;border-top:1px solid var(--line)}.apy:first-of-type{border-top:0}.apyh{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.apbar{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;margin-bottom:5px}.apbar i{display:block;height:100%}
+.apr{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);min-width:0}.apr:first-child{border-top:0}.apr.wrap{flex-wrap:wrap}
+.apb{background:none;border:0;border-top:1px solid var(--line);font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%;border-radius:0}.apb:first-child{border-top:0}.apb:hover{background:var(--accent-soft)}.apb:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.apc{padding:9px 0;border-top:1px solid var(--line)}.apc:first-child{border-top:0}
+.aptl{display:grid;gap:10px}.apt{display:grid;grid-template-columns:84px auto minmax(0,1fr);gap:8px;align-items:start}.apx{min-width:0;font-size:13px}.apk{justify-self:start}
+.apn{margin-top:3px;white-space:pre-wrap;color:var(--muted);cursor:pointer}.apn.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:480px){.apt{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}.apt .apd{grid-column:1}.apt .apk{grid-column:2;grid-row:1}.apt .apx{grid-column:1/-1}.apks{grid-template-columns:repeat(2,minmax(0,1fr))}.apv{font-size:19px!important}}
 </style>
 
 <header class="top gut">
@@ -624,7 +635,7 @@ input.err,select.err,textarea.err{border-color:var(--bad)!important}
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 20 Nov 2026 · build 084b9c9</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 20 Nov 2026 · build b7fdd95</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
@@ -960,7 +971,7 @@ function renderInner(){const m=$("#main");
 ({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,renew:renderRenew,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
 function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
-  if(S.drawer)refreshDrawer();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
+  if(S.drawer)refreshDrawer();else if(S.acctP)drawAcctP();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
 // A lead is "new for me" from the moment it is assigned to me until I open it (assigneeSeenAt is stored on the lead).
 const NEW_DAYS=14;
 function isNewForMe(l){return isMine(l)&&OPEN.includes(l.status)&&!["New","Info Needed"].includes(l.status)&&!!l.assignedAt&&days(l.assignedAt)<=NEW_DAYS&&!(l.assigneeSeenAt&&l.assigneeSeenAt>=l.assignedAt)}
@@ -2486,7 +2497,7 @@ function renderAccts(m){renderAcctsBase(m);if(S.acctView==="matrix"||typeof canC
    <div class="tw" style="margin-top:10px"><table><thead><tr><th>Account</th><th>Region</th><th>Engineer</th><th>Hotel PMS</th><th>Solutions in use</th><th>AMC contract</th><th class="num">Yearly value</th></tr></thead><tbody>
    ${L.map(c=>{const pq={};(c.lines||[]).forEach(x=>{if(x.product)pq[x.product]=(pq[x.product]||0)+(+x.qty||0)});return`<tr class="click" data-actr="${esc(c.id)}"><td><b>${esc(c.accountName||c.client)}</b><div class="small muted">${esc(c.country||"—")}</div></td><td>${esc(c.region||"—")}</td><td>${esc(c.engineer||"—")}</td><td>${esc(c.pms||"—")}</td>
      <td class="small">${Object.entries(pq).map(([p,n])=>`${esc(p)}${n?" × "+n:""}`).join(", ")||"—"}</td><td>${ctrChip(c)}<div class="small muted">${esc(c.no||"")} · to ${fmtD(c.end)}</div></td><td class="num">${fmtAED(ctrSum(c,"amc")+ctrSum(c,"sub"))}</td></tr>`}).join("")}</tbody></table></div></div>`);
-  v.querySelectorAll("[data-actr]").forEach(r=>r.onclick=()=>openLeadOrContract("C:"+r.dataset.actr))}
+  v.querySelectorAll("[data-actr]").forEach(r=>r.onclick=()=>{const c=ctrAll().find(x=>x.id===r.dataset.actr);S.apFrom=r;if(c)openAcctProfile(c.accountKey||c.id);else openLeadOrContract("C:"+r.dataset.actr)})}
 function renderAcctsBase(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatrix(m);return}
   const F=af(),R=analytics(F),q=nk(S.acctQ||"");const E=Object.fromEntries(R.engs.map(e=>[e.name,e]));
   const cols=[{k:"name",label:"Account",w:200},{k:"region",label:"Region"},{k:"eng",label:"Engineer"},{k:"leads",label:"Leads",num:1,v:a=>a.leads.length},
@@ -2499,7 +2510,7 @@ function renderAcctsBase(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatr
     :{t:viewAll()?"Whole team":"Your accounts",a:T.accounts,l:T.leads,o:T.orders,r:T.rev,rpa:T.accounts?T.rev/T.accounts:0,sub:`${T.custAcc} customer account${T.custAcc===1?"":"s"} · ${fmtP(pct(T.orders,T.leads))} conversion`};
   const byEng=viewAll()&&!F.eng?R.engs.slice().sort((a,b)=>b.accounts-a.accounts||b.leads-a.leads):[];const engAll=S.engAll?byEng:byEng.slice(0,10);const mxA=Math.max(1,...byEng.map(x=>x.accounts)),mxL=Math.max(1,...byEng.map(x=>x.leads));
   m.innerHTML=`<section class="view">
-   <div class="vhead"><div><h2>Accounts</h2><p>${viewAll()?"Every property with leads in the selected period, with its region, engineer, orders and revenue.":"Properties where you have leads."} Click a row to open its latest lead.</p></div>
+   <div class="vhead"><div><h2>Accounts</h2><p>${viewAll()?"Every property with leads in the selected period, with its region, engineer, orders and revenue.":"Properties where you have leads."} Click an account to open its profile.</p></div>
     <div class="row"><span class="seg" id="acctV"><button data-v="overview" aria-pressed="true">Overview</button><button data-v="matrix" aria-pressed="false">Product matrix</button></span></div></div>
    ${filterBar()}
    <div class="panel"><div class="row" style="margin-bottom:12px"><h3>${sum.t}</h3><span class="chip">summary</span><span class="sp"></span><span class="small muted">${esc(sum.sub)}</span></div>
@@ -2513,7 +2524,7 @@ function renderAcctsBase(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatr
    ${renameReqsHTML()}
    <div class="row"><input id="acctQ" placeholder="Search account, country or region" value="${esc(S.acctQ||"")}" style="max-width:320px"><span class="sp"></span><span class="small muted">${fmtN(rows.length)} account${rows.length===1?"":"s"}</span>${F.status?"":`<span class="legend">${ACC_STATUS.map(x=>`<span><i style="background:var(${x[1]});border-radius:50%;width:8px;height:8px"></i>${x[0]}</span>`).join("")}</span>`}</div>
    <div class="tw acct"><table><thead><tr>${cols.map(c=>th("acct",c)).join("")}<th>Key requirements</th>${can("account.manage")||S.myEng||S.role==="management"?`<th class="stk"></th>`:""}</tr></thead><tbody>
-    ${shown.map(a=>{const x=E[a.eng];const rq=acctDoc(a.key).renameReq;const aka=acctDoc(a.key).aka||[];return`<tr class="click" data-open="${esc(a.latest.id)}"><td><b>${esc(a.name)}</b><div class="small muted">${esc(a.country||"—")}${aka.length?` · formerly ${esc(aka[aka.length-1])}`:""}</div>${rq&&rq.to?`<span class="chip warn" data-renchip>Rename asked: ${esc(rq.to)}</span>`:""}</td><td>${esc(a.region)}</td>
+    ${shown.map(a=>{const x=E[a.eng];const rq=acctDoc(a.key).renameReq;const aka=acctDoc(a.key).aka||[];return`<tr class="click" data-akey="${esc(a.key)}" tabindex="0"><td><b>${esc(a.name)}</b><div class="small muted">${esc(a.country||"—")}${aka.length?` · formerly ${esc(aka[aka.length-1])}`:""}</div>${rq&&rq.to?`<span class="chip warn" data-renchip>Rename asked: ${esc(rq.to)}</span>`:""}</td><td>${esc(a.region)}</td>
      <td>${a.eng?esc(a.eng):`<span class="muted">Unassigned</span>`}${a.otherEngs.length?` <span class="small muted" data-tip="Also: ${esc(a.otherEngs.join(", "))}">+${a.otherEngs.length}</span>`:""}</td>
      <td class="num">${a.leads.length}</td><td class="num">${x?x.accounts:"—"}</td><td class="num">${a.orders||""}</td><td class="num">${a.rev?fmtAED(a.rev)+dbar(a.rev,mxRev,"--c-main")+ohipNote(a.ohip):`<span class="muted">—</span>`}</td>
      <td class="num">${x&&x.rpa?fmtAED(x.rpa):"—"}</td><td>${astatus(a.status)}</td><td style="white-space:nowrap">${fmtD(a.last+"T12:00:00")}</td>
@@ -2526,10 +2537,171 @@ function renderAcctsBase(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatr
   bindFilters(m);bindSort(m);
   $("#acctV").onclick=ev=>{const b=ev.target.closest("button");if(b){S.acctView=b.dataset.v;render()}};
   m.querySelectorAll("[data-eng]").forEach(r=>r.onclick=()=>{af().eng=r.dataset.eng;S.acctN=50;render();scrollTo({top:0})});
-  m.querySelectorAll("[data-open]").forEach(r=>r.onclick=ev=>{if(ev.target.closest("button"))return;openDrawer(r.dataset.open)});
+  m.querySelectorAll("[data-akey]").forEach(r=>{const go=ev=>{if(ev.target.closest("button"))return;S.apFrom=r;openAcctProfile(r.dataset.akey)};r.onclick=go;r.onkeydown=ev=>{if(ev.key==="Enter"&&ev.target===r)go(ev)}});
   m.querySelectorAll("[data-merge]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();openMerge(b.dataset.merge)});bindRenameReqs(m);
   $("#engAll")?.addEventListener("click",()=>{S.engAll=!S.engAll;render()});$("#acctMore")?.addEventListener("click",()=>{S.acctN=n+50;render()});
   const inp=$("#acctQ");inp.oninput=()=>{S.acctQ=inp.value;S.acctN=50;clearTimeout(inp.t);inp.t=setTimeout(()=>{render();const i=$("#acctQ");i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)}}
+
+/* ======================= ACCOUNT PROFILE (read-only, 20 Nov 2026) =======================
+   Click an account on the Accounts page. Nothing is stored or changed here; every figure comes from the same functions the
+   Accounts, Renewals and Installed base pages already use, so the totals match.
+   Management, Supervisor and Lead Manager (viewAll) see the whole account. Sales see the hotel, the products it owns, renewal dates,
+   their own contacts, leads and follow-ups, and ONLY their own revenue. AMC contract prices are never shown to Sales.
+   For Sales the products and contract dates of a colleague's orders come from account_profile() (SQL 49): no money, no contacts. */
+const apPrices=()=>viewAll()||can("contract.view_all");
+async function apLoad(key){S.apExt=S.apExt||{};if(!window.LD_HOSTED||viewAll()||!key||S.apExt[key]!==undefined)return;S.apExt[key]=null;
+  try{const{data}=await window.__sb.rpc("account_profile",{p_key:key});S.apExt[key]=data||false}catch(e){S.apExt[key]=false}
+  if(S.acctP&&S.acctP.key===key)drawAcctP()}
+function openAcctProfile(key){if(!key)return;if(typeof ctrLoad==="function")ctrLoad();S.acctP={key,all:{}};S.drawer=null;apLoad(key);drawAcctP()}
+function closeAcctProfile(){const f=S.apFrom;S.acctP=null;S.apFrom=null;$("#drawerHost").innerHTML="";document.onkeydown=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}}
+const apM=n=>{n=Math.round(n||0);return Math.abs(n)>=1e6?(n/1e6).toFixed(2)+"M":n.toLocaleString("en-US")};
+function apData(key){const full=viewAll(),pr=apPrices(),today=todayISO(),yr=today.slice(0,4);const ext=((S.apExt||{})[key])||null;
+  const seen=new Set(),ls=[];S.leads.concat(S.genOnly||[],S.jointOnly||[]).forEach(l=>{if(l.deleted||seen.has(l.id)||accKey(l)!==key)return;seen.add(l.id);ls.push(l)});
+  const live=ls.filter(l=>!["Duplicate","Rejected"].includes(l.status)),won=live.filter(l=>l.status==="Won"),open=live.filter(l=>OPEN.includes(l.status)&&!l.registered);
+  const mine=l=>{if(full)return 1;const p=engParts(l).find(x=>sameEng(x[0],S.myEng));return p?p[1]:0};
+  const C=ctrOfClient(key),liveC=ctrLive().filter(c=>(c.accountKey||c.id)===key);
+  const reg=(S.accounts||{})[key]||{},A0=allAccounts()[key]||{};
+  const newest=live.slice().sort((a,b)=>reqDate(b).localeCompare(reqDate(a)))[0]||null;
+  const name=reg.name||(newest&&newest.accountName)||A0.name||(C[0]&&(C[0].accountName||C[0].client))||"Account";
+  const country=reg.country||A0.country||(newest&&newest.country)||(C[0]&&C[0].country)||"";
+  /* revenue by year */
+  const Y={},yy=y=>Y[y]||(Y[y]={y,one:0,sub:0,ohip:0,amc:0,rsub:0,rohip:0,exp:false,orders:0});
+  for(const l of won){const f=mine(l);if(!f)continue;const ov=orderVal(l),oh=Math.min(ohipVal(l),ov);let r=null;try{r=recOf(l)}catch(e){}const sb=Math.min(Math.max(0,r?r.subT:0),Math.max(0,ov-oh));
+    const o=yy(String(wonAt(l)).slice(0,4)||"—");o.one+=(ov-oh-sb)*f;o.sub+=sb*f;o.ohip+=oh*f;o.orders++}
+  if(full){if(C.length)C.forEach(c=>{const y=String(c.start||"").slice(0,4);if(!y)return;const o=yy(y);o.amc+=ctrSum(c,"amc");o.rsub+=ctrSum(c,"sub")+ctrSum(c,"cloud");o.rohip+=ctrSum(c,"ohip");if(y>yr)o.exp=true});
+    else won.forEach(l=>renItems(l).forEach(i=>{const o=yy((i.due||"").slice(0,4)||"—");if(i.ty==="amc")o.amc+=i.amt;else if(i.ty==="sub")o.rsub+=i.amt;else o.rohip+=i.amt;if((i.due||"")>today||i.est)o.exp=true}))}
+  const years=Object.values(Y).sort((a,b)=>b.y.localeCompare(a.y));years.forEach(o=>{o.total=o.one+o.sub+o.amc+o.rsub;o.order=o.one+o.sub+o.ohip});
+  const ordersTotal=years.reduce((s,o)=>s+o.order,0),ohipOrders=years.reduce((s,o)=>s+o.ohip,0),thisYear=(Y[yr]?Y[yr].order:0);
+  /* by engineer (whole account, credited with engParts like every other Management figure) */
+  const E={};if(full)for(const l of won){const v=orderVal(l);if(!engCredit(l)){const e=E["\u0000"]||(E["\u0000"]={name:"No engineer credit (upsell)",orders:0,rev:0,none:true});e.orders+=1;e.rev+=v;continue}for(const[n,f]of engParts(l)){const e=E[n||"Unassigned"]||(E[n||"Unassigned"]={name:n||"Unassigned",orders:0,rev:0});e.orders+=f;e.rev+=v*f}}
+  const engs=Object.values(E).sort((a,b)=>(a.none?1:0)-(b.none?1:0)||b.rev-a.rev);
+  /* people on the account */
+  const engNames=[...new Set(live.map(l=>l.assignedTo).concat(C.map(c=>c.engineer),ext?ext.engineers||[]:[]).filter(Boolean))];
+  /* products and licences */
+  const P={};const addP=(p,src,since,qty)=>{if(!p)return;const o=P[p]||(P[p]={product:p,src:new Set(),since:"",qty:0});(Array.isArray(src)?src:[src]).forEach(s=>o.src.add(s));if(since&&(!o.since||since<o.since))o.since=since;if(qty)o.qty=Math.max(o.qty,+qty||0)};
+  ctrSolutions(key).forEach(x=>{[...x.src].forEach(s=>addP(x.product,s,x.since,x.qty))});
+  if(ext)(ext.products||[]).forEach(x=>addP(x.product,x.src||["order"],x.since,x.qty));
+  const prods=Object.values(P).sort((a,b)=>a.product.localeCompare(b.product));
+  const newestC=liveC[0]||C[C.length-1]||null;
+  const extC=(ext&&ext.contracts||[]).slice().sort((a,b)=>String(b.end||"").localeCompare(String(a.end||"")))[0]||null;
+  prods.forEach(p=>{let kind="AMC";let inL=C.filter(c=>(c.lines||[]).some(x=>x.product===p.product&&x.kind==="amc"));if(!inL.length){inL=C.filter(c=>(c.lines||[]).some(x=>x.product===p.product&&(x.kind==="sub"||x.kind==="cloud")));if(inL.length)kind="Subscription"}const c=inL[inL.length-1]||null;
+    if(c){const st=ctrState(c);p.amc={kind,end:c.end,ok:st.k==="active"||st.k==="expiring"||st.k==="future"||st.k==="renewed",t:st.t,no:c.no}}
+    else if(p.src.has("contract")&&extC)p.amc={end:extC.end,ok:(extC.end||"")>=today,t:(extC.end||"")>=today?"Active":"Expired",no:extC.no};
+    const wl=won.filter(l=>productsOf(l).includes(p.product)).sort((a,b)=>String(wonAt(b)).localeCompare(String(wonAt(a))))[0];
+    if(wl){const ifc=wl.pmsIface&&typeof wl.pmsIface==="object"?wl.pmsIface[p.product]:"";p.iface=ifc||""}});
+  /* PMS, rooms, PCs and users (latest lead that has them) */
+  const lastWith=f=>live.slice().sort((a,b)=>reqDate(b).localeCompare(reqDate(a))).find(l=>f(l)!=null&&f(l)!=="");
+  const pms=(lastWith(l=>pmsOf(l))||{}).pms||(C.slice().reverse().find(c=>c.pms)||{}).pms||(ext&&ext.pms)||"";
+  const rooms=(lastWith(l=>l.rooms)||{}).rooms||(C.slice().reverse().find(c=>c.rooms)||{}).rooms||(extC&&extC.rooms)||"";
+  const pcs=(lastWith(l=>l.pcs)||{}).pcs||"",users=(lastWith(l=>l.users)||{}).users||"";
+  /* not yet sold */
+  const owned=new Set(prods.map(p=>nk(p.product))),inTalk=new Set(open.flatMap(l=>productsOf(l)).map(nk).concat((ext&&ext.openLeads||[]).flatMap(x=>x.products||[]).map(nk)));
+  const cross=prodList().filter(p=>!p.repeatable&&!owned.has(nk(p.name))).map(p=>{let blocked="";try{blocked=pms?pmsBlock(pms,[p.name]):""}catch(e){}return{name:p.name,talk:inTalk.has(nk(p.name)),blocked}}).filter(x=>!x.blocked);
+  /* contacts: every lead and contract, one line per email */
+  const CT={};const addC=(c,at,src)=>{if(!c)return;const em=String(c.email||"").trim().toLowerCase(),nm=String(c.name||"").trim();if(!em&&!nm)return;const k=em||"n:"+nk(nm);const o=CT[k]||(CT[k]={name:"",title:"",email:"",phone:"",at:"",signer:false});
+    if(!o.name||(at&&at>=o.at))Object.assign(o,{name:nm||o.name,title:c.title||o.title,email:c.email||o.email,phone:c.phone||o.phone});if(at&&at>o.at)o.at=at;if(src==="signer")o.signer=true};
+  live.forEach(l=>addC(l.contact,String(lastTouch(l)||reqDate(l)).slice(0,10)));
+  C.forEach(c=>{if(c.signer){const m=Object.values(CT).find(x=>nk(x.name)===nk(c.signer));if(m)m.signer=true;else addC({name:c.signer},String(c.signedOn||c.start||"").slice(0,10),"signer")}});
+  const contacts=Object.values(CT).sort((a,b)=>(b.at||"").localeCompare(a.at||"")||a.name.localeCompare(b.name));
+  /* renewals */
+  const rens=[];if(C.length)liveC.forEach(c=>ctrItems(c).forEach(i=>rens.push(i)));else won.forEach(l=>renItems(l).forEach(i=>rens.push(i)));
+  const renDue=rens.filter(renOpen).sort((a,b)=>(a.due||"").localeCompare(b.due||""));
+  let nextRen=renDue[0]?{due:renDue[0].due,ty:renDue[0].ty,what:renDue[0].what}:null;
+  if(!full&&!C.length&&extC&&extC.end){const d=addDaysISO(extC.end,1);if(d&&(!nextRen||d<nextRen.due))nextRen={due:d,ty:"amc",what:"AMC contract "+(extC.no||"")}}
+  /* recurring a year */
+  let recurring=0,recSrc="";if(full){if(newestC){recurring=ctrSum(newestC,"amc")+ctrSum(newestC,"sub")+ctrSum(newestC,"cloud");recSrc="contract "+newestC.no}else{recurring=rens.filter(i=>i.y===2&&(i.ty==="amc"||i.ty==="sub")).reduce((s,i)=>s+i.amt,0);recSrc=recurring?"worked out from the orders":""}}
+  /* meetings, last contact */
+  const meets=[];live.forEach(l=>meetingsOf(l).forEach(m=>{if(m.date)meets.push({m,l})}));meets.sort((a,b)=>(b.m.date||"").localeCompare(a.m.date||""));
+  const lastMeeting=(meets[0]&&meets[0].m.date)||(ext&&ext.lastMeeting)||"";
+  const lastTouchAt=live.map(l=>String(lastTouch(l)||"").slice(0,10)).concat(lastMeeting?[lastMeeting]:[]).filter(Boolean).sort().pop()||"";
+  const pipeline=open.filter(l=>full||isMine(l)).reduce((s,l)=>s+(+leadValue(l)||0),0);
+  /* status */
+  const hasOwn=won.length>0||C.length>0||(ext&&((ext.products||[]).length>0));
+  const lapsed=hasOwn&&newestC&&ctrState(newestC).k==="expired"&&!open.length&&!renDue.length;
+  const status=!hasOwn?"Prospect":lapsed?"Lapsed":"Customer";
+  /* warnings (whole-account roles only) */
+  const warns=[];if(full){const al=Math.max(...(amcCfg().alertDays||[90]).map(Number),30);
+    if(newestC){const s=ctrState(newestC);if(s.k==="expired")warns.push(["bad","AMC contract "+newestC.no+" expired on "+fmtD(newestC.end)]);else if(s.k==="expiring")warns.push(["warn","AMC contract "+newestC.no+" "+s.t.toLowerCase()+" ("+fmtD(newestC.end)+")"])}
+    const od=renDue.filter(i=>i.due&&i.due<today);if(od.length)warns.push(["bad",od.length+" renewal"+(od.length===1?"":"s")+" overdue, the oldest was due "+fmtD(od[0].due)]);
+    else if(renDue[0]&&renDue[0].due<=addDaysISO(today,al))warns.push(["warn","Renewal due "+fmtD(renDue[0].due)+" ("+REN_T[renDue[0].ty]+")"]);
+    if(hasOwn&&lastTouchAt&&lastTouchAt<addDaysISO(today,-90))warns.push(["warn","No contact for "+Math.round((new Date(today)-new Date(lastTouchAt))/864e5)+" days (last on "+fmtD(lastTouchAt)+")"]);
+    open.filter(l=>l.status==="Quotation Sent").forEach(l=>{const d=String(l.quote?.date||l.stageAt?.["Quotation Sent"]||"").slice(0,10);if(d&&d<addDaysISO(today,-30))warns.push(["warn","Quotation on "+l.ref+" sent "+Math.round((new Date(today)-new Date(d))/864e5)+" days ago, no answer yet"])})}
+  /* timeline */
+  const T=[];live.forEach(l=>{const own=full||isMine(l);const d0=reqDate(l);if(d0)T.push({d:d0,k:"Lead",t:`<b>${esc(l.ref)}</b> came in${l.category==="Outbound"?" (outbound)":""} for ${esc(productsOf(l).join(", ")||"—")}`,l});
+    meetingsOf(l).forEach(m=>{if(m.date)T.push({d:m.date,k:"Meeting",t:`${esc(m.type||"Meeting")}${m.mode?" · "+esc(m.mode):""} <span class="muted">(${esc(l.ref)}${l.assignedTo?", "+esc(l.assignedTo):""})</span>`,notes:own||full?String(m.notes||""):"",l})});
+    (l.contacts||[]).forEach(c=>{if(c.at)T.push({d:String(c.at).slice(0,10),k:"Contact",t:`${esc(c.kind||"Contact")}${c.by?" by "+esc(c.by):""} <span class="muted">(${esc(l.ref)})</span>`,notes:own||full?String(c.note||""):"",l})});
+    const qd=String(l.quote?.date||l.stageAt?.["Quotation Sent"]||"").slice(0,10);if(qd&&l.quote)T.push({d:qd,k:"Quote",t:`Quotation ${esc(l.quote.no||"")} sent${(full||isMine(l))&&l.quote.aed?" · "+fmtAED(l.quote.aed):""} <span class="muted">(${esc(l.ref)})</span>`,l});
+    if(l.status==="Won")T.push({d:String(wonAt(l)).slice(0,10),k:"Order",t:`Order won${(full||isMine(l))&&orderVal(l)?" · "+fmtAED(orderVal(l)):""} <span class="muted">(${esc(l.ref)}${l.registered?", registered":""})</span>`,l})});
+  C.forEach(c=>{if(c.start)T.push({d:String(c.start).slice(0,10),k:"Contract",t:`AMC contract ${esc(c.no)} started`+(c.end?` · to ${fmtD(c.end)}`:""),c})});
+  T.sort((a,b)=>(b.d||"").localeCompare(a.d||""));
+  return{key,full,pr,today,yr,name,country,city:reg.city||"",group:reg.group||"",status,engNames,pms,rooms,pcs,users,ls:live,won,open,C,liveC,newestC,ext,extC,years,ordersTotal,ohipOrders,thisYear,engs,prods,cross,contacts,rens,renDue,nextRen,recurring,recSrc,
+    lastMeeting,lastTouchAt,pipeline,warns,T,customerSuccess:(newestC&&newestC.sender)||""}}
+function drawAcctP(){const S0=S.acctP;if(!S0)return;const sc0=document.querySelector("#apScrim .lvb"),st0=sc0?sc0.scrollTop:0,had=!!sc0;let D;try{D=apData(S0.key)}catch(e){showFail("account profile",e);S.acctP=null;return}
+  const sc=D.status==="Customer"?"ok":D.status==="Lapsed"?"bad":"";const full=D.full,pr=D.pr;
+  const kp=(l,v,s)=>`<div class="kpi"><div class="l">${l}</div><div class="v apv">${v}</div>${s?`<div class="s small muted">${s}</div>`:""}</div>`;
+  const sec=(t,body,extra)=>`<div class="lvc"><p class="lvt">${t}${extra||""}</p>${body}</div>`;
+  const when=d=>d?fmtD(d):"—";
+  const rd=D.nextRen?(D.nextRen.due<D.today?`<span style="color:var(--bad)">${when(D.nextRen.due)}</span>`:when(D.nextRen.due)):"—";
+  const kpis=full?[kp("Order revenue, all years",fmtAED(D.ordersTotal),D.ohipOrders>0?`of which OHIP ${fmtAED(D.ohipOrders)}`:`${D.won.length} order${D.won.length===1?"":"s"}`),kp("This year",fmtAED(D.thisYear),"orders won in "+D.yr),
+      kp("Yearly AMC + subscription",D.recurring?fmtAED(D.recurring):"—",esc(D.recSrc||"no contract or renewal yet")),kp("Open pipeline",D.pipeline?fmtAED(D.pipeline):"—",`${D.open.length} open lead${D.open.length===1?"":"s"}`),
+      kp("Next renewal",rd,D.nextRen?esc(REN_T[D.nextRen.ty]||""):""),kp("Last meeting",when(D.lastMeeting),"")]
+    :[kp("Your revenue, all years",fmtAED(D.ordersTotal),"orders credited to you"),kp("This year",fmtAED(D.thisYear),"your orders in "+D.yr),kp("Your open pipeline",D.pipeline?fmtAED(D.pipeline):"—",`${D.open.filter(isMine).length} open lead${D.open.filter(isMine).length===1?"":"s"}`),
+      kp("Next renewal",rd,D.nextRen?esc(REN_T[D.nextRen.ty]||""):""),kp("Last meeting",when(D.lastMeeting),"")];
+  const mxY=Math.max(1,...D.years.map(o=>o.total));const seg=(v,c,t)=>v>0?`<i style="width:${v/mxY*100}%;background:var(${c})" data-tip="${esc(t+": "+fmtAED(v))}"></i>`:"";
+  const revBody=D.years.length?`<div class="panel" style="padding:14px"><div class="apleg"><span><i style="background:var(--c-main)"></i>New sales</span>${full?`<span><i style="background:var(--c-in)"></i>Subscription / cloud</span><span><i style="background:var(--c-out)"></i>AMC</span>`:`<span><i style="background:var(--c-in)"></i>Subscription</span>`}</div>
+     ${D.years.map(o=>`<div class="apy"><div class="apyh"><b>${esc(o.y)}</b>${o.exp?` <span class="chip" data-tip="Not billed yet: worked out from the order or the contract">expected</span>`:""}<span class="sp"></span><b>${fmtAED(o.total)}</b></div>
+       <div class="apbar">${seg(o.one,"--c-main","New sales")}${seg(o.sub+o.rsub,"--c-in","Subscription / cloud")}${seg(o.amc,"--c-out","AMC")}</div>
+       <div class="small muted">New sales ${apM(o.one)} · Subscription ${apM(o.sub+o.rsub)}${full?` · AMC ${apM(o.amc)}`:""}${o.ohip+o.rohip>0?` · OHIP ${apM(o.ohip+o.rohip)} (kept apart)`:""}</div></div>`).join("")}
+     <p class="small muted" style="margin:10px 0 0">${full?"Orders by the year they were won. AMC and subscription renewals by contract year from approved contracts; with no contract they are worked out from the order (year 2 and 3). OHIP is shown apart and is not in the yearly total.":"Only the orders credited to you. Amounts in AED."}${D.ordersTotal?` Orders${full?"":" credited to you"}, all years: <b>${fmtAED(D.ordersTotal)}</b> (the Accounts page shows this figure).`:""}</p></div>`
+    :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">${full?"No won orders or contracts on this account yet.":"No orders credited to you on this account."}</p></div>`;
+  const engBody=full&&D.engs.length?`<div class="panel" style="padding:14px">${D.engs.map(e=>`<div class="apr"><b>${esc(e.name)}</b><span class="small muted">${Math.round(e.orders*10)/10} order${Math.round(e.orders*10)/10===1?"":"s"}</span><span class="sp"></span><span class="mono">${fmtAED(e.rev)}</span></div>`).join("")}</div>`:"";
+  const prodBody=D.prods.length?`<div class="panel" style="padding:6px 14px">${D.prods.map(p=>`<div class="apr wrap"><b>${esc(p.product)}</b>${p.since?`<span class="chip">since ${esc(p.since)}</span>`:""}${p.qty?`<span class="chip">${p.qty} unit${p.qty===1?"":"s"}</span>`:""}${p.iface?`<span class="chip">${esc(p.iface)}</span>`:""}<span class="sp"></span>${p.amc?`<span class="chip ${p.amc.ok?"ok":"bad"}" data-tip="${esc("Contract "+(p.amc.no||""))}">${esc(p.amc.kind||"AMC")} ${p.amc.ok?"to":"ended"} ${fmtD(p.amc.end)}</span>`:`<span class="chip warn">No AMC contract on file</span>`}</div>`).join("")}</div>`
+    :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">No product bought yet.</p></div>`;
+  const facts=[["PMS",D.pms||"—"],["Rooms",D.rooms||"—"],["PCs",D.pcs||"—"],["Users",D.users||"—"]];
+  const crossBody=D.cross.length?`<div class="panel" style="padding:14px"><div class="row" style="gap:6px;flex-wrap:wrap">${D.cross.map(x=>`<span class="chip${x.talk?" m-on":""}" data-tip="${x.talk?"There is an open lead for this product":"Not sold to this account yet"}">${esc(x.name)}${x.talk?" · open lead":""}</span>`).join("")}</div><p class="small muted" style="margin:8px 0 0">Products the hotel's PMS can support, not bought yet.</p></div>`:"";
+  const wBody=full&&D.warns.length?`<div class="lvc"><p class="lvt">Needs attention</p><div style="display:grid;gap:6px">${D.warns.map(w=>`<div class="notice ${w[0]}">${esc(w[1])}</div>`).join("")}</div></div>`:"";
+  const ctrBody=(D.C.length||D.rens.length||(D.extC&&!D.C.length))?`<div class="panel" style="padding:6px 14px">${D.C.map(c=>`<div class="apr wrap"><b>${esc(c.no||"Contract")}</b><span class="small muted">${fmtD(c.start)} – ${fmtD(c.end)}</span>${ctrChip(c)}<span class="sp"></span>${pr?`<span class="mono">${fmtAED(ctrSum(c,"amc")+ctrSum(c,"sub")+ctrSum(c,"cloud"))} a year</span>`:""}${canCV()?`<button type="button" class="btn sm" data-apc="${esc(c.id)}">Open</button>`:""}</div>`).join("")}
+     ${!D.C.length&&D.extC?`<div class="apr wrap"><b>${esc(D.extC.no||"Contract")}</b><span class="small muted">${fmtD(D.extC.start)} – ${fmtD(D.extC.end)}</span><span class="small muted">a colleague's client</span></div>`:""}
+     ${D.renDue.slice(0,6).map(i=>`<div class="apr wrap"><span>${renChip(i.ty)}</span><span class="small">${esc(i.what||"")}</span><span class="sp"></span><span class="small" style="${i.due<D.today?"color:var(--bad)":""}">${i.due<D.today?"overdue · ":"due "}${fmtD(i.due)}</span>${full?`<span class="mono">${fmtAED(i.amt)}</span>`:""}</div>`).join("")}</div>`
+    :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">No AMC contract or renewal on file.</p></div>`;
+  const conBody=D.contacts.length?`<div class="panel" style="padding:6px 14px">${D.contacts.map(c=>`<div class="apc"><div class="row" style="gap:6px"><b>${esc(c.name||c.email)}</b>${c.signer?`<span class="chip" data-tip="Signed the AMC contract">contract signer</span>`:""}</div>
+      <div class="small muted">${esc(c.title||"")}</div><div class="small">${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:""}${c.email&&c.phone?" · ":""}${c.phone?`<a href="tel:${esc(String(c.phone).replace(/[^+\d]/g,""))}">${esc(c.phone)}</a>`:""}</div>${c.at?`<div class="small muted">last used ${fmtD(c.at)}</div>`:""}</div>`).join("")}</div>`
+    :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">No contact on file.</p></div>`;
+  const ownOpen=D.open,oth=(D.ext&&D.ext.openLeads||[]).filter(x=>!D.open.some(l=>l.id===x.ref));
+  const leadBody=ownOpen.length||oth.length?`<div class="panel" style="padding:6px 14px">${ownOpen.map(l=>{const own=full||isMine(l);const v=own?leadValue(l):0;return`<button type="button" class="apr wrap apb" data-apl="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span><span class="small">${esc(productsOf(l).join(", "))}</span><span class="sp"></span><span class="small muted">${esc(l.assignedTo||"")}</span>${v?`<span class="mono">${fmtAED(v)}</span>`:""}</button>`}).join("")}
+     ${oth.map(x=>`<div class="apr wrap"><span class="mono">${esc(x.ref)}</span><span class="${stCls(x.status)}">${esc(x.status)}</span><span class="small">${esc((x.products||[]).join(", "))}</span><span class="sp"></span><span class="small muted">${esc(x.engineer||"")}</span></div>`).join("")}</div>`
+    :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">No open lead or quotation.</p></div>`;
+  const nT=S0.all.t?999:12;const tl=D.T.slice(0,nT);
+  const tlBody=D.T.length?`<div class="panel" style="padding:10px 14px"><div class="aptl">${tl.map((x,i)=>`<div class="apt"><span class="small muted apd">${fmtD(x.d)}</span><span class="chip apk">${esc(x.k)}</span><div class="apx">${x.t}${x.notes?`<div class="small apn${S0.all["n"+i]?"":" clamp"}" data-apn="${i}">${esc(x.notes)}</div>`:""}</div></div>`).join("")}</div>${D.T.length>12?`<button type="button" class="btn sm" id="apAll" style="margin-top:8px">${S0.all.t?"Show the latest 12":"Show all "+D.T.length}</button>`:""}</div>`
+    :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">Nothing logged yet.</p></div>`;
+  const people=[D.engNames.length?`Sales engineer <b>${esc(D.engNames.join(", "))}</b>`:"",D.customerSuccess?`Customer success <b>${esc(D.customerSuccess)}</b>`:""].filter(Boolean);
+  $("#drawerHost").innerHTML=`<div class="scrim lvs" id="apScrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Account ${esc(D.name)}">
+   <div class="lvh"><div class="row"><span class="ast" data-tip="${D.status==="Customer"?"Has an order or an AMC contract":D.status==="Lapsed"?"Had a contract that has ended, with nothing open":"No order or contract yet"}"><i style="background:var(${D.status==="Customer"?"--ok":D.status==="Lapsed"?"--bad":"--muted"})"></i>${D.status}</span>${full?"":`<span class="chip" data-tip="Your own revenue only. Other engineers' revenue and AMC prices are not shown to Sales.">Your view</span>`}<span class="sp"></span><button type="button" class="btn sm" id="apClose">Close</button></div>
+    <div><h2>${esc(D.name)}</h2><div class="muted">${esc([D.city,D.country,D.group?"Group: "+D.group:""].filter(Boolean).join(" · ")||"Country not set")}</div></div>
+    <div class="kv">${facts.map(f=>`<span>${f[0]} <b>${esc(f[1])}</b></span>`).join("")}${people.map(p=>`<span>${p}</span>`).join("")}</div></div>
+   <div class="lvb">
+    <div class="lvc apkp" style="grid-column:1/-1"><div class="apks">${kpis.join("")}</div></div>
+    ${wBody?`<div style="grid-column:1/-1">${wBody}</div>`:""}
+    <div style="display:grid;gap:16px;min-width:0;align-content:start">
+     ${sec(full?"Revenue by year":"Your revenue by year",revBody)}
+     ${engBody?sec("Revenue by engineer",engBody):""}
+     ${sec("Products and licences",prodBody)}
+     ${crossBody?sec("Not yet sold",crossBody):""}
+    </div>
+    <div style="display:grid;gap:16px;min-width:0;align-content:start">
+     ${sec("Contracts and renewals",ctrBody)}
+     ${sec("Open leads and quotations",leadBody)}
+     ${sec("Contacts",conBody)}
+     ${sec("Activity",tlBody)}
+    </div>
+   </div></aside></div>`;
+  $("#apClose").onclick=closeAcctProfile;$("#apScrim").onclick=e=>{if(e.target.id==="apScrim")closeAcctProfile()};document.onkeydown=e=>{if(e.key==="Escape"&&S.acctP)closeAcctProfile()};
+  const h=$("#drawerHost");
+  h.querySelectorAll("[data-apl]").forEach(b=>b.onclick=()=>{const id=b.dataset.apl;S.acctP=null;document.onkeydown=null;openDrawer(id)});
+  h.querySelectorAll("[data-apc]").forEach(b=>b.onclick=()=>{const id=b.dataset.apc;closeAcctProfile();openLeadOrContract("C:"+id)});
+  h.querySelectorAll("[data-apn]").forEach(b=>b.onclick=()=>{const i=b.dataset.apn;S0.all["n"+i]=!S0.all["n"+i];drawAcctP()});
+  $("#apAll")?.addEventListener("click",()=>{S0.all.t=!S0.all.t;drawAcctP()});
+  const nb=h.querySelector(".lvb");if(had&&nb)nb.scrollTop=st0;else $("#apClose").focus({preventScroll:true})}
 
 /* ======================= 4. MANAGEMENT ======================= */
 function orderTree(ls,x){const os=ls.filter(l=>(l.assignedTo===x.name||(shareOn(l)&&sameEng(l.share.to,x.name)))&&l.status==="Won"&&engCredit(l)).sort((a,b)=>orderVal(b)-orderVal(a)||reqDate(b).localeCompare(reqDate(a)));
@@ -4728,7 +4900,7 @@ const canCA=()=>ctrOn()&&can("contract.approve");
 const canCV=()=>ctrOn()&&(can("contract.view_all")||can("contract.view_own")||can("contract.upload")||can("contract.approve"));
 function ctrLoad(force){if(!canCV()||S.ctrLoading||(S.ctrLoaded&&!force))return;S.ctrLoading=true;
   window.__contracts.list().then(L=>{S.contracts=L.map(ctrNorm);S.ctrErr=""}).catch(e=>{S.contracts=S.contracts||[];S.ctrErr=/does not exist|schema cache|42P01|PGRST205/i.test((e.message||"")+(e.code||""))?"missing":(e.message||"error")})
-    .finally(()=>{S.ctrLoading=false;S.ctrLoaded=true;S.ctrStamp=(S.ctrStamp||0)+1;render()})}
+    .finally(()=>{S.ctrLoading=false;S.ctrLoaded=true;S.ctrStamp=(S.ctrStamp||0)+1;render();if(S.acctP)drawAcctP()})}
 const ctrAll=()=>{ctrLoad();return S.contracts||[]};
 const ctrById=id=>ctrAll().find(c=>c.id===id);
 /* approved contracts, newest per client; an older one is "renewed by" the newer */
