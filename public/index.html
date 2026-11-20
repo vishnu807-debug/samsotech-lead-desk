@@ -43,7 +43,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.005em}
 h2{font-size:22px;font-weight:600} h3{font-size:16px;font-weight:600}
 .mono{font-family:var(--f-mono);font-size:12.5px}
-.muted{color:var(--muted)} .small{font-size:12.5px}
+.muted{color:var(--muted)} .small{font-size:12.5px} .wc{color:var(--muted);margin:-4px 0 0}.wc.ok{color:var(--ok)}
 .ldver{font-size:11.5px;color:var(--muted);text-align:center;padding-top:16px;padding-bottom:20px}@media print{.ldver{display:none}}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -99,7 +99,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .seg.segw{display:flex;flex-wrap:wrap;gap:6px;border:0;overflow:visible}
 .seg.segw button{border:1px solid var(--line);border-radius:8px;padding:6px 11px}
 .seg.segw button+button{border-left:1px solid var(--line)}
-.lv-acc #pmsArea,.lv-acc #pbArea,.lv-acc #recArea,.lv-acc #prodArea,.lv-acc .actlog,.lv-acc #editAll,.lv-acc #fcEdit,.lv-acc #jointArea{display:none!important}
+.lv-acc #renAcct,.lv-acc #pmsArea,.lv-acc #pbArea,.lv-acc #recArea,.lv-acc #prodArea,.lv-acc .actlog,.lv-acc #editAll,.lv-acc #fcEdit,.lv-acc #jointArea{display:none!important}
 .nxq{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 -2px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .seg.cat button[data-v="Inbound"][aria-pressed="true"]{background:var(--inb);color:#fff}
@@ -129,6 +129,8 @@ td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tbody tr.click{cursor:pointer} tbody tr.click:hover{background:var(--accent-soft)}
+.lvbtns{margin-left:auto;display:inline-flex;gap:8px;flex:none;white-space:nowrap}
+.tw.acct th.stk,.tw.acct td.stk{position:sticky;right:0;z-index:2;box-shadow:-8px 0 8px -8px rgba(15,30,50,.28);white-space:nowrap}.tw.acct td.stk{background:var(--surface)}.tw.acct tr.click:hover td.stk{background:var(--accent-soft)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 /* analytics */
 .afbar{display:grid;gap:8px;padding:14px 16px}
@@ -521,7 +523,49 @@ th{position:relative}
 .lvt{font:600 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 -4px}
 @media(max-width:900px){.scrim.lvs{padding:0;align-items:stretch}.drawer.lv{width:100%;max-height:none;height:100%;border-radius:0}
  .lvh{padding:calc(12px + env(safe-area-inset-top,0px)) 14px 10px}.lvb{grid-template-columns:minmax(0,1fr);padding:14px 14px calc(30px + env(safe-area-inset-bottom,0px))}}
-/* Commercial page viewer */
+/* ---- lead popup: one Edit mode + sticky Save bar (20 Nov 2026) ---- */
+.lvh{position:relative;z-index:6}
+.lvf{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;padding:10px 22px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface)}
+.lv-editing .lvf{border-top:2px solid var(--accent)}
+.lvf-l,.lvf-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.lvf-r{justify-content:flex-end}
+.lvf .cnt,.lvf .hint{margin-left:auto}
+.lvf .hint{font-size:12.5px;color:var(--muted)}
+.lvf .cnt{font-size:12.5px;font-weight:600;color:var(--accent);white-space:nowrap}
+.lvf .gerr{flex:1 1 100%;color:var(--bad);font-size:12.5px;font-weight:500}
+.lvf .btn[disabled]{opacity:.5;cursor:not-allowed}
+.lvbtns .edbadge{background:var(--accent-soft);color:var(--accent);font-weight:600;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.lvbtns svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.edpanel{border-color:color-mix(in srgb,var(--accent) 60%,var(--line))!important}
+.lv-editing .edmode input,.lv-editing .edmode select,.lv-editing .edmode textarea,.lv-editing .lvh input.edin,.lv-editing .lvh select.edsel{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent-soft) 30%,var(--surface))}
+.edlab{display:block;font:600 10.5px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.lvh .acin{font:600 22px/1.25 var(--f-display);padding:4px 10px}
+.acbox{position:relative;max-width:620px}
+.acdd{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:260px;overflow:auto;z-index:30}
+.acdd [role=option]{display:grid;gap:1px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--line);font-size:14px}
+.acdd [role=option]:last-child{border-bottom:0}
+.acdd [role=option].on,.acdd [role=option]:hover{background:var(--accent-soft)}
+.acdd .sub{font-size:12px;color:var(--muted);font-weight:400}
+.acdd .cur{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.acnote{margin-top:6px;font-size:12.5px}
+.acnote .notice{padding:6px 10px;margin:0}
+.ferr{display:block;color:var(--bad);font-size:12px;margin-top:2px;font-weight:500}
+input.err,select.err,textarea.err{border-color:var(--bad)!important}
+.edchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.edchip{display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:20px;padding:2px 3px 2px 10px;font-size:12.5px}
+.edchip button{border:0;background:transparent;cursor:pointer;color:var(--muted);width:22px;height:22px;border-radius:50%;line-height:1;font-size:14px;padding:0}
+.edchip button:hover{background:var(--bad-soft);color:var(--bad)}
+.lvh select.edsel{width:auto;max-width:100%;padding:5px 8px;font-size:13px}
+.timeline .edrow{align-items:start}
+.timeline .edrow>span:first-child{padding-top:8px}
+.timeline .edv{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.timeline .edv div{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.timeline .edv .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.edv label{display:grid;gap:3px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
+.edv .ro{font-size:12.5px;color:var(--ink)}
+@media(max-width:900px){.lvf{padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px))}}
+@media(max-width:560px){.timeline .edv .two{grid-template-columns:minmax(0,1fr)}.timeline .edrow{grid-template-columns:minmax(0,1fr)}.timeline .edrow>span:first-child{padding-top:0;font-weight:600}.lvf{gap:6px 8px;padding-top:6px}.lvf .cnt{flex:1 1 100%;order:-1;text-align:right;margin:0}.lvf-r{margin-left:auto}.lvf .btn{padding:6px 10px;font-size:13px}.lvf .hint{display:none}.lvh .acin{font-size:19px}.acHelp,.lvedh .ctryline{display:none}}
+@media(max-height:660px){.lv-editing .stages{display:none}}/* Commercial page viewer */
 .scrim.cpg{justify-content:center;align-items:center;padding:16px;z-index:60}
 .cpgbox{background:var(--surface);border-radius:12px;width:min(1040px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .cpghead{padding:12px 16px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}.cpgbody{overflow:auto;padding:14px 16px;display:grid;gap:14px}
@@ -580,13 +624,14 @@ th{position:relative}
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 20 Nov 2026 · build 18a0fc9</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 20 Nov 2026 · build 084b9c9</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="adapter.js?v=00b06ed6"></script>
+<script src="vendor/supabase.js"></script>
+<script>window.supabase||document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
+<script src="adapter.js?v=515ea8d5"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -700,6 +745,13 @@ function bindSubTerr(){const save=async(list,msg)=>{try{await S.db.doc("config/s
     save(setMany(ns,s.value==="__clear"?"":s.value),s.value==="__clear"?`${g} cleared`:`${g} (${ns.length}) assigned to ${s.value}`)})}
 
 const MEET_TYPES=["New lead meeting","Follow-up meeting"];
+/* Every new meeting needs real notes: at least meetMin() words (default 30) and half as many different words (SQL 48 enforces the same). */
+const meetMin=()=>{const v=+(S.settings&&S.settings.meetMinWords);return v>=1&&v<=999?Math.floor(v):30};
+function meetWords(t){const w=String(t||"").toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu)||[];return{n:w.length,d:new Set(w).size}}
+function meetNotesErr(t){const c=meetWords(t),mn=meetMin();if(c.n<mn)return`Meeting notes need at least ${mn} words (you have ${c.n}). Say who attended, what was discussed, the client's concerns and the agreed next step.`;
+  if(c.d<Math.ceil(mn/2))return`Please write real meeting notes: use at least ${Math.ceil(mn/2)} different words.`;return""}
+const meetWC=t=>{const c=meetWords(t),mn=meetMin();return`<div class="small wc${c.n>=mn?" ok":""}" data-wc aria-live="polite">${c.n} / ${mn} words${c.n>=mn?" ✓":""}</div>`};
+document.addEventListener("input",e=>{const el=e.target;if(!el||!el.matches||!el.matches("#f-mnotes,#md-notes,#lm-notes,#a-notes[data-mw]"))return;const w=el.closest("label")?.nextElementSibling;if(w&&w.hasAttribute("data-wc")){const c=meetWords(el.value),mn=meetMin();w.textContent=`${c.n} / ${mn} words${c.n>=mn?" ✓":""}`;w.classList.toggle("ok",c.n>=mn)}const m=el.closest(".panel")?.querySelector("#lm-msg,#md-msg,#a-aed");if(m&&/meeting notes/i.test(m.textContent))m.textContent=""});
 function meetingsOf(l){if(Array.isArray(l.meetings))return l.meetings;
   return l.meeting?[{id:"m0",date:(l.meeting.date||"").slice(0,10),mode:l.meeting.mode||"",type:"New lead meeting",products:productsOf(l),notes:l.meeting.notes||"",legacy:true}]:[]}
 const reqDate=l=>l.requirementDate||(l.createdAt||"").slice(0,10);
@@ -743,6 +795,11 @@ const isMine=l=>!!S.myEng&&nk(l.assignedTo)===nk(S.myEng);
 const isSales=()=>!can("lead.create")&&can("lead.create_own_outbound");   // outbound-only lead form
 async function loadLocks(key){if(!window.LD_HOSTED||viewAll()||!key)return;try{const{data}=await window.__sb.rpc("product_locks",{p_account:key});if(data)S.extLocks[key]=data}catch(e){}}
 const isBO=()=>can("lead.verify");
+/* ----- Request info: back office asks the creator, the creator answers (SQL 47) ----- */
+function infoAsk(l){if(l.status!=="Info Needed")return null;const r=l.infoReq;if(r&&r.reason)return{reason:r.reason,by:r.byName||"",at:r.at||""};
+  const e=[...(l.log||[])].reverse().find(x=>/^Info requested: /.test(x.a||""));return e?{reason:e.a.replace(/^Info requested: /,""),by:"",at:e.t||""}:{reason:"Back office needs more information.",by:"",at:""}}
+const infoCreator=l=>!l.deleted&&!isBO()&&((!!S.uid&&l.createdBy===S.uid)||(!!S.myEng&&nk(l.generatedBy)===nk(S.myEng))||isMine(l));
+const infoReplied=l=>l.status==="New"&&!!(l.infoReply&&l.infoReply.at)&&(!l.infoReq||(l.infoReq.at||"")<=l.infoReply.at);
 /* Sales may also read (not edit) leads they generated that another engineer now has (permission lead.view_generated,
    21 → 23_generated_view.sql). Those stay out of S.leads so pipelines, Focus and counts are unchanged; they are used
    only by "Generated by me" and can be opened read-only. */
@@ -980,7 +1037,7 @@ function renderNew(m){
       <div style="display:grid;gap:12px">
         <div class="grid2"><label class="f">Meeting date<input id="f-mdate" type="date" max="${todayISO()}" value="${esc(f.mDate||"")}"></label>
         <div class="f" style="display:grid;gap:4px;align-content:start"><span>Held</span><span class="seg" id="f-mmode" style="justify-self:start">${["Online","Onsite"].map(v=>`<button type="button" data-v="${v}" aria-pressed="${f.mMode===v}">${v}</button>`).join("")}</span></div></div>
-        <label class="f">What happened in the meeting<textarea id="f-mnotes" rows="4" placeholder="Who attended, what was discussed, client's concerns, agreed next step">${esc(f.mNotes||"")}</textarea></label>
+        <label class="f">What happened in the meeting <span class="muted small">(at least ${meetMin()} words)</span><textarea id="f-mnotes" rows="4" placeholder="Who attended, what was discussed, client's concerns, agreed next step">${esc(f.mNotes||"")}</textarea></label>${meetWC(f.mNotes)}
       </div>
     </div>
     <div id="submitMsg"></div>
@@ -1106,9 +1163,11 @@ function exportRows(ls){const d=v=>v?new Date(String(v).length===10?v+"T12:00:00
   const H=[["Ref",l=>l.ref],["Received",l=>d(reqDate(l)),1],["Property",l=>l.accountName||""],["Region",regionOf],["Products",l=>productsOf(l).join(", ")],
     ["Status",l=>l.status],["Engineer",l=>l.assignedTo||""],["Created by",l=>hasCb(l)?genName(l):""],["Created by team",l=>hasCb(l)?genDept(l):""],["Value (AED)",l=>leadValue(l)||"",0,1]];
   return{H,rows:ls.map(l=>H.map(([,f])=>{const v=f(l);return v instanceof Date&&isNaN(v)?null:v}))}}
+/* Libraries are served from this site (public/vendor/, exact pinned versions, same origin so the browser security policy can stay strict).
+   The public CDN address is only a fallback if a vendor file is missing. */
+function ldLoadJs(urls){return new Promise((res,rej)=>{const next=i=>{if(i>=urls.length){rej(new Error("load"));return}const s=document.createElement("script");s.src=urls[i];s.onload=()=>res(urls[i]);s.onerror=()=>{s.remove();next(i+1)};document.head.appendChild(s)};next(0)})}
 let XLSX_P=null;
-function loadXLSX(){if(window.XLSX)return Promise.resolve(window.XLSX);return XLSX_P||(XLSX_P=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-  s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error("Excel library didn't load"));s.onerror=()=>{XLSX_P=null;rej(new Error("Couldn't load the Excel library. Check your internet connection or use CSV."))};document.head.appendChild(s)}))}
+function loadXLSX(){if(window.XLSX)return Promise.resolve(window.XLSX);return XLSX_P||(XLSX_P=new Promise((res,rej)=>{ldLoadJs(["vendor/xlsx.full.min.js","https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]).then(()=>window.XLSX?res(window.XLSX):rej(new Error("Excel library didn't load")),()=>{XLSX_P=null;rej(new Error("Couldn't load the Excel library. Check your internet connection or use CSV."))})}))}
 async function exportLeads(fmt){if(!can("lead.export")){toast("Your role can't export leads.");return}const F=lf();const b=$("#lfX");const label=b?.textContent;
   const ls=sortedLeads(F);if(!ls.length){toast("No leads match these filters, so there's nothing to export.");return}
   if(b){b.disabled=true;b.innerHTML=`<span class="spin" aria-hidden="true"></span> Preparing ${fmt==="xlsx"?"Excel":"CSV"}…`}
@@ -1187,7 +1246,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(!v("f-genby"))errs.push("Add who generated the lead");
   if(!v("f-reqdate"))errs.push("Add the date the requirement came in");else if(v("f-reqdate")>todayISO())errs.push("The requirement date can't be in the future");
   if(f.account&&f.account.isNew&&!f.account.country)errs.push("Choose the country");
-  {const mn=(f.mNotes||"").trim(),md=f.mDate||"";if(mn||md||f.mMode){if(!mn)errs.push("Write the meeting notes, or clear the meeting date");if(!md)errs.push("Pick the meeting date");else if(md>todayISO())errs.push("The meeting date can't be in the future");if(!f.mMode)errs.push("Choose whether the meeting was Online or Onsite")}}
+  {const mn=(f.mNotes||"").trim(),md=f.mDate||"";if(mn||md||f.mMode){if(!mn)errs.push("Write the meeting notes, or clear the meeting date");else{const ne=meetNotesErr(mn);if(ne)errs.push(ne)}if(!md)errs.push("Pick the meeting date");else if(md>todayISO())errs.push("The meeting date can't be in the future");if(!f.mMode)errs.push("Choose whether the meeting was Online or Onsite")}}
   if(!v("f-region"))errs.push("Choose the region");{const x=formSub();if(x&&!x.n)errs.push("Choose the "+SUBDIV[x.c].label.toLowerCase())}
   if(errs.length){msg.innerHTML=`<div class="notice bad">${errs.map(esc).join(" · ")}</div>`;return}
   if(!S.db){msg.innerHTML=`<div class="notice bad">The lead database isn't available. Sign in and reopen the page.</div>`;return}
@@ -1259,10 +1318,11 @@ function renderBO(m){if(regApprover())regLoad();const q=S.leads.filter(l=>l.stat
   $("#goSet")?.addEventListener("click",()=>{S.tab="set";try{history.replaceState(null,"","#set")}catch(_){}render()})}
 function qCard(l){const ch=dupChecks(l);const bad=ch.some(c=>c.lvl==="bad");const hrs=days(l.createdAt)*24;
   return`<div class="qcard ${bad?"blockd":ch.length?"flag":""}">
-   <div class="qtop"><span class="mono">${esc(l.ref)}</span><b>${esc(l.accountName)}</b><span class="muted">${esc(l.country||"")}</span><span class="sp"></span><span class="${stCls(l.status)}">${esc(l.status)}</span></div>
+   <div class="qtop"><span class="mono">${esc(l.ref)}</span><b>${esc(l.accountName)}</b><span class="muted">${esc(l.country||"")}</span><span class="sp"></span>${infoReplied(l)?`<span class="chip ok">Reply received</span>`:""}<span class="${stCls(l.status)}">${esc(l.status)}</span></div>
    <div class="row">${productsOf(l).map(p=>`<span class="chip">${esc(p)}</span>`).join("")}<span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span><span class="chip">${esc(l.source)}</span>${l.preferred?`<span class="chip">Prefers ${esc(l.preferred)}</span>`:""}${l.formerAssignee?`<span class="chip" style="background:var(--warn-soft);color:var(--warn)">Was shared: ${esc((sharedOwners(l.formerAssignee)||[l.formerAssignee]).join(" + "))} · pick one</span>`:""}</div>
    <div class="kv">${ownerOf(l)?`<span>Territory <b>${esc(ownerOf(l))}</b></span>`:`<span style="color:var(--warn)">No territory owner</span>`}${meetingsOf(l).length?`<span>Meetings <b>${meetingsOf(l).length}</b></span>`:""}<span>Requirement <b>${fmtD(reqDate(l))}</b></span><span>Region <b>${esc(regionOf(l))}</b></span><span>Contact <b>${esc(l.contact?.name)}</b>${l.contact?.title?" · "+esc(l.contact.title):""}</span><span><b>${esc(l.contact?.email||l.contact?.phone||"")}</b></span><span>By <b>${esc(l.generatedBy)}</b>${l.department?" · "+esc(l.department):""}</span><span style="${hrs>(S.settings.slaVerifyHours||24)?"color:var(--bad)":""}">Waiting <b>${hrs<1?"<1h":hrs<48?Math.round(hrs)+"h":Math.round(hrs/24)+" days"}</b></span></div>
    ${l.notes?`<div class="small">${esc(l.notes)}</div>`:""}
+   ${infoAsk(l)?`<div class="notice warn" style="padding:6px 10px">Waiting for ${esc(genName(l)||"the creator")}${infoAsk(l).at?" since "+fmtD(infoAsk(l).at):""}: <b>${esc(infoAsk(l).reason)}</b></div>`:""}${infoReplied(l)?`<div class="notice ok" style="padding:6px 10px"><b>Reply received</b> from ${esc(l.infoReply.by||"the creator")} on ${fmtD(l.infoReply.at)}${l.infoReply.note?": "+esc(l.infoReply.note):""}${(l.infoReply.changed||[]).length?` <span class="muted">(updated: ${esc(l.infoReply.changed.join(", "))})</span>`:""}</div>`:""}
    ${ch.length?`<div class="view" style="gap:4px">${ch.map(c=>`<div class="notice ${c.lvl}" style="padding:6px 10px">${esc(c.msg)}</div>`).join("")}</div>`:`<div class="notice ok" style="padding:6px 10px">No duplicates found for this account and product.</div>`}
    <div class="row"><button class="btn pri sm" data-open="${esc(l.id)}">Review and assign</button></div></div>`}
 
@@ -1311,13 +1371,13 @@ function lcard(l){const stale=["Assigned","Attended"].includes(l.status)&&days(l
   const fu=fuOpen(l)&&fuDue(l)<=new Date(new Date().setHours(23,59,59,999));
   return`<button class="lc" data-open="${esc(l.id)}"><span class="row" style="gap:6px"><span class="mono muted">${esc(l.ref)}</span><span class="sp"></span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span>${flagChips(l)}${isUpsell(l)?`<span class="chip ups">Upsell</span>`:""}${isNewForMe(l)?`<span class="chip newl">New</span>`:""}</span>
    <b style="font-size:13.5px">${esc(l.accountName)}</b><span class="small muted">${esc(regionOf(l))} · received ${fmtD(reqDate(l))}</span><span class="small muted">${esc(l.product)}${viewAll()&&S.me==="__all"?" · "+esc(l.assignedTo):""}</span>
-   ${cbChip(l)}${wqChip(l)}${standChip(l)}${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
+   ${l.status==="Info Needed"?`<span class="late">More information needed: ${esc(infoAsk(l).reason)}</span>`:infoReplied(l)?`<span class="small muted">You answered · waiting for review</span>`:""}${cbChip(l)}${wqChip(l)}${standChip(l)}${leadValue(l)?`<span class="amt">${fmtAED(leadValue(l))}</span>`:""}${l.status==="Lost"||l.status==="On Hold"?`<span class="${stCls(l.status)}" style="justify-self:start">${esc(l.status)}</span>`:""}
    ${urgent?`<span class="late">No meeting yet · assigned ${Math.floor(days(l.assignedAt))} days ago</span>`:stale?`<span class="small muted">No meeting logged · ${Math.floor(days(l.assignedAt))} days</span>`:""}${qst?`<span class="late">Quote open ${Math.floor(days(l.stageAt["Quotation Sent"]))} days</span>`:""}${l.status==="Quotation Sent"&&l.quote?.targetDate?(tgtOverdue(l)?`<span class="late">Target ${fmtD(l.quote.targetDate)} passed</span>`:`<span class="small muted">Target ${fmtD(l.quote.targetDate)}</span>`):""}${fu?`<span class="late">Follow-up ${esc(fuLabel(l))}</span>`:fuOpen(l)?`<span class="small muted">Follow-up ${esc(fuLabel(l))}</span>`:""}</button>`}
 
 /* ======================= LEAD DRAWER (back office + sales) ======================= */
 function openDrawer(id){if(!S.drawer)S.drawerFrom=document.activeElement;S.drawer={id,mode:null};S.vSubN=null;drawDrawer();const l=S.leadMap[id];if(l&&isNewForMe(l))markSeen([l])}
 function closeDrawer(){S.drawer=null;$("#drawerHost").innerHTML="";const f=S.drawerFrom;S.drawerFrom=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}}
-function refreshDrawer(){if(!S.drawer)return;if(!S.drawer.mode&&!S.drawer.pmsEdit)drawDrawer()}
+function refreshDrawer(){if(!S.drawer)return;if(S.drawer.mode||S.drawer.pmsEdit)return;{const a=document.activeElement;if(a&&a.closest&&a.closest("#infoPanel"))return}if(S.drawer.edit){const a=document.activeElement;if(a&&a.closest&&a.closest(".drawer")&&a.matches("input,textarea,select"))return}drawDrawer()}
 /* ======================= UPSELL LEADS =======================
    A product added to an approved lead at or after a meeting becomes a separate "Upsell" lead, linked to the original
    and assigned to the engineer who held the meeting. The original lead keeps its products, engineer and lead generator,
@@ -1352,13 +1412,13 @@ const canQuoteDel=l=>!!l.quote&&l.status==="Quotation Sent"&&!l.deleted&&canAct(
 const qBackTo=l=>(l.meeting||meetingsOf(l).length||l.stageAt?.["Meeting Done"])?"Meeting Done":l.stageAt?.Attended?"Attended":"Assigned";
 function quoteRow(l){const q=l.quote;if(!q)return"";const od=tgtOverdue(l);const canT=canAct(l)&&!l.deleted&&l.status==="Quotation Sent";
   const tgt=S.drawer?.mode==="qtarget"&&canT?`<span class="row" style="gap:6px;margin-top:4px"><input type="date" id="qtIn" min="${esc(q.date||"")}" value="${esc(q.targetDate||"")}" style="width:auto"><button type="button" class="btn sm pri" id="qtSave">Save</button><button type="button" class="btn sm" id="qtX">Cancel</button></span>`
-    :`<span style="display:block;margin-top:2px">Target date: ${q.targetDate?`<b style="${od?"color:var(--bad)":""}">${fmtD(q.targetDate)}</b>${od?` · ${Math.floor(days(q.targetDate+"T23:59:59"))} days past`:""}`:`<span class="muted">not recorded</span>`}${canT?` <button type="button" class="btn sm" id="qTgt" style="margin-left:6px">${q.targetDate?"Change":"Set"} target date</button>`:""}</span>`;
+    :`<span style="display:block;margin-top:2px">Target date: ${q.targetDate?`<b style="${od?"color:var(--bad)":""}">${fmtD(q.targetDate)}</b>${od?` · ${Math.floor(days(q.targetDate+"T23:59:59"))} days past`:""}`:`<span class="muted">not recorded</span>`}</span>`;
   const canDel=canQuoteDel(l);
   const hist=(l.quoteHistory||[]).slice().reverse();
   return`<div><span>Quotation</span><span><b>${fmtAED(q.aed)}</b>${q.currency&&q.currency!=="AED"?` <span class="muted">(${esc(q.currency)} ${fmtN(q.value)})</span>`:""} · ${fmtD(q.date)}${q.no?` · <span class="mono">${esc(q.no)}</span>`:""}${q.notes?` · ${esc(q.notes)}`:""}${q.createdBy||q.validUntil?`<span class="small muted" style="display:block">${q.createdBy?"Prepared by "+esc(q.createdBy):""}${q.createdBy&&q.validUntil?" · ":""}${q.validUntil?"valid until "+fmtD(q.validUntil):""}${q.source?" · from "+esc(q.source):""}</span>`:""}${tgt}
     ${(q.lines||[]).length?`<details class="small" style="margin-top:4px"><summary style="cursor:pointer">${q.lines.length} line item${q.lines.length===1?"":"s"}</summary><div class="tw" style="margin-top:4px"><table class="qlines"><tbody>${q.lines.map(x=>`<tr><td>${esc(x.item)}${x.manual?` <span class="chip warn">Manual</span>`:""}${x.product?`<div class="muted">${esc(x.product)}</div>`:""}</td><td class="num">${fmtN(x.qty)} × ${fmtN(x.unit)}</td><td class="num">${fmtN(x.total)}</td></tr>`).join("")}</tbody></table></div></details>`:""}
     ${(q.manualLines||[]).length?mlStateHTML(l):""}
-    ${canDel?`<span style="display:block;margin-top:6px"><button type="button" class="btn sm" id="qDel">Remove quote</button></span>`:""}${hist.length?`<span class="qhist small muted">${hist.map(h=>`<span>Earlier: ${fmtAED(h.aed)} · ${fmtD(h.date)}${h.no?" · "+esc(h.no):""} · target ${h.targetDate?fmtD(h.targetDate):"not recorded"}</span>`).join("")}</span>`:""}</span></div>`}
+    ${hist.length?`<span class="qhist small muted">${hist.map(h=>`<span>Earlier: ${fmtAED(h.aed)} · ${fmtD(h.date)}${h.no?" · "+esc(h.no):""} · target ${h.targetDate?fmtD(h.targetDate):"not recorded"}</span>`).join("")}</span>`:""}</span></div>`}
 /* Supervisor: correct a meeting date on a won lead. Only the date changes; status, amounts, owner and incentive stay as they are. */
 function wonMeetingDate(l,mid){if(!can("meeting.edit_won")||l.status!=="Won")return;const m=meetingsOf(l).find(x=>x.id===mid);if(!m)return;
   cfmOpen(`<h3>Change meeting date</h3><p class="small muted" style="margin:0">${esc(l.ref)} · ${esc(l.accountName)} is Won. Only the meeting date changes: status, quotation, order value, assignment and incentive stay as they are. The original date is kept in the record.</p>
@@ -1377,9 +1437,7 @@ function cfmOpen(html,onOk,okSel){cfmClose();const h=document.createElement("div
 function cfmClose(){const h=$("#cfm");if(!h)return;document.onkeydown=h._prev||document.onkeydown;h.remove()}
 /* Soft delete: approved leads only, Lead Manager and Supervisor. Nothing is erased; the lead can be restored. */
 const DEL_REASONS=["Not a Valid Lead","Duplicate Lead","Incorrect Lead Entry","Not a Genuine Business Opportunity","Wrong Customer Information","Other"];
-function drawDelArea(l){const D=$("#delArea");if(!D)return;if(!can("lead.remove")||l.deleted||["New","Info Needed"].includes(l.status)){D.innerHTML="";return}
-  D.innerHTML=`<div class="panel" style="padding:12px 14px"><div class="row"><span class="small muted" style="flex:1;min-width:200px">Remove this lead if it is invalid, a duplicate or entered by mistake. It is kept for the audit trail and can be restored.</span><button type="button" class="btn bad sm" id="delLead">Delete lead</button></div></div>`;
-  $("#delLead").onclick=()=>{cfmOpen(`<h3>Delete lead ${esc(l.ref)}?</h3>
+function openDeleteLead(l){if(!can("lead.remove")||l.deleted||["New","Info Needed"].includes(l.status))return;{cfmOpen(`<h3>Delete lead ${esc(l.ref)}?</h3>
     <p class="small" style="margin:0"><b>${esc(l.accountName)}</b> · ${esc(l.product||"")} · ${esc(l.status)}${l.assignedTo?" · "+esc(l.assignedTo):""}</p>
     <p class="small muted" style="margin:0">The lead disappears from every list, pipeline, count and report. Its details, meetings, quotation and history are kept, and a Lead Manager or Supervisor can restore it from Back office.</p>
     <label class="f">Reason <span class="req">*</span><select id="dlR">${opts(DEL_REASONS,"","Choose a reason")}</select></label>
@@ -1503,29 +1561,30 @@ async function unWin(l,to,why,lr){if(!canUnwin(l))return false;if(!can("lead.sta
   if(to==="Lost")body.lost={reason:lr,notes:why,date:t};else if(l.lost)body.lost=null;
   return await patch(l,body,`Status changed from Won to ${to}${to==="Lost"?" ("+lr+")":""}${why?" · "+why:""}${l.order?" · order "+fmtAED(l.order.aed)+" moved to history":""}`)}
 function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return}
+  if(S.drawer.edit&&!leCanEdit(l))S.drawer.edit=null;const E=S.drawer.edit;const _sc=E?($(".lvb")||{}).scrollTop:0;
   const stg=["New","Assigned","Attended","Meeting Done","Quotation Sent","Won"];const reachedIdx=Math.max(...stg.map((s,i)=>l.stageAt?.[s]?i:-1));
   const inBO=l.status==="New"||l.status==="Info Needed";const ch=dupChecks(l);const hideRest=needAccept(l)&&isMine(l)&&!can("lead.status_override")&&!l.deleted;
   const money=(o,lab)=>o?`<div><span>${lab}</span><span><b>${fmtAED(o.aed)}</b>${o.currency&&o.currency!=="AED"?` <span class="muted">(${esc(o.currency)} ${fmtN(o.value)})</span>`:""} · ${fmtD(o.date)}${o.no?` · <span class="mono">${esc(o.no)}</span>`:""}${o.notes?` · ${esc(o.notes)}`:""}</span></div>`:"";
   const lvTop=`${l.deleted?`<div class="notice bad" style="display:grid;gap:6px"><b>This lead was deleted on ${fmtD(l.deleted.at)} by ${esc(l.deleted.by||"someone")}.</b><span>Reason: ${esc(l.deleted.reason||"—")}${l.deleted.note?" · "+esc(l.deleted.note):""}. It is hidden from every list, count and report. Its details and history are kept.</span>${can("lead.remove")?`<span><button type="button" class="btn sm" id="restoreLead">Restore this lead</button></span>`:""}</div>`:""}${ruleFlags(l).length?`<div class="notice warn" style="display:grid;gap:2px"><b>Needs action</b>${ruleFlags(l).map(f=>`<span class="small">${esc(f.t)}</span>`).join("")}</div>`:""}`;
-  $("#drawerHost").innerHTML=`<div class="scrim lvs" id="scrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Lead ${esc(l.ref)}">
+  $("#drawerHost").innerHTML=`<div class="scrim lvs" id="scrim"><aside class="drawer lv${E?" lv-editing":""}" role="dialog" aria-modal="true" aria-label="Lead ${esc(l.ref)}">
   <div class="lvh">
-   <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wqChip(l)}${l.registered?`<span class="chip" title="Won before it was entered in Lead Desk. Registered from the approved quotation; it is not a lead.">Registered order</span>`:""}${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><button class="btn sm" id="dClose">Close</button></div>
-   <div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>
+   <div class="row"><span class="mono">${esc(l.ref)}</span><span class="${stCls(l.status)}">${esc(l.status)}</span>${wqChip(l)}${l.registered?`<span class="chip" title="Won before it was entered in Lead Desk. Registered from the approved quotation; it is not a lead.">Registered order</span>`:""}${wonTouched(l)?`<span class="chip warn" title="This order was moved back from Won or had its value corrected. See Status changes and Order corrections below.">Changed after Won</span>`:""}<span class="sp"></span><span class="lvbtns">${E?`<span class="chip edbadge">Editing lead</span>`:leCanEdit(l)?`<button type="button" class="btn pri sm" id="edBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>`:""}<button class="btn sm" id="dClose">Close</button></span></div>
+   ${E?leHeadHTML(l):`<div><h2>${esc(l.accountName)}${isUpsell(l)?` <span class="chip ups" style="vertical-align:middle">Upsell</span>`:""}</h2><div class="muted">${esc([l.product,l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>`}
    <div class="stages">${stg.map((s,i)=>`<span class="${i<=reachedIdx?(l.status==="Won"?"won":"on"):""}">${s==="Quotation Sent"?"Quote":s==="Meeting Done"?"Meeting":s}</span>`).join("")}</div>
   </div>
   <div class="lvb${hideRest?" lv-acc":""}">
    ${lvTop}
   <div class="lvc"><p class="lvt">The lead</p>
-   <div class="panel" style="padding:14px" id="detPanel">${(can("lead.edit_fields")||canAct(l))&&!l.deleted?`<div class="row" style="margin:-2px 0 8px"><span class="small muted">Lead details</span><span class="sp"></span><button type="button" class="btn sm" id="editAll">Edit details</button></div>`:""}<div class="timeline">
-     <div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>
-     <div><span>Contact</span><span>${esc(l.contact?.name)}${l.contact?.title?", "+esc(l.contact.title):""}<br><span class="mono">${esc(l.contact?.email||"")}</span> ${esc(l.contact?.phone||"")}</span></div>
+   <div class="panel${E?" edpanel edmode":""}" style="padding:14px" id="detPanel"><div class="timeline">
+     ${E&&leFull()?leCatRow(l):`<div><span>Category</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${esc(l.category)}</span> ${esc(l.source)}</span></div>`}
+     ${E&&leFull()?leContactRow(l):`<div><span>Contact</span><span>${esc(l.contact?.name)}${l.contact?.title?", "+esc(l.contact.title):""}<br><span class="mono">${esc(l.contact?.email||"")}</span> ${esc(l.contact?.phone||"")}</span></div>`}
      ${isUpsell(l)?`<div><span>Upsell of</span><span>${S.leadMap[l.parentId]?`<button type="button" class="linkb" data-goto="${esc(l.parentId)}">${esc(l.parentRef)}</button>`:`<span class="mono">${esc(l.parentRef||"")}</span>`} <span class="chip ups">Upsell</span><br><span class="small muted">From the meeting held by ${esc(l.assignedTo)}${l.upsellMeeting?.date?" on "+fmtD(l.upsellMeeting.date):""}. The original lead's generator${l.originalGenerator?" ("+esc(l.originalGenerator)+")":""} gets no credit on this lead.</span></span></div>`
-       :`<div><span>Generated by</span><span>${esc(l.generatedBy)}${hasCb(l)?` <span class="chip cbt">${esc(genDept(l))}</span>`:""}${l.department&&l.department!==genDept(l)?" · "+esc(l.department):""} · entered ${fmtD(l.createdAt)}</span></div>`}
+       :E&&leFull()?leGenRow(l):`<div><span>Generated by</span><span>${esc(l.generatedBy)}${hasCb(l)?` <span class="chip cbt">${esc(genDept(l))}</span>`:""}${l.department&&l.department!==genDept(l)?" · "+esc(l.department):""} · entered ${fmtD(l.createdAt)}</span></div>`}
      ${l.eventName?`<div><span>Event</span><span>${esc(l.eventName)}</span></div>`:""}
      ${(l.upsells||[]).length?`<div><span>Upsell leads</span><span style="display:grid;gap:3px">${l.upsells.map(id=>{const k=S.leadMap[id];return k?`<span><button type="button" class="linkb" data-goto="${esc(id)}">${esc(k.ref)}</button> · ${esc(productsOf(k).join(", "))} · ${esc(k.assignedTo)} · <span class="${stCls(k.status)}">${esc(k.deleted?"Deleted":k.status)}</span>${leadValue(k)?" · "+fmtAED(leadValue(k)):""}</span>`:`<span class="mono">${esc(id)}</span>`}).join("")}</span></div>`:""}
      <div id="detArea" style="display:contents"></div>
-     ${l.rooms||l.pms||l.timeline?`<div><span>Qualification</span><span>${[l.rooms?l.rooms+" rooms":"",l.pms,l.timeline].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}
-     ${l.notes?`<div><span>Requirement</span><span>${esc(l.notes)}</span></div>`:""}
+     ${E&&leFull()?"":l.rooms||l.pms||l.timeline?`<div><span>Qualification</span><span>${[l.rooms?l.rooms+" rooms":"",l.pms,l.timeline].filter(Boolean).map(esc).join(" · ")}</span></div>`:""}
+     ${E&&leFull()?leReqRow(l):l.notes?`<div><span>Requirement</span><span>${esc(l.notes)}</span></div>`:""}
      ${l.reqNote&&(l.reqNote.text||l.reqNote.skip)?`<div><span>Requirement note</span><span>${l.reqNote.text?esc(l.reqNote.text):`<span class="muted">Skipped by ${esc(l.reqNote.by||"a manager")}: ${esc(l.reqNote.skip)}</span>`}<br><span class="small muted">${fmtD(l.reqNote.at)} · ${esc(l.reqNote.by||"")}</span></span></div>`:""}
      ${flow().on&&standOf(l)&&OPEN.includes(l.status)?`<div><span>Where it stands</span><span><b>${esc(standOf(l))}</b> <span class="small muted">· ${fmtD(l.standing.at)}${l.standing.by?" · "+esc(l.standing.by):""}</span></span></div>`:""}
      ${l.status==="On Hold"&&l.holdReason?`<div><span>On hold</span><span>${esc(l.holdReason.reason)}${l.holdReason.note?" · "+esc(l.holdReason.note):""}<br><span class="small muted">${fmtD(l.holdReason.at)}${l.holdReason.by?" · "+esc(l.holdReason.by):""}</span></span></div>`:""}
@@ -1533,12 +1592,12 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
      <div><span>Assigned to</span><span>${l.assignedTo?`<b>${esc(l.assignedTo)}</b> · ${fmtD(l.assignedAt)}${l.priority?" · "+esc(l.priority)+" priority":""}`:"Not assigned"}</span></div>
      ${(l.declines||[]).length&&!hideRest?`<div><span>Declined earlier</span><span style="display:grid;gap:3px">${l.declines.map(d=>`<span>${esc(d.eng||d.by||"—")} · ${fmtD(d.at)}<br><span class="small muted">${esc(d.reason||"")}${d.note?" · "+esc(d.note):""}</span></span>`).join("")}</span></div>`:""}
      ${money(l.meeting,"Deal estimate")}
-     ${meetingsOf(l).length?`<div><span>Meetings (${meetingsOf(l).length})</span><span style="display:grid;gap:4px">${meetingsOf(l).slice().sort((a,b)=>a.date<b.date?1:-1).map(x=>`<span>${fmtD(x.date)} · ${x.mode?`<span class="chip ${x.mode==="Onsite"?"m-site":"m-on"}">${esc(x.mode)}</span>`:`<span class="chip">mode not recorded</span>`} ${esc(x.type||"")}<br><span class="small muted">${esc((x.products||[]).join(", "))}${x.notes?" · "+esc(x.notes):""}${x.by?" · "+esc(x.by):""}${(x.joined||[]).length?" · joined by "+esc(x.joined.join(", ")):""}</span>${(x.dateChanges||[]).length?`<span class="small muted">Date changed ${x.dateChanges.map(d=>`from ${fmtD(d.from)} to ${fmtD(d.to)} by ${esc(d.by||"—")} on ${fmtD(d.at)}`).join("; ")}</span>`:""}${l.status==="Won"&&can("meeting.edit_won")&&!l.deleted&&x.id?`<span><button type="button" class="btn sm" data-mdate="${esc(x.id)}">Change date</button></span>`:""}</span>`).join("")}</span></div>`:""}${quoteRow(l)}${money(l.order,"Order")}${l.status==="Won"&&!String(l.id).startsWith("C:")?`<div id="signRow"><span>Project sign-off</span><span>${S.drawer&&S.drawer.mode==="signoff"&&canSignOff()?`<span class="row" style="gap:6px"><input id="so-d" type="date" max="${todayISO()}" value="${esc(signOffOf(l)||todayISO())}" style="max-width:170px"><button class="btn sm pri" id="so-ok">Save</button><button class="btn sm" id="so-x">Cancel</button></span><span class="small muted" style="display:block;margin-top:3px">The day the project was signed off by the client. AMC and renewals count from this date.</span>`
+     ${meetingsOf(l).length?`<div><span>Meetings (${meetingsOf(l).length})</span><span style="display:grid;gap:4px">${meetingsOf(l).slice().sort((a,b)=>a.date<b.date?1:-1).map(x=>`<span>${fmtD(x.date)} · ${x.mode?`<span class="chip ${x.mode==="Onsite"?"m-site":"m-on"}">${esc(x.mode)}</span>`:`<span class="chip">mode not recorded</span>`} ${esc(x.type||"")}<br><span class="small muted">${esc((x.products||[]).join(", "))}${x.notes?" · "+esc(x.notes):""}${x.by?" · "+esc(x.by):""}${(x.joined||[]).length?" · joined by "+esc(x.joined.join(", ")):""}</span>${(x.dateChanges||[]).length?`<span class="small muted">Date changed ${x.dateChanges.map(d=>`from ${fmtD(d.from)} to ${fmtD(d.to)} by ${esc(d.by||"—")} on ${fmtD(d.at)}`).join("; ")}</span>`:""}${l.status==="Won"&&can("meeting.edit_won")&&!l.deleted&&x.id?`<span><button type="button" class="btn sm" data-mdate="${esc(x.id)}">Change date</button></span>`:""}</span>`).join("")}</span></div>`:""}${E?leQuoteHTML(l):quoteRow(l)}${money(l.order,"Order")}${l.status==="Won"&&!String(l.id).startsWith("C:")?`<div id="signRow"><span>Project sign-off</span><span>${S.drawer&&S.drawer.mode==="signoff"&&canSignOff()?`<span class="row" style="gap:6px"><input id="so-d" type="date" max="${todayISO()}" value="${esc(signOffOf(l)||todayISO())}" style="max-width:170px"><button class="btn sm pri" id="so-ok">Save</button><button class="btn sm" id="so-x">Cancel</button></span><span class="small muted" style="display:block;margin-top:3px">The day the project was signed off by the client. AMC and renewals count from this date.</span>`
        :signOffOf(l)?`<b>${fmtD(signOffOf(l))}</b> <span class="small muted">· entered by ${esc(l.signOff.by||"—")} · renewals count from this date</span>${canSignOff()?` <button class="btn sm" id="so-ed">Change</button>`:""}`
        :`<span class="chip warn" data-nosign>Not entered</span> <span class="small muted">renewals count from the order date until it is</span>${canSignOff()?` <button class="btn sm" id="so-ed">Enter sign-off date</button>`:""}`}</span></div>`:""}${l.status==="Won"&&ohipVal(l)>0?`<div><span>Of which OHIP</span><span>${fmtAED(ohipVal(l))} per year <span class="small muted">· ${l.order&&l.order.ohip!=null?"entered on the order":"from the quotation lines"} · counted in revenue and targets, shown separately</span></span></div>`:""}
      ${(l.wonChanges||[]).length?`<div><span>Order corrections</span><span style="display:grid;gap:3px">${l.wonChanges.map(c=>`<span>${c.kind==="ohip"?`OHIP part ${c.from?.ohip==null?"from the quotation lines":fmtAED(c.from.ohip)} → <b>${c.to?.ohip==null?"from the quotation lines":fmtAED(c.to.ohip)}</b>`:`${fmtAED(c.from?.aed)} → <b>${fmtAED(c.to?.aed)}</b>`} · ${fmtD(c.at)} · ${esc(c.by||"—")}${c.reason?`<br><span class="small muted">${esc(c.reason)}</span>`:""}</span>`).join("")}</span></div>`:""}
      ${(l.contacts||[]).length?`<div><span>Contacts</span><span style="display:grid;gap:3px">${l.contacts.slice(-5).reverse().map(c=>`<span>${fmtD(c.at)} · <b>${esc(c.kind)}</b>${c.note?" · "+esc(c.note):""}${c.stand?` · <span class="chip">${esc(c.stand)}</span>`:""} <span class="small muted">· ${esc(c.by||"")}</span></span>`).join("")}${l.contacts.length>5?`<span class="small muted">${l.contacts.length-5} earlier in Activity</span>`:""}</span></div>`:""}
-     ${fcEligible(l)?`<div><span>Forecast</span><span>${(()=>{const f=fcOf(l);return`<b>${FC_LABEL[f.cat]}</b>${f.month&&f.cat!=="omit"?" · "+ymLabel(f.month):""}${l.forecast?` <span class="small muted">· set ${fmtD(l.forecast.at)} by ${esc(l.forecast.by||"")}</span>`:` <span class="small muted">· not set yet</span>`}`})()}${canAct(l)?` <button type="button" class="btn sm" id="fcEdit" style="margin-left:6px">Change</button>`:""}</span></div>`:""}
+     ${fcEligible(l)&&E&&leFcEd(l)?leFcHTML(l):fcEligible(l)?`<div><span>Forecast</span><span>${(()=>{const f=fcOf(l);return`<b>${FC_LABEL[f.cat]}</b>${f.month&&f.cat!=="omit"?" · "+ymLabel(f.month):""}${l.forecast?` <span class="small muted">· set ${fmtD(l.forecast.at)} by ${esc(l.forecast.by||"")}</span>`:` <span class="small muted">· not set yet</span>`}`})()}</span></div>`:""}
      ${OPEN.includes(l.status)&&refsFor(l).length?`<div><span>Reference sites</span><span style="display:grid;gap:3px">${refsFor(l).map(v=>`<span>${esc(v.name)} <span class="small muted">· ${esc(ctryName(ctryOf(v.country)))} · ${esc(v.products.join(", "))}${v.note?" · "+esc(v.note):""}</span></span>`).join("")}</span></div>`:""}
      ${(l.statusChanges||[]).length?`<div><span>Status changes</span><span style="display:grid;gap:3px">${l.statusChanges.map(c=>`<span>${esc(c.from)} → <b>${esc(c.to)}</b> · ${fmtD(c.at)} · ${esc(c.by||"—")}<br><span class="small muted">${esc(c.reason||"")}${c.order?` · order ${fmtAED(c.order.aed)}${c.order.no?" ("+esc(c.order.no)+")":""} kept in history`:""}</span></span>`).join("")}</span></div>`:""}
      ${l.lost?`<div><span>Lost reason</span><span>${esc(l.lost.reason)}${l.lost.notes?" · "+esc(l.lost.notes):""}</span></div>`:""}
@@ -1553,16 +1612,16 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
    <div id="actArea"></div><div id="jointArea"></div>
    <div class="panel actlog" style="padding:14px"><h3 style="margin-bottom:8px">Activity</h3><div class="timeline">${(l.log||[]).slice().reverse().map(x=>`<div><span>${fmtD(x.t)}</span><span>${esc(x.a)}${x.by?` <span class="muted">· ${esc(x.by)}</span>`:x.byId?` <span class="muted">· <span data-uid="${esc(x.byId)}">${esc(S.names[x.byId]||"")}</span></span>`:""}</span></div>`).join("")}</div>
     ${canAct(l)&&!l.deleted?`<div class="row" style="margin-top:10px"><input id="noteIn" placeholder="Add a note"><button class="btn sm" id="noteBtn">Add</button></div>`:""}</div>
-   <div id="delArea"></div>
   </div>
   </div>
+  <div class="lvf" id="lvf" hidden></div>
   </aside></div>`;
-  $("#dClose").onclick=closeDrawer;if(!document.activeElement||!document.activeElement.closest?.(".drawer"))$("#dClose").focus({preventScroll:true});
+  $("#dClose").onclick=leClose;if(!document.activeElement||!document.activeElement.closest?.(".drawer"))$("#dClose").focus({preventScroll:true});
   $(".drawer").addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...e.currentTarget.querySelectorAll("button,input,select,textarea,a[href]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
   /* the lead closes only with its Close button: no click-outside, no Esc (window.__ESCCLOSE is for the automated tests) */
-  document.onkeydown=e=>{if(e.key==="Escape"&&S.drawer&&window.__ESCCLOSE)closeDrawer()};
+  document.onkeydown=e=>{if(e.key!=="Escape"||!S.drawer)return;if(S.drawer.edit){const x=S.leadMap[S.drawer.id];if(x&&leDirty(x).length&&!$("#cfm"))leClose();return}if(window.__ESCCLOSE)closeDrawer()};
   $("#noteBtn")?.addEventListener("click",async()=>{const t=$("#noteIn").value.trim();if(!t)return;await patch(l,{},t)});
-  fillNames();drawDetails(l);drawPms(l);drawPricing(l);drawRecurring(l);drawCtrNote(l);drawProdArea(l);drawActions(l);drawJoint(l);drawDelArea(l);bindSignOff(l);
+  fillNames();drawDetails(l);drawPms(l);drawPricing(l);drawRecurring(l);drawCtrNote(l);drawProdArea(l);drawActions(l);drawJoint(l);bindSignOff(l);
   $("#restoreLead")?.addEventListener("click",()=>restoreLead(l));
   $("#fcEdit")?.addEventListener("click",()=>{const f=fcOf(l);cfmOpen(`<h3>Forecast for ${esc(l.ref)}</h3><p class="small muted" style="margin:0">${esc(l.accountName)} · ${leadValue(l)?fmtAED(leadValue(l)):"no amount yet"}</p>
     <label class="f">Forecast<select id="fcC">${FC_CATS.map(([v,t])=>`<option value="${v}"${f.cat===v?" selected":""}>${t}</option>`).join("")}</select></label><label class="f">Month<select id="fcMo"><option value="">—</option>${[...new Set(fcMonths().concat(f.month?[f.month]:[]))].map(mm=>`<option value="${mm}"${f.month===mm?" selected":""}>${ymLabel(mm)}</option>`).join("")}</select></label>
@@ -1573,87 +1632,224 @@ function drawDrawer(){const l=S.leadMap[S.drawer.id];if(!l){closeDrawer();return
     await patch(l,{quote:Object.assign({},l.quote,{targetDate:v,targetHistory:[...(l.quote.targetHistory||[]),{from:l.quote.targetDate||"",to:v,by:actor(),at:nowISO()}]})},`Quotation target date ${l.quote.targetDate?"changed from "+fmtD(l.quote.targetDate)+" to ":"set to "}${fmtD(v)}`)});
   $("#qtX")?.addEventListener("click",()=>{S.drawer.mode=null;drawDrawer()});
   document.querySelectorAll("[data-mdate]").forEach(b=>b.onclick=()=>wonMeetingDate(l,b.dataset.mdate));
-  $("#editAll")?.addEventListener("click",()=>editAllDetails(l))}
-/* Supervisor: edit every field in the details box in one form */
-function editAllDetails(l){const P=$("#detPanel");if(!P)return;const st=S.settings;const c=l.contact||{};const sb=subOf(l);
-  const srcs=[...new Set((st.sources||[]).map(x=>x.name).concat(l.source?[l.source]:[]))];const deps=[...new Set((st.departments||[]).concat(l.department?[l.department]:[]))];
-  const mo=(o,k)=>o?.[k]??"";const ms=meetingsOf(l).map(({legacy,...x})=>x);
-  const wonLock=l.status==="Won"&&!can("meeting.edit_won");
-  const money=(key,lab,withNo)=>`<fieldset class="efs"><legend>${lab}</legend><div class="grid3"><label class="f">Amount (AED)<input type="number" min="0" step="0.01" data-m="${key}.aed" value="${esc(mo(l[key],"aed"))}"></label><label class="f">Date<input type="date" max="${todayISO()}" data-m="${key}.date" value="${esc(mo(l[key],"date"))}"></label>${withNo?`<label class="f">${key==="order"?"PO / order no.":"Quotation no."}<input data-m="${key}.no" value="${esc(mo(l[key],"no"))}"></label>`:"<span></span>"}${key==="quote"?`<label class="f">Target date<input type="date" data-m="quote.targetDate" value="${esc(mo(l.quote,"targetDate"))}"></label>`:""}</div></fieldset>`;
-  const lim=!can("lead.edit_fields");const ctyOK=can("lead.edit_fields")||can("lead.edit_country")||["New","Info Needed"].includes(l.status);
-  P.innerHTML=`<div class="row" style="margin-bottom:10px"><h3>Edit lead details</h3><span class="sp"></span><span class="chip">${lim?"Location and date":"Supervisor"}</span></div>
-   <div class="eform">
-    <fieldset class="efs"><legend>Origin</legend><div class="grid3">
-     <label class="f">Category<select id="e-cat">${opts(["Inbound","Outbound"],l.category||"Inbound")}</select></label>
-     <label class="f">Source channel<select id="e-src">${opts(srcs,l.source||"","—")}</select></label>
-     <label class="f">Department<select id="e-dep">${opts(deps,l.department||"","—")}</select></label>
-     <label class="f">Generated by<input id="e-gen" value="${esc(l.generatedBy||"")}"></label>
-    </div></fieldset>
-    <fieldset class="efs" id="e-locfs"><legend>Location and date</legend><div class="grid2">
-     <label class="f">Country${ctyOK?"":` <span class="small muted" style="font-weight:400">(Lead Manager or Supervisor)</span>`}<select id="e-ctry"${ctyOK?"":" disabled"}>${countryOptions(l.country||"")}</select></label>
-     <label class="f">Region<select id="e-reg">${opts(regionList(),l.region||(regionOf(l)==="No region"?"":regionOf(l)),"Choose region")}</select></label>
-     <span id="e-subw" style="display:contents">${sb?`<label class="f">${SUBDIV[sb.c].label}<select id="e-sub"><option value="">Not known</option>${subOptions(sb.c,sb.n)}</select></label>`:""}</span>
-     <label class="f">Requirement received<input id="e-req" type="date" max="${todayISO()}" value="${esc(reqDate(l))}"></label>
-    </div><p class="small muted" style="margin:6px 0 0" id="e-loch"></p></fieldset>
-    <fieldset class="efs" data-full><legend>Contact</legend><div class="grid2">
-     <label class="f">Name<input id="e-cn" value="${esc(c.name||"")}"></label><label class="f">Designation<input id="e-ct" value="${esc(c.title||"")}"></label>
-     <label class="f">Email<input id="e-ce" type="email" value="${esc(c.email||"")}"></label><label class="f">Phone / WhatsApp<input id="e-cp" value="${esc(c.phone||"")}"></label></div></fieldset>
-    <fieldset class="efs"><legend>Requirement and qualification</legend>
-     <label class="f">Requirement / notes<textarea id="e-notes" rows="3">${esc(l.notes||"")}</textarea></label>
-     <div class="grid3" style="margin-top:10px"><label class="f">Rooms<input id="e-rooms" type="number" min="0" value="${esc(l.rooms??"")}"></label><label class="f">PMS<input id="e-pms" value="${esc(l.pms||"")}"${pmsLocked(l)?" disabled title=\"Chain standard PMS\"":""}></label><label class="f">Timeline<input id="e-when" value="${esc(l.timeline||"")}"></label></div></fieldset>
-    <fieldset class="efs"><legend>Assignment</legend><div class="grid3">
-     <label class="f">Assigned to<select id="e-as">${opts(spNames().concat(l.assignedTo&&!spNames().includes(l.assignedTo)?[l.assignedTo]:[]),l.assignedTo||"","Not assigned")}</select></label>
-     <label class="f">Assigned on<input id="e-asd" type="date" max="${todayISO()}" value="${esc((l.assignedAt||"").slice(0,10))}"></label>
-     <label class="f">Priority<select id="e-pr">${opts(["High","Medium","Low"],l.priority||"","—")}</select></label></div></fieldset>
-    ${money("quote","Quotation",true)}${money("order","Order",true)}
-    <fieldset class="efs"><legend>Meetings (${ms.length})</legend>${ms.length?ms.map((x,i)=>`<div class="emeet" data-i="${i}"><div class="grid3">
-      <label class="f">Date${wonLock?` <span class="small muted" style="font-weight:400">(won lead: Supervisor only)</span>`:""}<input type="date" max="${todayISO()}" data-k="date" value="${esc(x.date||"")}"${wonLock?" disabled":""}></label>
-      <label class="f">Held<select data-k="mode">${opts(["Online","Onsite"],x.mode||"","—")}</select></label>
-      <label class="f">Type<select data-k="type">${opts(MEET_TYPES,x.type||"")}</select></label></div>
-      <label class="f" style="margin-top:8px">Products discussed<input data-k="products" value="${esc((x.products||[]).join(", "))}"></label>
-      <label class="f" style="margin-top:8px">Notes<textarea rows="2" data-k="notes">${esc(x.notes||"")}</textarea></label>
-      <label class="small" style="display:flex;gap:6px;align-items:center;margin-top:6px;color:var(--bad)"><input type="checkbox" data-k="del" style="width:auto"> Delete this meeting</label></div>`).join(""):`<p class="small muted" style="margin:0">No meetings on this lead.</p>`}</fieldset>
-    ${l.lost?`<fieldset class="efs"><legend>Lost</legend><label class="f">Reason<input id="e-lost" value="${esc(l.lost.reason||"")}"></label></fieldset>`:""}
-   </div>
-   <div id="e-msg" class="small" style="margin-top:8px"></div>
-   <div class="row" style="margin-top:10px"><button type="button" class="btn pri" id="e-save">Save changes</button><button type="button" class="btn" id="e-cancel">Cancel</button><span class="sp"></span><span class="small muted">Status and products are changed with the buttons below.</span></div>`;
-  if(lim)P.querySelectorAll(".eform>fieldset").forEach(f=>{if(f.id!=="e-locfs")f.hidden=true});
-  (lim?$("#e-ctry:not([disabled])")||$("#e-reg"):P.querySelector("input,select"))?.focus();
-  $("#e-cancel").onclick=()=>drawDrawer();
-  /* country → region and emirate / state follow it */
-  const knownC=areaOf(l.country).country||"";
-  const locCountry=()=>{const v=$("#e-ctry").value||knownC;return v};
-  $("#e-ctry").onchange=e=>{const v=e.target.value;if(!v)return;const g=guessRegion(v);if(g&&$("#e-reg").value!==g){$("#e-reg").value=g;$("#e-loch").textContent=`Region set to ${g} for ${COUNTRY_FULL[v]||v}. Change it if needed.`}else $("#e-loch").textContent="";
-    const nsb=subOf(Object.assign({},l,{country:v,subdivision:""}));$("#e-subw").innerHTML=nsb?`<label class="f">${SUBDIV[nsb.c].label}<select id="e-sub"><option value="">Not known</option>${subOptions(nsb.c,"")}</select></label>`:""};
-  const locBody=()=>{const g=id=>$(id)?.value.trim()??"";const b={requirementDate:g("#e-req")||reqDate(l),region:g("#e-reg")};const cv=$("#e-ctry").disabled?"":g("#e-ctry");
-    if(cv&&cv!==knownC)b.country=cv;if($("#e-sub"))b.subdivision=g("#e-sub");else if(b.country&&l.subdivision)b.subdivision="";return b};
-  $("#e-save").onclick=async()=>{const g=id=>$(id)?.value.trim()??"";const errs=[];const today=todayISO();
-    if(lim){const b=locBody();if(b.requirementDate>today){$("#e-msg").innerHTML=`<span style="color:var(--bad)">The requirement date can't be in the future.</span>`;return}if(!b.region){$("#e-msg").innerHTML=`<span style="color:var(--bad)">Choose a region.</span>`;return}
-      const ch=[];if(b.country)ch.push(`country ${l.country||"not set"} → ${b.country}`);if(b.requirementDate!==reqDate(l))ch.push("requirement date "+fmtD(b.requirementDate));if(b.region!==regionOf(l))ch.push("region "+b.region);if(b.subdivision!=null&&b.subdivision!==(l.subdivision||""))ch.push((SUBDIV[subOf(Object.assign({},l,b))?.c]?.label||"emirate / state").toLowerCase()+" "+(b.subdivision||"cleared"));
-      if(!ch.length){drawDrawer();return}await patch(l,b,"Updated "+ch.join(", "));return}
-    const email=g("#e-ce");if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))errs.push("The email address doesn't look right");
-    for(const id of["#e-req","#e-asd"])if(g(id)>today)errs.push("Dates can't be in the future");
-    const body={category:g("#e-cat"),source:g("#e-src"),department:g("#e-dep"),generatedBy:g("#e-gen"),requirementDate:g("#e-req")||reqDate(l),region:g("#e-reg"),
-      contact:Object.assign({},c,{name:g("#e-cn"),title:g("#e-ct"),email,phone:g("#e-cp")}),notes:g("#e-notes"),rooms:g("#e-rooms")===""?null:+g("#e-rooms"),pms:g("#e-pms"),chainPms:chainPmsMark(l.accountName,accKey(l),g("#e-pms")),timeline:g("#e-when"),
-      assignedTo:g("#e-as"),priority:g("#e-pr")};
-    Object.assign(body,locBody());
-    if(g("#e-asd"))body.assignedAt=g("#e-asd")===(l.assignedAt||"").slice(0,10)?l.assignedAt:g("#e-asd")+"T12:00:00.000Z";else if(body.assignedTo&&body.assignedTo!==l.assignedTo)body.assignedAt=nowISO();
-    for(const k of["quote","order"]){const a=P.querySelector(`[data-m="${k}.aed"]`).value,d=P.querySelector(`[data-m="${k}.date"]`).value,no=P.querySelector(`[data-m="${k}.no"]`)?.value.trim();
-      if(a===""&&!d&&!no){if(l[k])body[k]=null;continue}if(a!==""&&+a<0)errs.push("Amounts can't be negative");if(d>today)errs.push("Dates can't be in the future");
-      const prev=l[k]||{};const aed=a===""?null:+a;body[k]=Object.assign({},prev,{aed,value:prev.currency&&prev.currency!=="AED"&&prev.aed===aed?prev.value:aed,currency:prev.currency&&prev.currency!=="AED"&&prev.aed===aed?prev.currency:"AED",date:d||prev.date||""},no!==undefined?{no}:{});
-      if(k==="quote"){const td=P.querySelector('[data-m="quote.targetDate"]').value;if(td&&d&&td<d)errs.push("The target date can't be before the quotation date");if(td!==(prev.targetDate||"")){body.quote.targetDate=td||null;if(prev.aed!=null||td)body.quote.targetHistory=[...(prev.targetHistory||[]),{from:prev.targetDate||"",to:td,by:actor(),at:nowISO()}]}}}
-    const nm=[];P.querySelectorAll(".emeet").forEach(el=>{const x=ms[+el.dataset.i];const v=k=>el.querySelector(`[data-k="${k}"]`);if(v("del").checked)return;
-      const d=v("date").value;if(d>today)errs.push("Meeting dates can't be in the future");
-      const dc=d!==(x.date||"")?{dateChanges:[...(x.dateChanges||[]),{from:x.date||"",to:d,by:actor()||S.myName||"",byId:S.uid||null,at:nowISO()}]}:{};
-      nm.push(Object.assign({},x,dc,{date:d,mode:v("mode").value,type:v("type").value,notes:v("notes").value.trim(),products:v("products").value.split(",").map(t=>t.trim()).filter(Boolean)}))});
-    if(ms.length)body.meetings=nm;if(l.lost&&$("#e-lost"))body.lost=Object.assign({},l.lost,{reason:g("#e-lost")});
-    if(errs.length){$("#e-msg").innerHTML=`<span style="color:var(--bad)">${[...new Set(errs)].map(esc).join(" · ")}</span>`;return}
-    const LBL={category:"category",source:"source",department:"department",generatedBy:"generated by",requirementDate:"requirement date",country:"country",region:"region",subdivision:"emirate/state",contact:"contact",notes:"requirement",rooms:"rooms",pms:"PMS",timeline:"timeline",assignedTo:"assigned to",assignedAt:"assigned date",priority:"priority",quote:"quotation",order:"order",meetings:"meetings",lost:"lost reason"};
-    const clean=v=>Array.isArray(v)?v.map(clean):v&&typeof v==="object"?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==""&&v[k]!=null).map(k=>[k,clean(v[k])])):(v===""?null:v);const norm=v=>JSON.stringify(clean(v)??null);const changed=Object.keys(body).filter(k=>norm(body[k])!==norm(k==="requirementDate"?reqDate(l):k==="region"&&!l.region?(regionOf(l)==="No region"?"":regionOf(l)):k==="subdivision"&&!l.subdivision?(subOf(l)?.n||""):k==="meetings"?ms:l[k]));
-    if(!changed.length){drawDrawer();return}const out={};changed.forEach(k=>out[k]=body[k]);
-    const b=$("#e-save");b.disabled=true;b.textContent="Saving…";
-    try{const ok=await patch(l,out,"Details edited: "+changed.map(k=>LBL[k]||k).join(", "));if(ok&&out.contact){const nu=await ccApply(out.contact,l.id);if(nu)toast("Contact also updated on "+nu+" other lead"+(nu===1?"":"s"))}else if(S.cchk)S.cchk=null;toast("Lead details saved")}catch(e){b.disabled=false;b.textContent="Save changes";$("#e-msg").innerHTML=`<span style="color:var(--bad)">Couldn't save (${esc(e.code||e.message)}).</span>`}}}
-function drawDetails(l){const D=$("#detArea");if(!D)return;
+  $("#edBtn")?.addEventListener("click",()=>leStart(l));leBind(l);leFooter(l);if(E&&_sc){const b=$(".lvb");if(b)b.scrollTop=_sc}}
+/* ---------- one Edit mode for the lead popup (20 Nov 2026) ----------
+   "Edit" in the header opens every field the user may change, in the header (account, products) and the left column
+   (lead details, PMS, quantities, quotation, forecast). Nothing is saved until the Save bar at the bottom: one request,
+   one Activity line per group. The right column (stage actions, notes) stays instant. The draft lives in S.drawer.edit. */
+const LE_LBL={cat:"Category",src:"Source",dep:"Team",gen:"Generated by",cn:"Contact name",ct:"Designation",ce:"Email",cp:"Phone",ctry:"Country",reg:"Region",sub:"Emirate / state",req:"Requirement received",notes:"Requirement",when:"Timeline",qaed:"Amount",qno:"Quotation no.",tgt:"Target date",fcc:"Forecast",fcm:"Month",pms:"PMS",pmsn:"PMS notes",pcs:"Front-desk PCs",us:"Users",rm:"Rooms",md:"Implementation"};
+const LE_GRP=[["details","Details",["cat","src","dep","gen","cn","ct","ce","cp","ctry","reg","sub","req","notes","when"]],["quote","Quotation",["qaed","qno","tgt"]],["fc","Forecast",["fcc","fcm"]],["pms","PMS",["pms","pmsn"]],["qty","Quantities",["pcs","us","rm","md"]]];
+const leFull=()=>can("lead.edit_fields");
+const leCanEdit=l=>!!l&&!l.deleted&&(canAct(l)||can("lead.edit_fields"))&&!(needAccept(l)&&isMine(l)&&!can("lead.status_override"));
+const leCtyOK=l=>can("lead.edit_fields")||can("lead.edit_country")||["New","Info Needed"].includes(l.status);
+const leQuoteEd=l=>!!l.quote&&can("lead.status_override");
+const leTgtEd=l=>!!l.quote&&canAct(l)&&l.status==="Quotation Sent";
+const leFcEd=l=>fcEligible(l)&&canAct(l);
+const lePmsEd=l=>canAct(l)&&!pmsLocked(l);
+const leNum=v=>{const x=String(v??"").trim();return x===""?null:Math.max(0,Math.round(+x))};
+function leVals(l){const q=l.quote||{},c=l.contact||{},f=fcOf(l),sb=subOf(l);
+  return{cat:l.category||"Inbound",src:l.source||"",dep:l.department||"",gen:l.generatedBy||"",cn:c.name||"",ct:c.title||"",ce:c.email||"",cp:c.phone||"",
+    ctry:areaOf(l.country).country||l.country||"",reg:l.region||(regionOf(l)==="No region"?"":regionOf(l)),sub:sb&&sb.n?sb.n:"",req:reqDate(l),notes:l.notes||"",when:l.timeline||"",
+    qaed:q.aed==null?"":String(q.aed),qno:q.no||"",qwhy:"",tgt:q.targetDate||"",fcc:f.cat,fcm:f.month||"",
+    pms:pmsOf(l),pmsn:l.pmsNote||"",pcs:l.pcs==null?"":String(l.pcs),us:l.users==null?"":String(l.users),rm:l.rooms==null?"":String(l.rooms),md:l.implMode||"",
+    prods:productsOf(l).slice(),acct:l.accountKey||"",iface:Object.assign({},l.pmsIface||{})}}
+function leInit(l){const o=leVals(l);const d=Object.assign({},o,{prods:o.prods.slice(),iface:Object.assign({},o.iface),atext:l.accountName||""});
+  return{o,d,pick:null,touched:{},errs:{},saving:false,all:true,sug:!pmsOf(l)?accountPms(accKey(l)):""}}
+const leT=v=>String(v??"").trim();
+function leDirty(l){const E=S.drawer&&S.drawer.edit;if(!E)return[];const out=[];
+  for(const[,,ks]of LE_GRP)for(const k of ks){if(k==="pms")continue;if(leT(E.d[k])!==leT(E.o[k]))out.push(k)}
+  if(E.touched.pms&&(E.d.pms!==E.o.pms||JSON.stringify(E.d.iface)!==JSON.stringify(E.o.iface)))out.push("pms");
+  if(E.d.prods.join("|")!==E.o.prods.join("|"))out.push("prods");
+  if(leAcct(l).mode!=="keep"&&leAcct(l).mode!=="empty")out.push("acct");
+  return out}
+const leAcctN=key=>leadsFor(key).filter(x=>!x.deleted).length;
+function leAcct(l){const E=S.drawer.edit;const txt=String(E.d.atext||"").replace(/\s+/g," ").trim();const cur=l.accountName||"";const full=can("account.manage");const P=E.pick;
+  if(!txt)return{mode:"empty",msg:"Enter the account name."};
+  if(P&&P.text===txt){if(P.key&&P.key===l.accountKey)return{mode:"keep"};if(P.key&&full)return{mode:"move",key:P.key,name:P.name};if(P.neu&&full)return{mode:"new",name:txt,key:keyOf(txt)}}
+  if(txt===cur)return{mode:"keep"};
+  const sp=normTxt(txt)===normTxt(cur)||keyOf(txt)===(l.accountKey||"")||similar(keyOf(txt),keyOf(cur))>=.8;
+  if(sp){if(!renOK(l))return{mode:"bad",msg:"You can't rename this account."};
+    const ex=Object.values(allAccounts()).find(x=>x.key!==l.accountKey&&(x.key===keyOf(txt)||normTxt(x.name)===normTxt(txt)));
+    if(ex)return{mode:"bad",msg:`“${ex.name}” already exists${full?". Pick it from the list to move this lead to it.":". Ask a Lead Manager to merge the two accounts."}`};
+    return{mode:"rename",name:txt,n:leAcctN(l.accountKey)}}
+  return{mode:"unres",msg:full?"Pick an account from the list, or create a new one.":"You can only fix the spelling of this hotel's name. Ask a Lead Manager to move the lead to another account."}}
+function leErr(k){const E=S.drawer&&S.drawer.edit;const m=E&&E.errs[k];return m?`<span class="ferr" data-err="${k}">${esc(m)}</span>`:""}
+const leCls=k=>{const E=S.drawer&&S.drawer.edit;return E&&E.errs[k]?" err":""};
+const leIn=(k,extra)=>`data-ed="${k}" value="${esc(S.drawer.edit.d[k]??"")}"${extra||""}`;
+/* ----- header (edit) ----- */
+function leHeadHTML(l){const E=S.drawer.edit;const a=leAcct(l);
+  return`<div class="lvedh"><div><label class="edlab" for="edAcct">Account</label><div class="acbox"><input id="edAcct" class="edin acin${leCls("atext")}" data-ed="atext" value="${esc(E.d.atext)}" maxlength="120" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="acDD" aria-autocomplete="list"><div class="acdd" id="acDD" role="listbox" hidden></div></div><div class="acnote" id="acNote">${leAcctNote(l)}</div>${leErr("atext")}</div>
+   <div style="margin-top:8px"><span class="edlab">Product</span><div id="edProds">${leProdsHTML(l)}</div>${leErr("prods")}</div>
+   <div class="muted small ctryline" style="margin-top:6px">${esc([l.country,subLabel(l)].filter(Boolean).join(" · "))}</div></div>`}
+function leAcctNote(l){const a=leAcct(l);const E=S.drawer.edit;
+  if(a.mode==="rename")return`<div class="notice warn">Spelling fix: renames this account for all ${a.n} lead${a.n===1?"":"s"} of this hotel.${can("account.manage")?"":" If a colleague also has a lead on it, your change goes for approval instead."}</div>`;
+  if(a.mode==="move")return`<div class="notice info">Moves this lead from <b>${esc(l.accountName)}</b> to <b>${esc(a.name)}</b>. The other leads of ${esc(l.accountName)} stay where they are.</div>`;
+  if(a.mode==="new")return`<div class="notice info">A new account <b>${esc(a.name)}</b> will be created and this lead moved to it. You will be asked to confirm when you save.</div>`;
+  if(a.mode==="unres"||a.mode==="bad")return`<div class="muted">${esc(a.msg)}</div>`;
+  return`<div class="muted small acHelp">Type to search the hotel's account. ${can("account.manage")?"Pick another to move the lead, or fix the spelling to rename.":"You can fix the spelling of this name."}</div>`}
+function leAcList(l){const E=S.drawer.edit;const txt=String(E.d.atext||"").replace(/\s+/g," ").trim();const full=can("account.manage");const A=allAccounts();const rows=[];
+  const place=a=>[a.city,COUNTRY_FULL[a.country]||a.country].filter(Boolean).join(", ")||"Place not recorded";
+  const cur=A[l.accountKey]||{key:l.accountKey,name:l.accountName,country:l.country};
+  rows.push({key:l.accountKey,name:l.accountName,cur:1,sub:place(cur)+" · "+leAcctN(l.accountKey)+" lead"+(leAcctN(l.accountKey)===1?"":"s")});
+  if(full&&txt.length>=2){findAccounts(txt,8,true).filter(a=>a.key!==l.accountKey).forEach(a=>rows.push({key:a.key,name:a.name,sub:place(a)+" · "+leAcctN(a.key)+" lead"+(leAcctN(a.key)===1?"":"s")+(a.was?" · was “"+a.was+"”":"")}))}
+  const exact=full&&txt.length>=3&&Object.values(A).some(a=>normTxt(a.name)===normTxt(txt));
+  if(full&&txt.length>=3&&!exact)rows.push({neu:1,name:txt,sub:"New account"});
+  return rows}
+function leAcOpen(l){const dd=$("#acDD");if(!dd)return;const rows=leAcList(l);const E=S.drawer.edit;E.rows=rows;E.act=Math.min(E.act||0,rows.length-1);
+  dd.innerHTML=rows.map((r,i)=>`<div role="option" id="acO${i}" data-i="${i}" class="${i===E.act?"on":""}" aria-selected="${i===E.act}">${r.cur?`<span class="cur">Current account</span>`:""}<b>${r.neu?`+ Create new account “${esc(r.name)}”`:esc(r.name)}</b><span class="sub">${esc(r.sub)}</span></div>`).join("");
+  const only=rows.length===1&&rows[0].cur&&String(E.d.atext||"").trim()!==(l.accountName||"");/* only the current account matches: a spelling fix, so keep the warning visible */
+  dd.hidden=!rows.length||only;$("#edAcct").setAttribute("aria-expanded",String(!!rows.length&&!only))}
+function leAcClose(){const dd=$("#acDD");if(dd){dd.hidden=true;dd.innerHTML=""}const i=$("#edAcct");if(i)i.setAttribute("aria-expanded","false")}
+function leAcPick(l,i){const E=S.drawer.edit;const r=(E.rows||[])[i];if(!r)return;
+  if(r.neu)E.pick={neu:1,text:r.name,name:r.name};else{E.pick={key:r.key,name:r.name,text:r.name};E.d.atext=r.name}
+  const inp=$("#edAcct");if(inp){inp.value=E.d.atext}leAcClose();delete E.errs.atext;leTick(l)}
+/* ----- products in the header ----- */
+function leProdsHTML(l){const E=S.drawer.edit;const cur=E.d.prods;
+  if(!canEditProducts(l))return`<div class="edchips">${cur.map(p=>`<span class="chip">${esc(p)}</span>`).join("")}</div>`;
+  const all=prodList().map(p=>p.name);const o=p=>{const s=productState(l.accountKey,p,l.id);const b=s.state==="blocked";return`<option value="${esc(p)}"${b?" disabled":""}>${esc(p)}${b?" · "+esc(s.msg):""}</option>`};
+  const add=all.filter(p=>!cur.includes(p));const up=upsellApplies(l,false);
+  const addSel=add.length?`<select class="edsel" data-ed="prodAdd" aria-label="Add a product"><option value="">＋ Add product</option>${add.map(o).join("")}</select>`:"";
+  const body=cur.length===1&&all.includes(cur[0])?`<select class="edsel" data-ed="prod1" aria-label="Product">${all.map(p=>`<option value="${esc(p)}"${p===cur[0]?" selected":""}${productState(l.accountKey,p,l.id).state==="blocked"&&p!==cur[0]?" disabled":""}>${esc(p)}</option>`).join("")}</select>`
+    :cur.map(p=>`<span class="edchip">${esc(p)}${cur.length>1?`<button type="button" data-prodx="${esc(p)}" aria-label="Remove ${esc(p)}">✕</button>`:""}</span>`).join("");
+  return`<div class="edchips">${body}${addSel}</div>${up&&E.d.prods.join("|")!==E.o.prods.join("|")?`<div class="small muted" style="margin-top:4px">A meeting has been held, so new products become an Upsell lead for ${esc(lastMeetBy(l)||l.assignedTo||"the meeting engineer")}.</div>`:""}`}
+/* ----- footer (sticky Save bar) ----- */
+function leFooter(l){const F=$("#lvf");if(!F)return;const E=S.drawer.edit;const delOK=can("lead.remove")&&!l.deleted&&!["New","Info Needed"].includes(l.status);
+  const left=delOK?`<button type="button" class="btn bad sm" id="delLead">Delete lead</button>`:"";let info="",btns="";
+  if(E){const n=leDirty(l).length;info=`<span class="cnt" id="edCnt" aria-live="polite">${n?`● ${n} unsaved change${n===1?"":"s"}`:"No changes yet"}</span>`;btns=`<button type="button" class="btn" id="edCancel"${E.saving?" disabled":""}>Cancel</button><button type="button" class="btn pri" id="edSave"${n&&!E.saving?"":" disabled"}>${E.saving?"Saving…":"Save changes"}</button>`}
+  else if(leCanEdit(l)){info=`<span class="hint">View mode · click Edit at the top to change details</span>`;btns=`<button type="button" class="btn pri" id="edSaveOff" disabled>Save changes</button>`}
+  const right=info+btns;
+  F.hidden=!(left||right);const h=`${E&&E.errs._?`<div class="gerr" role="alert">${esc(E.errs._)}</div>`:""}<div class="lvf-l">${left}</div>${info}<div class="lvf-r">${btns}</div>`;
+  if(F._h!==h){F._h=h;F.innerHTML=h}
+  /* one handler for the bar: the buttons are not rebuilt while their text is the same, so a click that follows a field's blur is not lost */
+  F.onclick=e=>{const b=e.target.closest("button");if(!b)return;const x=S.leadMap[S.drawer&&S.drawer.id];if(!x)return;
+    if(b.id==="delLead")openDeleteLead(x);else if(b.id==="edCancel")leCancel(x);else if(b.id==="edSave")leSave()}}
+function leTick(l){const E=S.drawer.edit;if(!E)return;const n=$("#acNote");if(n)n.innerHTML=leAcctNote(l);const w=$("#qwhyW");if(w)w.hidden=leT(E.d.qaed)===leT(E.o.qaed);leFooter(l)}
+function leStart(l){if(!leCanEdit(l))return;S.drawer.edit=leInit(l);drawDrawer();(document.querySelector("#detPanel [data-ed]")||$("#edAcct"))?.focus({preventScroll:true})}
+function leDiscardAsk(then){cfmOpen(`<h3>Discard unsaved changes?</h3><p class="small muted" style="margin:0">The changes you made in Edit mode have not been saved. They will be lost.</p><div class="row"><button type="button" class="btn bad" id="dcOk">Discard changes</button><button type="button" class="btn" data-cfmx>Keep editing</button></div>`,async()=>{then();return true},"#dcOk")}
+function leCancel(l){const E=S.drawer&&S.drawer.edit;if(!E)return;if(leDirty(l).length)return leDiscardAsk(()=>{S.drawer.edit=null;drawDrawer()});S.drawer.edit=null;drawDrawer()}
+function leClose(){const l=S.drawer&&S.leadMap[S.drawer.id];if(S.drawer&&S.drawer.edit&&l&&leDirty(l).length)return leDiscardAsk(closeDrawer);closeDrawer()}
+/* ----- input handling ----- */
+function leOnInput(e){const E=S.drawer&&S.drawer.edit;if(!E)return;const l=S.leadMap[S.drawer.id];if(!l)return;const el=e.target;
+  if(el.matches&&el.matches("[data-pmsi]")){lePmsRead(l);return}
+  const k=el.dataset&&el.dataset.ed;if(!k)return;
+  if(k==="prodAdd"){if(e.type!=="change"||!el.value)return;E.d.prods=[...E.d.prods,el.value];delete E.errs.prods;$("#edProds").innerHTML=leProdsHTML(l);leTick(l);return}
+  if(k==="prod1"){if(e.type!=="change")return;E.d.prods=[el.value];delete E.errs.prods;$("#edProds").innerHTML=leProdsHTML(l);leTick(l);return}
+  E.d[k]=el.value;if(E.errs[k]){delete E.errs[k];el.classList.remove("err");el.parentElement.querySelector(`[data-err="${k}"]`)?.remove()}
+  if(k==="atext"){const p=E.pick;if(p&&p.text!==String(el.value).replace(/\s+/g," ").trim())E.pick=null;E.act=0;if(e.type==="input")leAcOpen(l);leTick(l);return}
+  if(k==="ctry"&&e.type==="change"){const v=el.value;if(v){const g=guessRegion(v);if(g)E.d.reg=g;const nsb=subOf(Object.assign({},l,{country:v,subdivision:""}));E.d.sub="";E.locNote=g?`Region set to ${g} for ${COUNTRY_FULL[v]||v}. Change it if needed.`:""}drawDetails(l);$("#ed-ctry")?.focus({preventScroll:true})}
+  if(k==="pmsn"||k==="pmsall"){if(k==="pmsall")E.all=el.checked}
+  leTick(l)}
+function lePmsRead(l){const E=S.drawer.edit;const A=$("#pmsArea");if(!E||!A)return;const r=pmsRead("lp",A);E.d.pms=r.pms;E.d.iface=r.iface;E.touched.pms=true;delete E.errs.pms;leTick(l)}
+/* ----- edit-mode pieces of the left column ----- */
+function lePmsHTML(l){const E=S.drawer.edit;const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);const hp=E.d.prods.length?pmsProducts(Object.assign({},l,{products:E.d.prods,product:E.d.prods.join(", ")})):pmsProducts(l);
+  const shown=E.d.pms||E.sug||"";
+  A.innerHTML=`<div class="panel edpanel edmode" style="padding:14px;display:grid;gap:10px"><div class="row"><h3>PMS integration</h3><span class="chip">Editing</span></div>${pmsFields("lp",shown,hp,E.d.iface)}
+    <label class="f">PMS version / notes<input ${leIn("pmsn",' placeholder="e.g. OPERA Cloud 23.4, hosted by Oracle"')}></label>
+    <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-ed="pmsall" ${E.all?"checked ":""}style="width:auto"> Use this PMS on the hotel's other open leads that have none or a different one</label>${leErr("pms")}</div>`;
+  const mark=()=>{if(!E.d.pms&&E.sug){const o=[...A.querySelectorAll("#lp-pms option")].find(x=>x.textContent===E.sug);if(o)o.textContent=E.sug+" (suggested)"}};mark();
+  bindPmsFields("lp",hp,E.d.iface,A,()=>{lePmsRead(l);mark()})}
+function lePbHTML(l,ed){const E=S.drawer.edit;const f=(k,lab,type)=>`<label class="f fsm">${lab}<input id="ed-${k}" type="${type||"number"}"${type?"":' min="0" step="1"'} class="${leCls(k)}" ${leIn(k)}>${leErr(k)}</label>`;
+  return`<div class="grid2" style="margin-top:8px">${f("pcs","Front-desk PCs")}${f("us","Users")}${f("rm","Rooms")}<label class="f fsm">Implementation<select data-ed="md">${opts(["Onsite","Remote"],E.d.md||"","Not set")}</select></label></div>`}
+const leMonthOpts=(sel)=>[...new Set(fcMonths().concat(sel?[sel]:[]))].map(m=>`<option value="${m}"${m===sel?" selected":""}>${ymLabel(m)}</option>`).join("");
+function leQuoteHTML(l){const E=S.drawer.edit;const q=l.quote;if(!q)return"";const d=E.d;
+  const ro=`<b>${fmtAED(q.aed)}</b>${q.currency&&q.currency!=="AED"?` <span class="muted">(${esc(q.currency)} ${fmtN(q.value)})</span>`:""} · ${fmtD(q.date)}${q.no?` · <span class="mono">${esc(q.no)}</span>`:""}`;
+  const am=leQuoteEd(l)?`<div class="two"><label>Quotation amount (AED)<input id="ed-qaed" type="number" min="0" step="0.01" class="${leCls("qaed").trim()}" ${leIn("qaed")}>${leErr("qaed")}</label><label>Quotation number<input id="ed-qno" class="${leCls("qno").trim()}" ${leIn("qno")}>${leErr("qno")}</label></div>
+    ${q.currency&&q.currency!=="AED"?`<span class="small muted">Entered as ${esc(q.currency)} ${fmtN(q.value)}. Changing the AED amount here replaces it with an AED amount.</span>`:""}
+    <label id="qwhyW"${leT(d.qaed)===leT(E.o.qaed)?" hidden":""}><span>Reason for changing the amount <span class="req">*</span></span><input class="${leCls("qwhy").trim()}" ${leIn("qwhy",' maxlength="200" placeholder="e.g. Revised after the client changed the scope"')}>${leErr("qwhy")}</label>`:`<span class="ro">${ro}</span>`;
+  const tg=leTgtEd(l)?`<label>Quote target date<input type="date" id="ed-tgt" min="${esc(q.date||"")}" class="${leCls("tgt").trim()}" ${leIn("tgt")}>${leErr("tgt")}</label>`:`<span class="ro">Target date: ${q.targetDate?fmtD(q.targetDate):"not recorded"}</span>`;
+  return`<div class="edrow"><span>Quotation</span><span class="edv">${am}${tg}${canQuoteDel(l)?`<span><button type="button" class="btn sm" id="qDel">Remove quote</button></span>`:""}</span></div>`}
+function leFcHTML(l){const E=S.drawer.edit;const d=E.d;return`<div class="edrow"><span>Forecast</span><span class="edv"><div class="two"><label>Forecast<select data-ed="fcc">${FC_CATS.map(([v,t])=>`<option value="${v}"${d.fcc===v?" selected":""}>${t}</option>`).join("")}</select></label><label>Month<select data-ed="fcm"><option value="">—</option>${leMonthOpts(d.fcm)}</select></label></div></span></div>`}
+function leCatRow(l){const E=S.drawer.edit;const st=S.settings;const srcs=[...new Set((st.sources||[]).map(x=>x.name).concat(l.source?[l.source]:[]))];const deps=[...new Set((st.departments||[]).concat(l.department?[l.department]:[]))];
+  return`<div class="edrow"><span>Category</span><span class="edv"><div class="two"><label>Category<select data-ed="cat">${opts(["Inbound","Outbound"],E.d.cat)}</select></label><label>Team<select data-ed="dep">${opts(deps,E.d.dep,"—")}</select></label></div><label>Source channel<select data-ed="src">${opts(srcs,E.d.src,"—")}</select></label></span></div>`}
+function leContactRow(l){return`<div class="edrow"><span>Contact</span><span class="edv"><div class="two"><label>Name<input id="e-cn" class="${leCls("cn").trim()}" ${leIn("cn")}></label><label>Designation<input id="e-ct" ${leIn("ct")}></label></div><div class="two"><label>Email<input id="e-ce" type="email" class="${leCls("ce").trim()}" ${leIn("ce")}>${leErr("ce")}</label><label>Phone / WhatsApp<input id="e-cp" ${leIn("cp")}></label></div></span></div>`}
+function leGenRow(l){return`<div class="edrow"><span>Generated by</span><span class="edv"><input aria-label="Generated by" ${leIn("gen")}></span></div>`}
+function leReqRow(l){const E=S.drawer.edit;return`<div class="edrow"><span>Requirement</span><span class="edv"><textarea id="e-notes" rows="3" aria-label="Requirement" data-ed="notes">${esc(E.d.notes)}</textarea><label>Timeline<input ${leIn("when")}></label></span></div>`}
+function leDetailsHTML(l){const E=S.drawer.edit;const d=E.d;const sb=subOf(Object.assign({},l,{country:d.ctry||l.country,subdivision:d.sub}));const ctyOK=leCtyOK(l);
+  return`<div class="edrow"><span>Country</span><span class="edv"><select id="ed-ctry" data-ed="ctry" aria-label="Country"${ctyOK?"":" disabled"}>${countryOptions(d.ctry)}</select>${ctyOK?"":`<span class="small muted">Lead Manager or Supervisor can change the country.</span>`}${E.locNote?`<span class="small muted">${esc(E.locNote)}</span>`:""}</span></div>
+   <div class="edrow"><span>Requirement received</span><span class="edv"><input type="date" id="ed-req" max="${todayISO()}" class="${leCls("req").trim()}" ${leIn("req")} aria-label="Requirement received">${leErr("req")}</span></div>
+   <div class="edrow"><span>Region</span><span class="edv"><select data-ed="reg" class="${leCls("reg").trim()}" aria-label="Region">${opts(regionList(),d.reg,"Choose region")}</select>${leErr("reg")}</span></div>
+   ${sb?`<div class="edrow"><span>${SUBDIV[sb.c].label}</span><span class="edv"><select data-ed="sub" aria-label="${esc(SUBDIV[sb.c].label)}"><option value="">Not known</option>${subOptions(sb.c,d.sub)}</select></span></div>`:""}`}
+/* ----- save ----- */
+async function leSave(){const E=S.drawer&&S.drawer.edit;if(!E||E.saving)return;const l=S.leadMap[S.drawer.id];if(!l)return;const d=E.d,o=E.o;const dirty=leDirty(l);if(!dirty.length)return;
+  const has=k=>dirty.includes(k);const errs={};const today=todayISO();const bad=(k,m)=>{if(!errs[k])errs[k]=m};
+  if(has("ce")&&d.ce.trim()&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.ce.trim()))bad("ce","The email address doesn't look right");
+  if(has("req")&&d.req>today)bad("req","The date can't be in the future");
+  if((has("reg")||has("ctry"))&&!d.reg)bad("reg","Choose a region");
+  if(has("qaed")){const n=d.qaed.trim();if(n===""||!isFinite(+n)||+n<0)bad("qaed","Enter an amount of 0 or more. To take the quotation off the lead, use Remove quote.");if(leT(d.qwhy).length<3)bad("qwhy","Give the reason for changing the amount")}
+  if(has("tgt")&&d.tgt&&l.quote&&l.quote.date&&d.tgt<l.quote.date)bad("tgt","The target date can't be before the quotation date");
+  for(const k of["pcs","us","rm"])if(has(k)&&d[k].trim()!==""&&(!isFinite(+d[k])||+d[k]<0))bad(k,"Enter a number");
+  const A=leAcct(l);if(["empty","bad","unres"].includes(A.mode))bad("atext",A.msg);
+  if(!d.prods.length)bad("prods","Keep at least one product on the lead.");
+  const tgtKey=A.mode==="move"||A.mode==="new"?A.key:l.accountKey;
+  let add=[],rem=[];if(has("prods")&&d.prods.length){const cur=productsOf(l);add=d.prods.filter(p=>!cur.includes(p));rem=cur.filter(p=>!d.prods.includes(p));
+    const blocked=add.filter(p=>productState(tgtKey,p,l.id).state==="blocked");if(blocked.length)bad("prods",`${blocked.join(", ")} is already open on another lead for this account.`);
+    const prodsAfter=d.prods;const pmsNow=E.touched.pms&&has("pms")?d.pms:l.pms;const pb=pmsBlock(pmsNow,add.length?add:prodsAfter);if(pb)bad("prods",pb);
+    if(add.length&&upsellApplies(l,false)&&(A.mode==="move"||A.mode==="new"))bad("prods","Save the account change first, then add the product.")}
+  if(has("pms")){if(!isRealPms(d.pms))bad("pms","Choose the hotel's PMS.");else{const pb=pmsBlock(d.pms,d.prods);if(pb)bad("pms",pb);
+    const cs=chainStd(l.accountName,accKey(l));if(cs.list.length&&!can("lead.status_override")&&!cs.list.some(x=>nk(x)===nk(d.pms)))bad("pms",`${cs.chain} uses ${cs.list.join(" or ")} as its standard PMS. Ask a Lead Manager or Supervisor if this hotel differs.`)}}
+  /* someone else changed the same fields while this was open */
+  const live=leVals(l);const conf=dirty.filter(k=>k==="acct"?live.acct!==o.acct:k==="prods"?live.prods.join("|")!==o.prods.join("|"):k==="pms"?live.pms!==o.pms||JSON.stringify(live.iface)!==JSON.stringify(o.iface):leT(live[k])!==leT(o[k]));
+  if(conf.length)errs._=`This lead was changed by someone else while you were editing (${conf.map(k=>LE_LBL[k]||(k==="prods"?"Products":"Account")).join(", ")}). Cancel and open Edit again to see the latest.`;
+  if(Object.keys(errs).length){E.errs=errs;const top=$(".lvb")?.scrollTop;drawDrawer();const f=document.querySelector("[data-err]");if(f)f.scrollIntoView({block:"center"});return}
+  if(A.mode==="new"){const ok=await new Promise(res=>{let done=false;cfmOpen(`<h3>Create new account?</h3><p class="small" style="margin:0">There is no account called <b>${esc(A.name)}</b>. A new account will be created and <b>${esc(l.ref)}</b> will move to it.</p><p class="small muted" style="margin:0">Check the spelling first. If this hotel already exists under another name, cancel and pick it from the list instead.</p><div class="row"><button type="button" class="btn pri" id="naOk">Create account</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,async()=>{done=true;res(true);return true},"#naOk");
+      const h=$("#cfm");new MutationObserver((_,ob)=>{if(!$("#cfm")){ob.disconnect();if(!done)res(false)}}).observe(document.body,{childList:true})});if(!ok)return;
+    if(Object.values(allAccounts()).some(x=>x.key===A.key||normTxt(x.name)===normTxt(A.name))){E.errs={atext:`“${A.name}” already exists. Pick it from the list.`};drawDrawer();return}}
+  E.saving=true;leFooter(l);const now=nowISO();const by=actor()||"";const logs=[];const body={};let ctNote="";
+  try{
+    /* account */
+    if(A.mode==="rename"){const Ac=allAccounts()[l.accountKey]||{name:l.accountName};const cur={name:Ac.name,country:Ac.country||""};const why=`Spelling fix from lead ${l.ref}`;
+      const fb=async()=>{const ex=acctDoc(l.accountKey);await S.db.doc("accounts/"+l.accountKey).set(Object.assign({},ex,{name:A.name,country:ex.country||cur.country,aka:[...new Set([...(ex.aka||[]),Ac.name])],renamed:{from:Ac.name,to:A.name,by:actor()||S.myName||"",at:now,reason:why},renameReq:null}));for(const x of leadsFor(l.accountKey))await S.db.doc("leads/"+x.id).update({accountName:A.name,updatedAt:now})};
+      try{if(window.__accountRename)await window.__accountRename.rename({key:l.accountKey,name:A.name,reason:why,cur});else await fb();logs.push(`Account renamed: ${l.accountName} → ${A.name}`);o.acct=l.accountKey}
+      catch(e){if(/SHARED_ACCOUNT/.test(e.message||"")&&window.__accountRename&&!can("account.manage")){await window.__accountRename.request({key:l.accountKey,name:A.name,reason:why,cur});logs.push(`Account rename asked: ${l.accountName} → ${A.name} (waiting for approval)`);ctNote="Others also work on this account, so the new spelling was sent for approval."}else throw e}}
+    if(A.mode==="new"){const ctry=(d.ctry||l.country||"").trim();await S.db.doc("accounts/"+A.key).set({name:A.name,key:A.key,country:ctry,city:"",group:"",region:d.reg||l.region||"",createdAt:now,createdBy:S.uid||null,fromSheet:false});
+      body.accountKey=A.key;body.accountName=A.name;if(!l.country&&ctry)body.country=ctry;logs.push(`Account changed: ${l.accountName} → ${A.name} (new account)`)}
+    if(A.mode==="move"){const T=allAccounts()[A.key]||{};body.accountKey=A.key;body.accountName=A.name;if(!l.country&&T.country)body.country=T.country;logs.push(`Account changed: ${l.accountName} → ${A.name}`)}
+    /* products */
+    if(has("prods")){const cur=productsOf(l);if(add.length&&upsellApplies(l,false)){const keep=cur.filter(p=>!rem.includes(p));if(!keep.length)throw Object.assign(new Error("Keep at least one of this lead's own products. New products go to an Upsell lead."),{code:"products"});
+        const eng=lastMeetBy(l)||l.assignedTo;const r=await createUpsell(l,add,eng,null);if(rem.length){body.products=keep;body.product=keep.join(", ")}if(!r.added)body.upsells=[...(l.upsells||[]),r.id];logs.push(`Upsell ${r.ref} for ${eng}: ${add.join(", ")}`+(rem.length?" · removed "+rem.join(", "):""))}
+      else{body.products=d.prods.slice();body.product=d.prods.join(", ");logs.push("Products updated"+(add.length?" · added "+add.join(", "):"")+(rem.length?" · removed "+rem.join(", "):""))}}
+    /* details */
+    const chg=(keys)=>keys.filter(k=>has(k));const part=k=>k==="notes"?"Requirement edited":`${LE_LBL[k]} ${leT(o[k])||"—"} → ${leT(d[k])||"—"}`;
+    const dk=chg(LE_GRP[0][2]);
+    if(dk.length){const m={cat:"category",src:"source",dep:"department",gen:"generatedBy",reg:"region",req:"requirementDate",notes:"notes",when:"timeline"};dk.forEach(k=>{if(m[k])body[m[k]]=leT(d[k])});
+      if(dk.some(k=>["cn","ct","ce","cp"].includes(k)))body.contact=Object.assign({},l.contact||{},{name:leT(d.cn),title:leT(d.ct),email:leT(d.ce),phone:leT(d.cp)});
+      if(has("ctry")){body.country=d.ctry;if(l.subdivision||d.sub)body.subdivision=d.sub||""}else if(has("sub"))body.subdivision=d.sub||"";
+      if(has("req")&&!d.req)body.requirementDate=reqDate(l);
+      logs.push("Details updated · "+dk.map(part).join(" · "))}
+    /* quotation */
+    const qk=chg(LE_GRP[1][2]);if(qk.length&&l.quote){const prev=l.quote;const nq=Object.assign({},prev);
+      if(has("qaed")){const aed=+d.qaed.trim();const same=prev.currency&&prev.currency!=="AED"&&prev.aed===aed;nq.aed=aed;nq.value=same?prev.value:aed;nq.currency=same?prev.currency:"AED"}
+      if(has("qno"))nq.no=leT(d.qno);if(has("tgt")){nq.targetDate=d.tgt||null;nq.targetHistory=[...(prev.targetHistory||[]),{from:prev.targetDate||"",to:d.tgt||"",by:actor(),at:now}]}
+      body.quote=nq;logs.push("Quotation updated · "+qk.map(k=>k==="qaed"?`Amount ${fmtAED(prev.aed)} → ${fmtAED(nq.aed)} (${leT(d.qwhy)})`:k==="tgt"?`Target date ${prev.targetDate?fmtD(prev.targetDate):"not set"} → ${d.tgt?fmtD(d.tgt):"cleared"}`:part(k)).join(" · "))}
+    /* forecast */
+    if(chg(["fcc","fcm"]).length){const cat=d.fcc;let mo=d.fcm;if((cat==="commit"||cat==="best")&&!mo)mo=ymKey(l.quote&&l.quote.targetDate)||ymKey(todayISO());
+      body.forecast={cat,month:mo||"",at:now,by:actor()||S.myName||""};body.forecastHist=[...(l.forecastHist||[]),{cat,month:mo||"",amt:leadValue(l),at:now,by:actor()||S.myName||""}];
+      logs.push(`Forecast updated · ${FC_LABEL[o.fcc]||o.fcc} → ${FC_LABEL[cat]}${mo&&cat!=="omit"?" · "+ymLabel(mo):""}`)}
+    /* PMS */
+    if(has("pms")||has("pmsn")){const parts=[];if(has("pms")){body.pms=d.pms;body.pmsIface=d.iface;body.chainPms=chainPmsMark(l.accountName,accKey(l),d.pms);parts.push(`PMS ${o.pms||"not set"} → ${d.pms}`+(Object.keys(d.iface).length?" · "+Object.entries(d.iface).map(([p,m])=>p+" via "+m).join(", "):""))}
+      if(has("pmsn")){body.pmsNote=leT(d.pmsn);parts.push("notes edited")}logs.push("PMS updated · "+parts.join(" · "))}
+    /* quantities */
+    const yk=chg(LE_GRP[4][2]);if(yk.length){body.pcs=leNum(d.pcs);body.users=leNum(d.us);body.rooms=leNum(d.rm);body.implMode=d.md||null;logs.push("Quantities updated · "+yk.map(part).join(" · "))}
+    const upd=Object.assign({},body,{updatedAt:now,log:[...(l.log||[]),...logs.map(a=>({t:now,by,byId:S.uid||null,a}))]});
+    await S.db.doc("leads/"+l.id).update(upd);
+    S.drawer.edit=null;toast("Lead updated"+(ctNote?". "+ctNote:""));
+    if(body.contact){try{const nu=await ccApply(body.contact,l.id);if(nu)toast("Lead updated. Contact also updated on "+nu+" other lead"+(nu===1?"":"s"))}catch(_){}}else S.cchk=null;
+    if(has("pms")&&E.all){const others=S.leads.filter(x=>x.id!==l.id&&!x.deleted&&accKey(x)===accKey(l)&&OPEN.includes(x.status)&&canAct(x)&&x.pms!==d.pms&&!pmsBlock(d.pms,pmsProducts(x)));let n=0;
+      for(const x of others){try{await S.db.doc("leads/"+x.id).update({pms:d.pms,pmsIface:null,chainPms:chainPmsMark(x.accountName,accKey(x),d.pms),updatedAt:nowISO(),log:[...(x.log||[]),{t:nowISO(),by:actor(),byId:S.uid||null,a:`PMS set to ${d.pms} (same hotel as ${l.ref})`}]});n++}catch(_){}}
+      if(n)toast(`Lead updated. PMS also set on ${n} other open lead${n===1?"":"s"} for this hotel`)}
+    drawDrawer()}
+  catch(e){const E2=S.drawer&&S.drawer.edit;if(E2){E2.saving=false;E2.errs={_:`Couldn't save (${e.code||e.message}). Nothing else was changed.`+(logs.length&&logs[0].startsWith("Account renamed")?" The account was renamed.":"")};drawDrawer()}}}
+function leClick(e){const E=S.drawer&&S.drawer.edit;if(!E)return;const l=S.leadMap[S.drawer.id];if(!l)return;
+  const x=e.target.closest("[data-prodx]");if(x){E.d.prods=E.d.prods.filter(p=>p!==x.dataset.prodx);delete E.errs.prods;$("#edProds").innerHTML=leProdsHTML(l);leTick(l);return}
+  if(!e.target.closest(".acbox"))leAcClose()}
+function leKey(e){const E=S.drawer&&S.drawer.edit;if(!E||e.target.id!=="edAcct")return;const dd=$("#acDD");const l=S.leadMap[S.drawer.id];
+  if(e.key==="Escape"&&dd&&!dd.hidden){e.stopPropagation();leAcClose();return}
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();if(dd.hidden){E.act=0;leAcOpen(l)}else{const n=(E.rows||[]).length;if(n){E.act=((E.act||0)+(e.key==="ArrowDown"?1:-1)+n)%n;leAcOpen(l)}}}
+  if(e.key==="Enter"){e.preventDefault();if(!dd.hidden)leAcPick(l,E.act||0)}}
+function leBind(l){const dr=$(".drawer");if(!dr||!S.drawer.edit)return;dr.addEventListener("input",leOnInput);dr.addEventListener("change",leOnInput);dr.addEventListener("click",leClick);dr.addEventListener("keydown",leKey);
+  dr.addEventListener("mousedown",e=>{const o=e.target.closest("#acDD [role=option]");if(o){e.preventDefault();leAcPick(l,+o.dataset.i)}});
+  $("#edAcct")?.addEventListener("blur",()=>setTimeout(leAcClose,120))}
+function drawDetails(l){const D=$("#detArea");if(!D)return;if(S.drawer.edit&&canAct(l)&&!l.deleted){D.innerHTML=leDetailsHTML(l);return}
   const ctry=l.country?(COUNTRY_FULL[areaOf(l.country).country]||l.country):"";const sb=subOf(l);
   D.innerHTML=`<div><span>Country</span><span>${ctry?esc(ctry):`<span class="muted">Not set</span>`}</span></div>
     <div><span>Requirement received</span><span>${fmtD(reqDate(l))}${l.requirementDate?"":` <span class="muted small">(entry date)</span>`}</span></div>
@@ -1662,8 +1858,8 @@ function drawDetails(l){const D=$("#detArea");if(!D)return;
 function fillNames(){const els=[...document.querySelectorAll("[data-uid]")];const ids=[...new Set(els.map(e=>e.dataset.uid))];if(!ids.length||!S.user)return;
   S.user.profiles(ids).then(ps=>{ids.forEach(id=>{S.names[id]=(ps[id]&&ps[id].name)||""});document.querySelectorAll("[data-uid]").forEach(e=>{const n=S.names[e.dataset.uid];e.textContent=n||e.dataset.fallback||"a team member"})}).catch(()=>{})}
 function canEditProducts(l){return !l.deleted&&OPEN.includes(l.status)&&canAct(l)&&(can("lead.verify")||l.status!=="New")}
-function drawProdArea(l){const P=$("#prodArea");if(!P)return;const cur=productsOf(l);
-  if(S.drawer.mode!=="prods"){P.innerHTML=`<div class="panel" style="padding:14px"><div class="row" style="margin-bottom:8px"><h3>Products discussed</h3><span class="sp"></span>${canEditProducts(l)?`<button class="btn sm" id="pEdit">Add or remove products</button>`:""}</div>
+function drawProdArea(l){const P=$("#prodArea");if(!P)return;const cur=productsOf(l);if(S.drawer.edit&&canEditProducts(l)){P.innerHTML="";return}
+  if(S.drawer.mode!=="prods"){P.innerHTML=`<div class="panel" style="padding:14px"><div class="row" style="margin-bottom:8px"><h3>Products discussed</h3><span class="sp"></span></div>
     <div class="row" style="gap:6px">${cur.map(p=>`<span class="chip" style="font-size:12.5px;padding:3px 10px">${esc(p)}</span>`).join("")||`<span class="muted small">No products yet</span>`}</div></div>`;
     $("#pEdit")?.addEventListener("click",()=>{S.drawer.mode="prods";S.drawer.sel=cur.slice();drawProdArea(l);if(window.LD_HOSTED)window.__sb.rpc("product_locks",{p_account:l.accountKey}).then(({data})=>{if(data){S.extLocks[l.accountKey]=data;if(S.drawer?.mode==="prods")drawProdArea(l)}})});return}
   const sel=S.drawer.sel;
@@ -1690,7 +1886,31 @@ async function declineLead(l,reason,note){const t=nowISO();try{
 async function patch(l,data,logMsg,status){const t=nowISO();const body=Object.assign({},data,{updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:logMsg}]});
   if(status){body.status=status;body.stageAt=Object.assign({},l.stageAt||{},{[status]:t})}
   try{await S.db.doc("leads/"+l.id).update(body);if(S.drawer)S.drawer.mode=null;toast(logMsg);return true}catch(e){toast("Couldn't save: "+(e.code||e.message));return false}}
-function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll()&&!can("lead.edit_own")?`<div class="small muted">Read-only for your role.</div>`:`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or a Lead Manager can update it.</div>`;return}if(l.deleted){A.innerHTML="";return}const mode=["prods","details","country","qtarget","share","signoff"].includes(S.drawer.mode)?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
+function drawInfoReply(l,A){const ask=infoAsk(l),mineL=infoCreator(l),c=l.contact||{};
+  const logB=canAct(l)&&!isBO()?`<div><button class="btn" data-m="logmeet">Log a meeting</button></div>`:"";
+  const bindLog=()=>A.querySelector("[data-m]")?.addEventListener("click",()=>{S.drawer.mode="logmeet";drawActions(l)});
+  if(l.status==="New"){const r=l.infoReply||{};A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px"><div class="notice info">You answered back office on ${fmtD(r.at)}${r.note?`: “${esc(r.note)}”`:""}. A Lead Manager will review it.</div>${logB}</div>`;bindLog();return}
+  const head=`<div class="notice warn"><b>Back office needs more information</b><div style="margin-top:4px">${esc(ask.reason)}</div><div class="small muted" style="margin-top:4px">${ask.by?"Asked by "+esc(ask.by)+" · ":""}${ask.at?fmtD(ask.at):""}</div></div>`;
+  if(!mineL){A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px">${head}<div class="small muted">Waiting for the person who created this lead to answer.</div>${logB}</div>`;bindLog();return}
+  A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px" id="infoPanel"><h3>Answer back office</h3>${head}
+    <div class="grid2"><label class="f">Contact name<input id="i-cn" maxlength="200" value="${esc(c.name||"")}"></label><label class="f">Designation<input id="i-ct" maxlength="200" value="${esc(c.title||"")}"></label>
+    <label class="f">Email<input id="i-ce" type="email" maxlength="200" value="${esc(c.email||"")}"></label><label class="f">Phone / WhatsApp<input id="i-cp" maxlength="200" value="${esc(c.phone||"")}"></label></div>
+    <label class="f">Requirement<textarea id="i-notes" rows="3" maxlength="2000">${esc(l.notes||"")}</textarea></label>
+    <label class="f">Timeline<input id="i-when" maxlength="200" value="${esc(l.timeline||"")}"></label>
+    <label class="f">What did you add? <span class="muted small">(a short note for back office)</span><input id="i-note" maxlength="500"></label>
+    <div class="ferr" id="i-err" role="alert" hidden></div>
+    <div class="row"><button class="btn pri" id="i-send" type="button">Send back to review</button></div>${logB}</div>`;bindLog();
+  $("#i-send").onclick=async()=>{const b=$("#i-send"),er=$("#i-err");const v=id=>$(id).value.trim();const em=v("#i-ce");er.hidden=true;
+    if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){er.textContent="That email address does not look right.";er.hidden=false;$("#i-ce").focus();return}
+    const contact={name:v("#i-cn"),title:v("#i-ct"),email:em,phone:v("#i-cp")},notes=v("#i-notes"),tl=v("#i-when"),note=v("#i-note");
+    const chg=[];if(contact.name!==(c.name||""))chg.push("contact name");if(contact.title!==(c.title||""))chg.push("designation");if(em!==(c.email||""))chg.push("email");if(contact.phone!==(c.phone||""))chg.push("phone");if(notes!==(l.notes||""))chg.push("requirement");if(tl!==(l.timeline||""))chg.push("timeline");
+    if(!chg.length&&!note){er.textContent="Add the missing information or write a short note before sending it back.";er.hidden=false;return}
+    b.disabled=true;b.textContent="Sending…";
+    try{if(window.__leadInfoReply)await window.__leadInfoReply(l.id,contact,notes,tl,note);
+      else{const t=nowISO();await S.db.doc("leads/"+l.id).update({status:"New",contact:Object.assign({},c,contact),notes,timeline:tl,infoReply:{at:t,by:S.myName||S.myEmail||"",note,changed:chg},stageAt:Object.assign({},l.stageAt||{},{New:t}),updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:"Info provided"+(chg.length?" ("+chg.join(", ")+")":"")+(note?": "+note:"")+" · sent back to review"}]})}
+      toast("Sent back to review. Back office will see your answer.");S.drawer&&(S.drawer.mode=null)}
+    catch(e){b.disabled=false;b.textContent="Send back to review";er.textContent=(e.message||"Couldn't send it. Try again.");er.hidden=false}}}
+function drawActions(l){const A=$("#actArea");if(!l.deleted&&!isBO()&&S.drawer.mode!=="logmeet"&&(l.status==="Info Needed"||(infoCreator(l)&&infoReplied(l)))){drawInfoReply(l,A);return}if(!canAct(l)){A.innerHTML=viewAll()&&!can("lead.edit_own")?`<div class="small muted">Read-only for your role.</div>`:`<div class="notice info">This lead is assigned to ${esc(l.assignedTo||"someone else")}. Only they or a Lead Manager can update it.</div>`;return}if(l.deleted){A.innerHTML="";return}const mode=["prods","details","country","qtarget","share","signoff"].includes(S.drawer.mode)?null:S.drawer.mode;const sp=spNames();const cur=Object.keys(S.settings.fx||{AED:1});
   const inBO=l.status==="New"||l.status==="Info Needed";
   if(needAccept(l)&&isMine(l)&&!can("lead.status_override")){
     if(mode==="decline"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Decline this lead</h3><div style="display:grid;gap:10px"><label class="f">Reason <span class="req">*</span><select id="dc-r">${opts(flow().declineReasons||[],"","Choose")}</select></label><label class="f">Note<input id="dc-n" maxlength="200" placeholder="Optional"></label><div class="small muted">The lead goes back to the Lead Manager to assign to someone else.</div><div class="small" id="dc-msg"></div><div class="row"><button class="btn bad" id="dc-ok">Decline lead</button><button class="btn" id="dc-x">Cancel</button></div></div></div>`;
@@ -1719,14 +1939,14 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     $("#mt-prods").onchange=e=>{const c=e.target.closest("input");if(c)c.closest("label").classList.toggle("sel",c.checked)}};
   const readMeet=(date,notes)=>{const mode=$("#mt-mode").dataset.v||"";const products=[...document.querySelectorAll("#mt-prods input:checked")].map(c=>c.dataset.mp);
     if(!mode)return{err:"Choose whether the meeting was Online or Onsite."};if(!products.length)return{err:"Tick at least one product discussed."};
-    if(!date||date>todayISO())return{err:"Pick the meeting date (not in the future)."};
+    if(!date||date>todayISO())return{err:"Pick the meeting date (not in the future)."};{const ne=meetNotesErr(notes);if(ne)return{err:ne}}
     const by=$("#mt-by")?.value||actor()||l.assignedTo||"";const joined=[...document.querySelectorAll("#mt-join input:checked")].map(c=>c.dataset.mj).filter(n=>!sameEng(n,by));
     return{m:Object.assign({id:"m"+Date.now().toString(36),date,mode,type:$("#mt-type").value,products,notes,by,byId:S.uid||null,at:nowISO()},joined.length?{joined}:{})}};
   const meetBody=(m)=>{const lp=productsOf(l);const add=m.products.filter(n=>!lp.includes(n));const body={meetings:[...meetingsOf(l).map(({legacy,...x})=>x),m]};if((m.joined||[]).length)body.joint=[...new Set([...(l.joint||[]),...m.joined])];
     if(add.length){const all=lp.concat(add);body.products=all;body.product=all.join(", ")}return{body,add}};
   const amountForm=(title,withNo,noLabel,withMeet,withTarget)=>`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${title}</h3><div style="display:grid;gap:10px">${withTarget?qpdfBlock():""}${withMeet?meetFields():""}
     <div class="grid3"><label class="f">Amount${withTarget?" (total before tax)":""} <span class="req">*</span><input id="a-val" type="number" min="0" step="0.01" inputmode="decimal"></label><label class="f">Currency<select id="a-cur">${opts(cur,"AED")}</select></label><label class="f">Date<input id="a-date" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
-    ${withNo?`<div class="grid2"><label class="f">${noLabel}<input id="a-no"></label>${withTarget?`<label class="f">Target date <span class="req">*</span><input id="a-tgt" type="date" min="${todayISO()}" value="${esc(withTarget===true?"":withTarget)}"><span class="small muted" style="font-weight:400">When the client is expected to decide</span></label>`:""}</div>`:""}<label class="f">Notes<input id="a-notes"></label>${withTarget?nextFields(l):""}<div class="small muted" id="a-aed"></div>
+    ${withNo?`<div class="grid2"><label class="f">${noLabel}<input id="a-no"></label>${withTarget?`<label class="f">Target date <span class="req">*</span><input id="a-tgt" type="date" min="${todayISO()}" value="${esc(withTarget===true?"":withTarget)}"><span class="small muted" style="font-weight:400">When the client is expected to decide</span></label>`:""}</div>`:""}${withMeet?`<label class="f">Meeting notes <span class="muted small">(at least ${meetMin()} words)</span><textarea id="a-notes" data-mw rows="4" placeholder="Who attended, what was discussed, the client's concerns, agreed next step"></textarea></label>${meetWC("")}`:`<label class="f">Notes<input id="a-notes"></label>`}${withTarget?nextFields(l):""}<div class="small muted" id="a-aed"></div>
     <div class="row"><button class="btn pri" id="a-save">Save</button><button class="btn" id="a-cancel">Cancel</button></div></div></div>`;
   const bindAmount=(field,status,msg)=>{const upd=()=>{const v=+$("#a-val").value;$("#a-aed").textContent=v?"= "+fmtAED(toAED(v,$("#a-cur").value)):""};$("#a-val").oninput=upd;$("#a-cur").onchange=upd;$("#a-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};
     $("#a-save").onclick=async()=>{let manual=null;
@@ -1752,9 +1972,10 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     if(mode==="dup"){const cands=S.leads.filter(x=>x.id!==l.id&&x.accountKey===l.accountKey);A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Close as duplicate</h3><label class="f">Duplicate of<select id="d-of">${opts(cands.map(x=>x.ref+" · "+x.product+" · "+x.status),"",cands.length?"Choose the original":"Type a reference below")}</select></label><label class="f" style="margin-top:8px">or reference from the sheet<input id="d-ref" placeholder="LD2026-0123"></label><div class="row" style="margin-top:10px"><button class="btn bad" id="d-save">Close as duplicate</button><button class="btn" id="d-cancel">Cancel</button></div></div>`;
       $("#d-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#d-save").onclick=()=>{const of=($("#d-of").value.split(" · ")[0]||$("#d-ref").value.trim());patch(l,{dupOf:of,verifiedAt:nowISO()},"Closed as duplicate"+(of?" of "+of:""),"Duplicate")};return}
     if(mode==="rej"||mode==="info"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">${mode==="rej"?"Reject lead":"Ask the submitter for information"}</h3><label class="f">${mode==="rej"?"Reason":"What's missing?"} <span class="req">*</span><input id="r-why"></label><div class="row" style="margin-top:10px"><button class="btn ${mode==="rej"?"bad":"pri"}" id="r-save">${mode==="rej"?"Reject":"Send back"}</button><button class="btn" id="r-cancel">Cancel</button></div></div>`;
-      $("#r-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#r-save").onclick=()=>{const w=$("#r-why").value.trim();if(!w)return;mode==="rej"?patch(l,{verifiedAt:nowISO(),rejectReason:w},"Rejected: "+w,"Rejected"):patch(l,{},"Info requested: "+w,"Info Needed")};return}
+      $("#r-cancel").onclick=()=>{S.drawer.mode=null;drawDrawer()};$("#r-save").onclick=()=>{const w=$("#r-why").value.trim();if(!w)return;mode==="rej"?patch(l,{verifiedAt:nowISO(),rejectReason:w},"Rejected: "+w,"Rejected"):patch(l,{infoReq:{at:nowISO(),by:S.uid||null,byName:S.myName||S.myEmail||"Back office",reason:w},infoReply:null},"Info requested: "+w,"Info Needed")};return}
     const bad=dupChecks(l).some(c=>c.lvl==="bad");const sb0=subOf(l);S.vSub=sb0?{c:sb0.c,n:S.vSubN??sb0.n}:null;const terrO=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);const sug=terrO||l.preferred||suggestOwner(l);
     A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Verify and assign</h3>
+     ${infoAsk(l)?`<div class="notice warn" style="margin-bottom:10px">Waiting for ${esc(genName(l)||"the creator")}${infoAsk(l).at?" since "+fmtD(infoAsk(l).at):""}: <b>${esc(infoAsk(l).reason)}</b></div>`:""}${infoReplied(l)?`<div class="notice ok" style="margin-bottom:10px"><b>Reply received</b> from ${esc(l.infoReply.by||"the creator")} on ${fmtD(l.infoReply.at)}${l.infoReply.note?": "+esc(l.infoReply.note):""}${(l.infoReply.changed||[]).length?` (updated: ${esc(l.infoReply.changed.join(", "))})`:""}</div>`:""}
      ${bad?`<div class="notice bad" style="margin-bottom:10px">This account already has this product open or won. Close it as a duplicate unless the client is buying again.</div>`:""}
      <div class="grid3"><label class="f">Sales engineer <span class="req">*</span><select id="v-sp">${opts(sp,sug,"Choose")}</select></label>
       <label class="f">Priority<select id="v-pr">${opts(["High","Medium","Low"],"Medium")}</select></label>
@@ -1771,7 +1992,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
     const tw=()=>{const w=$("#v-sp").value,o=S.vSub?territoryOf(l.country,l.region,S.vSub).owner:ownerOf(l);$("#v-terr").innerHTML=o&&w&&nk(w)!==nk(o)?`<div class="notice warn" style="padding:6px 10px">${esc(territoryOf(l.country,l.region,S.vSub||subOf(l)).area)} is ${esc(o)}'s territory. Assign to ${esc(w)} only if that's agreed.</div>`:""};$("#v-sp").addEventListener("change",tw);tw();return}}
   if(mode==="meet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Meeting done</h3><div style="display:grid;gap:10px">${meetFields()}
       <label class="f" style="max-width:220px">Meeting date <span class="req">*</span><input id="md-date" type="date" max="${todayISO()}" value="${todayISO()}"></label>
-      <label class="f">Meeting notes<textarea id="md-notes" rows="3" placeholder="Who attended, what was discussed, agreed next step"></textarea></label>${reqBlock()}${nextFields(l)}<div class="small" id="md-msg"></div>
+      <label class="f">Meeting notes <span class="muted small">(at least ${meetMin()} words)</span><textarea id="md-notes" rows="4" placeholder="Who attended, what was discussed, the client's concerns, agreed next step"></textarea></label>${meetWC("")}${reqBlock()}${nextFields(l)}<div class="small" id="md-msg"></div>
       <div class="row"><button class="btn pri" id="md-save">Save meeting</button><button class="btn" id="md-x">Cancel</button><span class="small muted">The amount is entered with the quotation.</span></div></div></div>`;
     bindMeet();if(flow().on&&flow().pmsAtMeeting&&pmsProducts(l).length)pmsInject(l,A,"at Meeting done");
     $("#md-req")?.addEventListener("input",e=>{const n=e.target.value.trim().length,m=+flow().reqMin||1,c=$("#md-rc");c.textContent=n+" / "+m+" characters";c.style.color=n>=m?"var(--ok)":""});
@@ -1786,7 +2007,7 @@ function drawActions(l){const A=$("#actArea");if(!canAct(l)){A.innerHTML=viewAll
   if(mode==="contact"&&OPEN.includes(l.status)){A.innerHTML=contactForm(l);bindContact(l);return}
   if(mode==="logmeet"){A.innerHTML=`<div class="panel" style="padding:14px"><h3 style="margin-bottom:10px">Log a meeting</h3><div style="display:grid;gap:10px">${meetFields()}
       <label class="f" style="max-width:220px">Meeting date <span class="req">*</span><input id="lm-date" type="date" max="${todayISO()}" value="${todayISO()}"></label>
-      <label class="f">Notes<input id="lm-notes" placeholder="What was discussed, next step"></label>${OPEN.includes(l.status)?nextFields(l):""}<div class="small" id="lm-msg"></div>
+      <label class="f">Meeting notes <span class="muted small">(at least ${meetMin()} words)</span><textarea id="lm-notes" rows="4" placeholder="Who attended, what was discussed, the client's concerns, agreed next step"></textarea></label>${meetWC("")}${OPEN.includes(l.status)?nextFields(l):""}<div class="small" id="lm-msg"></div>
       <div class="row"><button class="btn pri" id="lm-save">Save meeting</button><button class="btn" id="lm-x">Cancel</button></div></div></div>`;
     bindMeet();$("#lm-x").onclick=()=>{S.drawer.mode=null;drawDrawer()};
     $("#lm-save").onclick=async()=>{const r=readMeet($("#lm-date").value,$("#lm-notes").value.trim());if(r.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(r.err)}</span>`;return}const nx=readNext();if(nx.err){$("#lm-msg").innerHTML=`<span style="color:var(--bad)">${esc(nx.err)}</span>`;return}
@@ -1955,7 +2176,7 @@ function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO()
    Built in the browser from the same analytics() the Management tab uses, for the filters on screen. */
 let PPTX_P=null;
 function loadPptx(){if(window.PptxGenJS)return Promise.resolve(window.PptxGenJS);
-  const urls=["https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js","https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"];
+  const urls=["vendor/pptxgen.bundle.js","https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js","https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"];
   return PPTX_P||(PPTX_P=new Promise((res,rej)=>{const next=i=>{if(i>=urls.length){PPTX_P=null;rej(new Error("Couldn't load the presentation library. Check your internet connection and try again."));return}
     const s=document.createElement("script");s.src=urls[i];s.onload=()=>window.PptxGenJS?res(window.PptxGenJS):next(i+1);s.onerror=()=>{s.remove();next(i+1)};document.head.appendChild(s)};next(0)}))}
 function deckData(F){const R=analytics(F),T=R.tot,E=R.engs.slice().sort((a,b)=>b.rev-a.rev||b.orders-a.orders);
@@ -2291,13 +2512,13 @@ function renderAcctsBase(m){ensureTip();if(S.acctView==="matrix"){renderAcctMatr
     </tbody></table></div>${byEng.length>10?`<button class="btn sm" id="engAll" style="margin-top:8px">${S.engAll?"Show top 10":"Show all "+byEng.length+" engineers"}</button>`:""}</div>`:""}
    ${renameReqsHTML()}
    <div class="row"><input id="acctQ" placeholder="Search account, country or region" value="${esc(S.acctQ||"")}" style="max-width:320px"><span class="sp"></span><span class="small muted">${fmtN(rows.length)} account${rows.length===1?"":"s"}</span>${F.status?"":`<span class="legend">${ACC_STATUS.map(x=>`<span><i style="background:var(${x[1]});border-radius:50%;width:8px;height:8px"></i>${x[0]}</span>`).join("")}</span>`}</div>
-   <div class="tw acct"><table><thead><tr>${cols.map(c=>th("acct",c)).join("")}<th>Key requirements</th>${can("account.manage")||S.myEng?"<th></th>":""}</tr></thead><tbody>
+   <div class="tw acct"><table><thead><tr>${cols.map(c=>th("acct",c)).join("")}<th>Key requirements</th>${can("account.manage")||S.myEng||S.role==="management"?`<th class="stk"></th>`:""}</tr></thead><tbody>
     ${shown.map(a=>{const x=E[a.eng];const rq=acctDoc(a.key).renameReq;const aka=acctDoc(a.key).aka||[];return`<tr class="click" data-open="${esc(a.latest.id)}"><td><b>${esc(a.name)}</b><div class="small muted">${esc(a.country||"—")}${aka.length?` · formerly ${esc(aka[aka.length-1])}`:""}</div>${rq&&rq.to?`<span class="chip warn" data-renchip>Rename asked: ${esc(rq.to)}</span>`:""}</td><td>${esc(a.region)}</td>
      <td>${a.eng?esc(a.eng):`<span class="muted">Unassigned</span>`}${a.otherEngs.length?` <span class="small muted" data-tip="Also: ${esc(a.otherEngs.join(", "))}">+${a.otherEngs.length}</span>`:""}</td>
      <td class="num">${a.leads.length}</td><td class="num">${x?x.accounts:"—"}</td><td class="num">${a.orders||""}</td><td class="num">${a.rev?fmtAED(a.rev)+dbar(a.rev,mxRev,"--c-main")+ohipNote(a.ohip):`<span class="muted">—</span>`}</td>
      <td class="num">${x&&x.rpa?fmtAED(x.rpa):"—"}</td><td>${astatus(a.status)}</td><td style="white-space:nowrap">${fmtD(a.last+"T12:00:00")}</td>
      <td>${a.reqs.slice(0,3).map(r=>`<span class="rq ${r.won?"won":r.open?"":"cl"}" data-tip="${esc(r.p)}: ${r.won?r.won+" won":""}${r.won&&r.open?", ":""}${r.open?r.open+" open":""}${!r.won&&!r.open?"closed":""}">${esc(r.p)}</span>`).join("")}${a.reqs.length>3?`<span class="small muted" data-tip="${esc(a.reqs.slice(3).map(r=>r.p).join(", "))}">+${a.reqs.length-3}</span>`:""}</td>
-     ${can("account.manage")?`<td style="white-space:nowrap">${a.key.startsWith("name:")?"":`<button class="btn sm" data-aren="${esc(a.key)}">Rename</button> <button class="btn sm" data-merge="${esc(a.key)}">Merge or delete</button>`}</td>`:S.myEng?`<td>${canAskRename(a.key)?`<button class="btn sm" data-aren="${esc(a.key)}">${acctDoc(a.key).renameReq?"Change request":"Ask to rename"}</button>`:""}</td>`:""}</tr>`}).join("")||`<tr><td colspan="12" class="empty">No accounts match these filters.</td></tr>`}
+     ${can("account.manage")||S.myEng||S.role==="management"?`<td class="stk">${acctRen(a.key)==="mgr"?`<button class="btn sm" data-aren="${esc(a.key)}">Rename</button> <button class="btn sm" data-merge="${esc(a.key)}">Merge or delete</button>`:acctRen(a.key)?`<button class="btn sm" data-aren="${esc(a.key)}">${acctDoc(a.key).renameReq?"Change request":(acctRen(a.key)==="sales"?"Rename":"Ask to rename")}</button>`:""}</td>`:""}</tr>`}).join("")||`<tr><td colspan="12" class="empty">No accounts match these filters.</td></tr>`}
    </tbody></table></div>
    ${rows.length>n?`<div><button class="btn" id="acctMore">Show ${Math.min(50,rows.length-n)} more</button> <span class="small muted">Showing ${n} of ${fmtN(rows.length)}</span></div>`:""}
    <p class="small muted" style="margin:0">Key requirements are the products asked for on the account's leads: green = ordered, outlined = still open. Revenue per account and Eng. accounts describe the account's assigned engineer, so you can compare an account against that engineer's average.</p>
@@ -2874,9 +3095,8 @@ function myTargetKpi(eng){if(!eng)return"";const y=new Date().getFullYear();cons
    The PDF is read in the browser (pdf.js, loaded only when needed) and never uploaded or stored.
    It fills the quotation form; the user checks the figures and saves as usual. */
 let PDFJS_P=null;
-function loadPDFJS(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);return PDFJS_P||(PDFJS_P=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-  s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)};s.onerror=()=>{PDFJS_P=null;rej(new Error("Couldn't load the PDF reader. Check the internet connection and try again."))};document.head.appendChild(s)}))}
-async function pdfLines(file){const lib=await loadPDFJS();const doc=await lib.getDocument({data:file instanceof Uint8Array?file.slice():new Uint8Array(await file.arrayBuffer())}).promise;const out=[];const fields=[];
+function loadPDFJS(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);return PDFJS_P||(PDFJS_P=new Promise((res,rej)=>{ldLoadJs(["vendor/pdf.min.js","https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"]).then(u=>{const loc=u.indexOf("vendor/")===0;window.pdfjsLib.GlobalWorkerOptions.workerSrc=loc?new URL("vendor/pdf.worker.min.js",location.href).href:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)},()=>{PDFJS_P=null;rej(new Error("Couldn't load the PDF reader. Check the internet connection and try again."))})}))}
+async function pdfLines(file){const lib=await loadPDFJS();const doc=await lib.getDocument({isEvalSupported:false,data:file instanceof Uint8Array?file.slice():new Uint8Array(await file.arrayBuffer())}).promise;const out=[];const fields=[];
   for(let p=1;p<=Math.min(doc.numPages,15);p++){const pg=await doc.getPage(p);const tc=await pg.getTextContent();const rows=[];try{(await pg.getAnnotations()).forEach(a=>{const v=a&&a.subtype==="Widget"&&typeof a.fieldValue==="string"?a.fieldValue.trim():"";if(v&&a.rect)fields.push({p,x:a.rect[0],y:a.rect[1],y2:a.rect[3],v})})}catch(e){}
     for(const it of tc.items){if(!it.str||!it.str.trim())continue;const x=it.transform[4],y=it.transform[5];let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r)rows.push(r={y,items:[]});r.items.push({x,w:it.width||0,s:it.str,f:it.fontName||""})}
     rows.sort((a,b)=>b.y-a.y);let prev=null;
@@ -3691,7 +3911,7 @@ function pmsRead(pre,root){root=root||document;const pms=(root.querySelector(`#$
 function bindPmsFields(pre,ps,cur,root,onChange){root=root||document;const sel=root.querySelector(`#${pre}-pms`);if(!sel)return;
   sel.onchange=()=>{const box=root.querySelector(`[data-pmsf="${pre}"]`);const keep=pmsRead(pre,root).iface;box.outerHTML=pmsFields(pre,sel.value,ps,Object.assign({},cur||{},keep));bindPmsFields(pre,ps,Object.assign({},cur||{},keep),root,onChange);onChange&&onChange(sel.value)}}
 /* lead drawer: PMS integration */
-function drawPms(l){const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);const hp=pmsProducts(l);const ed=S.drawer.pmsEdit&&canAct(l)&&!l.deleted;const pms=pmsOf(l);const sug=!pms?accountPms(accKey(l)):"";
+function drawPms(l){const A=$("#pmsArea");if(!A)return;if(S.drawer.edit&&lePmsEd(l)&&!l.deleted){lePmsHTML(l);return}const ps=productsOf(l);const hp=pmsProducts(l);const ed=S.drawer.pmsEdit&&canAct(l)&&!l.deleted;const pms=pmsOf(l);const sug=!pms?accountPms(accKey(l)):"";
   if(ed){A.innerHTML=`<div class="panel" style="padding:14px;display:grid;gap:10px"><h3>PMS integration</h3>${pmsFields("lp",pms||sug,hp,l.pmsIface)}
     <label class="f">PMS version / notes<input id="lp-note" value="${esc(l.pmsNote||"")}" placeholder="e.g. OPERA Cloud 23.4, hosted by Oracle"></label>
     ${ps.length>hp.length?`<div class="small muted">${esc(ps.filter(prodNoPms).join(", "))}: not tied to the hotel's PMS.</div>`:""}
@@ -3708,7 +3928,7 @@ function drawPms(l){const A=$("#pmsArea");if(!A)return;const ps=productsOf(l);co
         if(n)toast(`PMS also set on ${n} other open lead${n===1?"":"s"} for this hotel`)}}
     return}
   const rows=hp.map(p=>{const m=pmsMethods(p,pms);const i=ifaceOf(l,p);return`<tr><td>${esc(p)}</td><td>${i?`<span class="iface${i==="Standalone"?" sa":""}">${esc(i)}</span>`:pms?`<span class="muted">not set</span>`:"—"}${m&&!m.length?` <span class="small" style="color:var(--warn)">not listed for ${esc(pms)}</span>`:""}</td></tr>`}).join("");
-  A.innerHTML=`<div class="panel" style="padding:14px"><div class="row"><h3>PMS integration</h3>${pms?`<span class="chip">${esc(pms)}</span>`:`<span class="chip warn">PMS not recorded</span>`}<span class="sp"></span>${canAct(l)&&!l.deleted&&!pmsLocked(l)?`<button type="button" class="btn sm${pms?"":" pri"}" id="lp-e">${pms?"Edit":"Add PMS"}</button>`:""}</div>
+  A.innerHTML=`<div class="panel" style="padding:14px"><div class="row"><h3>PMS integration</h3>${pms?`<span class="chip">${esc(pms)}</span>`:`<span class="chip warn">PMS not recorded</span>`}<span class="sp"></span></div>
     ${!pms&&sug?`<div class="small" style="margin-top:6px">This hotel's other leads use <b>${esc(sug)}</b>.</div>`:""}
     ${pms&&hp.length?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Product</th><th>Interface</th></tr></thead><tbody>${rows}</tbody></table></div>`:""}
     ${pmsLocked(l)?`<div class="small muted" style="margin-top:6px">Chain standard PMS. A Lead Manager or Supervisor can change it for this hotel.</div>`:""}${l.pmsNote?`<div class="small muted" style="margin-top:6px">${esc(l.pmsNote)}</div>`:""}</div>`;
@@ -3726,7 +3946,7 @@ function pmsFromForm(l){const h=$("#aPms");if(!h)return{body:{}};const r=pmsRead
    Uses the browser's own speech recognition (SpeechRecognition / webkitSpeechRecognition): nothing is downloaded or
    stored by Lead Desk, the text is typed into the field and saved with the form like typed text. Where the browser has
    no speech recognition (e.g. Firefox) no button is shown. The browser may send the audio to its provider. */
-const VOICE_SEL="#f-notes,#f-mnotes,#e-notes,#md-notes,#md-req,#ct-n,#nx-n";
+const VOICE_SEL="#f-notes,#f-mnotes,#e-notes,#md-notes,#lm-notes,#a-notes[data-mw],#md-req,#ct-n,#nx-n";
 const VOICE_LANGS=[["en-GB","English (UK)"],["en-US","English (US)"],["ar-AE","Arabic"],["hi-IN","Hindi"],["fr-FR","French"],["es-ES","Spanish"],["de-DE","German"],["ru-RU","Russian"],["tr-TR","Turkish"],["zh-CN","Chinese"]];
 const voiceSR=()=>window.SpeechRecognition||window.webkitSpeechRecognition||null;
 function voiceLang(){let v="";try{v=localStorage.getItem("ld.voicelang")||""}catch(e){}if(VOICE_LANGS.some(x=>x[0]===v))return v;const n=(navigator.language||"en").toLowerCase().slice(0,2);return(VOICE_LANGS.find(x=>x[0].slice(0,2)===n)||VOICE_LANGS[0])[0]}
@@ -3976,7 +4196,7 @@ function pbLeadRows(l){const q=l.quote||{};const lines=Array.isArray(q.lines)?q.
     return{x,m,it,quoted,std,yearly:pbYearly(it)}})}
 function drawPricing(l){const A=$("#pbArea");if(!A)return;const q=l.quote;const hasLines=q&&Array.isArray(q.lines)&&q.lines.length;const canE=canAct(l)&&!l.deleted;
   const ed=S.drawer.pbEdit&&canE;const v=n=>n==null||n===""?"—":fmtN(+n);
-  if(!hasLines&&!l.pcs&&!l.users&&!l.implMode&&!(canPB()&&canE&&OPEN.includes(l.status))){A.innerHTML="";return}
+  if(!hasLines&&!l.pcs&&!l.users&&!l.implMode&&!(canPB()&&canE&&OPEN.includes(l.status))&&!(S.drawer.edit&&canE)){A.innerHTML="";return}
   const rows=hasLines?pbLeadRows(l):[];const grp=(f,label)=>{const R=rows.filter(f);if(!R.length)return"";const st=R.reduce((s,r)=>s+(r.std?r.std.amt:0),0),qt=R.reduce((s,r)=>s+r.quoted,0);const allStd=R.every(r=>r.std);
     return`<tr class="pbg"><td colspan="${canPB()?5:3}">${label}</td></tr>${R.map(r=>{const d=r.std&&r.std.amt?(r.quoted-r.std.amt)/r.std.amt:null;
       const sub=[r.it&&pbKey(r.x.item)!==pbKey(r.it.name)?esc(r.x.item):"",!r.it&&!r.m?"waiting for approval":"",r.std&&r.std.note?esc(r.std.note):""].filter(Boolean).join(" · ");
@@ -3984,10 +4204,9 @@ function drawPricing(l){const A=$("#pbArea");if(!A)return;const q=l.quote;const 
       <td class="num">${r.x.qty!=null?fmtN(r.x.qty):""}</td>${canPB()?`<td class="num">${r.std?fmtAED(r.std.amt):r.it?`<span class="small muted">no price</span>`:""}</td>`:""}<td class="num">${fmtAED(r.quoted)}</td>${canPB()?`<td class="num"${d!=null&&d<-.0005?` style="color:var(--warn)"`:""}>${d==null?"":(d*100).toFixed(1)+"%"}</td>`:""}</tr>`}).join("")}
       <tr class="tot"><td>${label} total</td><td></td>${canPB()?`<td class="num">${allStd?fmtAED(st):"—"}</td>`:""}<td class="num">${fmtAED(qt)}</td>${canPB()?`<td class="num">${allStd&&st?((qt-st)/st*100).toFixed(1)+"%":""}</td>`:""}</tr>`};
   const pend=hasLines?pbPending(l).length:0;
-  A.innerHTML=`<div class="panel pbp"><div class="row"><b>Products and pricing</b><span class="sp"></span>${canE?`<button type="button" class="btn sm" id="pb-e">${ed?"Close":"Edit quantities"}</button>`:""}${canPB()&&canE&&OPEN.includes(l.status)?`<button type="button" class="btn sm" id="pb-b">Build quote from price book</button>`:""}</div>
-   <div class="row small" style="gap:14px;margin-top:4px"><span>Front-desk PCs <b>${v(l.pcs)}</b></span><span>Users <b>${v(l.users)}</b></span><span>Rooms <b>${v(l.rooms)}</b></span><span>Implementation <b>${esc(l.implMode||"—")}</b></span></div>
-   ${ed?`<div class="grid2" style="margin-top:8px"><label class="f fsm">Front-desk PCs<input id="pb-pcs" type="number" min="0" step="1" value="${esc(l.pcs??"")}"></label><label class="f fsm">Users<input id="pb-us" type="number" min="0" step="1" value="${esc(l.users??"")}"></label>
-     <label class="f fsm">Rooms<input id="pb-rm" type="number" min="0" step="1" value="${esc(l.rooms??"")}"></label><label class="f fsm">Implementation<select id="pb-md">${opts(["Onsite","Remote"],l.implMode||"","Not set")}</select></label></div><div class="row" style="margin-top:6px"><button type="button" class="btn pri sm" id="pb-s">Save</button></div>`:""}
+  A.innerHTML=`<div class="panel pbp${S.drawer.edit&&canE?" edpanel edmode":""}"><div class="row"><b>Products and pricing</b><span class="sp"></span>${S.drawer.edit&&canPB()&&canE&&OPEN.includes(l.status)?`<button type="button" class="btn sm" id="pb-b">Build quote from price book</button>`:""}</div>
+   ${S.drawer.edit&&canE?"":`<div class="row small" style="gap:14px;margin-top:4px"><span>Front-desk PCs <b>${v(l.pcs)}</b></span><span>Users <b>${v(l.users)}</b></span><span>Rooms <b>${v(l.rooms)}</b></span><span>Implementation <b>${esc(l.implMode||"—")}</b></span></div>`}
+   ${S.drawer.edit&&canE?lePbHTML(l):""}
    ${hasLines?`<div class="tw" style="margin-top:8px"><table class="pbtab"><thead><tr><th>Item</th><th class="num">Qty</th>${canPB()?`<th class="num">Standard</th>`:""}<th class="num">Quoted</th>${canPB()?`<th class="num">Diff.</th>`:""}</tr></thead><tbody>
      ${grp(r=>r.it&&!r.yearly,"One-time")}${grp(r=>r.it&&r.yearly,"Yearly")}${grp(r=>!r.it,"Not a product or not matched")}</tbody></table></div>
      <div class="small muted" style="margin-top:6px">From quotation ${esc(q.no||"")}${pend?` · <b style="color:var(--warn)">${pend} line${pend===1?"":"s"} waiting for approval</b>`:" · all lines matched"}${canPB()?" · standard = approved price book on the quote date":""}</div>`:`<div class="small muted" style="margin-top:6px">No quotation lines yet. They're filled in when a quotation is read from a PDF or email${canPB()?", or built from the price book":""}.</div>`}</div>`;
@@ -4247,7 +4466,7 @@ function renderMine(m){const g=myGen();if(!g){m.innerHTML=`<section class="view"
   const ok=dr.filter(l=>!["Duplicate","Rejected"].includes(l.status));
   const cnt=k=>k?ok.filter(gcReached[k]).length:ok.length;const wonV=ok.filter(l=>l.status==="Won").reduce((a,l)=>a+orderVal(l),0);
   const list=(M.f?ok.filter(gcReached[M.f]):ok).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));const show=M.all?list:list.slice(0,25);
-  const stg=l=>`<span class="${stCls(l.status)}">${esc(l.status==="Meeting Done"?"Meeting done":l.status==="Quotation Sent"?"Quotation sent":l.assignedTo?l.status:l.status==="New"||l.status==="Info Needed"?"Waiting to be assigned":l.status)}</span>`;
+  const stg=l=>`<span class="${stCls(l.status)}">${esc(l.status==="Meeting Done"?"Meeting done":l.status==="Quotation Sent"?"Quotation sent":l.status==="Info Needed"?"More info needed":l.assignedTo?l.status:l.status==="New"?"Waiting to be assigned":l.status)}</span>${l.status==="Info Needed"?`<div class="small muted">${esc(infoAsk(l).reason)}</div>`:""}`;
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Leads I created for others</h2><p>Leads you brought in that someone else works on${g.dept?` (${esc(g.dept)})`:""}, and where each one stands. Read-only: you can open a lead to see it, not change it.</p></div>${can("page.leads")?`<button type="button" class="btn pri" id="mNew">+ New lead</button>`:""}</div>
    <div class="panel afbar"><div class="fgrid"><label class="f fsm">From<input type="date" id="gcF" value="${esc(M.from||"")}"></label><label class="f fsm">To<input type="date" id="gcT" value="${esc(M.to||"")}"></label>
     ${g.eng?`<label class="f" style="align-self:end;display:flex;gap:6px;align-items:center"><input type="checkbox" id="gcOwn"${M.own?" checked":""} style="width:auto"> Also show leads I work myself</label>`:""}
@@ -4272,7 +4491,7 @@ const ccSame=(a,b)=>["name","title","email","phone"].every(k=>nk(a[k]||"")===nk(
 function ccCtx(){if($("#f-cname"))return{ids:["#f-cname","#f-ctitle","#f-cemail","#f-cphone"],key:(S.form&&S.form.account&&!S.form.account.isNew)?S.form.account.key:"",except:""};
   if($("#e-cn")&&S.drawer){const l=S.leadMap[S.drawer.id];return{ids:["#e-cn","#e-ct","#e-ce","#e-cp"],key:l?accKey(l):"",except:l?l.id:""}}return null}
 function ccRun(){const X=ccCtx();if(!X)return;const g=$(X.ids[0]);if(!g)return;let host=$("#cdupHost");
-  if(!host){host=document.createElement("div");host.id="cdupHost";host.style.marginTop="8px";const grid=g.closest(".grid2");(grid||g.parentElement).insertAdjacentElement("afterend",host)}
+  if(!host){host=document.createElement("div");host.id="cdupHost";host.style.marginTop="8px";const ev=g.closest(".edv");if(ev)ev.appendChild(host);else{const grid=g.closest(".grid2");(grid||g.parentElement).insertAdjacentElement("afterend",host)}}
   const c={name:$(X.ids[0]).value.trim(),title:$(X.ids[1]).value.trim(),email:$(X.ids[2]).value.trim(),phone:$(X.ids[3]).value.trim()};
   const m=ccFind(X.key,c,X.except);const st=S.cchk&&S.cchk.sig===JSON.stringify(c)?S.cchk:null;if(S.cchk&&!st&&S.cchk.mode==="add")S.cchk=null;
   if(!m){host.innerHTML="";if(S.cchk&&S.cchk.mode!=="upd")S.cchk=null;return}
@@ -4633,7 +4852,7 @@ function ctrPickAdd(files){const P=S.ctrPick=S.ctrPick||[];let skipped=0,dup=0;f
    back), so the approver can compare the lines with the paper. At most 3 pages, each well under 300 KB. */
 function ctrPricePages(L,R){const pp=new Set();(R.lines||[]).forEach(x=>{const k=nk(String(x.item||"").slice(0,22));if(k.length<6)return;const num=r=>(String(r.t).match(/\d[\d,]*(\.\d+)?/g)||[]).length>=2;const hit=L.find(r=>nk(r.t).includes(k)&&num(r))||L.find(r=>{const i=L.indexOf(r);return nk(r.t).includes(k)&&[L[i-1],L[i+1]].some(n=>n&&n.p===r.p&&num(n))});if(hit)pp.add(hit.p)});
   if(!pp.size){const t=L.find(r=>/\btotal\b/i.test(r.t)&&/\d[\d,]*\.\d{2}/.test(r.t));if(t)pp.add(t.p)}return[...pp].sort((a,b)=>a-b).slice(0,3)}
-async function pdfPageImages(file,pages){const lib=await loadPDFJS();const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const out=[];
+async function pdfPageImages(file,pages){const lib=await loadPDFJS();const doc=await lib.getDocument({isEvalSupported:false,data:new Uint8Array(await file.arrayBuffer())}).promise;const out=[];
   for(const p of pages.slice(0,3)){const pg=await doc.getPage(p);let w=1000,q=0.6,img="";for(let k=0;k<4;k++){const v0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:w/v0.width});const cv=document.createElement("canvas");cv.width=Math.round(vp.width);cv.height=Math.round(vp.height);
       const cx=cv.getContext("2d");cx.fillStyle="#fff";cx.fillRect(0,0,cv.width,cv.height);await pg.render({canvasContext:cx,viewport:vp}).promise;img=cv.toDataURL("image/jpeg",q);if(img.length<380000)break;w-=140;q=Math.max(0.3,q-0.1)}
     if(img&&img.length<520000)out.push({n:p,img})}return out}
@@ -5904,28 +6123,42 @@ const engUses=name=>(S.allLeads||S.leads).filter(l=>[l.assignedTo,l.generatedBy,
    Old names stay in doc.aka so a search still finds the hotel. All done in the database: 34_amc_lines_signoff_cloud.sql. */
 const acctDoc=key=>(S.accounts||{})[key]||{};
 const renameReqs=()=>Object.entries(S.accounts||{}).filter(([k,a])=>a&&!a.deleted&&a.renameReq&&a.renameReq.to).map(([k,a])=>Object.assign({key:k,name:(allAccounts()[k]||{}).name||a.name||k},a.renameReq));
-const canAskRename=key=>!can("account.manage")&&!!S.myEng&&!String(key).startsWith("name:")&&S.leads.some(l=>l.accountKey===key&&isMine(l));
+/* Who may change an account name (20 Nov 2026): Lead Manager / Supervisor (account.manage) rename directly. A Sales login renames an account
+   it has a lead on; the database lets that through only when every lead on the account is theirs and it has no AMC contract, otherwise
+   the request goes for approval. Management can only ask. The rule is enforced in supabase/44_account_rename_sales.sql. */
+const acctRen=key=>{key=String(key||"");if(!key||key.startsWith("name:"))return"";if(can("account.manage"))return"mgr";
+  if(S.role==="sales"&&S.myEng&&S.leads.some(l=>l.accountKey===key&&isMine(l)))return"sales";if(S.role==="management")return"ask";return""};
+const canAskRename=key=>{const m=acctRen(key);return m==="sales"||m==="ask"};
+const renOK=l=>!!l&&!l.deleted&&!!l.accountKey&&["mgr","sales"].includes(acctRen(l.accountKey));
 async function acctRpc(fn,args,fallback){try{if(window.__accountRename)await window.__accountRename[fn](args);else await fallback();return true}catch(e){toast("Couldn't save: "+(e.message||e.code));return false}}
-function openAcctRename(key){const A=allAccounts()[key];if(!A)return;const direct=can("account.manage");const req=acctDoc(key).renameReq;const n=S.leads.filter(l=>l.accountKey===key).length;
-  cfmOpen(`<h3>${direct?"Rename account":"Ask to rename this account"}</h3>
-    <p class="small muted" style="margin:0">${direct?`The new name replaces <b>${esc(A.name)}</b> on the account, on its ${n} lead${n===1?"":"s"} and on its AMC contracts. The old name is kept so a search still finds the hotel, and the change is recorded in the audit trail.`:`A Lead Manager or Supervisor has to approve before <b>${esc(A.name)}</b> is renamed. Until then nothing changes.`}</p>
+function openAcctRename(key){const A=allAccounts()[key];if(!A)return;const mode=acctRen(key)||"ask";const direct=mode==="mgr",self=mode==="sales";const req=acctDoc(key).renameReq;const n=S.leads.filter(l=>l.accountKey===key).length;
+  cfmOpen(`<h3>${direct||self?"Rename account":"Ask to rename this account"}</h3>
+    <p class="small muted" style="margin:0">${direct?`The new name replaces <b>${esc(A.name)}</b> on the account, on its ${n} lead${n===1?"":"s"} and on its AMC contracts. The old name is kept so a search still finds the hotel, and the change is recorded in the audit trail.`
+      :self?`The new name replaces <b>${esc(A.name)}</b> on this account and its lead${n===1?"":"s"}. If a colleague also has a lead on it, or it has an AMC contract, your request goes to a Lead Manager or Supervisor for approval instead. The old name is kept and the change is recorded in the audit trail.`
+      :`A Lead Manager or Supervisor has to approve before <b>${esc(A.name)}</b> is renamed. Until then nothing changes.`}</p>
     <label class="f">New name <span class="req">*</span><input id="arIn" maxlength="120" value="${esc(req&&req.to||A.name)}"></label>
     <label class="f">Reason <span class="req">*</span><input id="arWhy" maxlength="200" placeholder="e.g. Hotel rebranded, spelling mistake" value="${esc(direct&&req?req.reason||"":"")}"></label><div class="small" id="arMsg"></div>
-    <div class="row"><button type="button" class="btn pri" id="arOk">${direct?"Rename":"Send for approval"}</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,
+    <div class="row"><button type="button" class="btn pri" id="arOk">${direct||self?"Rename":"Send for approval"}</button><button type="button" class="btn" data-cfmx>Cancel</button></div>`,
   async()=>{const v=$("#arIn").value.trim().replace(/\s+/g," "),why=$("#arWhy").value.trim(),M=$("#arMsg");const bad=t=>{M.innerHTML=`<span style="color:var(--bad)">${t}</span>`;return false};
     if(v.length<3)return bad("Enter the new name.");if(v===A.name)return bad("That is the name it already has.");if(why.length<3)return bad("Give the reason.");
     const ex=Object.values(allAccounts()).find(x=>x.key!==key&&(x.key===keyOf(v)||normTxt(x.name)===normTxt(v)));
     if(ex)return bad(`“${esc(ex.name)}” already exists${ex.country?" ("+esc(ex.country)+")":""}. ${direct?"Use “Merge or delete” to combine the two accounts instead.":"Ask a Lead Manager to merge the two accounts instead."}`);
     const t=nowISO(),by=actor()||S.myName||"";const cur={name:A.name,country:A.country||""};
-    const ok=direct?await acctRpc("rename",{key,name:v,reason:why,cur},async()=>{await S.db.doc("accounts/"+key).set(Object.assign({},acctDoc(key),{name:v,country:acctDoc(key).country||cur.country,aka:[...new Set([...(acctDoc(key).aka||[]),A.name])],renamed:{from:A.name,to:v,by,at:t,reason:why},renameReq:null}));for(const l of S.leads.filter(l=>l.accountKey===key))await S.db.doc("leads/"+l.id).update({accountName:v,updatedAt:t})})
-      :await acctRpc("request",{key,name:v,reason:why,cur},async()=>{await S.db.doc("accounts/"+key).set(Object.assign({name:cur.name,country:cur.country},acctDoc(key),{renameReq:{to:v,reason:why,by,at:t}}))});
-    if(ok){toast(direct?`Renamed to ${v}`:"Sent for approval");render()}return ok},"#arOk")}
+    const doRename=()=>acctRpc("rename",{key,name:v,reason:why,cur},async()=>{await S.db.doc("accounts/"+key).set(Object.assign({},acctDoc(key),{name:v,country:acctDoc(key).country||cur.country,aka:[...new Set([...(acctDoc(key).aka||[]),A.name])],renamed:{from:A.name,to:v,by,at:t,reason:why},renameReq:null}));for(const l of S.leads.filter(l=>l.accountKey===key))await S.db.doc("leads/"+l.id).update({accountName:v,updatedAt:t})});
+    const doAsk=()=>acctRpc("request",{key,name:v,reason:why,cur},async()=>{await S.db.doc("accounts/"+key).set(Object.assign({name:cur.name,country:cur.country},acctDoc(key),{renameReq:{to:v,reason:why,by,at:t}}))});
+    let ok=false,msg="";
+    if(direct){ok=await doRename();msg=`Renamed to ${v}`}
+    else if(self){if(window.__accountRename){try{await window.__accountRename.rename({key,name:v,reason:why,cur});ok=true;msg=`Renamed to ${v}`}
+        catch(e){if(/SHARED_ACCOUNT/.test(e.message||"")){ok=await doAsk();msg="Others also work on this account, so your request was sent for approval"}else toast("Couldn't save: "+(e.message||e.code))}}
+      else{ok=await doRename();msg=`Renamed to ${v}`}}
+    else{ok=await doAsk();msg="Sent for approval"}
+    if(ok){toast(msg);render()}return ok},"#arOk")}
 async function acctRenameDecide(key,ok){const a=acctDoc(key),r=a.renameReq;if(!r)return;const A=allAccounts()[key]||{name:a.name};const t=nowISO(),by=actor()||S.myName||"";
   if(ok){const ex=Object.values(allAccounts()).find(x=>x.key!==key&&(x.key===keyOf(r.to)||normTxt(x.name)===normTxt(r.to)));if(ex){toast(`“${ex.name}” already exists. Merge the two accounts instead, or reject this request.`);return}}
   const done=ok?await acctRpc("rename",{key,name:r.to,reason:r.reason||"",cur:{name:A.name,country:A.country||""}},async()=>{await S.db.doc("accounts/"+key).set(Object.assign({},a,{name:r.to,aka:[...new Set([...(a.aka||[]),A.name])],renamed:{from:A.name,to:r.to,by,at:t,reason:r.reason||"",askedBy:r.by||""},renameReq:null}));for(const l of S.leads.filter(l=>l.accountKey===key))await S.db.doc("leads/"+l.id).update({accountName:r.to,updatedAt:t})})
     :await acctRpc("reject",{key},async()=>{await S.db.doc("accounts/"+key).set(Object.assign({},a,{renameReq:null,renameLast:{to:r.to,by:r.by||"",status:"rejected",decidedBy:by,at:t}}))});
   if(done){toast(ok?`Renamed to ${r.to}`:"Rename request rejected");render()}}
-function renameReqsHTML(){const L=renameReqs();const mgr=can("account.manage");const show=mgr?L:L.filter(r=>S.leads.some(l=>l.accountKey===r.key&&isMine(l)));if(!show.length)return"";
+function renameReqsHTML(){const L=renameReqs();const mgr=can("account.manage");const show=mgr?L:L.filter(r=>S.leads.some(l=>l.accountKey===r.key&&isMine(l))||(S.role==="management"&&r.by&&nk(r.by)===nk(actor()||S.myName||"")));if(!show.length)return"";
   return`<div class="panel" id="renReq"><h3>Account rename requests <span class="chip warn">${show.length}</span></h3><p class="small muted" style="margin:2px 0 10px">${mgr?"A sales engineer asked for these names to be changed. Approving changes the name on the account, all its leads and its AMC contracts.":"Waiting for a Lead Manager or Supervisor."}</p>
     <div class="tw plain"><table><thead><tr><th>Account now</th><th>New name asked</th><th>Reason</th><th>Asked by</th><th></th></tr></thead><tbody>${show.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td><b>${esc(r.to)}</b></td><td>${esc(r.reason||"—")}</td><td>${esc(r.by||"—")}<div class="small muted">${fmtD(r.at)}</div></td>
      <td class="num" style="white-space:nowrap">${mgr?`<button type="button" class="btn sm" data-arno="${esc(r.key)}">Reject</button> <button type="button" class="btn sm pri" data-aryes="${esc(r.key)}">Approve</button>`:`<span class="chip warn">Waiting</span>`}</td></tr>`).join("")}</tbody></table></div></div>`}
@@ -5976,7 +6209,7 @@ function usersPanel(){const mem=Object.entries(S.users);const mapped=new Set(mem
      <label class="f" id="uengWrap" ${(S.urole||"sales")==="sales"?"":"hidden"}>Linked sales engineer<select id="ueng">${opts(spNames().filter(n=>!mapped.has(nk(n))),"","Choose the engineer name")}</select></label>
    </div><div class="row" style="margin-top:10px"><button class="btn pri" id="uAdd" type="button">Add user</button><div id="uMsg" class="small"></div></div>
    ${S.userNote?`<div class="notice ${S.userNote.lvl}" style="margin-top:10px">${S.userNote.msg}</div>`:""}
-   ${window.LD_HOSTED?`<p class="small muted" style="margin:8px 0 0">New users get the temporary password <b class="mono">Samsotech123</b> and must change it at first sign-in.</p>`:""}
+   ${window.LD_HOSTED?`<p class="small muted" style="margin:8px 0 0">Each new or reset sign-in gets its own random temporary password, shown once on this screen. The person must change it at first sign-in.</p>`:""}
    <div class="tw" style="margin-top:14px"><table><thead><tr><th>Person</th><th>Role</th><th>Sales engineer</th><th></th></tr></thead><tbody>
     ${window.LD_HOSTED?"":`<tr><td>${S.isOwner?"You":"Page owner"} <span class="chip">Owner</span></td><td>Supervisor</td><td>${esc((S.users[S.uid]||{}).engineer&&S.isOwner?S.users[S.uid].engineer:"—")}</td><td></td></tr>`}
     ${mem.filter(([id])=>window.LD_HOSTED||!(S.isOwner&&id===S.uid)).map(([id,u])=>`<tr><td><span data-uid="${esc(id)}" data-fallback="Unknown user">${esc(S.names[id]||"")}</span><div class="small muted" data-mail="${esc(id)}"></div>${window.LD_HOSTED?`<input data-uname="${esc(id)}" maxlength="60" placeholder="Display name" aria-label="Display name for ${esc(id)}" value="${esc(u.displayName||"")}" style="max-width:240px;margin-top:4px;padding:5px 8px;font-size:12.5px">`:""}</td>

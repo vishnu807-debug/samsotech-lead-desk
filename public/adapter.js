@@ -219,6 +219,12 @@
     if (error) throw Object.assign(new Error(error.message), { code: error.code });
     return true;
   };
+  // "Request info" answered by the person who created the lead (supabase/47_info_request.sql)
+  window.__leadInfoReply = async (id, contact, notes, timeline, note) => {
+    const { error } = await sb.rpc("lead_info_reply", { p_id: id, p_contact: contact || {}, p_notes: notes ?? null, p_timeline: timeline ?? null, p_note: note || "" });
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return true;
+  };
   // Joint work and events (supabase/33_joint_events.sql)
   window.__shareDecide = async (id, ok) => {
     const { error } = await sb.rpc("lead_share_decide", { p_id: id, p_ok: !!ok });
@@ -543,7 +549,6 @@
       const a = host.querySelector("#cp1").value, b = host.querySelector("#cp2").value, m = host.querySelector("#cpm");
       if (a.length < 8) { m.innerHTML = '<span style="color:var(--bad)">Use at least 8 characters.</span>'; return; }
       if (a !== b) { m.innerHTML = '<span style="color:var(--bad)">The two passwords don\'t match.</span>'; return; }
-      if (a === "Samsotech123") { m.innerHTML = '<span style="color:var(--bad)">Choose a password different from the temporary one.</span>'; return; }
       const { error } = await sb.auth.updateUser({ password: a, data: { must_change_password: false } });
       if (error) m.innerHTML = `<span style="color:var(--bad)">${clean(error.message)}</span>`;
       else { window.__audit("password_changed", "session", ME.email, forced ? "Changed the temporary password" : "Changed password"); m.innerHTML = '<span style="color:var(--ok)">Password changed.</span>'; setTimeout(() => { close(); if (forced && window.__afterPassword) window.__afterPassword(); }, 900); }
