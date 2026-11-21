@@ -610,6 +610,15 @@ input.err,select.err,textarea.err{border-color:var(--bad)!important}
 .apc{padding:9px 0;border-top:1px solid var(--line)}.apc:first-child{border-top:0}
 .aptl{display:grid;gap:10px}.apt{display:grid;grid-template-columns:84px auto minmax(0,1fr);gap:8px;align-items:start}.apx{min-width:0;font-size:13px}.apk{justify-self:start}
 .apn{margin-top:3px;white-space:pre-wrap;color:var(--muted);cursor:pointer}.apn.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kcols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}@media(max-width:860px){.kcols{grid-template-columns:minmax(0,1fr)}}
+.kacard{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;padding:12px 14px}.kacard:hover{border-color:var(--accent)}.kacard:focus-visible{outline:2px solid var(--accent)}.kacard .row{min-width:0}
+.linkb.kab{font:500 13px var(--f-body);text-align:left;color:var(--ink);flex:1 1 160px;min-width:0}.linkb.kab:hover{color:var(--accent);text-decoration:underline}
+button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%;padding:0;border-radius:6px}button.apt.kab:hover{background:var(--sunk)}
+.stp{display:flex;flex-wrap:wrap;gap:6px}.stp button{padding:5px 11px;border-radius:999px;border:1px solid var(--line);font:500 12.5px var(--f-body);color:var(--muted);background:var(--surface);cursor:pointer}.stp button:hover{border-color:var(--accent)}.stp .done{background:var(--accent-soft);color:var(--ink)}.stp .on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.kmood{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted)}.kmood i{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}.kmood[data-mood="Positive"] i{background:var(--ok)}.kmood[data-mood="Cautious"] i{background:var(--warn,#d99a00)}.kmood[data-mood="Unhappy"] i{background:var(--bad)}
+.ksel{width:auto;max-width:100%;padding:3px 6px;font-size:12.5px}.chip.kal{cursor:pointer;font:inherit}.kform label.f{margin:0}
+.kmrow{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:8px;align-items:end}.kmrow.ks{grid-template-columns:minmax(0,2fr) minmax(0,1fr) 90px 140px auto}
+@media(max-width:700px){.kmrow,.kmrow.ks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.kmrow label:first-child{grid-column:1/-1}.kmrow .btn{justify-self:start}}
 @media(max-width:480px){.apt{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}.apt .apd{grid-column:1}.apt .apk{grid-column:2;grid-row:1}.apt .apx{grid-column:1/-1}.apks{grid-template-columns:repeat(2,minmax(0,1fr))}.apv{font-size:19px!important}}
 </style>
 
@@ -626,6 +635,7 @@ input.err,select.err,textarea.err{border-color:var(--bad)!important}
       <button data-tab="meet" role="tab">Meetings</button>
       <button data-tab="mgmt" role="tab"><span class="tl">Management</span></button>
       <button data-tab="accts" role="tab">Accounts</button>
+      <button data-tab="keyacct" role="tab">Key accounts</button>
       <button data-tab="set" role="tab">Products &amp; settings</button>
       <button data-tab="audit" role="tab">Audit trail</button>
       <div class="mtw" id="tabMore" hidden><button type="button" class="mt" id="tabMoreBtn" aria-haspopup="true" aria-expanded="false">More <span class="count" id="c-more" hidden></span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="mtp" id="tabMoreMenu" hidden></div></div>
@@ -635,7 +645,7 @@ input.err,select.err,textarea.err{border-color:var(--bad)!important}
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 20 Nov 2026 · build b7fdd95</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 21 Nov 2026 · build bf71e7c</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
@@ -762,7 +772,7 @@ function meetWords(t){const w=String(t||"").toLowerCase().match(/[\p{L}\p{N}][\p
 function meetNotesErr(t){const c=meetWords(t),mn=meetMin();if(c.n<mn)return`Meeting notes need at least ${mn} words (you have ${c.n}). Say who attended, what was discussed, the client's concerns and the agreed next step.`;
   if(c.d<Math.ceil(mn/2))return`Please write real meeting notes: use at least ${Math.ceil(mn/2)} different words.`;return""}
 const meetWC=t=>{const c=meetWords(t),mn=meetMin();return`<div class="small wc${c.n>=mn?" ok":""}" data-wc aria-live="polite">${c.n} / ${mn} words${c.n>=mn?" ✓":""}</div>`};
-document.addEventListener("input",e=>{const el=e.target;if(!el||!el.matches||!el.matches("#f-mnotes,#md-notes,#lm-notes,#a-notes[data-mw]"))return;const w=el.closest("label")?.nextElementSibling;if(w&&w.hasAttribute("data-wc")){const c=meetWords(el.value),mn=meetMin();w.textContent=`${c.n} / ${mn} words${c.n>=mn?" ✓":""}`;w.classList.toggle("ok",c.n>=mn)}const m=el.closest(".panel")?.querySelector("#lm-msg,#md-msg,#a-aed");if(m&&/meeting notes/i.test(m.textContent))m.textContent=""});
+document.addEventListener("input",e=>{const el=e.target;if(!el||!el.matches||!el.matches("#f-mnotes,#md-notes,#lm-notes,#km-notes,#a-notes[data-mw]"))return;const w=el.closest("label")?.nextElementSibling;if(w&&w.hasAttribute("data-wc")){const c=meetWords(el.value),mn=meetMin();w.textContent=`${c.n} / ${mn} words${c.n>=mn?" ✓":""}`;w.classList.toggle("ok",c.n>=mn)}const m=el.closest(".panel")?.querySelector("#lm-msg,#md-msg,#km-msg,#a-aed");if(m&&/meeting notes/i.test(m.textContent))m.textContent=""});
 function meetingsOf(l){if(Array.isArray(l.meetings))return l.meetings;
   return l.meeting?[{id:"m0",date:(l.meeting.date||"").slice(0,10),mode:l.meeting.mode||"",type:"New lead meeting",products:productsOf(l),notes:l.meeting.notes||"",legacy:true}]:[]}
 const reqDate=l=>l.requirementDate||(l.createdAt||"").slice(0,10);
@@ -780,7 +790,7 @@ const ROLES=["supervisor","leadmanager","management","sales","amc"];
 const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales",amc:"AMC"};
 const PERMISSIONS=[
  ["page.leads","Leads tab: lead form and lead list","Pages"],["page.backoffice","Back office queue","Pages"],["page.pipelines","Pipelines","Pages"],["page.focus","Focus (needs action, forecast call, cross-sell)","Pages"],
- ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],["page.audit","Audit trail (who did what, when)","Pages"],
+ ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],["page.audit","Audit trail (who did what, when)","Pages"],["keyacct.manage","Key accounts: open the page, log account meetings, keep people, requirements and promises","Pages"],
  ["lead.view_all","See every engineer's leads, meetings and accounts (otherwise only their own)","Data"],
  ["lead.create","Create any lead","Leads"],["lead.create_own_outbound","Create own outbound leads","Leads"],["lead.verify","Approve, assign, reject, close duplicates","Leads"],
  ["lead.edit_all","Update any lead","Leads"],["lead.edit_own","Update own leads","Leads"],["lead.reassign","Reassign leads","Leads"],["lead.remove","Delete approved leads with a reason, and restore them","Leads"],["lead.edit_country","Change a lead's country at any stage","Leads"],["meeting.edit_won","Change meeting dates on won leads","Leads"],["lead.status_override","Move a won lead back to an earlier status (with a reason)","Leads"],["event.manage","Register events (exhibitions, roadshows) and who attended","Leads"],["lead.won_own","Change their own won leads for a limited number of days: move back a stage or correct the order value, no reason needed","Leads"],
@@ -788,19 +798,19 @@ const PERMISSIONS=[
  ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
  ["report.world","Management → World view: tile map, country outlook, opportunity score, whitespace","Reports"],["outlook.manage","Enter or import market outlook data and set the opportunity score weights (World view)","Reports"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["order.register_approve","lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
+const DEFAULT_PERMS={"leadmanager": ["order.register_approve","lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage", "keyacct.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
 function permsFor(role){if(role==="supervisor")return PERMISSIONS.map(x=>x[0]);const def=DEFAULT_PERMS[role]||[];if(!(S.perms&&Array.isArray(S.perms[role])))return def;
   const known=Array.isArray(S.permsKnown)?S.permsKnown:PERMS_V1;return S.perms[role].concat(def.filter(p=>!known.includes(p)))}
 const can=perm=>!!S.role&&permsFor(S.role).includes(perm);
-const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",mine:"page.mine",renew:"page.renewals",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",set:"page.settings",audit:"page.audit"};
-const LANDING=["bo","mgmt","pipe","focus","mine","renew","meet","new","accts","set","audit"];
+const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",mine:"page.mine",renew:"page.renewals",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",keyacct:"keyacct.manage",set:"page.settings",audit:"page.audit"};
+const LANDING=["bo","mgmt","pipe","focus","mine","renew","meet","new","accts","keyacct","set","audit"];
 const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet",amc:"renew"};   // first page after sign-in
 const homeTab=()=>{const a=allowedTabs();return a.includes(HOME[S.role])?HOME[S.role]:a[0]};
 const mineLabel=()=>{const b=document.querySelector('#tabs [data-tab="mine"]');if(b){const t="Created for others";if(b.textContent!==t)b.textContent=t}};
-const allowedTabs=()=>LANDING.filter(t=>t==="mine"?!!(typeof myGen==="function"&&myGen()):can(TAB_PERM[t]));
+const allowedTabs=()=>LANDING.filter(t=>t==="mine"?!!(typeof myGen==="function"&&myGen()):t==="keyacct"?kaOn():can(TAB_PERM[t]));
 const viewAll=()=>can("lead.view_all");
 const isMine=l=>!!S.myEng&&nk(l.assignedTo)===nk(S.myEng);
 const isSales=()=>!can("lead.create")&&can("lead.create_own_outbound");   // outbound-only lead form
@@ -896,7 +906,7 @@ function dupChecks(l){const out=[];const others=S.leads.filter(x=>x.id!==l.id);
 
 /* ---------- boot ---------- */
 async function boot(){
-  bindTabs();const hash=location.hash.slice(1);if(["new","bo","pipe","meet","mgmt","accts","set","audit"].includes(hash)){S.tab=hash;S.tabChosen=true}
+  bindTabs();const hash=location.hash.slice(1);if(["new","bo","pipe","meet","mgmt","accts","keyacct","set","audit"].includes(hash)){S.tab=hash;S.tabChosen=true}
   const [db,user,downloads]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("downloads")]);
   S.db=db;S.user=user;S.downloads=downloads;
   if(user){const me=await user.me();S.uid=me.id;S.isOwner=me.isOwner;S.myName=me.name;S.myEmail=me.email||"";S.canEdit=await user.canEdit();S.canWrite=await user.can("data.write")}
@@ -968,10 +978,10 @@ function renderInner(){const m=$("#main");
   tabsFit();
   $("#banner").querySelector("[data-perm]")?.remove();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
-({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,renew:renderRenew,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
+({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,renew:renderRenew,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,keyacct:renderKeyAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
 function softInner(){updateCounts();if(!S.role||!S.usersLoaded)return render();if(S.tab==="new"){if(!$("#leadForm")){if(!document.activeElement?.closest?.(".lfbar"))render()}else refreshFormChecks()}else if(S.tab==="set"){if(!$("#setForm")||!document.activeElement||!document.activeElement.closest("#main"))render()}else{const y=scrollY;render();scrollTo(0,y)}
-  if(S.drawer)refreshDrawer();else if(S.acctP)drawAcctP();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
+  if(S.drawer)refreshDrawer();else if(S.acctP)drawAcctP();else if(S.kaW&&!S.kaM&&!document.activeElement?.closest?.("#drawerHost form"))drawKeyAcct();else if(S.merge&&!document.activeElement?.closest?.("#drawerHost"))drawMerge()}
 // A lead is "new for me" from the moment it is assigned to me until I open it (assigneeSeenAt is stored on the lead).
 const NEW_DAYS=14;
 function isNewForMe(l){return isMine(l)&&OPEN.includes(l.status)&&!["New","Info Needed"].includes(l.status)&&!!l.assignedAt&&days(l.assignedAt)<=NEW_DAYS&&!(l.assigneeSeenAt&&l.assigneeSeenAt>=l.assignedAt)}
@@ -1281,6 +1291,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
         status:"New",assignedTo:sales&&ownLead?S.myEng:"",priority:"",createdAt:t,createdBy:S.uid||null,stageAt:{New:t},histRepeat:ps.some(p=>productState(a.key,p).state==="hist"),
         ...((f.mNotes||"").trim()?{meetings:[{id:"m"+Date.now().toString(36),date:f.mDate,mode:f.mMode,type:"New lead meeting",products:ps,notes:f.mNotes.trim(),by:actor()||v("f-genby"),byId:S.uid||null,at:t}]}:{}),
         log:[{t,by:"",byId:S.uid||null,a:"Lead submitted · "+ps.join(", ")+" (generated by "+(evPick?evBy+" at "+evPick.name:v("f-genby"))+")"}].concat((f.mNotes||"").trim()?[{t,by:actor()||"",byId:S.uid||null,a:`New lead meeting (${f.mMode}, ${fmtD(f.mDate)}) · ${f.mNotes.trim()}`}]:[])});
+    try{if(f.fromKey)await kaLinkLead(f.fromKey,ref)}catch(e){}
     {const nu=await ccApply({name:v("f-cname"),title:v("f-ctitle"),email:v("f-cemail"),phone:v("f-cphone")},ref);if(nu)toast("Contact also updated on "+nu+" other lead"+(nu===1?"":"s")+" of this account")}S.form=null;render();$("#submitMsg").innerHTML=`<div class="notice ok">Submitted <span class="mono">${ref}</span> with ${ps.length} product${ps.length>1?"s":""}. ${sales?(ownLead?"It's in My leads under Awaiting approval. You can log meetings on it while it waits.":`It's in ${esc(terr.owner)}'s territory, so back office will pass it to ${esc(terr.owner)}.`):"Back office will verify and assign it."}</div>`;scrollTo(0,0);
   }catch(e){btn.disabled=false;btn.textContent="Submit for verification";msg.innerHTML=`<div class="notice bad">Couldn't save the lead (${esc(e.code||e.message)}). ${e.code==="invalid_argument"?"Your access may be view-only; ask the owner for Contributor access.":"Try again."}</div>`}}
 async function nextRef(){if(window.LD_HOSTED){const{data,error}=await window.__sb.rpc("next_lead_ref");if(error)throw{code:error.code==="42501"?"invalid_argument":"unavailable",message:error.message};return data}
@@ -2552,7 +2563,7 @@ const apPrices=()=>viewAll()||can("contract.view_all");
 async function apLoad(key){S.apExt=S.apExt||{};if(!window.LD_HOSTED||viewAll()||!key||S.apExt[key]!==undefined)return;S.apExt[key]=null;
   try{const{data}=await window.__sb.rpc("account_profile",{p_key:key});S.apExt[key]=data||false}catch(e){S.apExt[key]=false}
   if(S.acctP&&S.acctP.key===key)drawAcctP()}
-function openAcctProfile(key){if(!key)return;if(typeof ctrLoad==="function")ctrLoad();S.acctP={key,all:{}};S.drawer=null;apLoad(key);drawAcctP()}
+function openAcctProfile(key){if(!key)return;try{kaDatesLoad(key);if(kaOn())kaLoad()}catch(e){}if(typeof ctrLoad==="function")ctrLoad();S.acctP={key,all:{}};S.drawer=null;apLoad(key);drawAcctP()}
 function closeAcctProfile(){const f=S.apFrom;S.acctP=null;S.apFrom=null;$("#drawerHost").innerHTML="";document.onkeydown=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}}
 const apM=n=>{n=Math.round(n||0);return Math.abs(n)>=1e6?(n/1e6).toFixed(2)+"M":n.toLocaleString("en-US")};
 function apData(key){const full=viewAll(),pr=apPrices(),today=todayISO(),yr=today.slice(0,4);const ext=((S.apExt||{})[key])||null;
@@ -2633,6 +2644,7 @@ function apData(key){const full=viewAll(),pr=apPrices(),today=todayISO(),yr=toda
     const qd=String(l.quote?.date||l.stageAt?.["Quotation Sent"]||"").slice(0,10);if(qd&&l.quote)T.push({d:qd,k:"Quote",t:`Quotation ${esc(l.quote.no||"")} sent${(full||isMine(l))&&l.quote.aed?" · "+fmtAED(l.quote.aed):""} <span class="muted">(${esc(l.ref)})</span>`,l});
     if(l.status==="Won")T.push({d:String(wonAt(l)).slice(0,10),k:"Order",t:`Order won${(full||isMine(l))&&orderVal(l)?" · "+fmtAED(orderVal(l)):""} <span class="muted">(${esc(l.ref)}${l.registered?", registered":""})</span>`,l})});
   C.forEach(c=>{if(c.start)T.push({d:String(c.start).slice(0,10),k:"Contract",t:`AMC contract ${esc(c.no)} started`+(c.end?` · to ${fmtD(c.end)}`:""),c})});
+  try{kaProfileTimeline(key).forEach(x=>T.push(x))}catch(e){}
   T.sort((a,b)=>(b.d||"").localeCompare(a.d||""));
   return{key,full,pr,today,yr,name,country,city:reg.city||"",group:reg.group||"",status,engNames,pms,rooms,pcs,users,ls:live,won,open,C,liveC,newestC,ext,extC,years,ordersTotal,ohipOrders,thisYear,engs,prods,cross,contacts,rens,renDue,nextRen,recurring,recSrc,
     lastMeeting,lastTouchAt,pipeline,warns,T,customerSuccess:(newestC&&newestC.sender)||""}}
@@ -2676,7 +2688,7 @@ function drawAcctP(){const S0=S.acctP;if(!S0)return;const sc0=document.querySele
     :`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">Nothing logged yet.</p></div>`;
   const people=[D.engNames.length?`Sales engineer <b>${esc(D.engNames.join(", "))}</b>`:"",D.customerSuccess?`Customer success <b>${esc(D.customerSuccess)}</b>`:""].filter(Boolean);
   $("#drawerHost").innerHTML=`<div class="scrim lvs" id="apScrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Account ${esc(D.name)}">
-   <div class="lvh"><div class="row"><span class="ast" data-tip="${D.status==="Customer"?"Has an order or an AMC contract":D.status==="Lapsed"?"Had a contract that has ended, with nothing open":"No order or contract yet"}"><i style="background:var(${D.status==="Customer"?"--ok":D.status==="Lapsed"?"--bad":"--muted"})"></i>${D.status}</span>${full?"":`<span class="chip" data-tip="Your own revenue only. Other engineers' revenue and AMC prices are not shown to Sales.">Your view</span>`}<span class="sp"></span><button type="button" class="btn sm" id="apClose">Close</button></div>
+   <div class="lvh"><div class="row"><span class="ast" data-tip="${D.status==="Customer"?"Has an order or an AMC contract":D.status==="Lapsed"?"Had a contract that has ended, with nothing open":"No order or contract yet"}"><i style="background:var(${D.status==="Customer"?"--ok":D.status==="Lapsed"?"--bad":"--muted"})"></i>${D.status}</span>${full?"":`<span class="chip" data-tip="Your own revenue only. Other engineers' revenue and AMC prices are not shown to Sales.">Your view</span>`}<span class="sp"></span>${kaOn()?`<button type="button" class="btn sm" id="apKey">${kaAcct(D.key)?"Key account":"Make key account"}</button>`:""}<button type="button" class="btn sm" id="apClose">Close</button></div>
     <div><h2>${esc(D.name)}</h2><div class="muted">${esc([D.city,D.country,D.group?"Group: "+D.group:""].filter(Boolean).join(" · ")||"Country not set")}</div></div>
     <div class="kv">${facts.map(f=>`<span>${f[0]} <b>${esc(f[1])}</b></span>`).join("")}${people.map(p=>`<span>${p}</span>`).join("")}</div></div>
    <div class="lvb">
@@ -2695,13 +2707,269 @@ function drawAcctP(){const S0=S.acctP;if(!S0)return;const sc0=document.querySele
      ${sec("Activity",tlBody)}
     </div>
    </div></aside></div>`;
-  $("#apClose").onclick=closeAcctProfile;$("#apScrim").onclick=e=>{if(e.target.id==="apScrim")closeAcctProfile()};document.onkeydown=e=>{if(e.key==="Escape"&&S.acctP)closeAcctProfile()};
+  $("#apClose").onclick=closeAcctProfile;$("#apKey")?.addEventListener("click",()=>{const k=D.key;if(kaAcct(k)){S.acctP=null;$("#drawerHost").innerHTML="";openKeyAcct(k)}else{S.acctP=null;$("#drawerHost").innerHTML="";openKeyAdd({name:D.name})}});$("#apScrim").onclick=e=>{if(e.target.id==="apScrim")closeAcctProfile()};document.onkeydown=e=>{if(e.key==="Escape"&&S.acctP)closeAcctProfile()};
   const h=$("#drawerHost");
   h.querySelectorAll("[data-apl]").forEach(b=>b.onclick=()=>{const id=b.dataset.apl;S.acctP=null;document.onkeydown=null;openDrawer(id)});
   h.querySelectorAll("[data-apc]").forEach(b=>b.onclick=()=>{const id=b.dataset.apc;closeAcctProfile();openLeadOrContract("C:"+id)});
   h.querySelectorAll("[data-apn]").forEach(b=>b.onclick=()=>{const i=b.dataset.apn;S0.all["n"+i]=!S0.all["n"+i];drawAcctP()});
   $("#apAll")?.addEventListener("click",()=>{S0.all.t=!S0.all.t;drawAcctP()});
   const nb=h.querySelector(".lvb");if(had&&nb)nb.scrollTop=st0;else $("#apClose").focus({preventScroll:true})}
+
+/* ======================= KEY ACCOUNTS (phase 1) =======================
+   Corporate / key-account work that is NOT part of a lead: account meetings, who we know at the client, requirements, promises.
+   Stored in its own table (SQL 50, key_items). Never counted in leads, pipeline, win rate, targets or incentives. */
+const KA_STAGES=["Introduce","Showcase","Requirements","Proposal","Pilot","Rollout","Expand"];
+const KA_TYPES=["Platform showcase","Requirements discussion","Key account review","Relationship meeting","Proposal walkthrough","Other"];
+const KA_KINDS=["Corporate group","Key account"];
+const KA_ROLES=["Decision maker","Champion","Influencer","Gatekeeper","User","Blocker"];
+const KA_MOODS=["Positive","Neutral","Cautious","Unhappy"];
+const KA_RSTAT=["Open","In discussion","Promised","Delivered","Declined"];
+const kaOn=()=>!!window.__sb&&can("keyacct.manage");
+const kaK=()=>S.ka||(S.ka={items:[],loaded:false,loading:false,err:"",view:"",dates:{}});
+const kaId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const kaErr=e=>String((e&&(e.message||e.details))||e||"Could not save").replace(/^.*?(Meeting notes need|Please write real|Choose the date)/,"$1");
+async function kaLoad(force){const K=kaK();if(!kaOn()||K.loading||(K.loaded&&!force))return;K.loading=true;
+  try{const{data,error}=await window.__sb.from("key_items").select("*").order("updated_at",{ascending:false}).limit(3000);
+    if(error)K.err=/does not exist|schema cache|42P01|PGRST205/i.test((error.message||"")+(error.code||""))?"missing":(error.message||"error");else{K.err="";K.items=data||[]}}
+  catch(e){K.err=e.message||"error"}
+  K.loading=false;K.loaded=true;if(S.tab==="keyacct"&&!S.kaM)render();if(S.kaW&&!S.kaM)drawKeyAcct();if(S.acctP)drawAcctP()}
+const kaAll=k=>kaK().items.filter(x=>x.kind===k&&!(x.doc&&x.doc.removed));
+const kaAcctRows=()=>kaAll("account");
+const kaFor=(kind,key)=>kaAll(kind).filter(x=>x.account_key===key);
+const kaAcct=key=>kaAcctRows().find(x=>x.account_key===key);
+const kaDaysAgo=d=>d?Math.floor((Date.parse(todayISO()+"T12:00:00")-Date.parse(d+"T12:00:00"))/864e5):null;
+const kaMe=()=>nk(S.myEng||S.myName||"");
+const kaIsMine=a=>!!kaMe()&&nk(a.doc.owner)===kaMe()||(!!S.myEmail&&nk(a.created_by)===nk(S.myEmail)&&!a.doc.owner);
+const kaQStart=()=>{const t=todayISO(),m=+t.slice(5,7);return t.slice(0,4)+"-"+String(Math.floor((m-1)/3)*3+1).padStart(2,"0")+"-01"};
+function kaSum(a){const key=a.account_key,today=todayISO(),ms=kaFor("meeting",key),rq=kaFor("req",key),pr=kaFor("promise",key);
+  const last=ms.map(x=>x.doc.date||"").sort().pop()||"";const openR=rq.filter(x=>!["Delivered","Declined"].includes(x.doc.status));
+  const openP=pr.filter(x=>x.doc.status!=="Done"),over=openP.filter(x=>x.doc.due&&x.doc.due<today);
+  const leads=viewAll()?S.leads.filter(l=>!l.deleted&&accKey(l)===key&&OPEN.includes(l.status)&&!l.registered).length:null;
+  return{a,key,ms,rq,pr,last,since:last?kaDaysAgo(last):null,openR,openP,over,leads,people:a.doc.people||[]}}
+function kaResolve(name){name=String(name||"").trim().replace(/\s+/g," ");if(!name)return null;const n=nk(name);
+  const ex=kaAcctRows().find(x=>nk(x.doc.accountName)===n);if(ex)return{key:ex.account_key,name:ex.doc.accountName,existing:true};
+  const a=Object.values(allAccounts()).find(x=>nk(x.name)===n);if(a)return{key:a.key,name:a.name,existing:false};
+  return{key:keyOf(name),name,existing:false}}
+async function kaInsert(rows){const{error}=await window.__sb.from("key_items").insert(rows);if(error)throw error}
+async function kaPatch(row,patch){const doc=Object.assign({},row.doc,patch);
+  const{data,error}=await window.__sb.from("key_items").update({doc}).eq("id",row.id).select("id");if(error)throw error;
+  if(!data||!data.length)throw new Error("You don't have permission to change this.");row.doc=doc}
+async function kaEnsureAcct(r,extra){if(kaAcct(r.key))return;
+  await kaInsert([{id:"ka_"+r.key.slice(0,60)+"_"+Date.now().toString(36),kind:"account",account_key:r.key,doc:Object.assign({accountName:r.name,type:"Key account",stage:"Introduce",owner:S.myEng||S.myName||"",sponsor:"",hotels:[],people:[]},extra||{})}])}
+const kaOwners=()=>[...new Set([S.myEng||S.myName||"",...spNames(),...kaAcctRows().map(x=>x.doc.owner)].filter(Boolean))];
+const kaChip=(n,t,c)=>`<span class="chip${c?" "+c:""}">${n}${t?` ${esc(t)}`:""}</span>`;
+const kaDue=d=>{if(!d)return`<span class="chip">no date</span>`;const x=kaDaysAgo(d);return x>0?`<span class="chip bad">overdue ${x} day${x===1?"":"s"}</span>`:x===0?`<span class="chip warn">due today</span>`:`<span class="chip${x>=-3?" warn":""}">due ${fmtD(d)}</span>`};
+const kaMood=m=>`<span class="kmood" data-mood="${esc(m||"")}"><i></i>${esc(m||"Not set")}</span>`;
+
+/* ---------- the page ---------- */
+function renderKeyAccts(m){
+  if(!kaOn()){m.innerHTML=`<div class="panel empty">Key accounts isn't switched on for your role. A Supervisor can switch it on under Users → Roles &amp; permissions.</div>`;return}
+  const K=kaK();kaLoad();
+  if(K.err==="missing"){m.innerHTML=`<section class="view"><div class="notice warn">Key accounts needs a one-time database step. Ask the Supervisor to run <b>50_key_accounts.sql</b> in Supabase (SQL Editor), then refresh.</div></section>`;return}
+  if(K.err){m.innerHTML=`<section class="view"><div class="notice bad">Couldn't load key accounts: ${esc(K.err)} <button class="btn sm" id="kaRetry">Try again</button></div></section>`;$("#kaRetry").onclick=()=>{K.loaded=false;K.err="";render()};return}
+  if(!K.loaded){m.innerHTML=`<div class="panel empty">Loading key accounts…</div>`;return}
+  const today=todayISO(),all=kaAcctRows().map(kaSum),mine=all.filter(s=>kaIsMine(s.a));
+  const view=K.view||(mine.length?"mine":"all"),list=(view==="mine"?mine:all).slice().sort((x,y)=>(y.over.length>0)-(x.over.length>0)||(y.since==null?9999:y.since)-(x.since==null?9999:x.since)||nk(x.a.doc.accountName).localeCompare(nk(y.a.doc.accountName)));
+  const q0=kaQStart(),mq=list.flatMap(s=>s.ms).filter(x=>(x.doc.date||"")>=q0);
+  const steps=list.flatMap(s=>s.openP.map(p=>({p,s}))).sort((x,y)=>(x.p.doc.due||"9999").localeCompare(y.p.doc.due||"9999"));
+  const soon=steps.filter(x=>x.p.doc.due&&x.p.doc.due>=today&&x.p.doc.due<=addDaysISO(today,14)),od=steps.filter(x=>x.p.doc.due&&x.p.doc.due<today);
+  const stale=list.filter(s=>s.since==null||s.since>=60);
+  const kp=(l,v,s,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v apv"${c?` style="color:var(${c})"`:""}>${v}</div><div class="s small muted">${s||"&nbsp;"}</div></div>`;
+  const groups=list.filter(s=>s.a.doc.type==="Corporate group").length;
+  const odAcc=[...new Set(od.map(x=>x.s.a.doc.accountName))];
+  const recent=list.flatMap(s=>s.ms.map(x=>({x,s}))).sort((a,b)=>(b.x.doc.date||"").localeCompare(a.x.doc.date||"")).slice(0,8);
+  const card=s=>{const d=s.a.doc,st=KA_STAGES.indexOf(d.stage);const b=[];
+    if(s.over.length)b.push(`<span class="chip bad">${s.over.length} step${s.over.length===1?"":"s"} overdue</span>`);else{const nx=s.openP.filter(p=>p.doc.due).sort((a,c)=>a.doc.due.localeCompare(c.doc.due))[0];if(nx&&nx.doc.due<=addDaysISO(today,7))b.push(`<span class="chip warn">step due ${fmtD(nx.doc.due)}</span>`)}
+    if(s.since==null)b.push(`<span class="chip warn">no meeting yet</span>`);else if(s.since>=60)b.push(`<span class="chip warn">no meeting for ${s.since} days</span>`);
+    return`<button type="button" class="panel kacard" data-ka="${esc(s.key)}"><div class="row"><b class="ell">${esc(d.accountName)}</b><span class="chip">${esc(d.type||"Key account")}</span><span class="sp"></span>${b.join("")}</div>
+      <div class="small muted">Stage <b>${esc(d.stage||"—")}</b>${d.owner?` · Owner <b>${esc(d.owner)}</b>`:""}${st>=0?` · step ${st+1} of ${KA_STAGES.length}`:""}</div>
+      <div class="row small" style="margin-top:6px;gap:4px 14px;flex-wrap:wrap"><span>Last meeting <b>${s.last?fmtD(s.last):"—"}</b></span><span>Requirements <b>${s.openR.length} open</b></span><span>People <b>${s.people.length}</b></span>${s.leads==null?"":`<span>Leads <b>${s.leads} open</b></span>`}</div></button>`};
+  m.innerHTML=`<section class="view">
+   <div class="vhead"><div><h2>Key accounts</h2><p>Corporate and key account work that is not part of a lead: showcases, requirements talks and account reviews. Not counted in leads, pipeline, win rate, targets or incentives.</p></div>
+    <div class="row" style="flex-wrap:wrap;gap:8px">${mine.length&&all.length>mine.length?`<div class="seg" role="group" aria-label="Which key accounts">${[["mine","My accounts"],["all","All accounts"]].map(([k,t])=>`<button type="button" data-kview="${k}" aria-pressed="${view===k}"${view===k?' class="on"':""}>${t}</button>`).join("")}</div>`:""}<button class="btn" id="kaAdd">+ Add key account</button><button class="btn pri" id="kaLog">+ Log account meeting</button></div></div>
+   ${all.length?`<div class="apks">${kp("Key accounts",list.length,groups?`${groups} corporate group${groups===1?"":"s"}`:"")}${kp("Meetings this quarter",mq.length,(n1=>n2=>`${n1} showcase${n1===1?"":"s"} · ${n2} requirements talk${n2===1?"":"s"}`)(mq.filter(x=>x.doc.type==="Platform showcase").length)(mq.filter(x=>x.doc.type==="Requirements discussion").length))}${kp("Next steps due",soon.length,"next 14 days")}${kp("Overdue",od.length,esc(odAcc.slice(0,2).join(", ")),od.length?"--bad":"")}${kp("No meeting for 60+ days",stale.length,esc(stale.slice(0,2).map(s=>s.a.doc.accountName).join(", ")))}</div>
+   <div class="kcols"><div style="display:grid;gap:16px;align-content:start;min-width:0">
+    <div class="lvc"><p class="lvt">Next steps</p><div class="panel" style="padding:6px 14px">${steps.length?steps.slice(0,10).map(({p,s})=>`<div class="apr wrap">${kaDue(p.doc.due)}<button type="button" class="linkb kab" data-ka="${esc(s.key)}">${esc(p.doc.text)}</button><span class="sp"></span><span class="small muted">${esc(s.a.doc.accountName)}${p.doc.owner?" · "+esc(p.doc.owner):""}${p.doc.side==="theirs"?" · theirs":""}</span><button type="button" class="btn sm" data-kdone="${esc(p.id)}" aria-label="Mark done: ${esc(p.doc.text)}">Done</button></div>`).join(""):`<p class="small muted" style="margin:8px 0">No open next steps. Add them when you log a meeting.</p>`}</div></div>
+    <div class="lvc"><p class="lvt">Recent meetings</p><div class="panel" style="padding:10px 14px">${recent.length?`<div class="aptl">${recent.map(({x,s})=>`<button type="button" class="apt kab" data-ka="${esc(s.key)}"><span class="small muted apd">${fmtD(x.doc.date)}</span><span class="chip apk">${esc(x.doc.type||"Meeting")}</span><div class="apx"><b>${esc(s.a.doc.accountName)}</b>${x.doc.ours?` <span class="muted">(${esc(x.doc.ours)})</span>`:""}<div class="small apn clamp">${esc(x.doc.notes||"")}</div></div></button>`).join("")}</div>`:`<p class="small muted" style="margin:0">No meeting logged yet.</p>`}</div></div></div>
+    <div class="lvc"><p class="lvt">${view==="mine"?"My key accounts":"All key accounts"}</p><div style="display:grid;gap:10px">${list.length?list.map(card).join(""):`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">None here yet.</p></div>`}</div></div></div>`
+   :`<div class="panel" style="padding:22px;display:grid;gap:10px;max-width:640px"><h3 style="margin:0">No key account yet</h3><p class="muted" style="margin:0">Use this page for the corporate side of the work: platform showcases, discussions about a group's hotel requirements, and account reviews. Log your first meeting and the account is created for you, or add an account first.</p><div class="row"><button class="btn pri" id="kaLog2">+ Log account meeting</button><button class="btn" id="kaAdd2">+ Add key account</button></div></div>`}
+  </section>`;
+  const lg=()=>openKeyMeeting({}),ad=()=>openKeyAdd();
+  $("#kaLog")?.addEventListener("click",lg);$("#kaLog2")?.addEventListener("click",lg);$("#kaAdd")?.addEventListener("click",ad);$("#kaAdd2")?.addEventListener("click",ad);
+  m.querySelectorAll("[data-kview]").forEach(b=>b.onclick=()=>{K.view=b.dataset.kview;render()});
+  m.querySelectorAll("[data-ka]").forEach(b=>b.onclick=e=>{S.kaFrom=b;openKeyAcct(b.dataset.ka)});
+  m.querySelectorAll("[data-kdone]").forEach(b=>b.onclick=async e=>{e.stopPropagation();const row=K.items.find(x=>x.id===b.dataset.kdone);if(!row)return;b.disabled=true;
+    try{await kaPatch(row,{status:"Done",doneAt:todayISO()});toast("Marked done");render()}catch(er){b.disabled=false;toast(kaErr(er))}})}
+
+/* ---------- the account workspace ---------- */
+function openKeyAcct(key,keepFrom){if(!key)return;kaLoad();S.drawer=null;S.acctP=null;S.kaM=null;S.kaW={key,edit:null,arm:null,open:{}};drawKeyAcct()}
+function closeKeyAcct(){const f=S.kaFrom;S.kaW=null;S.kaFrom=null;$("#drawerHost").innerHTML="";document.onkeydown=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}}
+function kaHotelProducts(name){try{const a=Object.values(allAccounts()).find(x=>nk(x.name)===nk(name));if(!a)return null;return{key:a.key,prods:apData(a.key).prods.map(p=>p.product)}}catch(e){return null}}
+function drawKeyAcct(){const W=S.kaW;if(!W)return;const a=kaAcct(W.key);const sc0=document.querySelector("#kaScrim .lvb"),st0=sc0?sc0.scrollTop:0,had=!!sc0;
+  if(!a){$("#drawerHost").innerHTML=`<div class="scrim lvs" id="kaScrim"><aside class="drawer lv" role="dialog" aria-modal="true"><div class="lvh"><div class="row"><span class="sp"></span><button class="btn sm" id="kaClose">Close</button></div><p class="muted">${kaK().loaded?"This key account isn't here any more.":"Loading…"}</p></div></aside></div>`;$("#kaClose").onclick=closeKeyAcct;return}
+  const d=a.doc,S1=kaSum(a),today=todayISO(),ed=W.edit,stIx=KA_STAGES.indexOf(d.stage);
+  const sec=(t,b,x)=>`<div class="lvc"><p class="lvt">${t}${x||""}</p>${b}</div>`;
+  const kp=(l,v,s,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v apv"${c?` style="color:var(${c})"`:""}>${v}</div><div class="s small muted">${s||"&nbsp;"}</div></div>`;
+  const arm=(k,t)=>W.arm===k?`<button type="button" class="linkb" data-karm="${esc(k)}" style="color:var(--bad)">Sure? Remove</button>`:`<button type="button" class="linkb" data-karm="${esc(k)}">${t||"Remove"}</button>`;
+  const canLead=can("lead.create")||can("lead.create_own_outbound");
+  /* people */
+  const pf=ed&&ed.t==="person"?(()=>{const p=ed.id?S1.people.find(x=>x.id===ed.id)||{}:{};return`<form class="panel kform" data-kform="person" style="padding:12px;display:grid;gap:10px"><div class="grid2"><label class="f">Name <span class="req">*</span><input name="name" maxlength="80" value="${esc(p.name||"")}" required></label><label class="f">Title<input name="title" maxlength="80" value="${esc(p.title||"")}"></label></div>
+     <div class="grid2"><label class="f">Role in the decision<select name="role">${opts(KA_ROLES,p.role||"Influencer")}</select></label><label class="f">How they feel about us<select name="mood">${opts(KA_MOODS,p.mood||"Neutral")}</select></label></div>
+     <label class="f">Hotel or brand <span class="muted small">(optional)</span><input name="hotel" maxlength="80" value="${esc(p.hotel||"")}"></label><div class="small kmsg" data-kmsg></div><div class="row"><button class="btn pri sm" type="submit">${ed.id?"Save":"Add person"}</button><button class="btn sm" type="button" data-kcancel>Cancel</button></div></form>`})():"";
+  const peopleBody=`<div class="panel" style="padding:6px 14px">${S1.people.length?S1.people.map(p=>`<div class="apc"><div class="row" style="flex-wrap:wrap;gap:6px"><b>${esc(p.name)}</b><span class="chip${p.role==="Decision maker"?" ok":p.role==="Blocker"?" bad":""}">${esc(p.role||"")}</span><span class="sp"></span>${kaMood(p.mood)}</div><div class="small muted">${esc([p.title,p.hotel].filter(Boolean).join(" · "))}</div><div class="row small" style="gap:12px"><button type="button" class="linkb" data-kedit="person:${esc(p.id)}">Edit</button>${arm("person:"+p.id)}</div></div>`).join(""):`<p class="small muted" style="margin:8px 0">Nobody added yet. Add the people you deal with at the client and how they feel about us.</p>`}${pf?`<div style="padding:8px 0">${pf}</div>`:`<div class="apr"><button class="btn sm" data-kadd="person">+ Add person</button></div>`}</div>`;
+  const hasDM=S1.people.some(p=>p.role==="Decision maker");
+  /* requirements */
+  const rf=ed&&ed.t==="req"?`<form class="panel kform" data-kform="req" style="padding:12px;display:grid;gap:10px"><label class="f">What the client needs <span class="req">*</span><textarea name="text" rows="2" maxlength="400" required></textarea></label><div class="grid2"><label class="f">Product <span class="muted small">(optional)</span><select name="product">${opts(prodList().map(p=>p.name),"","Not specific")}</select></label><label class="f">Hotel <span class="muted small">(optional)</span><input name="hotel" maxlength="80" list="kaHotels"></label></div><div class="small kmsg" data-kmsg></div><div class="row"><button class="btn pri sm" type="submit">Add requirement</button><button class="btn sm" type="button" data-kcancel>Cancel</button></div></form>`:"";
+  const reqBody=`<div class="panel" style="padding:6px 14px">${S1.rq.length?S1.rq.slice().sort((x,y)=>(["Delivered","Declined"].includes(x.doc.status)?1:0)-(["Delivered","Declined"].includes(y.doc.status)?1:0)).map(r=>{const q=r.doc,lead=q.leadRef&&S.leadMap&&Object.values(S.leadMap).find(l=>l.ref===q.leadRef);
+    return`<div class="apc"><div style="min-width:0">${esc(q.text)}</div><div class="row" style="flex-wrap:wrap;gap:6px;margin-top:4px">${q.product?`<span class="chip">${esc(q.product)}</span>`:""}${q.hotel?`<span class="chip">${esc(q.hotel)}</span>`:""}<select class="ksel" data-kreq="${esc(r.id)}" aria-label="Status of: ${esc(q.text)}">${opts(KA_RSTAT,q.status||"Open")}</select><span class="sp"></span>${q.leadRef?(lead?`<button type="button" class="chip kal" data-klead="${esc(lead.id)}">Lead ${esc(q.leadRef)}</button>`:`<span class="chip">Lead ${esc(q.leadRef)}</span>`):canLead&&!["Delivered","Declined"].includes(q.status)?`<button type="button" class="btn sm" data-kmklead="${esc(r.id)}">Create lead</button>`:""}${arm("req:"+r.id)}</div></div>`}).join(""):`<p class="small muted" style="margin:8px 0">No requirement captured yet.</p>`}${rf?`<div style="padding:8px 0">${rf}</div>`:`<div class="apr"><button class="btn sm" data-kadd="req">+ Add requirement</button></div>`}</div>`;
+  /* promises */
+  const prf=ed&&ed.t==="promise"?`<form class="panel kform" data-kform="promise" style="padding:12px;display:grid;gap:10px"><div class="seg" role="group" aria-label="Whose promise"><button type="button" class="on" data-kside="ours" aria-pressed="true">We promised</button><button type="button" data-kside="theirs" aria-pressed="false">They promised</button></div><input type="hidden" name="side" value="ours"><label class="f">What was promised <span class="req">*</span><input name="text" maxlength="200" required></label><div class="grid2"><label class="f">Who <span class="muted small">(owner)</span><input name="owner" maxlength="80" list="kaOwners" value="${esc(S.myEng||S.myName||"")}"></label><label class="f">Due date<input name="due" type="date"></label></div><div class="small kmsg" data-kmsg></div><div class="row"><button class="btn pri sm" type="submit">Add promise</button><button class="btn sm" type="button" data-kcancel>Cancel</button></div></form>`:"";
+  const prRow=p=>`<div class="apr wrap">${p.doc.status==="Done"?`<span class="chip ok">done ${fmtD(p.doc.doneAt)}</span>`:kaDue(p.doc.due)}<span class="${p.doc.status==="Done"?"muted":""}" style="min-width:0;flex:1 1 160px">${esc(p.doc.text)}</span>${p.doc.owner?`<span class="chip">${esc(p.doc.owner)}</span>`:""}${p.doc.status!=="Done"?`<button type="button" class="btn sm" data-kdone="${esc(p.id)}">Done</button>`:`<button type="button" class="linkb" data-kreopen="${esc(p.id)}">Reopen</button>`}${arm("promise:"+p.id)}</div>`;
+  const byS=s=>S1.pr.filter(p=>(p.doc.side||"ours")===s).sort((x,y)=>(x.doc.status==="Done")-(y.doc.status==="Done")||(x.doc.due||"9999").localeCompare(y.doc.due||"9999"));
+  const promBody=`<div class="panel" style="padding:6px 14px">${[["ours","We promised"],["theirs","They promised"]].map(([s,t])=>`<div class="small muted" style="padding-top:8px;font-weight:600">${t}</div>${byS(s).length?byS(s).map(prRow).join(""):`<p class="small muted" style="margin:4px 0 8px">None.</p>`}`).join("")}${prf?`<div style="padding:8px 0">${prf}</div>`:`<div class="apr"><button class="btn sm" data-kadd="promise">+ Add promise</button></div>`}</div>`;
+  /* meetings */
+  const mtl=S1.ms.slice().sort((x,y)=>(y.doc.date||"").localeCompare(x.doc.date||""));const nm=W.open.all?999:6;
+  const meetBody=mtl.length?`<div class="panel" style="padding:10px 14px"><div class="aptl">${mtl.slice(0,nm).map(x=>`<div class="apt"><span class="small muted apd">${fmtD(x.doc.date)}</span><span class="chip apk">${esc(x.doc.type||"Meeting")}</span><div class="apx"><b>${esc(x.doc.client||"")}</b>${x.doc.ours?` <span class="muted">(Samsotech: ${esc(x.doc.ours)})</span>`:""}${(x.doc.hotels||[]).length?`<div class="small muted">Hotels: ${esc(x.doc.hotels.join(", "))}</div>`:""}<div class="small apn${W.open["n"+x.id]?"":" clamp"}" data-kn="${esc(x.id)}">${esc(x.doc.notes||"")}</div><div class="small muted">Logged by ${esc(String(x.created_by||"").split("@")[0])} · ${arm("meeting:"+x.id)}</div></div></div>`).join("")}</div>${mtl.length>6?`<div class="row" style="margin-top:8px"><button class="btn sm" data-kall>${W.open.all?"Show fewer":"Show all "+mtl.length}</button></div>`:""}</div>`:`<div class="panel" style="padding:14px"><p class="small muted" style="margin:0">No meeting logged yet.</p></div>`;
+  /* hotels */
+  const hotels=d.hotels||[];
+  const hotBody=`<div class="panel" style="padding:12px 14px"><div class="row" style="flex-wrap:wrap;gap:6px">${hotels.length?hotels.slice(0,16).map(h=>{const hp=kaHotelProducts(h);return`<span class="chip" ${hp&&hp.prods.length?`data-tip="Already has: ${esc(hp.prods.join(", "))}"`:""}>${esc(h)}${hp&&hp.prods.length?` · ${hp.prods.length} product${hp.prods.length===1?"":"s"}`:hp?"":""}</span>`}).join(""):`<span class="small muted">No hotels listed. Add them under Edit details.</span>`}</div></div>`;
+  const ef=ed&&ed.t==="acct"?`<form class="panel kform" data-kform="acct" style="padding:12px;display:grid;gap:10px"><div class="grid2"><label class="f">Type<select name="type">${opts(KA_KINDS,d.type||"Key account")}</select></label><label class="f">Owner<input name="owner" maxlength="80" list="kaOwners" value="${esc(d.owner||"")}"></label></div><label class="f">Executive sponsor at Samsotech <span class="muted small">(optional)</span><input name="sponsor" maxlength="80" value="${esc(d.sponsor||"")}"></label><label class="f">Hotels in this account <span class="muted small">(separate with commas)</span><textarea name="hotels" rows="2" maxlength="1500">${esc(hotels.join(", "))}</textarea></label><div class="small kmsg" data-kmsg></div><div class="row"><button class="btn pri sm" type="submit">Save</button><button class="btn sm" type="button" data-kcancel>Cancel</button></div></form>`:"";
+  const prof=allAccounts()[W.key];
+  const od=S1.over.length;
+  $("#drawerHost").innerHTML=`<div class="scrim lvs" id="kaScrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Key account ${esc(d.accountName)}">
+   <div class="lvh"><div class="row" style="flex-wrap:wrap;gap:6px"><span class="chip">${esc(d.type||"Key account")}</span>${od?`<span class="chip bad">${od} step${od===1?"":"s"} overdue</span>`:""}${S1.since!=null&&S1.since>=60?`<span class="chip warn">no meeting for ${S1.since} days</span>`:""}<span class="sp"></span>${prof?`<button type="button" class="btn sm" id="kaProf">Account profile</button>`:""}<button type="button" class="btn sm pri" id="kaLogHere">+ Log account meeting</button><button type="button" class="btn sm" id="kaClose">Close</button></div>
+    <div><h2>${esc(d.accountName)}</h2><div class="muted">${esc(["Owner "+(d.owner||"not set"),d.sponsor?"Executive sponsor "+d.sponsor:""].filter(Boolean).join(" · "))} · <button type="button" class="linkb" id="kaEdit">Edit details</button></div></div>
+    <div class="stp" role="group" aria-label="Where this account is">${KA_STAGES.map((s,i)=>`<button type="button" class="${i<stIx?"done":i===stIx?"on":""}" data-kstage="${esc(s)}" aria-pressed="${i===stIx}">${esc(s)}</button>`).join("")}</div></div>
+   <div class="lvb">
+    <div class="lvc apkp" style="grid-column:1/-1"><div class="apks">${kp("Meetings",S1.ms.length,S1.last?"last "+fmtD(S1.last):"none yet")}${kp("Open requirements",S1.openR.length,S1.rq.length-S1.openR.length?`${S1.rq.length-S1.openR.length} closed`:"")}${kp("Open promises",S1.openP.length,od?od+" overdue":"none overdue",od?"--bad":"")}${kp("People we know",S1.people.length,hasDM?"decision maker known":"no decision maker yet")}</div></div>
+    ${ef?`<div style="grid-column:1/-1">${ef}</div>`:""}
+    <div style="display:grid;gap:16px;min-width:0;align-content:start">${sec("Who we know",peopleBody)}${sec("Requirements",reqBody)}${sec("Hotels in this account",hotBody)}</div>
+    <div style="display:grid;gap:16px;min-width:0;align-content:start">${sec("Promises and next steps",promBody)}${sec("Meetings",meetBody)}</div>
+   </div><datalist id="kaOwners">${kaOwners().map(o=>`<option value="${esc(o)}">`).join("")}</datalist><datalist id="kaHotels">${hotels.map(o=>`<option value="${esc(o)}">`).join("")}</datalist></aside></div>`;
+  bindKeyAcct(a);
+  const nb=document.querySelector("#kaScrim .lvb");if(had&&nb)nb.scrollTop=st0;else $("#kaClose").focus({preventScroll:true})}
+function bindKeyAcct(a){const W=S.kaW,h=$("#drawerHost"),K=kaK();
+  const redraw=()=>drawKeyAcct(),run=async(fn,btn)=>{if(btn)btn.disabled=true;try{await fn();await kaLoad(true);redraw()}catch(e){toast(kaErr(e));if(btn)btn.disabled=false}};
+  $("#kaClose").onclick=closeKeyAcct;$("#kaScrim").onclick=e=>{if(e.target.id==="kaScrim")closeKeyAcct()};document.onkeydown=e=>{if(e.key==="Escape"&&S.kaW&&!S.kaM)closeKeyAcct()};
+  $("#kaProf")?.addEventListener("click",()=>{const k=W.key;S.kaW=null;h.innerHTML="";S.apFrom=null;openAcctProfile(k)});
+  $("#kaLogHere").onclick=()=>openKeyMeeting({key:W.key,name:a.doc.accountName,back:W.key});
+  $("#kaEdit").onclick=()=>{W.edit={t:"acct"};redraw()};
+  h.querySelectorAll("[data-kstage]").forEach(b=>b.onclick=()=>{if(a.doc.stage===b.dataset.kstage)return;run(()=>kaPatch(a,{stage:b.dataset.kstage}),b)});
+  h.querySelectorAll("[data-kadd]").forEach(b=>b.onclick=()=>{W.edit={t:b.dataset.kadd};W.arm=null;redraw();const f=h.querySelector(".kform input:not([type=hidden]),.kform textarea");f&&f.focus()});
+  h.querySelectorAll("[data-kedit]").forEach(b=>b.onclick=()=>{const[t,id]=b.dataset.kedit.split(":");W.edit={t,id};redraw()});
+  h.querySelectorAll("[data-kcancel]").forEach(b=>b.onclick=()=>{W.edit=null;redraw()});
+  h.querySelectorAll("[data-kside]").forEach(b=>b.onclick=()=>{const f=b.closest("form");f.elements.side.value=b.dataset.kside;f.querySelectorAll("[data-kside]").forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on)})});
+  h.querySelectorAll("[data-karm]").forEach(b=>b.onclick=()=>{const k=b.dataset.karm;if(W.arm!==k){W.arm=k;redraw();return}
+    const[t,id]=[k.slice(0,k.indexOf(":")),k.slice(k.indexOf(":")+1)];W.arm=null;
+    if(t==="person")return run(()=>kaPatch(a,{people:(a.doc.people||[]).filter(p=>p.id!==id)}));
+    const row=K.items.find(x=>x.id===id);if(row)run(()=>kaPatch(row,{removed:todayISO()}))});
+  h.querySelectorAll("[data-kdone]").forEach(b=>b.onclick=()=>{const row=K.items.find(x=>x.id===b.dataset.kdone);if(row)run(()=>kaPatch(row,{status:"Done",doneAt:todayISO()}),b)});
+  h.querySelectorAll("[data-kreopen]").forEach(b=>b.onclick=()=>{const row=K.items.find(x=>x.id===b.dataset.kreopen);if(row)run(()=>kaPatch(row,{status:"Open",doneAt:""}),b)});
+  h.querySelectorAll("[data-kreq]").forEach(s=>s.onchange=()=>{const row=K.items.find(x=>x.id===s.dataset.kreq);if(row)run(()=>kaPatch(row,{status:s.value}))});
+  h.querySelectorAll("[data-kn]").forEach(b=>b.onclick=()=>{W.open["n"+b.dataset.kn]=!W.open["n"+b.dataset.kn];redraw()});
+  h.querySelector("[data-kall]")?.addEventListener("click",()=>{W.open.all=!W.open.all;redraw()});
+  h.querySelectorAll("[data-klead]").forEach(b=>b.onclick=()=>{const id=b.dataset.klead;S.kaW=null;h.innerHTML="";document.onkeydown=null;openDrawer(id)});
+  h.querySelectorAll("[data-kmklead]").forEach(b=>b.onclick=()=>{const r=K.items.find(x=>x.id===b.dataset.kmklead);if(r)kaStartLead(a,r)});
+  h.querySelectorAll(".kform").forEach(f=>f.onsubmit=async e=>{e.preventDefault();const t=f.dataset.kform,v=n=>String(f.elements[n]?f.elements[n].value:"").trim().replace(/\s+/g," "),msg=f.querySelector("[data-kmsg]"),bad=m=>{msg.innerHTML=`<span style="color:var(--bad)">${esc(m)}</span>`};
+    const btn=f.querySelector("[type=submit]");
+    if(t==="person"){if(!v("name"))return bad("Enter the person's name.");const id=W.edit&&W.edit.id,p={id:id||kaId("p"),name:v("name"),title:v("title"),role:v("role"),mood:v("mood"),hotel:v("hotel"),at:todayISO()};
+      const ppl=(a.doc.people||[]).slice();if(!id&&ppl.length>=60)return bad("At most 60 people per account.");const i=ppl.findIndex(x=>x.id===id);if(i>=0)ppl[i]=p;else ppl.push(p);W.edit=null;return run(()=>kaPatch(a,{people:ppl}),btn)}
+    if(t==="req"){if(!v("text"))return bad("Write what the client needs.");W.edit=null;return run(()=>kaInsert([{id:kaId("r"),kind:"req",account_key:a.account_key,doc:{accountName:a.doc.accountName,text:v("text"),product:v("product"),hotel:v("hotel"),status:"Open",by:S.myEng||S.myName||""}}]),btn)}
+    if(t==="promise"){if(!v("text"))return bad("Write what was promised.");W.edit=null;return run(()=>kaInsert([{id:kaId("s"),kind:"promise",account_key:a.account_key,doc:{accountName:a.doc.accountName,text:v("text"),side:v("side")==="theirs"?"theirs":"ours",owner:v("owner"),due:v("due"),status:"Open"}}]),btn)}
+    if(t==="acct"){const hs=[...new Set(String(f.elements.hotels.value).split(/[,\n;]+/).map(x=>x.trim().replace(/\s+/g," ")).filter(Boolean))].slice(0,40);W.edit=null;return run(()=>kaPatch(a,{type:v("type"),owner:v("owner"),sponsor:v("sponsor"),hotels:hs}),btn)}})}
+
+/* ---------- add a key account ---------- */
+function openKeyAdd(pre){S.drawer=null;S.acctP=null;S.kaW=null;S.kaM=null;S.kaA=Object.assign({name:"",type:"Key account",owner:S.myEng||S.myName||"",sponsor:"",stage:"Introduce"},pre||{});drawKeyAdd()}
+function closeKeyAdd(){S.kaA=null;$("#drawerHost").innerHTML="";document.onkeydown=null}
+function drawKeyAdd(){const A=S.kaA;if(!A)return;const names=[...new Set(Object.values(allAccounts()).map(x=>x.name).filter(Boolean))].slice(0,3000).sort();
+  $("#drawerHost").innerHTML=`<div class="scrim lvs" id="kaAScrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Add key account" style="width:min(640px,100%)">
+   <div class="lvh"><div class="row"><span class="chip">New</span><span class="sp"></span><button class="btn sm" id="kaAX">Cancel</button></div><div><h2>Add key account</h2><div class="muted">A corporate group or a hotel you look after outside the lead journey.</div></div></div>
+   <form id="kaAForm" class="lvb" style="grid-template-columns:minmax(0,1fr)" novalidate><div style="display:grid;gap:12px">
+    <label class="f">Account or group <span class="req">*</span><input id="kaA-name" list="kaAList" maxlength="120" value="${esc(A.name)}" autocomplete="off" placeholder="Start typing, e.g. Accor HQ"></label><datalist id="kaAList">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+    <div class="grid2"><label class="f">Type<select id="kaA-type">${opts(KA_KINDS,A.type)}</select></label><label class="f">Where it is now<select id="kaA-stage">${opts(KA_STAGES,A.stage)}</select></label></div>
+    <div class="grid2"><label class="f">Owner<input id="kaA-owner" maxlength="80" list="kaAOwn" value="${esc(A.owner)}"></label><label class="f">Executive sponsor at Samsotech <span class="muted small">(optional)</span><input id="kaA-sp" maxlength="80" value="${esc(A.sponsor)}"></label></div><datalist id="kaAOwn">${kaOwners().map(o=>`<option value="${esc(o)}">`).join("")}</datalist>
+    <div class="small" id="kaA-msg" aria-live="polite"></div></div></form>
+   <div class="lvf"><span class="hint small muted">Visible to people who have Key accounts switched on (Management and Supervisor by default).</span><div class="row"><button class="btn pri" id="kaASave">Add key account</button></div></div></aside></div>`;
+  $("#kaAX").onclick=closeKeyAdd;$("#kaAScrim").onclick=e=>{if(e.target.id==="kaAScrim")closeKeyAdd()};document.onkeydown=e=>{if(e.key==="Escape"&&S.kaA)closeKeyAdd()};
+  $("#kaA-name").focus({preventScroll:true});
+  $("#kaASave").onclick=async()=>{const v=id=>($(id).value||"").trim().replace(/\s+/g," "),msg=$("#kaA-msg"),r=kaResolve(v("#kaA-name"));
+    if(!r){msg.innerHTML=`<span style="color:var(--bad)">Enter the account or group name.</span>`;return}
+    if(r.existing){closeKeyAdd();toast(r.name+" is already a key account");openKeyAcct(r.key);return}
+    const b=$("#kaASave");b.disabled=true;b.textContent="Saving…";
+    try{await kaEnsureAcct(r,{type:v("#kaA-type"),stage:v("#kaA-stage"),owner:v("#kaA-owner"),sponsor:v("#kaA-sp")});await kaLoad(true);closeKeyAdd();toast(r.name+" added to Key accounts");if(S.tab==="keyacct")render();openKeyAcct(r.key)}
+    catch(e){b.disabled=false;b.textContent="Add key account";msg.innerHTML=`<span style="color:var(--bad)">${esc(kaErr(e))}</span>`}}}
+
+/* ---------- log an account meeting ---------- */
+function openKeyMeeting(o){o=o||{};S.drawer=null;S.acctP=null;kaLoad();const back=o.back||(S.kaW&&S.kaW.key)||"";S.kaW=null;
+  S.kaM={key:o.key||"",name:o.name||"",type:KA_TYPES[0],date:todayISO(),client:"",ours:S.myEng||S.myName||"",hotels:"",notes:"",reqs:[],steps:[],back,busy:false,lead:false};drawKeyMeeting()}
+function closeKeyMeeting(){const b=S.kaM&&S.kaM.back;S.kaM=null;$("#drawerHost").innerHTML="";document.onkeydown=null;if(b&&kaAcct(b))openKeyAcct(b)}
+function kmRowsHTML(){const M=S.kaM,prods=prodList().map(p=>p.name),canLead=can("lead.create")||can("lead.create_own_outbound");void canLead;
+  return{reqs:M.reqs.map((r,i)=>`<div class="kmrow" data-i="${i}"><label class="f">Requirement<input data-kr="${i}.text" maxlength="400" value="${esc(r.text)}" placeholder="What does the client need?"></label><label class="f">Product<select data-kr="${i}.product">${opts(prods,r.product,"Not specific")}</select></label><button type="button" class="btn sm" data-krx="${i}" aria-label="Remove requirement ${i+1}">Remove</button></div>`).join(""),
+   steps:M.steps.map((r,i)=>`<div class="kmrow ks" data-i="${i}"><label class="f">Next step<input data-ks="${i}.text" maxlength="200" value="${esc(r.text)}" placeholder="What happens next?"></label><label class="f">Who<input data-ks="${i}.owner" list="kmOwn" maxlength="80" value="${esc(r.owner)}"></label><label class="f">Whose<select data-ks="${i}.side"><option value="ours"${r.side==="ours"?" selected":""}>Ours</option><option value="theirs"${r.side==="theirs"?" selected":""}>Theirs</option></select></label><label class="f">Due<input type="date" data-ks="${i}.due" value="${esc(r.due)}"></label><button type="button" class="btn sm" data-ksx="${i}" aria-label="Remove next step ${i+1}">Remove</button></div>`).join("")}}
+function drawKmRows(){const R=kmRowsHTML();const a=$("#kmReqs"),b=$("#kmSteps");if(a)a.innerHTML=R.reqs;if(b)b.innerHTML=R.steps}
+function drawKeyMeeting(){const M=S.kaM;if(!M)return;const names=[...new Set(kaAcctRows().map(x=>x.doc.accountName).concat(Object.values(allAccounts()).map(x=>x.name)).filter(Boolean))].slice(0,3000).sort();
+  const canLead=can("lead.create")||can("lead.create_own_outbound");const wc=meetWords(M.notes),mn=meetMin();
+  $("#drawerHost").innerHTML=`<div class="scrim lvs" id="kmScrim"><aside class="drawer lv" role="dialog" aria-modal="true" aria-label="Log account meeting">
+   <div class="lvh"><div class="row"><span class="chip">New entry</span><span class="sp"></span><button class="btn sm" id="kmX">Cancel</button></div><div><h2>Log account meeting</h2><div class="muted">Key account work. Not a lead, so it does not count in pipeline, win rate or targets.</div></div></div>
+   <form id="kmForm" class="lvb" novalidate style="grid-template-columns:minmax(0,1fr)"><div style="display:grid;gap:16px;min-width:0;align-content:start">
+    <div class="lvc"><p class="lvt">Who and what</p><div class="panel" style="padding:14px;display:grid;gap:12px">
+     <label class="f">Account or group <span class="req">*</span><input id="km-name" list="kmList" maxlength="120" autocomplete="off" value="${esc(M.name)}" placeholder="Start typing, e.g. Accor HQ"></label><datalist id="kmList">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+     <div class="grid2"><label class="f">Meeting type<select id="km-type">${opts(KA_TYPES,M.type)}</select></label><label class="f">Date <span class="req">*</span><input id="km-date" type="date" max="${todayISO()}" value="${esc(M.date)}"></label></div>
+     <label class="f">Client attendees<input id="km-client" maxlength="300" value="${esc(M.client)}" placeholder="Names and titles, separated by commas"></label>
+     <label class="f">Samsotech attendees<input id="km-ours" maxlength="300" list="kmOwn" value="${esc(M.ours)}"></label><datalist id="kmOwn">${kaOwners().map(o=>`<option value="${esc(o)}">`).join("")}</datalist>
+     <label class="f">Hotels discussed <span class="muted small">(optional, separate with commas)</span><input id="km-hotels" maxlength="600" value="${esc(M.hotels)}"></label></div></div>
+    <div class="lvc"><p class="lvt">What was discussed</p><div class="panel" style="padding:14px;display:grid;gap:8px"><label class="f">Notes <span class="req">*</span> <span class="muted small">(at least ${mn} words)</span><textarea id="km-notes" rows="5" placeholder="Who attended, what was discussed, the client's concerns, agreed next step">${esc(M.notes)}</textarea></label><div class="small wc${wc.n>=mn?" ok":""}" data-wc aria-live="polite">${wc.n} / ${mn} words${wc.n>=mn?" ✓":""}</div></div></div>
+    <div class="lvc"><p class="lvt">Requirements captured <span class="muted" style="text-transform:none;letter-spacing:0">(optional)</span></p><div class="panel" style="padding:10px 14px"><div id="kmReqs" style="display:grid;gap:8px"></div><div class="apr"><button type="button" class="btn sm" id="kmAddR">+ Add requirement</button></div></div></div>
+    <div class="lvc"><p class="lvt">Next steps <span class="muted" style="text-transform:none;letter-spacing:0">(optional)</span></p><div class="panel" style="padding:10px 14px"><div id="kmSteps" style="display:grid;gap:8px"></div><div class="apr"><button type="button" class="btn sm" id="kmAddS">+ Add next step</button></div></div></div>
+    <div class="small" id="km-msg" aria-live="polite"></div></div></form>
+   <div class="lvf"><span class="hint small muted">Visible to you, Management and Supervisor. Sales on the account see only the date and type.</span><div class="row">${canLead?`<button type="button" class="btn" id="kmSaveLead">Save and create a lead…</button>`:""}<button type="button" class="btn pri" id="kmSave">Save meeting</button></div></div></aside></div>`;
+  drawKmRows();const h=$("#drawerHost");
+  $("#kmX").onclick=closeKeyMeeting;$("#kmScrim").onclick=e=>{if(e.target.id==="kmScrim")closeKeyMeeting()};document.onkeydown=e=>{if(e.key==="Escape"&&S.kaM&&!S.kaM.busy)closeKeyMeeting()};
+  const bind=(id,k)=>$(id).addEventListener("input",e=>{M[k]=e.target.value;$("#km-msg").innerHTML=""});
+  bind("#km-name","name");bind("#km-type","type");bind("#km-date","date");bind("#km-client","client");bind("#km-ours","ours");bind("#km-hotels","hotels");bind("#km-notes","notes");
+  $("#km-name").addEventListener("input",e=>{const r=kaResolve(e.target.value);M.key=r?r.key:""});
+  $("#kmAddR").onclick=()=>{M.reqs.push({text:"",product:""});drawKmRows();h.querySelector("#kmReqs [data-i]:last-child input")?.focus()};
+  $("#kmAddS").onclick=()=>{M.steps.push({text:"",owner:M.ours,side:"ours",due:""});drawKmRows();h.querySelector("#kmSteps [data-i]:last-child input")?.focus()};
+  const F=$("#kmForm"),sync=e=>{const el=e.target,a=el.dataset&&(el.dataset.kr||el.dataset.ks);if(!a)return;const[i,f]=a.split(".");(el.dataset.kr?M.reqs:M.steps)[+i][f]=el.value};
+  F.addEventListener("input",sync);F.addEventListener("change",sync);
+  F.addEventListener("click",e=>{const b=e.target.closest("[data-krx],[data-ksx]");if(!b)return;if(b.dataset.krx!=null)M.reqs.splice(+b.dataset.krx,1);else M.steps.splice(+b.dataset.ksx,1);drawKmRows()});
+  $("#kmSave").onclick=()=>kmSave(false);$("#kmSaveLead")?.addEventListener("click",()=>kmSave(true));
+  if(!M.name)$("#km-name").focus({preventScroll:true})}
+async function kmSave(thenLead){const M=S.kaM;if(!M||M.busy)return;const msg=$("#km-msg"),bad=t=>{msg.innerHTML=`<div class="notice bad">${esc(t)}</div>`};
+  const clean=s=>String(s||"").trim().replace(/\s+/g," ");const r=kaResolve(M.name);
+  if(!r)return bad("Enter the account or group name.");if(!M.date)return bad("Choose the date of the meeting.");if(M.date>todayISO())return bad("The meeting date can't be in the future.");
+  const ne=meetNotesErr(M.notes);if(ne)return bad(ne);
+  const reqs=M.reqs.filter(x=>clean(x.text)),steps=M.steps.filter(x=>clean(x.text));
+  if(M.reqs.some(x=>!clean(x.text)&&x.product))return bad("A requirement has a product but no text. Write it or remove the row.");
+  M.busy=true;const b1=$("#kmSave"),b2=$("#kmSaveLead");[b1,b2].forEach(b=>b&&(b.disabled=true));b1.textContent="Saving…";
+  const mid=kaId("m"),hs=clean(M.hotels).split(/[,;]+/).map(clean).filter(Boolean).slice(0,30);
+  try{await kaEnsureAcct(r,hs.length?{hotels:hs}:{});
+    const acct=kaAcct(r.key);if(acct&&hs.length){const cur=acct.doc.hotels||[],add=hs.filter(h=>!cur.some(c=>nk(c)===nk(h)));if(add.length)await kaPatch(acct,{hotels:cur.concat(add).slice(0,40)})}
+    const rows=[{id:mid,kind:"meeting",account_key:r.key,doc:{accountName:r.name,date:M.date,type:M.type,client:clean(M.client),ours:clean(M.ours),hotels:hs,notes:M.notes.trim(),by:S.myEng||S.myName||""}}];
+    const rids=[];reqs.forEach(x=>{const id=kaId("r");rids.push(id);rows.push({id,kind:"req",account_key:r.key,doc:{accountName:r.name,text:clean(x.text),product:x.product||"",hotel:"",status:"Open",source:mid,by:S.myEng||S.myName||""}})});
+    steps.forEach(x=>rows.push({id:kaId("s"),kind:"promise",account_key:r.key,doc:{accountName:r.name,text:clean(x.text),side:x.side==="theirs"?"theirs":"ours",owner:clean(x.owner),due:x.due||"",status:"Open",source:mid}}));
+    await kaInsert(rows);await kaLoad(true);
+    const back=M.back;S.kaM=null;$("#drawerHost").innerHTML="";document.onkeydown=null;toast("Account meeting saved");
+    if(thenLead){const first=reqs[0];const row=first&&kaAll("req").find(x=>x.id===rids[0]);kaStartLeadFor(r,row,reqs.map(x=>x.product).filter(Boolean))}
+    else{if(S.tab==="keyacct")render();openKeyAcct(r.key)}}
+  catch(e){M.busy=false;[b1,b2].forEach(b=>b&&(b.disabled=false));b1.textContent="Save meeting";bad(kaErr(e))}}
+
+/* ---------- from a requirement to a normal lead ---------- */
+function kaStartLead(a,reqRow){kaStartLeadFor({key:a.account_key,name:a.doc.accountName},reqRow,reqRow.doc.product?[reqRow.doc.product]:[])}
+function kaStartLeadFor(r,reqRow,prods){const acc=allAccounts()[r.key];S.kaW=null;S.kaM=null;$("#drawerHost").innerHTML="";document.onkeydown=null;
+  const known=prodList().map(p=>p.name);const ps=[...new Set((prods||[]).filter(p=>known.includes(p)))];
+  S.form={account:acc?Object.assign({isNew:false},acc):{isNew:true,name:r.name,key:r.key,country:"",city:"",group:""},products:ps,category:isSales()?"Outbound":"",source:"",fromKey:reqRow?reqRow.id:""};
+  S.tab="new";S.tabChosen=true;render();scrollTo(0,0);toast(acc?"The lead form is ready for "+r.name+". Fill in the rest and submit.":r.name+" isn't an account yet, so the lead form will create it. Check the country.")}
+async function kaLinkLead(reqId,ref){const row=kaK().items.find(x=>x.id===reqId);if(!row||!kaOn())return;try{await kaPatch(row,{leadRef:ref,status:row.doc.status==="Open"||row.doc.status==="In discussion"?"Promised":row.doc.status});kaLoad(true)}catch(e){}}
+
+/* ---------- Account profile hooks ---------- */
+async function kaDatesLoad(key){const K=kaK();if(!window.__sb||kaOn()||!key||K.dates[key]!==undefined)return;K.dates[key]=null;
+  try{const{data}=await window.__sb.rpc("key_meeting_dates",{p_key:key});K.dates[key]=Array.isArray(data)?data:[]}catch(e){K.dates[key]=[]}
+  if(S.acctP&&S.acctP.key===key)drawAcctP()}
+function kaProfileTimeline(key){const out=[];if(!window.__sb)return out;
+  if(kaOn()){kaLoad();kaFor("meeting",key).forEach(x=>{if(x.doc.date)out.push({d:x.doc.date,k:"Account meeting",t:`${esc(x.doc.type||"Meeting")} <span class="muted">(${esc(x.doc.ours||"")})</span>`,notes:String(x.doc.notes||"")})})}
+  else{(kaK().dates[key]||[]).forEach(x=>{if(x.date)out.push({d:x.date,k:"Account meeting",t:`${esc(x.type||"Meeting")} <span class="muted">(key account work)</span>`,notes:""})})}
+  return out}
 
 /* ======================= 4. MANAGEMENT ======================= */
 function orderTree(ls,x){const os=ls.filter(l=>(l.assignedTo===x.name||(shareOn(l)&&sameEng(l.share.to,x.name)))&&l.status==="Won"&&engCredit(l)).sort((a,b)=>orderVal(b)-orderVal(a)||reqDate(b).localeCompare(reqDate(a)));
