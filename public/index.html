@@ -620,6 +620,34 @@ button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:le
 .kmrow{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:8px;align-items:end}.kmrow.ks{grid-template-columns:minmax(0,2fr) minmax(0,1fr) 90px 140px auto}
 @media(max-width:700px){.kmrow,.kmrow.ks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.kmrow label:first-child{grid-column:1/-1}.kmrow .btn{justify-self:start}}
 @media(max-width:480px){.apt{grid-template-columns:minmax(0,1fr) auto;gap:2px 8px}.apt .apd{grid-column:1}.apt .apk{grid-column:2;grid-row:1}.apt .apx{grid-column:1/-1}.apks{grid-template-columns:repeat(2,minmax(0,1fr))}.apv{font-size:19px!important}}
+
+/* Help centre (22 Nov 2026) */
+#helpBtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 16px var(--f-body);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:auto;flex:none;padding:0}
+#helpBtn:hover{background:var(--sunk)}#helpBtn[hidden]{display:none}#helpBtn+#who{margin-left:0}#helpBtn[hidden]+#who{margin-left:auto}
+.hq{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;min-width:24px;margin-left:8px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);font:700 13px var(--f-body);cursor:pointer;padding:0;vertical-align:middle;flex:none}
+.hq:hover{background:var(--accent-soft)}
+.scrim.hlp{z-index:30}
+.drawer.hlpd{width:min(560px,100%);padding:0;gap:0;display:flex;flex-direction:column;overflow:hidden;height:100%}
+.hlpd .hh{padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));display:grid;gap:10px;border-bottom:1px solid var(--line);background:var(--bg);flex:none}
+.hlpd .hh h2{margin:0;font-size:19px}
+.hlpd .hnav{display:flex;flex-wrap:wrap;gap:4px;margin:0 -4px}
+.hlpd .hn{flex:none;min-height:40px;padding:8px 11px;border-radius:8px;border:1px solid transparent;background:none;color:var(--muted);font:500 13.5px var(--f-body);cursor:pointer;white-space:nowrap}
+.hlpd .hn[aria-selected="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}.hlpd .hn:hover{color:var(--ink)}
+.hlpd .hb{overflow:auto;flex:1;min-height:0;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:block;outline:none}
+.hlpd .hb h3{margin:4px 0 8px;font-size:16px}.hlpd .hb h4{margin:14px 0 6px;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.hlpd .hsteps,.hlpd .hcard ul,.hlpd .hcard ol,.hlpd .hnew{margin:0 0 12px;padding-left:22px;display:grid;gap:7px}.hlpd .hnew{list-style:none;padding-left:0}
+.hlpd .hcard{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:12px 14px;margin:12px 0}.hlpd .hcard.warn{border-left:3px solid var(--warn,#d99a00)}.hlpd .hcard p{margin:6px 0 0}
+.hlpd .hcard ul,.hlpd .hcard ol{margin:8px 0 0}
+.htiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.htile{display:grid;gap:4px;text-align:left;padding:12px 14px;min-height:76px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.htile:hover{border-color:var(--accent);background:var(--accent-soft)}.htile .hgo{color:var(--accent);font-weight:600;font-size:12.5px;margin-top:2px}
+.hfaq{border:1px solid var(--line);border-radius:9px;background:var(--surface);margin:0 0 6px}.hfaq summary{cursor:pointer;padding:11px 14px;font-weight:500;min-height:44px;display:flex;align-items:center}
+.hfaq[open] summary{border-bottom:1px solid var(--line)}.hfaq .hans{padding:4px 14px 10px}.hfaq .hans p{margin:8px 0}
+.hflow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 10px}.hst{padding:5px 10px;border-radius:20px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12.5px}.har{color:var(--muted)}
+.hwho{display:grid;gap:8px;margin:8px 0}.hwho>div{border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:10px 14px}.hwho dt{font-weight:600}.hwho dd{margin:3px 0 0;color:var(--muted)}
+#helpAdm .hrows{display:grid;gap:8px;margin-bottom:6px}#helpAdm .hrow{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--surface)}
+#helpAdm .hrow>div:first-child{min-width:0;flex:1}#helpAdm .hrb{display:flex;gap:6px;flex:none}#helpAdm .hform textarea{width:100%}
+@media(max-width:700px){.drawer.hlpd{width:100%}#helpBtn{width:40px;height:40px}#helpAdm .hrow{flex-direction:column}.hq{width:28px;height:28px;min-width:28px}}
 </style>
 
 <header class="top gut">
@@ -640,14 +668,16 @@ button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:le
       <button data-tab="audit" role="tab">Audit trail</button>
       <div class="mtw" id="tabMore" hidden><button type="button" class="mt" id="tabMoreBtn" aria-haspopup="true" aria-expanded="false">More <span class="count" id="c-more" hidden></span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="mtp" id="tabMoreMenu" hidden></div></div>
     </nav>
+    <button type="button" id="helpBtn" hidden aria-label="Help" aria-haspopup="dialog" aria-expanded="false" title="Help">?</button>
     <div id="who" class="row" style="gap:6px"></div>
   </div>
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 22 Nov 2026 · build e0842c4</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 22 Nov 2026 · build 97f065e</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
+<div id="helpHost"></div>
 
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
@@ -964,7 +994,7 @@ function uiPolish(){tabsInit();
 function renderInner(){const m=$("#main");
   if(!S.db){m.innerHTML=`<div class="panel empty">Lead Desk needs you to be signed in to claude.ai with access to this page.</div>`;$("#tabs").hidden=true;return}
   if(!S.usersLoaded){m.innerHTML=`<div class="panel empty">Checking your access…</div>`;$("#tabs").hidden=true;return}
-  if(!S.role){$("#tabs").hidden=true;$("#who").innerHTML="";m.innerHTML=`<section class="view" style="max-width:560px;margin:40px auto"><div class="panel" style="padding:28px;display:grid;gap:10px"><h2>You don't have access yet</h2>
+  if(!S.role){helpBtnShow(false);$("#tabs").hidden=true;$("#who").innerHTML="";m.innerHTML=`<section class="view" style="max-width:560px;margin:40px auto"><div class="panel" style="padding:28px;display:grid;gap:10px"><h2>You don't have access yet</h2>
     <p class="muted" style="margin:0">${S.uid?`You're signed in${S.myName?" as <b>"+esc(S.myName)+"</b>":""}, but you aren't on the Lead Desk user list.`:"Lead Desk couldn't identify your account."} Ask a Supervisor to add you under Products &amp; settings → Users and access, then reload this page.</p>${window.LD_HOSTED?`<div><button class="btn" onclick="window.__signOut()">Sign out</button></div>`:""}</div></section>`;return}
   const allowed=allowedTabs();mineLabel();if(!allowed.length){$("#tabs").hidden=true;m.innerHTML=`<div class="panel empty">Your role (${esc(ROLE_LABEL[S.role]||S.role)}) has no pages switched on. Ask a Supervisor.</div>`;return}
   if(!S.tabChosen||!allowed.includes(S.tab)){S.tab=homeTab();S.tabChosen=true}
@@ -973,7 +1003,7 @@ function renderInner(){const m=$("#main");
   const pt=document.querySelector('#tabs [data-tab="pipe"] .tl');pt.textContent=!viewAll()?"My pipeline":can("lead.edit_all")?"Pipelines":S.role==="keyaccount"?"Pipelines":"Team pipeline";document.querySelector('#tabs [data-tab="new"]').textContent=can("lead.create")||can("lead.create_own_outbound")?"Leads":"Leads";
   $("#who").innerHTML=`<details class="acctm"><summary aria-label="Account: ${esc(S.myName||"")}, ${esc(ROLE_LABEL[S.role])}"><span class="av" aria-hidden="true">${esc((myLabel()||"?").trim().charAt(0).toUpperCase())}</span><span class="acn"><b>${esc(myLabel())}</b><span>${esc(ROLE_LABEL[S.role])}</span></span></summary>
     <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button><button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}${themeSeg()}</div></details>`;
-  bindTheme();
+  bindTheme();helpBtnShow(true);
   $("#dnMenu")?.addEventListener("click",()=>{$("#who details")?.removeAttribute("open");openDisplayName()});
   tabsFit();
   $("#banner").querySelector("[data-perm]")?.remove();$("#banner").querySelector("[data-kam]")?.remove();if(isKam())$("#banner").insertAdjacentHTML("beforeend",kamBanner());if(isKam()||can("users.manage"))kamLoad();
@@ -6481,6 +6511,7 @@ const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead
   ["prod","Products & PMS","Product catalog, PMS integrations",["Product catalog","PMS integrations"]],
   ["sales","Sales rules","Source channels, rates and targets, activity rules, lead flow",["Source channels","Rates and targets","Activity rules and forecast","Lead flow rules"]],
   ["amc","AMC & contracts","Renewal rates, line categories, reading rules, OHIP",["AMC and renewals","Contract line categories","Contract reading rules","OHIP rules"]],
+  ["help","Help centre","Who to ask lines and extra questions",["Help centre"]],
   ["sys","Backup","Download a copy of all data",["Backup"]]];
 function renderSet(m){renderSetBase(m);if(can("settings.manage")&&!window.__NOSETSEC)setSections(m)}
 function setSections(m){const sec=m.querySelector("section.view");if(!sec)return;const title=p=>((p.querySelector("h3,h2")||{}).textContent||"").trim();
@@ -6507,7 +6538,7 @@ function setSections(m){const sec=m.querySelector("section.view");if(!sec)return
   const on=n.querySelector("button.on");if(on&&n.scrollWidth>n.clientWidth)n.scrollLeft=Math.max(0,on.offsetLeft-12)}
 function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spList(true);
   if(!can("settings.manage")){m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Products, sales engineers, sources, exchange rates and targets. Only a Supervisor can change these.</p></div></div>
-   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel()+kamPanel():""}
+   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel()+kamPanel():""}${helpAdmPanel()}
    <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;$("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}return}
   const row=(x,i,kind)=>`<div class="it" style="padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1;min-width:0;${x.active===false?"color:var(--muted);text-decoration:line-through":""}">${esc(x.name)}</span>
     ${kind==="p"?`<label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-rep="${i}" ${x.repeatable?"checked":""} style="width:auto">Repeatable</label>`:""}
@@ -6515,7 +6546,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
     ${kind==="s"&&(openLeadsOf(x.name).length||myAreas(x.name).length)?`<button type="button" class="btn sm" data-hand="${esc(x.name)}">Hand over</button>`:""}
     <button type="button" class="btn sm" data-ren="${kind}:${i}">Rename</button><button type="button" class="btn sm" data-tog="${kind}:${i}">${x.active===false?"Restore":"Retire"}</button></div>`;
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Supervisors manage users, roles, the product catalog and the sales engineer list here. Names must be unique, ignoring case and spacing. Retired names stay on existing leads but can no longer be chosen.</p></div></div>
-  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel()+kamPanel():""}
+  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel()+kamPanel():""}${helpAdmPanel()}
   ${territoryPanel()}
   ${subTerrPanel()}
   ${chainsPanel()}
@@ -6562,7 +6593,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);bindKam(m);if($("#regAccPanel"))regAccLoad();bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
+  bindChains(m);bindKam(m);helpAdmBind();if($("#regAccPanel"))regAccLoad();bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
@@ -6833,6 +6864,280 @@ function bindUsers(){const inp=$("#uq"),sg=$("#usugg");if(!inp)return;
     S.userNote=r.error?{lvl:"bad",msg:`Couldn't reset ${em}: ${esc(r.error)}`}:{lvl:"ok",msg:`${r.status==="created"?"Sign-in created":"Password reset"} for ${em}. Temporary password: <b class="mono">${esc(r.password)}</b>. They must choose a new one when they sign in.`};render()});
   document.querySelectorAll("[data-urm]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm remove";return}const m=Object.assign({},S.users);delete m[b.dataset.urm];saveUsers(m,"User removed")})}
 function useCount(name,kind){return S.leads.filter(l=>kind==="p"?productsOf(l).includes(name):l.assignedTo===name).length}
+
+/* ======================= HELP CENTRE (22 Nov 2026, SQL 53) =======================
+   The "?" button in the top bar opens a panel: Quick start, Quick access, Questions, At a glance, Who to ask.
+   The text ships with the app, one block per role (letters: S sales, L lead manager, M management, U supervisor, A amc, K key account manager;
+   "*" = everyone; a Supervisor sees everything). Nothing here names a company: names, numbers and wording that a client can change
+   come from the settings (meetMin(), wonDays(), IL_MAX) or from the Supervisor's own lines in table help_items (SQL 53).
+   The table is read only when someone opens Help or the Help settings; nobody else pays for it. */
+const HELP_L=()=>({sales:"S",leadmanager:"L",management:"M",supervisor:"U",amc:"A",keyaccount:"K"})[S.role]||"";
+const helpS=()=>S.help||(S.help={open:false,sec:"start",q:"",openId:"",rows:[],loaded:false,loading:false,err:"",ed:null});
+const hfmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+const hSee=(letters,L)=>L==="U"||letters==="*"||letters.includes(L);
+
+const HELP_QS={
+ S:{title:"Quick start for Sales",
+  steps:["Open **Focus**. It lists what needs you today: leads to accept, follow-ups that are due, and won orders still waiting for a quotation.",
+   "Open **My pipeline**. When a lead is assigned to you, click **Accept** (or **Decline** with a reason).",
+   "After every call, email or visit, open the lead and click **Log update**. Always set the **next follow-up date**.",
+   "After a meeting, click **Log a meeting**. Write real notes the same day: who came, what was discussed, the next step.",
+   "When the customer wants a price, click **Quotation sent**, upload the Salesforce PDF, check the amount, then set the target date and next step.",
+   "If the customer wants a separate quotation for each product, **split the lead first**, then quote each new lead.",
+   "When the customer orders, click **Order won**. You do not type an amount: it comes from the quotation."],
+  routine:["Morning: open Focus, then My pipeline, and work the follow-ups that are due.","After each call or meeting: log it the same day.","Before you leave: check Meetings for tomorrow."],
+  musts:["Every open lead needs a next follow-up date.","Meeting notes need the minimum number of words shown by the counter.","Upload the right quotation: the order value is its total before tax."]},
+ L:{title:"Quick start for Lead Managers",
+  steps:["Open **Back office**. The number on the tab is how many leads are waiting for you.",
+   "Open each new lead and check the hotel, contact, country, products and requirement.",
+   "If it is complete, choose the sales engineer and click **Verify and assign**.",
+   "If something is missing, click **Request info** and say what. The creator is emailed and the lead comes back to you with a reply.",
+   "A copy of an existing lead is marked **Duplicate**. Something that is not a real lead is **Rejected**.",
+   "Open **Data issues** and work each list until it is empty (missing PMS, manual quotation items to confirm, hotels with no chain).",
+   "Look at registered orders waiting for approval and hotel rename requests."],
+  routine:["Every morning: clear the verification queue from the top.","Then Data issues and anything waiting for approval.","When Sales ask for help, use the Questions section."],
+  musts:["Do not leave a lead waiting in the queue: the engineer cannot start until you assign it.","Confirm manual quotation items. Until you do, that order cannot be marked Won.","Give a clear reason whenever Lead Desk asks for one."]},
+ M:{title:"Quick start for Management",
+  steps:["Open **Management**. The filters at the top change every figure on the page, so set the period first.",
+   "**Overview** shows how the company is doing. **Engineers** shows each person's leads, meetings, quotations and revenue.",
+   "**Pipeline health** shows the forecast, forecast accuracy, stale leads and won orders without a quotation.",
+   "**Closed orders** lists won orders, including registered ones, with a check that the totals tie.",
+   "**Targets** shows progress against company, monthly and personal targets, and lets you set them if you have that permission.",
+   "If a figure looks wrong, ask the Lead Manager. If two views disagree, tell your Supervisor."],
+  routine:["Weekly: Overview, then Pipeline health.","Monthly: Targets and Closed orders.","Use the Excel and CSV buttons on a view to download it."],
+  musts:["Duplicate and Rejected leads are never added to totals.","Registered orders count in revenue and targets, but not as leads.","You read the numbers; Lead Managers fix the data."]},
+ U:{title:"Quick start for Supervisors",
+  steps:["Open **Products & settings → Users and access**. Click **Add user**, type the work email and choose the role.",
+   "For a Sales user, choose the engineer name. It must match the Sales engineers list, because that links the person to their leads.",
+   "Give the temporary password to the person privately. They choose their own at first sign-in. Use **Reset password** if someone is locked out.",
+   "Check **Roles and permissions** before you change anything: each tick is enforced in the database as well as on screen.",
+   "Under **Hotel chains**, click **Save chains on accounts** so Key Account Managers can see the right hotels.",
+   "Download a copy from **Backup** every week.",
+   "Use the **Audit trail** to see who changed what, and when."],
+  routine:["Weekly: Backup, then a look at the Audit trail.","When someone joins or leaves: Users and access.","After any settings change: tell the team."],
+  musts:["Give temporary passwords privately, never by group chat.","Prefer a time-limited window or a Lead Manager override to widening a role for everyone.","Change settings outside working hours when you can."]},
+ A:{title:"Quick start for AMC",
+  steps:["Open **Renewals**. Choose the view you need: items due, contracts or installed base.",
+   "Click an item to open it. Update its **status**, enter the **amount** if it changed, and add a **note** about what the customer said.",
+   "Save. Management sees the progress in its own views.",
+   "Enter the **project sign-off date** when you have it. AMC counts from that date; until it is entered the order date is used and the item is flagged.",
+   "For clients who already hold a contract, upload the contract PDFs (up to 10 at a time) and check each line before it is approved."],
+  routine:["Start with the items marked due or late.","Add a note after every customer conversation.","Check the flagged items with no sign-off date."],
+  musts:["You can read won orders but cannot edit leads. Ask the Lead Manager if a lead is wrong.","OHIP and cloud hosting are shown on their own.","Always write what the customer said in the note."]},
+ K:{title:"Quick start for Key Account Managers",
+  steps:["Open **Key accounts**. The banner at the top lists the chains and regions you look after.",
+   "Open an account card to see its stage, owner, last meeting, requirements and open items.",
+   "Use **Pipelines**, **Meetings** and **Accounts** to read the leads and hotels of your chains.",
+   "You can read everything for your chains, but you cannot create, edit, assign or delete anything.",
+   "If a hotel you expect is missing, ask your Supervisor to check that its chain and region are set."],
+  routine:["Start with Key accounts: overdue items come first.","Then the Pipelines of your chains.","Note anything wrong for the Lead Manager."],
+  musts:["You see a hotel only when both its chain and its region match one of your allocations.","Your view is read-only.","Amounts are shown for your chains only."]}
+};
+
+/* Quick access tiles: [id, title, one line, tab, hint shown after the jump] */
+const HELP_TILES={
+ S:[["focus","Focus","What needs action today","focus"],["pipe","My pipeline","Your leads by stage, with the next step","pipe"],["newlead","Submit a lead","Enter a lead you found yourself","new"],
+    ["meet","Log a meeting","Open Meetings, then log it on the lead","meet","Open the lead and click Log a meeting."],["quote","Quotation sent","Upload the Salesforce PDF and set the target date","pipe","Open a lead at Meeting Done and click Quotation sent."],
+    ["split","Split a lead","One quotation for each product","pipe","Open a lead, then Products discussed → Split into separate leads."]],
+ L:[["bo","Verification queue","New leads waiting to be checked","bo"],["dq","Data issues","Records that need cleaning","bo"],["accts","Accounts","Hotels, renames and merges","accts"],
+    ["reg","Registered orders","Approve earlier orders","focus"],["import","Import leads","Load leads from Excel","new"]],
+ M:[["ov","Overview","How the company is doing","mgmt"],["tg","Targets","Progress against targets","mgmt"],["closed","Closed orders","Won orders and the tie check","mgmt"],["ops","Pipeline health","Forecast and stale leads","mgmt"]],
+ U:[["users","Users and access","Add people, reset passwords","set"],["perms","Roles and permissions","What each role may do","set"],["settings","Settings","All setup sections","set"],["backup","Backup","Download a copy of all data","set"],["audit","Audit trail","Who changed what, and when","audit"]],
+ A:[["renew","Renewals","AMC, subscriptions and contracts","renew"]],
+ K:[["keyacct","Key accounts","Your chains and their accounts","keyacct"]]
+};
+
+/* Questions: [id, who, group, question, answer]. Answers use **bold**; a blank line starts a new paragraph. */
+function helpFaq(){const mn=(typeof meetMin==="function"?meetMin():30),wd=(typeof wonDays==="function"?wonDays():30),il=(typeof IL_MAX==="number"?IL_MAX:500);return[
+ ["popup","*","Getting around","What is the lead popup?","Click any lead to open it. The top shows the lead number, its status and the stage boxes. The left side holds the details; the right side holds what to do next and the Activity history.\n\nIt opens in view mode, so nothing changes until you click **Edit**. In edit mode a counter shows your unsaved changes: **Save changes** keeps them, **Cancel** throws them away. Everything you do is added to Activity with your name and date."],
+ ["f-tabs","*","Getting around","I cannot see a tab or button that someone mentioned","Your role decides which tabs and buttons you see. If you think you need one, ask your Supervisor. A button that is hidden is also refused behind the scenes, so it is not a mistake on your side."],
+ ["f-pass","*","Getting around","How do I change my password, or switch to dark mode?","Open the account menu at the top right. Choose **Change password**, or pick **Light**, **Dark** or **Device** under theme. The theme is remembered on that device."],
+ ["f-stale","*","Getting around","A screen looks out of date","Switch to another tab and back. Each device keeps a copy of the leads you can see and only asks for what changed since your last visit."],
+ ["f-mail","*","Getting around","Which emails does Lead Desk send?","A new lead assigned to you, a follow-up that is due, a request for more information on a lead you created, a reminder about won orders with no quotation, and renewal reminders. Each email links back to the lead."],
+ ["f-speak","*","Getting around","Can I speak my notes instead of typing?","Yes. Under the notes box tap **Speak**, talk, then tap **Stop**. Edit the words before you save. It works in Chrome, Edge and Safari, needs internet and microphone permission, and is not offered in Firefox."],
+ ["f-audit","*","Getting around","Is everything I do recorded?","Yes. Every change to a lead, account, order or user is saved with your name and the time. When Lead Desk asks for a reason, write a clear one: it is kept with the change."],
+ ["f-accept","SL","Working a lead","A lead was assigned to me. What now?","Open it and click **Accept** to start, or **Decline** with a reason if it is not yours (it goes back to the Lead Manager). A lead you do not accept within the agreed number of working days is flagged as overdue. Leads you enter yourself as outbound need no acceptance."],
+ ["f-stage","SL","Working a lead","I cannot move the lead to the next stage","A lead moves one step at a time: **Log update** takes Assigned to Attended, **Log a meeting** then Meeting Done, **Quotation sent**, then **Order won**. If a step was missed, ask a Lead Manager: they can override it, and the override is recorded."],
+ ["f-notes","SL","Working a lead","What do I write in meeting notes?","At least **"+mn+" words** (a counter shows how many you have). Say who attended, what was discussed, the customer's concerns and the agreed next step. When you mark Meeting Done, also write the customer's requirement and record the hotel's PMS."],
+ ["f-follow","SL","Working a lead","How do I set a follow-up?","Use **Schedule follow-up** on the lead: pick a date and time, add what to follow up on, and click **Set follow-up**. You get a reminder email at that time. Every open lead needs a next follow-up date."],
+ ["f-hold","SL","Working a lead","How do I pause a lead, or mark it lost?","**Put on hold**: pick a reason and a date to revisit; when you reopen it, it goes back to Attended. **Lost**: pick the reason. Lost leads stay in the records for reports."],
+ ["f-info","SL","Working a lead","The Lead Manager asked for more information","Open the lead, fill in **Answer back office** and send. The lead returns to the Lead Manager's queue with a Reply received note."],
+ ["f-dup","SL","Working a lead","Lead Desk warns about a duplicate contact","If the same email, phone or name already exists on that hotel you can choose **Use existing contact**, **Update the contact** or **Add anyway**. Search for the hotel before you create a lead, so its leads stay together."],
+ ["f-edit","SL","Working a lead","What can I correct on my own lead?","Use **Edit**. You can correct dates, forecast, PMS, quantities and products, and fix the spelling of a hotel name. Category, contact and the original requirement can only be changed by a Supervisor, so ask your Lead Manager."],
+ ["quote","SL","Quotations and orders","How do I send a quotation?","Open the lead at Meeting Done and click **Quotation sent**. Choose the hotel's PMS if it is not recorded yet, then upload the Salesforce PDF. Lead Desk reads the total before tax and the line items on your own device; the PDF is not stored.\n\nCheck the amount and currency, set the target date and the next step, and save. The lead is now Quotation Sent and appears in the forecast. If Lead Desk cannot read the PDF, ask a Lead Manager or Supervisor to enter the amount by hand with a reason."],
+ ["f-manual","SL","Quotations and orders","I quoted something that is not in Salesforce","Click **+ Add item not in Salesforce** and enter the description, product, quantity, unit price and discount. The total becomes the PDF total plus these items. A Lead Manager must confirm manual items; until then the order cannot be marked Won."],
+ ["split","SL","Quotations and orders","The customer wants a separate quotation for each product","Split the lead **before** the quotation is sent (status Assigned, Attended or Meeting Done, with two or more products). Open the lead, go to **Products discussed**, click **Split into separate leads**, tick the products to move, read the preview and click **Create separate leads**.\n\nEach new lead gets a number ending -S1, -S2 and its own quotation, forecast and result. Once a quotation has been sent you can no longer split, so decide first."],
+ ["f-wrongq","SL","Quotations and orders","I uploaded the wrong quotation","While the lead is still at Quotation Sent, you can remove the quotation (give a reason): the lead returns to Meeting Done. If the customer asked for changes, use **Upload revised quote** instead: the old quotation is kept in the history."],
+ ["f-won","SL","Quotations and orders","Where do I type the order amount?","You do not. Click **Order won**, check the date and PMS, and save. The order value is the quotation's value before tax, so upload the right quotation first."],
+ ["f-wonfix","SL","Quotations and orders","I marked an order Won by mistake","For **"+wd+" days** you can move your own Won lead back to an earlier step or correct its order. After that only a Lead Manager or Supervisor can change it. Every change after Won is listed for Management."],
+ ["f-wonnoq","SL","Quotations and orders","Focus says Won, upload the quotation","An order was won before a quotation was uploaded. Click **Upload quotation** to close it. Lead Managers send weekly reminders for these."],
+ ["f-import","SL","Quotations and orders","Can I upload many quotations at once?","In **Focus**, use **Import quotations**. Drop saved Outlook emails (.msg, .eml) or quotation PDFs. Lead Desk matches each one to the customer's open lead; if there is none it creates a new outbound lead. Check the result before you confirm."],
+ ["f-regsales","S","Quotations and orders","How do I add orders I won earlier this year?","Ask your Supervisor for a time-limited access window. Then open **Focus → Registered orders**, upload the approved quotation PDFs and submit. A Lead Manager or Supervisor checks them before they count in your revenue."],
+ ["f-rename","S","Working a lead","The hotel name is spelled wrongly everywhere","Edit your lead to fix the spelling, or ask for a rename: the request goes to the Lead Manager, who approves it. All the hotel's leads follow."],
+ ["f-verify","L","Back office","How do I check and assign a new lead?","Open **Back office**. The verification queue lists every lead with status New. Open one, check the details, choose the sales engineer and click **Verify and assign**. The engineer gets an email and the lead becomes Assigned. To move a lead to another engineer later, use **Reassign** on the lead."],
+ ["f-reqinfo","L","Back office","A new lead is missing something","Click **Request info** and write the reason. The person who created the lead gets an email, answers in Lead Desk, and the lead comes back to your queue with a Reply received note."],
+ ["f-dupl","L","Back office","What is the difference between Duplicate and Reject?","**Duplicate** is a copy of a lead that already exists. **Reject** is not a real lead. Neither is counted in the totals."],
+ ["dq","L","Back office","What is on the Data issues page?","It lists records that need cleaning. Work each list until it is empty: **Won leads without a PMS** (open each and record the PMS), **Won, no quotation** (use Remind or Remind all; a weekly reminder also goes out), **manual quotation items** (check and Confirm), **hotels with no chain** (choose a chain or mark Independent), **names not on the Sales engineer list**, and **accounts to merge**."],
+ ["f-merge","L","Back office","How do I rename or merge hotels?","On the **Accounts** page, rename a hotel and all its leads and contracts follow. Merge two spellings of the same place: the old name is kept as an alias so searches still find it. Sales requests for a spelling fix appear in Back office for you to approve or reject."],
+ ["f-lmedit","L","Back office","What can I change on a lead that Sales cannot?","In Edit mode: the hotel (rename it or move the lead), the quotation amount or number (with a reason), target date, forecast, PMS, quantities and products. You can remove a wrong quotation on any open lead and delete a lead (it is hidden, not erased)."],
+ ["f-lmimport","L","Back office","How do I import leads from Excel?","If your role has Import, open **Leads → Import leads**. Download the template, fill it in and drop it on the page (up to "+il+" rows). Each row is marked ready, warning, fix or blocked. Fix what you can and import the rest. Imported leads start as New and unassigned, so they go through your normal queue."],
+ ["f-lmreg","L","Back office","How do I approve registered orders?","Open the notice in Back office, or **Focus → Registered orders**. Compare each value with the picture of the quotation, correct anything wrong (give the reason), tick Verified and approve or reject. You cannot approve your own batch; a Supervisor can."],
+ ["f-lmsplit","L","Back office","Sales forgot to split a lead","You can split any lead before its quotation is sent. The new leads stay with the same engineer."],
+ ["mgf","M","Reading the numbers","How do the filters work?","The filters at the top change every figure on the page, so set the period first. The view names sit just under the filters."],
+ ["f-views","M","Reading the numbers","What does each Management view answer?","**Overview**: how the company is doing. **Engineers**: leads, meetings, quotations and revenue per person. **Inbound vs outbound**: where leads come from. **Revenue per account**: which hotels bring revenue and what changed after Won. **Closed orders**: won orders with a tie check. **Regions**, **Pipeline health** (forecast and stale leads), **Targets**, **Customer footprint**, **Products**, **Lead generators** and **World view**. Your Supervisor can switch some off, so your list may be shorter."],
+ ["f-count","M","Reading the numbers","How are the numbers counted?","Only valid leads are counted: Duplicate and Rejected leads are shown on their own line. Orders and revenue count when a lead is Won, using the quotation value before tax. Registered orders count in revenue and targets but not as leads. Split leads are full leads. When two engineers share an order, revenue is split between them for engineer figures; the company total never changes."],
+ ["f-wrong","M","Reading the numbers","A figure looks wrong","Ask the Lead Manager: what you see is what the team entered. If two views ever disagree, tell your Supervisor."],
+ ["f-targets","M","Reading the numbers","How do I set targets?","Open **Management → Targets**, pick a year and click **Edit targets**. Enter the company's yearly target, then each month and each engineer. You need the permission to set targets."],
+ ["f-price","M","Reading the numbers","What is the Price book?","The standard prices by product, unit and PMS interface, with dated price versions. A new version starts as Draft; someone with approval rights marks it Approved. People who cannot see prices never see this page."],
+ ["f-export","M","Reading the numbers","Can I download a view?","Use the **Excel** and **CSV** buttons on the view."],
+ ["f-adduser","U","Setting up","How do I add someone?","Open **Products & settings → Users and access**, click **Add user**, type the work email and choose the role. For Sales, choose the engineer name from the Sales engineers list. Lead Desk shows a random temporary password once; give it to the person privately."],
+ ["f-lock","U","Setting up","Someone is locked out, or has left","Use **Reset password** on their row for a lockout. To remove someone, remove them in Users and access: they lose access to all data straight away."],
+ ["f-perm","U","Setting up","How do I change what a role can do?","Open **Roles and permissions**. A ticked permission is enforced in the database as well as on screen, so change it carefully. If one person needs something extra, a time-limited window or a Lead Manager override is safer than widening the role."],
+ ["f-chain","U","Setting up","A Key Account Manager cannot see a hotel","They see a hotel only when its chain and region match their allocation. Check **Hotel chains**, click **Save chains on accounts**, look at Back office → Data issues → Hotels with no chain, then check **Key account allocations**."],
+ ["f-regwin","U","Setting up","How do I let someone register earlier orders?","In **Register closed orders**, give the person an access window (14 days by default). You can extend or end it at any time. A Supervisor can register at any time."],
+ ["f-backup","U","Setting up","How often should I back up?","Weekly. Open **Products & settings → Backup** and download a copy. Lead Desk reminds you when the last backup is a week old. Deleted leads are hidden, not erased, so they can be recovered."],
+ ["f-auditu","U","Setting up","How do I see who changed something?","Open the **Audit trail**. Filter by date, user, type of change or search text."],
+ ["f-helpedit","U","Setting up","Can I add my own lines to this Help?","Yes. Open **Products & settings → Help centre**. Add names to **Who to ask** and extra questions for one role or for everyone."],
+ ["f-amcupd","A","Renewals","How do I update a renewal?","Open **Renewals**, click the item, update its status, enter the amount if it changed, add a note about what the customer said, and save."],
+ ["f-sign","A","Renewals","What does the sign-off warning mean?","AMC counts from the project sign-off date. Until it is entered, the order date is used and the item is flagged. AMC, Lead Managers and Supervisors can enter sign-off dates."],
+ ["f-contract","A","Renewals","How do I add an AMC contract?","In Renewals, upload the contract PDFs (up to 10 at a time). Lead Desk reads the lines, matches the hotel and suggests the sales engineer. The person who prepared the contract must be named. Review the lines and set the price item for each; someone with approval rights approves."],
+ ["f-amcshare","A","Renewals","Who gets credit for renewals?","Sales see renewals of their own orders, and a share of subscription renewals is credited to the engineer. AMC goes to the AMC department. OHIP and cloud hosting are shown on their own."],
+ ["f-amcro","A","Renewals","I cannot edit a lead","The AMC role can read won orders and update renewals, but cannot change leads. Ask the Lead Manager."],
+ ["f-kmiss","K","Your accounts","Why can I not see a hotel I expect?","You see a hotel only when both its chain and its region match one of your allocations. Ask your Supervisor to check that the hotel's chain and region are set."],
+ ["f-kro","K","Your accounts","Can I edit anything?","No. Your view is read-only: you cannot create, edit, assign or delete leads, accounts or key-account records."],
+ ["f-kstage","K","Your accounts","What are the stages of a key account?","Introduce, Showcase, Requirements, Proposal, Pilot, Rollout, Expand. The card shows the owner, last meeting and open items; overdue items come first."]]}
+
+const HELP_GLANCE_RULES=["Every open lead has a next follow-up date. Set it every time you log an update.","Accept new leads quickly. An unaccepted lead is flagged after the agreed number of working days.",
+ "Write real meeting notes, the same day.","Do not skip stages. Lead Managers can override, and the override is recorded.","Search for the hotel before you create a lead, so leads are not duplicated.",
+ "Record the hotel's PMS. It is needed from Quotation Sent onwards.","Upload the right quotation. The order value is the quotation value before tax.","Split before you quote if the customer wants separate quotations.",
+ "Give a clear reason whenever Lead Desk asks for one. It is kept with the change.","Never share your password. Everything you do is recorded under your name."];
+
+const HELP_NEW=[["22 Nov 2026","Help centre: the ? button now opens quick steps, shortcuts and answers for your role.","*"],
+ ["22 Nov 2026","Split a lead into separate leads when the customer wants a separate quotation for each product.","SLU"],
+ ["21 Nov 2026","Key Account Manager role: read-only view of the chains and regions allocated to a person.","*"],
+ ["21 Nov 2026","Key accounts: log account meetings (notes of at least the minimum word count) and track requirements.","LMUK"],
+ ["20 Nov 2026","Account profile: one page per hotel with its leads, orders, products and revenue by year.","*"]];
+
+/* Who to ask. Names are never fixed here: a Supervisor adds names under Products & settings → Help centre. */
+function helpWho(L){const r=ROLE_LABEL;const d={
+ S:[["A lead, hotel or quotation problem","Your "+r.leadmanager],["Something you cannot see or change","Your "+r.leadmanager+", who passes it to the "+r.supervisor+" if needed"],["Sign-in or password problem","Your "+r.leadmanager],["A question about targets or figures","Your "+r.leadmanager]],
+ L:[["Sign-in, new users, access or settings","The "+r.supervisor+" (IT)"],["Targets, revenue figures, quotation or pricing decisions","The "+r.management+" team"],["Registered-order access windows and password resets","The "+r.supervisor],["Day-to-day lead questions from Sales","You decide: use the Questions section"]],
+ M:[["A lead or figure looks wrong","The "+r.leadmanager],["Two views disagree, or you cannot see a view","The "+r.supervisor],["Targets and pricing","You set them: Management → Targets and Price book"]],
+ U:[["A business rule, target or revenue decision","The "+r.management+" team"],["Lead data that needs fixing","The "+r.leadmanager],["Something looks broken or a database error appears","Whoever set up Lead Desk for your company"]],
+ A:[["A lead or order detail is wrong","The "+r.leadmanager],["You cannot see something or need access","The "+r.supervisor]],
+ K:[["A hotel is missing from your list","The "+r.supervisor+": check the hotel's chain and region"],["Lead data looks wrong","The "+r.leadmanager]]}[L]||[];
+ const rows=(S.help&&S.help.rows||[]).filter(x=>x.kind==="who"&&(x.role==="all"||x.role===S.role));
+ const out=d.map(x=>x.slice());rows.forEach(x=>{const i=out.findIndex(y=>y[0].toLowerCase()===x.title.toLowerCase());if(i>=0)out[i]=[x.title,x.body];else out.push([x.title,x.body])});return out}
+
+function helpTiles(L){const list=HELP_TILES[L]||[];const al=allowedTabs();const mv=mgViews().map(v=>v[0]);
+ return list.filter(t=>{if(!al.includes(t[3]))return false;
+  if(t[0]==="newlead")return can("lead.create")||can("lead.create_own_outbound");
+  if(t[0]==="import")return typeof ilOK==="function"&&ilOK();
+  if(t[0]==="reg")return typeof regGo==="function"&&can("page.focus");
+  if(L!=="U"&&t[3]==="mgmt")return mv.includes(t[0]);
+  return true})}
+function helpGo(id){const t=Object.values(HELP_TILES).flat().find(x=>x[0]===id);closeHelp();if(S.drawer)closeDrawer();
+ const to=tab=>{S.tab=tab;S.tabChosen=true;try{history.replaceState(null,"","#"+tab)}catch(e){}};
+ if(id==="newlead"){S.newView="form";to("new")}else if(id==="import"){S.newView="import";to("new")}
+ else if(id==="reg"){regGo("","");render();scrollTo(0,0);return}
+ else if(id==="dq"){to("bo");S.boDqOpen=true;render();setTimeout(()=>$("#boDq")?.scrollIntoView({block:"start"}),0);return}
+ else if(["ov","tg","closed","ops"].includes(id)){S.mgView=id;to("mgmt")}
+ else if(id==="users"||id==="perms"||id==="settings"||id==="backup"){const sec=id==="backup"?"sys":"people";S.setSec=sec;try{lsSet("ld.setsec",sec)}catch(e){}S.setQ="";S.setJump=id==="users"?"Users and access":id==="perms"?"Roles and permissions":id==="backup"?"Backup":"";to("set")}
+ else to(t?t[3]:"focus");
+ render();scrollTo(0,0);if(t&&t[4])toast(t[4])}
+
+/* ---- the extra lines a Supervisor adds (table help_items) ---- */
+async function helpLoad(force){const H=helpS();if(H.loading||(H.loaded&&!force))return;if(!window.__sb){H.loaded=true;return}H.loading=true;
+ try{const{data,error}=await window.__sb.from("help_items").select("*").order("sort").order("id").limit(200);if(error)throw error;H.rows=data||[];H.err=""}
+ catch(e){H.rows=[];H.err=/does not exist|42P01|schema cache/i.test(String(e&&(e.message||e.code)))?"nodb":"fail"}
+ H.loaded=true;H.loading=false;if(H.open)helpBody();if(S.tab==="set"&&$("#helpAdm"))helpAdmDraw()}
+
+/* ---- the panel ---- */
+const HELP_SECS=[["start","Quick start"],["go","Quick access"],["faq","Questions"],["glance","At a glance"],["who","Who to ask"]];
+function helpOpen(o){o=o||{};if(!S.role)return;const H=helpS();H.from=document.activeElement;H.open=true;H.sec=o.sec||"start";H.q="";H.openId=o.id||"";if(o.id)H.sec="faq";
+ const L=HELP_L();$("#helpHost").innerHTML=`<div class="scrim hlp" id="helpScrim"><aside class="drawer hlpd" role="dialog" aria-modal="true" aria-labelledby="hlpT">
+  <div class="hh"><div class="row"><h2 id="hlpT">Help</h2><span class="chip">${esc(ROLE_LABEL[S.role]||"")}</span><span class="sp"></span><button type="button" class="btn sm" id="hlpX">Close</button></div>
+   <input id="hlpQ" type="search" placeholder="Search the questions…" aria-label="Search the Help questions" autocomplete="off">
+   <div class="hnav" role="tablist" aria-label="Help sections">${HELP_SECS.map(s=>`<button type="button" role="tab" class="hn" data-hs="${s[0]}" aria-selected="${s[0]===H.sec}" tabindex="${s[0]===H.sec?0:-1}">${s[1]}</button>`).join("")}</div></div>
+  <div class="hb" id="hlpBody" tabindex="-1"></div></aside></div>`;
+ $("#helpBtn")?.setAttribute("aria-expanded","true");helpBody();helpBind();if(!H.loaded)helpLoad();
+ setTimeout(()=>{if(H.openId){const d=$("#hlpBody details[open]");if(d){d.scrollIntoView({block:"start"});const b=$("#hlpBody");b.scrollTop=Math.max(0,b.scrollTop-64)}d&&d.querySelector("summary").focus({preventScroll:true})}else $("#hlpX")?.focus()},30)}
+function closeHelp(){const H=helpS();if(!H.open)return;H.open=false;$("#helpHost").innerHTML="";$("#helpBtn")?.setAttribute("aria-expanded","false");const f=H.from;H.from=null;if(f&&f.isConnected&&f.focus)try{f.focus({preventScroll:true})}catch(e){}}
+function helpNavSync(){const H=helpS();document.querySelectorAll("#helpScrim .hn").forEach(b=>{const on=b.dataset.hs===H.sec;b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1})}
+function helpBody(){const H=helpS(),B=$("#hlpBody");if(!B)return;const L=HELP_L();let h="";
+ if(H.sec==="start"){const q=HELP_QS[L]||HELP_QS.S;h=`<h3>${esc(q.title)}</h3><ol class="hsteps">${q.steps.map(s=>`<li>${hfmt(s)}</li>`).join("")}</ol>
+   <div class="hcard"><b>Your routine</b><ul>${q.routine.map(s=>`<li>${hfmt(s)}</li>`).join("")}</ul></div>
+   <div class="hcard warn"><b>Three things not to forget</b><ol>${q.musts.map(s=>`<li>${hfmt(s)}</li>`).join("")}</ol></div>`}
+ else if(H.sec==="go"){const t=helpTiles(L);h=`<h3>Quick access</h3><p class="small muted">Tap a tile and Lead Desk takes you straight there.</p>`+(t.length?`<div class="htiles">${t.map(x=>`<button type="button" class="htile" data-hgo="${x[0]}"><b>${esc(x[1])}</b><span class="small muted">${esc(x[2])}</span><span class="hgo">Take me there <span aria-hidden="true">→</span></span></button>`).join("")}</div>`:`<div class="notice">Nothing to show here for your role yet.</div>`)}
+ else if(H.sec==="faq"){const q=H.q.trim().toLowerCase().split(/\s+/).filter(Boolean);let items=helpFaq().filter(x=>hSee(x[1],L)).map(x=>({id:x[0],g:x[2],q:x[3],a:x[4]}));
+   (H.rows||[]).filter(x=>x.kind==="faq"&&(x.role==="all"||x.role===S.role)).forEach(x=>items.push({id:"x"+x.id,g:"Added by your Supervisor",q:x.title,a:x.body}));
+   if(q.length)items=items.filter(x=>{const s=(x.q+" "+x.a+" "+x.g).toLowerCase();return q.every(w=>s.includes(w))});
+   if(!items.length)h=`<h3>Questions</h3><div class="notice">No question matches “${esc(H.q)}”. Try fewer or different words, or <button type="button" class="linkbtn" data-hs2="who"><b>see who to ask</b></button>.</div>`;
+   else{const gs=[];items.forEach(x=>{let g=gs.find(y=>y[0]===x.g);if(!g)gs.push(g=[x.g,[]]);g[1].push(x)});
+    h=`<h3>Questions</h3>`+(q.length?`<p class="small muted">${items.length} match${items.length===1?"":"es"}</p>`:"")+gs.map(g=>`<div class="hgrp"><h4>${esc(g[0])}</h4>${g[1].map(x=>`<details class="hfaq" data-fid="${esc(x.id)}"${(q.length||H.openId===x.id)?" open":""}><summary>${esc(x.q)}</summary><div class="hans">${String(x.a).split(/\n\n/).map(p=>`<p>${hfmt(p)}</p>`).join("")}</div></details>`).join("")}</div>`).join("")}}
+ else if(H.sec==="glance"){const mn=(typeof meetMin==="function"?meetMin():30);const flow=["New","Assigned","Attended","Meeting Done","Quotation Sent","Won"];
+   h=`<h3>The stages of a lead</h3><div class="hflow" role="list">${flow.map((s,i)=>`<span class="hst" role="listitem">${esc(s)}</span>${i<flow.length-1?`<span class="har" aria-hidden="true">→</span>`:""}`).join("")}</div>
+    <p class="small muted">A lead moves one step at a time. Beside the main path: <b>Info Needed</b> (back office asks a question), <b>On Hold</b> (paused with a revisit date) and <b>Lost</b> (with a reason).</p>
+    <h3>Ten rules for the whole team</h3><ol class="hsteps">${HELP_GLANCE_RULES.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
+    <div class="hcard"><b>The meeting-note rule</b><p>Meeting notes need at least <b>${mn} words</b>. A counter shows how many you have written. Say who came, what was discussed, the customer's concerns and the agreed next step.</p></div>
+    <h3>What's new</h3><ul class="hnew">${HELP_NEW.filter(x=>hSee(x[2],L)).slice(0,5).map(x=>`<li><span class="small muted">${esc(x[0])}</span> ${esc(x[1])}</li>`).join("")}</ul>`}
+ else{const w=helpWho(L);h=`<h3>Who to ask</h3><p class="small muted">Start with the first person on the list. They will pass it on if it needs someone else.</p>`+(w.length?`<dl class="hwho">${w.map(x=>`<div><dt>${esc(x[0])}</dt><dd>${esc(x[1])}</dd></div>`).join("")}</dl>`:`<div class="notice">Ask your Supervisor.</div>`)+
+   `<p class="small muted">${H.loading?"Checking for names added by your Supervisor…":can("users.manage")||S.role==="supervisor"?"You can add names here under Products & settings → Help centre.":""}</p>`}
+ B.innerHTML=h;B.scrollTop=0}
+function helpBind(){const sc=$("#helpScrim");if(!sc)return;const H=helpS();
+ sc.addEventListener("click",e=>{if(e.target===sc)closeHelp();const t=e.target.closest("[data-hgo]");if(t){helpGo(t.dataset.hgo);return}
+  const n=e.target.closest("[data-hs],[data-hs2]");if(n){H.sec=n.dataset.hs||n.dataset.hs2;H.openId="";if(H.sec!=="faq"){H.q="";$("#hlpQ").value=""}helpNavSync();helpBody()}});
+ $("#hlpX").onclick=closeHelp;
+ const q=$("#hlpQ");q.oninput=()=>{H.q=q.value;if(q.value.trim()&&H.sec!=="faq"){H.sec="faq";helpNavSync()}H.openId="";clearTimeout(q.t);q.t=setTimeout(helpBody,120)};
+ sc.querySelector(".hnav").addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;const i=HELP_SECS.findIndex(s=>s[0]===H.sec),j=(i+(e.key==="ArrowRight"?1:-1)+HELP_SECS.length)%HELP_SECS.length;H.sec=HELP_SECS[j][0];H.openId="";helpNavSync();helpBody();sc.querySelector(`.hn[data-hs="${H.sec}"]`).focus();e.preventDefault()});
+ sc.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();closeHelp();return}if(e.key!=="Tab")return;
+  const f=[...sc.querySelectorAll('button:not([disabled]),input,summary,[tabindex]:not([tabindex="-1"]),a[href]')].filter(x=>x.offsetParent!==null);if(!f.length)return;const a=f[0],z=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===a){z.focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===z){a.focus();e.preventDefault()}})}
+
+/* ---- the "?" beside the account menu, and the small "?" on five screens ---- */
+function helpBtnShow(on){const b=$("#helpBtn");if(b)b.hidden=!on}
+function helpDots(){if(!S.role)return;
+ const add=(host,topic,label,where)=>{if(!host||(where==="before"?host.parentNode:host).querySelector(`[data-hq="${topic}"]`))return;const b=document.createElement("button");b.type="button";b.className="hq";b.dataset.hq=topic;b.setAttribute("aria-label",label);b.title=label;b.textContent="?";
+  b.onclick=e=>{e.preventDefault();e.stopPropagation();helpOpen({id:topic})};if(where==="before")host.parentNode.insertBefore(b,host);else host.appendChild(b)};
+ const faqOK=id=>helpFaq().some(x=>x[0]===id&&hSee(x[1],HELP_L()));
+ if(faqOK("popup"))add(document.querySelector('#scrim .lvh #dClose'),"popup","Help: the lead popup","before");
+ document.querySelectorAll("#actArea h3").forEach(h=>{if(/^(Quotation sent|Revise quotation)/.test(h.textContent.trim())&&faqOK("quote"))add(h,"quote","Help: sending a quotation")});
+ document.querySelectorAll("#scrim h3").forEach(h=>{if(h.textContent.trim().startsWith("Split into separate leads")&&faqOK("split"))add(h,"split","Help: splitting a lead")});
+ const dq=document.querySelector("#boDq>summary");if(dq&&faqOK("dq"))add(dq,"dq","Help: Data issues");
+ if(S.tab==="mgmt"&&faqOK("mgf")){const g=document.querySelector("#main .panel.afbar>.fgrid");if(g)add(g,"mgf","Help: how the filters work")}}
+(function helpInit(){let raf=0;const run=()=>{raf=0;try{helpDots()}catch(e){}};
+ const go=()=>{if(!raf)raf=requestAnimationFrame(run)};
+ const wire=()=>{const b=$("#helpBtn");if(b)b.onclick=()=>helpS().open?closeHelp():helpOpen();
+  ["#main","#drawerHost"].forEach(s=>{const n=$(s);if(n)new MutationObserver(go).observe(n,{childList:true,subtree:true})})};
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",wire);else wire();
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&helpS().open){closeHelp()}},true)})();
+
+/* ---- Products & settings → Help centre (Supervisor only; the database refuses anyone else) ---- */
+function helpAdmPanel(){if(S.role!=="supervisor")return"";helpLoad();return`<div class="panel" id="helpAdm">${helpAdmHTML()}</div>`}
+function helpAdmDraw(){const P=$("#helpAdm");if(!P)return;P.innerHTML=helpAdmHTML();helpAdmBind()}
+function helpAdmHTML(){const H=helpS();const roles=[["all","Everyone"]].concat(Object.keys(ROLE_LABEL).map(k=>[k,ROLE_LABEL[k]]));const ed=H.ed;
+ const row=x=>`<div class="hrow" data-hid="${x.id}"><div><span class="chip">${x.role==="all"?"Everyone":esc(ROLE_LABEL[x.role]||x.role)}</span> <span class="chip">${x.kind==="who"?"Who to ask":"Question"}</span><div><b>${esc(x.title)}</b></div><div class="small muted">${esc(x.body.length>160?x.body.slice(0,160)+"…":x.body)}</div></div><div class="hrb"><button type="button" class="btn sm" data-hedit="${x.id}">Edit</button><button type="button" class="btn sm" data-hdel="${x.id}">Remove</button></div></div>`;
+ const rows=H.rows||[];
+ return`<div class="row" style="margin-bottom:6px"><h3>Help centre</h3><span class="chip">${rows.length}</span></div>
+  <p class="small muted" style="margin:2px 0 10px;max-width:90ch">The Help text comes with the app. Add your own lines here: names under <b>Who to ask</b> (for example “Password reset → Ask Ravi in IT”), or extra questions and answers for one role or everyone. A line with the same title as a built-in “Who to ask” line replaces it. Everyone signed in can read these; only a Supervisor can change them. Every change is in the Audit trail.</p>
+  ${H.err==="nodb"?`<div class="notice warn">The Help table is not in the database yet. Run <b>53_help_items.sql</b> in the Supabase SQL Editor.</div>`:H.err==="fail"?`<div class="notice warn">Couldn't load the Help lines. Reload the page and try again.</div>`:""}
+  ${H.loading&&!H.loaded?`<p class="muted">Loading…</p>`:rows.length?`<div class="hrows">${rows.map(row).join("")}</div>`:`<p class="small muted">Nothing added yet.</p>`}
+  <form id="helpForm" class="hform" novalidate><h4 style="margin:12px 0 6px">${ed?"Edit line":"Add a line"}</h4>
+   <div class="fgrid"><label class="f">Type<select id="hfKind"${ed?" disabled":""}><option value="who"${ed&&ed.kind==="who"?" selected":""}>Who to ask</option><option value="faq"${ed&&ed.kind==="faq"?" selected":""}>Extra question</option></select></label>
+   <label class="f">For<select id="hfRole">${roles.map(r=>`<option value="${r[0]}"${ed&&ed.role===r[0]?" selected":""}>${esc(r[1])}</option>`).join("")}</select></label></div>
+   <label class="f">Title <span class="small muted">(the topic or the question)</span><input id="hfTitle" maxlength="160" value="${esc(ed?ed.title:"")}"></label>
+   <label class="f">Text <span class="small muted">(who to ask, or the answer)</span><textarea id="hfBody" rows="3" maxlength="2000">${esc(ed?ed.body:"")}</textarea></label>
+   <div id="hfMsg" class="small" role="status"></div>
+   <div class="row" style="gap:8px"><button class="btn pri" id="hfSave" type="submit">${ed?"Save changes":"Add"}</button>${ed?`<button class="btn" id="hfCancel" type="button">Cancel</button>`:""}</div></form>`}
+function helpAdmBind(){const P=$("#helpAdm");if(!P)return;const H=helpS(),rows=H.rows||[],ed=H.ed;
+ const msg=(t,bad)=>{const m=$("#hfMsg");m.textContent=t;m.style.color=bad?"var(--bad)":"var(--ok)"};
+ P.querySelectorAll("[data-hedit]").forEach(b=>b.onclick=()=>{H.ed=rows.find(x=>String(x.id)===b.dataset.hedit)||null;helpAdmDraw();$("#hfTitle")?.focus()});
+ $("#hfCancel")?.addEventListener("click",()=>{H.ed=null;helpAdmDraw()});
+ P.querySelectorAll("[data-hdel]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm remove";return}b.disabled=true;
+  try{const{error}=await window.__sb.from("help_items").delete().eq("id",Number(b.dataset.hdel));if(error)throw error;toast("Line removed");await helpLoad(true)}catch(e){b.disabled=false;toast("Couldn't remove: "+(e.message||e.code))}});
+ $("#helpForm").onsubmit=async e=>{e.preventDefault();const t=$("#hfTitle").value.trim(),b=$("#hfBody").value.trim();if(!t||!b){msg("Please fill in the title and the text.",true);return}
+  const btn=$("#hfSave");btn.disabled=true;try{let r;if(ed)r=await window.__sb.from("help_items").update({role:$("#hfRole").value,title:t,body:b}).eq("id",ed.id);else r=await window.__sb.from("help_items").insert({kind:$("#hfKind").value,role:$("#hfRole").value,title:t,body:b});
+   if(r.error)throw r.error;H.ed=null;toast(ed?"Line saved":"Line added");await helpLoad(true)}catch(er){btn.disabled=false;msg("Couldn't save: "+(er.message||er.code),true)}}}
 
 if(window.LD_HOSTED){window.__startApp=boot;if(window.__ldReady)boot()}else boot();
 </script>
