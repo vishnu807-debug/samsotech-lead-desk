@@ -645,7 +645,7 @@ button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:le
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 21 Nov 2026 · build bf71e7c</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 21 Nov 2026 · build f26af5d</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 
@@ -786,8 +786,8 @@ const S={settings:DEFAULTS,registry:{},history:null,accounts:{},leads:[],leadMap
 /* ===== Role-based access: ONE permission table drives navigation, actions and data scope =====
    Roles and their permissions live in the shared document config/permissions (edited by Supervisors under
    Products & settings → Roles and permissions). The same table is enforced by the database on the hosted version. */
-const ROLES=["supervisor","leadmanager","management","sales","amc"];
-const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales",amc:"AMC"};
+const ROLES=["supervisor","leadmanager","management","sales","amc","keyaccount"];
+const ROLE_LABEL={supervisor:"Supervisor",leadmanager:"Lead Manager",management:"Management",sales:"Sales",amc:"AMC",keyaccount:"Key Account Manager"};
 const PERMISSIONS=[
  ["page.leads","Leads tab: lead form and lead list","Pages"],["page.backoffice","Back office queue","Pages"],["page.pipelines","Pipelines","Pages"],["page.focus","Focus (needs action, forecast call, cross-sell)","Pages"],
  ["page.meetings","Meetings","Pages"],["page.accounts","Accounts","Pages"],["page.management","Management dashboard","Pages"],["page.settings","Products & settings","Pages"],["page.audit","Audit trail (who did what, when)","Pages"],["keyacct.manage","Key accounts: open the page, log account meetings, keep people, requirements and promises","Pages"],
@@ -798,7 +798,7 @@ const PERMISSIONS=[
  ["pricing.view","See the price book, standard prices and discounts (Management → Price book)","Pricing"],["pricing.approve","Approve prices and quote lines; teach line rules","Pricing"],["pricing.manage","Edit prices, upload price sheets, add price items","Pricing"],
  ["report.world","Management → World view: tile map, country outlook, opportunity score, whitespace","Reports"],["outlook.manage","Enter or import market outlook data and set the opportunity score weights (World view)","Reports"],
  ["settings.manage","Products, engineers, territories, sources, rates","Admin"],["users.manage","Users, roles and permissions","Admin"],["data.backup","Download a full backup","Admin"]];
-const DEFAULT_PERMS={"leadmanager": ["order.register_approve","lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage", "keyacct.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
+const DEFAULT_PERMS={"keyaccount":["page.pipelines","page.meetings","page.accounts","keyacct.manage"],"leadmanager": ["order.register_approve","lead.import","event.manage", "page.leads", "page.backoffice", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.view_all", "lead.create", "lead.verify", "lead.edit_all", "lead.reassign", "lead.export", "lead.remove", "lead.edit_country", "lead.status_override", "account.manage", "pricing.view", "page.renewals", "contract.view_all"], "management": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "page.management", "lead.view_all", "report.footprint", "report.products", "report.generators", "page.renewals", "targets.manage", "pricing.view", "pricing.approve", "contract.view_all", "report.world", "outlook.manage", "keyacct.manage"], "sales": ["page.leads", "page.pipelines", "page.focus", "page.meetings", "page.accounts", "lead.create_own_outbound", "lead.edit_own", "lead.view_generated", "page.renewals", "contract.view_own", "lead.won_own"], "amc": ["page.renewals", "renewal.manage", "lead.view_won", "contract.upload", "contract.view_all"]};
 const normRole=r=>r==="backoffice"?"supervisor":r;   // accounts created before the four roles existed
 // permissions added after a role table was saved fall back to their default until a Supervisor saves the table again
 const PERMS_V1=["page.leads","page.backoffice","page.pipelines","page.meetings","page.accounts","page.management","page.settings","lead.view_all","lead.create","lead.create_own_outbound","lead.verify","lead.edit_all","lead.edit_own","lead.reassign","lead.delete","account.manage","settings.manage","users.manage"];
@@ -807,11 +807,11 @@ function permsFor(role){if(role==="supervisor")return PERMISSIONS.map(x=>x[0]);c
 const can=perm=>!!S.role&&permsFor(S.role).includes(perm);
 const TAB_PERM={new:"page.leads",bo:"page.backoffice",pipe:"page.pipelines",focus:"page.focus",mine:"page.mine",renew:"page.renewals",meet:"page.meetings",mgmt:"page.management",accts:"page.accounts",keyacct:"keyacct.manage",set:"page.settings",audit:"page.audit"};
 const LANDING=["bo","mgmt","pipe","focus","mine","renew","meet","new","accts","keyacct","set","audit"];
-const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet",amc:"renew"};   // first page after sign-in
+const HOME={supervisor:"mgmt",management:"mgmt",leadmanager:"bo",sales:"meet",amc:"renew",keyaccount:"keyacct"};   // first page after sign-in
 const homeTab=()=>{const a=allowedTabs();return a.includes(HOME[S.role])?HOME[S.role]:a[0]};
 const mineLabel=()=>{const b=document.querySelector('#tabs [data-tab="mine"]');if(b){const t="Created for others";if(b.textContent!==t)b.textContent=t}};
 const allowedTabs=()=>LANDING.filter(t=>t==="mine"?!!(typeof myGen==="function"&&myGen()):t==="keyacct"?kaOn():can(TAB_PERM[t]));
-const viewAll=()=>can("lead.view_all");
+const viewAll=()=>can("lead.view_all")||S.role==="keyaccount";   // a Key Account Manager sees every lead the database lets through (only their chains and regions)
 const isMine=l=>!!S.myEng&&nk(l.assignedTo)===nk(S.myEng);
 const isSales=()=>!can("lead.create")&&can("lead.create_own_outbound");   // outbound-only lead form
 async function loadLocks(key){if(!window.LD_HOSTED||viewAll()||!key)return;try{const{data}=await window.__sb.rpc("product_locks",{p_account:key});if(data)S.extLocks[key]=data}catch(e){}}
@@ -970,13 +970,13 @@ function renderInner(){const m=$("#main");
   if(!S.tabChosen||!allowed.includes(S.tab)){S.tab=homeTab();S.tabChosen=true}
   $("#tabs").hidden=allowed.length<2;
   document.querySelectorAll("#tabs button[data-tab]").forEach(b=>{b.hidden=!allowed.includes(b.dataset.tab);b.setAttribute("aria-selected",b.dataset.tab===S.tab);b.tabIndex=b.dataset.tab===S.tab?0:-1});
-  const pt=document.querySelector('#tabs [data-tab="pipe"] .tl');pt.textContent=!viewAll()?"My pipeline":can("lead.edit_all")?"Pipelines":"Team pipeline";document.querySelector('#tabs [data-tab="new"]').textContent=can("lead.create")||can("lead.create_own_outbound")?"Leads":"Leads";
+  const pt=document.querySelector('#tabs [data-tab="pipe"] .tl');pt.textContent=!viewAll()?"My pipeline":can("lead.edit_all")?"Pipelines":S.role==="keyaccount"?"Pipelines":"Team pipeline";document.querySelector('#tabs [data-tab="new"]').textContent=can("lead.create")||can("lead.create_own_outbound")?"Leads":"Leads";
   $("#who").innerHTML=`<details class="acctm"><summary aria-label="Account: ${esc(S.myName||"")}, ${esc(ROLE_LABEL[S.role])}"><span class="av" aria-hidden="true">${esc((myLabel()||"?").trim().charAt(0).toUpperCase())}</span><span class="acn"><b>${esc(myLabel())}</b><span>${esc(ROLE_LABEL[S.role])}</span></span></summary>
     <div class="acm" role="menu"><div class="small muted" style="padding:6px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:4px">${hasDisplayName()?`<b style="color:var(--ink)">${esc(S.myName)}</b><br>`:""}${esc(S.myEmail||S.myName||"")}<br>${esc(ROLE_LABEL[S.role])}${S.myEng?" · "+esc(S.myEng):""}</div>${window.LD_HOSTED?`<button type="button" role="menuitem" id="dnMenu">Change display name</button><button type="button" role="menuitem" onclick="window.__changePassword()">Change password</button><button type="button" role="menuitem" onclick="window.__signOut()">Sign out</button>`:`<div class="small muted" style="padding:4px 10px">Signed in with claude.ai</div>`}${themeSeg()}</div></details>`;
   bindTheme();
   $("#dnMenu")?.addEventListener("click",()=>{$("#who details")?.removeAttribute("open");openDisplayName()});
   tabsFit();
-  $("#banner").querySelector("[data-perm]")?.remove();
+  $("#banner").querySelector("[data-perm]")?.remove();$("#banner").querySelector("[data-kam]")?.remove();if(isKam())$("#banner").insertAdjacentHTML("beforeend",kamBanner());if(isKam()||can("users.manage"))kamLoad();
   if((can("settings.manage")||can("users.manage"))&&!S.canEdit&&!S.isOwner&&!window.LD_HOSTED)$("#banner").insertAdjacentHTML("beforeend",`<div data-perm class="notice warn" style="margin-top:14px">Your share access to this page isn't Editor, so saving products, settings and users will fail. Ask the owner to make you an Editor.</div>`);
 ({new:renderNew,bo:renderBO,pipe:renderPipe,focus:renderFocus,mine:renderMine,renew:renderRenew,meet:renderMeet,mgmt:renderMgmt,accts:renderAccts,keyacct:renderKeyAccts,set:renderSet,audit:renderAudit})[S.tab](m);updateCounts()}
 function softRender(){try{softInner()}catch(e){showFail("refresh "+(S.tab||""),e)}}
@@ -1281,7 +1281,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   btn.disabled=true;btn.textContent="Saving…";const own=!sales&&!!myGen()&&S.genOwn!==false;if(!sales&&!myGen()){lsSet("ld.genby",v("f-genby"));lsSet("ld.dept",v("f-dept"))}
   try{
     const aref=S.db.doc("accounts/"+a.key);const ex=await aref.get();
-    if(!ex.exists||(ex.data().deleted&&!ex.data().mergedInto))await aref.set({name:a.name,key:a.key,country:(a.country||"").trim(),city:(a.city||"").trim(),group:(a.group||"").trim(),region:v("f-region"),domain:emailDomain(v("f-cemail")),createdAt:nowISO(),createdBy:S.uid||null,fromSheet:!!S.registry[a.key]});
+    if(!ex.exists||(ex.data().deleted&&!ex.data().mergedInto))await aref.set({name:a.name,key:a.key,country:(a.country||"").trim(),city:(a.city||"").trim(),group:(a.group||"").trim(),region:v("f-region"),chain:chainDoc(a.key,a.name).chain||null,domain:emailDomain(v("f-cemail")),createdAt:nowISO(),createdBy:S.uid||null,fromSheet:!!S.registry[a.key]});
     const ref=await nextRef();const t=nowISO();const ps=f.products.slice();const evPick=f.event?evById(f.event):null;const evBy=evPick?(sales?S.myEng:(($("#f-evby")||{}).value||f.evBy||(evPick.people||[])[0]||"")):"";
     await S.db.doc("leads/"+ref).set({ref,accountKey:a.key,accountName:a.name,country:(a.country||S.accounts[a.key]?.country||"").trim(),
         contact:{name:v("f-cname"),title:v("f-ctitle"),email:v("f-cemail"),phone:v("f-cphone")},products:ps,product:ps.join(", "),category:sales?"Outbound":f.category,source:v("f-source"),
@@ -1823,7 +1823,7 @@ async function leSave(){const E=S.drawer&&S.drawer.edit;if(!E||E.saving)return;c
       const fb=async()=>{const ex=acctDoc(l.accountKey);await S.db.doc("accounts/"+l.accountKey).set(Object.assign({},ex,{name:A.name,country:ex.country||cur.country,aka:[...new Set([...(ex.aka||[]),Ac.name])],renamed:{from:Ac.name,to:A.name,by:actor()||S.myName||"",at:now,reason:why},renameReq:null}));for(const x of leadsFor(l.accountKey))await S.db.doc("leads/"+x.id).update({accountName:A.name,updatedAt:now})};
       try{if(window.__accountRename)await window.__accountRename.rename({key:l.accountKey,name:A.name,reason:why,cur});else await fb();logs.push(`Account renamed: ${l.accountName} → ${A.name}`);o.acct=l.accountKey}
       catch(e){if(/SHARED_ACCOUNT/.test(e.message||"")&&window.__accountRename&&!can("account.manage")){await window.__accountRename.request({key:l.accountKey,name:A.name,reason:why,cur});logs.push(`Account rename asked: ${l.accountName} → ${A.name} (waiting for approval)`);ctNote="Others also work on this account, so the new spelling was sent for approval."}else throw e}}
-    if(A.mode==="new"){const ctry=(d.ctry||l.country||"").trim();await S.db.doc("accounts/"+A.key).set({name:A.name,key:A.key,country:ctry,city:"",group:"",region:d.reg||l.region||"",createdAt:now,createdBy:S.uid||null,fromSheet:false});
+    if(A.mode==="new"){const ctry=(d.ctry||l.country||"").trim();await S.db.doc("accounts/"+A.key).set({name:A.name,key:A.key,country:ctry,city:"",group:"",region:d.reg||l.region||"",chain:chainDoc(A.key,A.name).chain||null,createdAt:now,createdBy:S.uid||null,fromSheet:false});
       body.accountKey=A.key;body.accountName=A.name;if(!l.country&&ctry)body.country=ctry;logs.push(`Account changed: ${l.accountName} → ${A.name} (new account)`)}
     if(A.mode==="move"){const T=allAccounts()[A.key]||{};body.accountKey=A.key;body.accountName=A.name;if(!l.country&&T.country)body.country=T.country;logs.push(`Account changed: ${l.accountName} → ${A.name}`)}
     /* products */
@@ -2715,6 +2715,99 @@ function drawAcctP(){const S0=S.acctP;if(!S0)return;const sc0=document.querySele
   $("#apAll")?.addEventListener("click",()=>{S0.all.t=!S0.all.t;drawAcctP()});
   const nb=h.querySelector(".lvb");if(had&&nb)nb.scrollTop=st0;else $("#apClose").focus({preventScroll:true})}
 
+/* ======================= HOTEL CHAIN ON EACH ACCOUNT + KEY ACCOUNT MANAGER (SQL 51) =======================
+   The chain of a hotel is saved on its account (accounts.chain). A Key Account Manager is shown only the leads, accounts and key-account
+   work of the chains and regions allocated to them (table kam_scope, set by a Supervisor). The database enforces this; the app only reflects it. */
+const chainDoc=(key,name)=>{const c=chainOf(key,name);return c.how==="manual"||c.how==="detected"?{chain:c.chain}:{}};
+const kcSig=()=>{let sv=0,cn=0;const A=S.accounts||{};for(const k in A){if(A[k]&&A[k].chain)sv++;if(A[k]&&A[k].chainNone)cn++}return[Object.keys(A).length,(S.allLeads||[]).length,_chainSig,JSON.stringify(S.settings.chainOverrides||{}).length,sv,cn,Object.values(A).reduce((n,a)=>n+((a&&a.deleted)?1:0),0)].join("|")};
+let _kcMemo=null,_kcMemoSig="";
+/* every account we can see, sorted into: saved and current / needs saving / no chain / confirmed independent.
+   Most leads carry no region of their own (it is worked out from the country), so the region is saved on the account too. */
+function kcStatus(){chainIndex();const sig=kcSig();if(_kcMemo&&sig===_kcMemoSig)return _kcMemo;
+  const A=S.accounts||{},info={};
+  (S.allLeads||S.leads||[]).forEach(l=>{if(l.deleted||["Duplicate","Rejected"].includes(l.status))return;const k=accKey(l);if(!k)return;const i=info[k]||(info[k]={name:l.accountName||"",country:l.country||"",region:"",leads:0});i.leads++;if(!i.name)i.name=l.accountName||"";const rg=regionOf(l);if(!i.region&&rg&&rg!=="No region")i.region=rg});
+  const keys=new Set([...Object.keys(A).filter(k=>A[k]&&!A[k].deleted),...Object.keys(info)]);
+  const o={total:0,ok:0,todo:[],none:[],confirmed:0};
+  for(const k of keys){const d=A[k]||null;if(d&&d.deleted)continue;const i=info[k]||{name:"",country:"",region:"",leads:0};const name=(d&&d.name)||i.name||k;const c=chainOf(k,name);o.total++;
+    const patch={};if((c.how==="manual"||c.how==="detected")&&!(d&&nk(d.chain||"")===nk(c.chain)))patch.chain=c.chain;if(!(d&&d.region)&&i.region)patch.region=i.region;
+    const country=(d&&d.country)||i.country||"";
+    if(Object.keys(patch).length&&(c.how!=="none"||patch.region))o.todo.push({key:k,name,patch,create:!d,country,chain:patch.chain||"",region:i.region});
+    else if(c.how==="manual"||c.how==="detected"||c.how==="saved")o.ok++;else if(c.how==="confirmed")o.confirmed++;
+    if(c.how==="none")o.none.push({key:k,name,country,leads:i.leads,region:i.region})}
+  o.none.sort((a,b)=>b.leads-a.leads||a.name.localeCompare(b.name));_kcMemo=o;_kcMemoSig=sig;return o}
+async function kcRun(items,fn){let n=0,f=0;for(let i=0;i<items.length;i+=8){await Promise.all(items.slice(i,i+8).map(async x=>{try{await fn(x);n++}catch(e){f++}}))}return{n,f}}
+async function kcSync(){const st=kcStatus();const r=await kcRun(st.todo,async x=>{
+    if(x.create){const doc={name:x.name,key:x.key,country:x.country||"",city:"",group:"",region:x.patch.region||"",createdAt:nowISO(),createdBy:S.uid||null,fromSheet:false};if(x.patch.chain)doc.chain=x.patch.chain;await S.db.doc("accounts/"+x.key).set(doc);S.accounts[x.key]=doc}
+    else{const pt=Object.assign({},x.patch);if(pt.chain)pt.chainNone=false;await S.db.doc("accounts/"+x.key).update(pt);S.accounts[x.key]=Object.assign({},S.accounts[x.key],pt)}});
+  if(!S.settings.chainTrack){try{await S.db.doc("config/settings").update({chainTrack:true});S.settings.chainTrack=true}catch(e){}}
+  window.__audit?.("updated","accounts","Hotel chains saved on accounts",`Saved the hotel chain and region on ${r.n} account${r.n===1?"":"s"}${r.f?` (${r.f} failed)`:""}`);return r}
+async function kcSetOne(key,name,val){const d=S.accounts[key];const l=(S.allLeads||[]).find(x=>accKey(x)===key&&!x.deleted);const rg=l?regionOf(l):"";
+  const patch=val==="__none"?{chainNone:true}:{chain:val,chainNone:false};if(!(d&&d.region)&&rg&&rg!=="No region")patch.region=rg;
+  if(d)await S.db.doc("accounts/"+key).update(patch);else await S.db.doc("accounts/"+key).set(Object.assign({name,key,country:(l&&l.country)||"",city:"",group:"",region:"",createdAt:nowISO(),createdBy:S.uid||null,fromSheet:false},patch));
+  S.accounts[key]=Object.assign({},d||{name,key},patch)}
+function chainMissingDefaults(){const cur=S.settings.chains;if(!cur||!cur.length)return[];const out=[];
+  for(const d of CHAIN_DEFAULT){const c=cur.find(x=>nk(x.name)===nk(d.name));const have=new Set((c?c.brands:[]).map(normTxt));const miss=d.brands.filter(b=>!have.has(normTxt(b)));if(miss.length)out.push({name:d.name,add:miss,isNew:!c})}return out}
+function chainSyncHTML(){const st=kcStatus();const can1=can("account.manage")||can("settings.manage");
+  return`<div style="margin:2px 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunk)" id="kcBox"><div class="row" style="gap:6px 14px;flex-wrap:wrap"><b>Chain and region saved on each account</b><span class="small muted">Needed by the Key Account Manager role: they see a hotel only when its chain (and region) are saved on the account.</span></div>
+   <div class="row small" style="gap:4px 16px;flex-wrap:wrap;margin-top:6px"><span>Accounts <b>${fmtN(st.total)}</b></span><span>Chain saved <b>${fmtN(st.ok)}</b></span><span style="${st.todo.length?"color:var(--warn)":""}">Not saved yet <b>${fmtN(st.todo.length)}</b></span><span>Confirmed independent <b>${fmtN(st.confirmed)}</b></span><span style="${st.none.length?"color:var(--warn)":""}">No chain, not confirmed <b>${fmtN(st.none.length)}</b></span></div>
+   <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap"><button type="button" class="btn pri" id="kcSync"${st.todo.length&&can1?"":" disabled"}>${st.todo.length?`Save chains on ${fmtN(st.todo.length)} account${st.todo.length===1?"":"s"}`:"Everything is saved"}</button>${st.none.length&&can("page.backoffice")?`<button type="button" class="btn" id="kcGo">Review the ${fmtN(st.none.length)} with no chain (Back office → Data issues)</button>`:""}<span class="small" id="kcMsg"></span></div></div>`}
+/* Back office → Data issues: hotels with no chain. Shown once the chains have been saved on accounts the first time. */
+const chainIssueCount=()=>S.settings.chainTrack?kcStatus().none.length:0;
+function chainIssuesHTML(){if(!S.settings.chainTrack)return"";const st=kcStatus(),L=st.none,mgr=can("account.manage");const names=chainList().map(c=>c.name).sort((a,b)=>a.localeCompare(b));
+  return`<div class="panel" id="dq-chain"><div class="row" style="margin-bottom:6px"><h3>Hotels with no chain</h3><span class="chip" style="${L.length?"background:var(--warn-soft);color:var(--warn)":""}">${fmtN(L.length)}</span></div>
+   <p class="small muted" style="margin:0 0 10px;max-width:90ch">These accounts have no hotel chain, so a Key Account Manager cannot see them. Pick the chain, or confirm the hotel is independent. Hotels with a lot of leads come first.${mgr?"":" Only people who can manage accounts can change this."}</p>
+   ${L.length?`<div class="tw"><table><thead><tr><th>Account</th><th>Country</th><th class="num">Leads</th><th style="width:250px">Chain</th></tr></thead><tbody>${L.slice(0,40).map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(ctryName(a.country)||"—")}</td><td class="num">${a.leads}</td><td><select data-kcset="${esc(a.key)}" aria-label="Chain for ${esc(a.name)}"${mgr?"":" disabled"}><option value="">Choose…</option><option value="__none">Independent (no chain)</option>${names.map(n=>`<option>${esc(n)}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div>
+   ${L.length>40?`<p class="small muted" style="margin:6px 0 0">Showing the first 40 of ${fmtN(L.length)}.</p>`:""}
+   ${mgr?`<div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="kcAllNone">Confirm all ${fmtN(L.length)} as independent hotels</button><span class="small muted">Use this once you have checked the list.</span><span class="small" id="kcIMsg"></span></div>`:""}`:`<p class="small" style="margin:0">Every account has a chain, or is confirmed independent.</p>`}</div>`}
+function bindChainIssues(m){
+  m.querySelectorAll("[data-kcset]").forEach(s=>s.onchange=async()=>{if(!s.value)return;s.disabled=true;try{const k=s.dataset.kcset,a=kcStatus().none.find(x=>x.key===k);await kcSetOne(k,a?a.name:k,s.value);toast(s.value==="__none"?"Confirmed as an independent hotel":"Chain set to "+s.value);render()}catch(e){s.disabled=false;toast("Couldn't save: "+(e.message||e.code))}});
+  $("#kcAllNone")?.addEventListener("click",async e=>{const b=e.currentTarget,L=kcStatus().none;if(!L.length||!confirm(`Confirm ${L.length} account${L.length===1?"":"s"} as independent hotels (no chain)?`))return;b.disabled=true;$("#kcIMsg").textContent="Saving…";
+    const r=await kcRun(L,x=>kcSetOne(x.key,x.name,"__none"));window.__audit?.("updated","accounts","Hotels with no chain",`Confirmed ${r.n} account${r.n===1?"":"s"} as independent hotels${r.f?` (${r.f} failed)`:""}`);toast(`${r.n} confirmed as independent${r.f?`, ${r.f} failed`:""}`);render()})}
+/* ---------- Key Account Manager: who looks after which chain and regions ---------- */
+const isKam=()=>S.role==="keyaccount";
+const kamK=()=>S.kam||(S.kam={rows:[],loaded:false,loading:false,err:""});
+const kamEmail=id=>String(id||"").trim().toLowerCase();
+async function kamLoad(force){const K=kamK();if(!window.__sb||K.loading||(K.loaded&&!force)||!(isKam()||can("users.manage")))return;K.loading=true;
+  try{const{data,error}=await window.__sb.from("kam_scope").select("*").order("email").order("chain").limit(2000);
+    if(error)K.err=/does not exist|schema cache|42P01|PGRST205/i.test((error.message||"")+(error.code||""))?"missing":(error.message||"error");else{K.err="";K.rows=(data||[]).map(r=>Object.assign({},r,{regions:r.regions||[]}))}}catch(e){K.err=e.message||"error"}
+  K.loading=false;K.loaded=true;if(isKam()||S.tab==="set")render()}
+const kamMine=()=>kamK().rows.filter(r=>kamEmail(r.email)===kamEmail(S.myEmail));
+const kamRegTxt=r=>r.regions&&r.regions.length?r.regions.join(", "):"all regions";
+function kamBanner(){if(!isKam())return"";const K=kamK(),rows=kamMine();
+  const t=!K.loaded?"Loading your allocation…":K.err==="missing"?"The database step for this role hasn't been run yet. Ask the Supervisor to run 51_key_account_manager.sql.":rows.length?`You look after ${rows.map(r=>`<b>${esc(r.chain)}</b> <span class="muted">(${esc(kamRegTxt(r))})</span>`).join(" · ")}.`:"No hotel chain is allocated to you yet. Ask a Supervisor to allocate your chains and regions.";
+  return`<div data-kam class="notice info" style="margin-top:14px"><b>Key Account Manager view</b> · read-only. ${t} You see only the leads, hotels and key-account work of your allocation.</div>`}
+function kamMatch(r){const re=new Set((r.regions||[]).map(nk)),ch=nk(r.chain);const ls=(S.allLeads||S.leads||[]).filter(l=>!l.deleted&&nk(chainOf(accKey(l),l.accountName).chain)===ch&&(!re.size||re.has(nk(regionOf(l)))));
+  return{leads:ls.length,hotels:new Set(ls.map(accKey)).size}}
+function kamPanel(){if(!can("users.manage"))return"";const K=kamK();kamLoad();
+  const people=Object.entries(S.users).filter(([,u])=>u.role==="keyaccount").map(([id])=>kamEmail(id));
+  const chains=chainList().map(c=>c.name).sort((a,b)=>a.localeCompare(b)),regs=regionList();
+  let body;
+  if(K.err==="missing")body=`<div class="notice warn">This needs a one-time database step. Run <b>51_key_account_manager.sql</b> in Supabase (SQL Editor), then refresh.</div>`;
+  else if(!K.loaded)body=`<p class="small muted">Loading…</p>`;
+  else{const by={};K.rows.forEach(r=>(by[kamEmail(r.email)]=by[kamEmail(r.email)]||[]).push(r));const emails=[...new Set([...people,...Object.keys(by)])].sort();
+    body=`${S.settings.chainTrack?"":`<div class="notice warn" style="margin-bottom:10px">Hotel chains are not saved on accounts yet, so nobody would see any hotel. Open <b>Hotel chains</b> below and press <b>Save chains on accounts</b> first.</div>`}
+    <div style="display:grid;gap:10px">
+    ${emails.length?emails.map(em=>{const rs=by[em]||[],nm=S.names[em]||"",role=(S.users[em]||{}).role;return`<div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0"><div style="word-break:break-word"><b>${esc(nm||em)}</b> <span class="small muted" style="word-break:break-all">${esc(em)}${role&&role!=="keyaccount"?` · now ${esc(ROLE_LABEL[role]||role)} (no access)`:""}</span></div>
+      ${rs.length?rs.map(r=>{const mt=kamMatch(r);return`<div class="row" style="gap:8px;padding:8px 0 0;margin-top:8px;border-top:1px solid var(--line);align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:170px"><b>${esc(r.chain)}</b> <span class="muted">· ${esc(kamRegTxt(r))}</span><div class="small muted">${fmtN(mt.hotels)} hotel${mt.hotels===1?"":"s"} · ${fmtN(mt.leads)} lead${mt.leads===1?"":"s"} now</div></div><button type="button" class="btn sm bad" data-kmdel="${esc(r.id)}">Remove</button></div>`}).join(""):`<div class="small muted" style="margin-top:6px">Nothing allocated yet. This person sees no hotel.</div>`}</div>`}).join(""):`<p class="small muted" style="margin:0">No Key Account Manager yet. Add a user with the role “Key Account Manager” under Users and access.</p>`}</div>
+    ${people.length||emails.length?`<div class="row" style="margin-top:12px;gap:10px;align-items:end;flex-wrap:wrap"><label class="f">Person<select id="kmP">${(emails.length?emails:people).map(e=>`<option value="${esc(e)}">${esc(S.names[e]||e)}</option>`).join("")}</select></label>
+     <label class="f">Hotel chain<select id="kmC"><option value="">Choose…</option>${chains.map(c=>`<option>${esc(c)}</option>`).join("")}</select></label></div>
+     <fieldset style="border:0;padding:0;margin:10px 0 0"><legend class="small muted" style="padding:0 0 4px">Regions <span class="muted">(leave “All regions” ticked for the whole chain)</span></legend><div class="row" style="gap:6px 14px;flex-wrap:wrap"><label style="display:flex;gap:5px;align-items:center"><input type="checkbox" id="kmAll" checked style="width:auto"><b>All regions</b></label>${regs.map(r=>`<label style="display:flex;gap:5px;align-items:center"><input type="checkbox" data-kmr="${esc(r)}" style="width:auto" disabled>${esc(r)}</label>`).join("")}</div></fieldset>
+     <div class="row" style="margin-top:10px"><button type="button" class="btn pri" id="kmAdd">Allocate</button><span class="small" id="kmMsg"></span></div>
+     <p class="small muted" style="margin:8px 0 0;max-width:90ch">Allocating a chain that is already on the list for the same person replaces its regions. A person sees a lead only when both the chain and the region match one of their rows. Changes are recorded in the audit trail.</p>`:""}`}
+  return`<div class="panel" id="kamPanel"><div class="row" style="margin-bottom:6px"><h3>Key account allocations</h3><span class="chip">${K.rows.length}</span></div><p class="small muted" style="margin:2px 0 10px;max-width:90ch">A Key Account Manager is read-only and sees only the leads, hotels and key-account work of the chains and regions allocated here. They are not counted in targets, incentives or engineer revenue.</p>${body}</div>`}
+function bindKam(m){if(!$("#kamPanel"))return;const K=kamK();
+  const all=$("#kmAll");const regs=[...m.querySelectorAll("[data-kmr]")];
+  if(all)all.onchange=()=>{regs.forEach(c=>{c.disabled=all.checked;if(all.checked)c.checked=false})};
+  m.querySelectorAll("[data-kmr]").forEach(c=>c.onchange=()=>{if(!regs.some(x=>x.checked)&&all){all.checked=true;regs.forEach(x=>x.disabled=true)}});
+  m.querySelectorAll("[data-kmdel]").forEach(b=>b.onclick=async()=>{const r=K.rows.find(x=>String(x.id)===b.dataset.kmdel);if(!r||!confirm(`Remove ${r.chain} (${kamRegTxt(r)}) from ${r.email}?`))return;b.disabled=true;
+    try{const{error}=await window.__sb.from("kam_scope").delete().eq("id",r.id);if(error)throw error;toast("Allocation removed");await kamLoad(true)}catch(e){b.disabled=false;toast("Couldn't remove: "+(e.message||e.code))}});
+  $("#kmAdd")?.addEventListener("click",async e=>{const M=$("#kmMsg"),em=$("#kmP").value,ch=$("#kmC").value,rs=all&&all.checked?[]:regs.filter(c=>c.checked).map(c=>c.dataset.kmr);
+    if(!em||!ch){M.innerHTML=`<span style="color:var(--bad)">Choose the person and the hotel chain.</span>`;return}
+    e.currentTarget.disabled=true;M.textContent="Saving…";
+    try{const old=K.rows.find(x=>kamEmail(x.email)===em&&nk(x.chain)===nk(ch));
+      const q=old?window.__sb.from("kam_scope").update({regions:rs}).eq("id",old.id):window.__sb.from("kam_scope").insert({email:em,chain:ch,regions:rs});
+      const{error}=await q;if(error)throw error;toast(`${ch} allocated to ${S.names[em]||em}`);await kamLoad(true)}catch(er){e.target.disabled=false;M.innerHTML=`<span style="color:var(--bad)">Couldn't save: ${esc(er.message||er.code||"error")}</span>`}})}
+
 /* ======================= KEY ACCOUNTS (phase 1) =======================
    Corporate / key-account work that is NOT part of a lead: account meetings, who we know at the client, requirements, promises.
    Stored in its own table (SQL 50, key_items). Never counted in leads, pipeline, win rate, targets or incentives. */
@@ -2727,7 +2820,7 @@ const KA_RSTAT=["Open","In discussion","Promised","Delivered","Declined"];
 const kaOn=()=>!!window.__sb&&can("keyacct.manage");
 const kaK=()=>S.ka||(S.ka={items:[],loaded:false,loading:false,err:"",view:"",dates:{}});
 const kaId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const kaErr=e=>String((e&&(e.message||e.details))||e||"Could not save").replace(/^.*?(Meeting notes need|Please write real|Choose the date)/,"$1");
+const kaErr=e=>/row-level security/i.test(String((e&&e.message)||e||""))?"That hotel is not in your allocated chains and regions.":String((e&&(e.message||e.details))||e||"Could not save").replace(/^.*?(Meeting notes need|Please write real|Choose the date)/,"$1");
 async function kaLoad(force){const K=kaK();if(!kaOn()||K.loading||(K.loaded&&!force))return;K.loading=true;
   try{const{data,error}=await window.__sb.from("key_items").select("*").order("updated_at",{ascending:false}).limit(3000);
     if(error)K.err=/does not exist|schema cache|42P01|PGRST205/i.test((error.message||"")+(error.code||""))?"missing":(error.message||"error");else{K.err="";K.items=data||[]}}
@@ -2989,7 +3082,7 @@ function dataIssues(){const ls=S.leads.filter(l=>!["Duplicate","Rejected"].inclu
   const known=new Set(spList(true).map(x=>nk(x.name)));const odd={};
   ls.forEach(l=>{if(l.assignedTo&&!known.has(nk(l.assignedTo))&&!sharedOwners(l.assignedTo))(odd[l.assignedTo]=odd[l.assignedTo]||[]).push(l)});
   const shared=sharedLeads();
-  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length+wqOpenL().length}}
+  return{noOrder,zero,odd:Object.entries(odd).sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])),shared,count:zero.length+Object.keys(odd).length+shared.length+noPmsWon().length+wqOpenL().length+chainIssueCount()}}
 const wonAt=l=>l.stageAt?.Won||l.order?.date||l.updatedAt||l.createdAt||"";
 function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:{}});const cur=Object.keys(S.settings.fx||{AED:1});const sp=spNames();
   const sec1=`<div class="panel" id="dq-won"><div class="row" style="margin-bottom:6px"><h3>Won leads without an order amount</h3><span class="chip" style="${D.zero.length?"background:var(--bad-soft);color:var(--bad)":""}">${D.zero.length} with no revenue</span>${D.noOrder.length>D.zero.length?`<span class="chip">${D.noOrder.length-D.zero.length} using the quotation amount</span>`:""}</div>
@@ -3011,9 +3104,9 @@ function issuesHTML(){const D=dataIssues();const st=S.dq||(S.dq={open:null,show:
       ${sh?`<div class="tw" style="margin-top:8px"><table><thead><tr><th>Ref</th><th>Property</th><th>Status</th><th class="num">Value</th><th>Generated by</th><th></th></tr></thead><tbody>${ls.map(l=>`<tr><td class="mono">${esc(l.ref)}</td><td>${esc(l.accountName)}</td><td><span class="${stCls(l.status)}">${esc(l.status)}</span></td><td class="num">${leadValue(l)?fmtAED(leadValue(l)):"—"}</td><td>${esc(l.generatedBy||"—")}</td><td class="num"><button type="button" class="btn sm" data-open="${esc(l.id)}">Open${can("lead.reassign")?" / reassign":""}</button></td></tr>`).join("")}</tbody></table></div>`:""}</div>`}).join("")}</div>`:`<p class="small" style="margin:0">Every lead is assigned to a name on the Sales engineer list.</p>`}</div>`;
   const sec3=`<div class="panel" id="dq-shared"><div class="row" style="margin-bottom:6px"><h3>Leads assigned to two people</h3><span class="chip" style="${D.shared.length?"background:var(--warn-soft);color:var(--warn)":""}">${D.shared.length}</span>${D.shared.length&&S.tab!=="bo"&&can("page.backoffice")?`<span class="sp"></span><button type="button" class="btn sm" id="dq-bo">Fix in Back office</button>`:""}</div>
     <p class="small muted" style="margin:0">${D.shared.length?`Combined names such as “${esc(D.shared[0].assignedTo)}”. Use “Move them to the queue” in the panel above to pick one engineer for each.`:"No lead is assigned to two people."}</p></div>`;
-  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}${wqHTML(can("lead.status_override"))}</div>`,D}}
+  return{html:`<div class="view" style="gap:14px">${sec1}${sec2}${sec3}${pmsIssuesHTML()}${chainIssuesHTML()}${wqHTML(can("lead.status_override"))}</div>`,D}}
 function suggestEng(n){const k=nk(n);const sp=spNames();return sp.find(x=>nk(x).split(" ")[0]===k.split(" ")[0])||sp.find(x=>nk(x).startsWith(k)||k.startsWith(nk(x)))||""}
-function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});bindPmsIssues(m);
+function bindIssues(m){const st=S.dq||(S.dq={open:null,show:{}});bindPmsIssues(m);bindChainIssues(m);
   m.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDrawer(b.dataset.open));
   m.querySelectorAll("[data-dqo]").forEach(b=>b.onclick=()=>{st.open=st.open===b.dataset.dqo?null:b.dataset.dqo;render();setTimeout(()=>$("#dq-v")?.focus(),0)});
   m.querySelectorAll("[data-dqs]").forEach(b=>b.onclick=()=>{st.show[b.dataset.dqs]=!st.show[b.dataset.dqs];render()});
@@ -3098,32 +3191,38 @@ async function exportProducts(){if(!can("lead.export")){toast("Your role can't e
    Prospect = an account with leads but no Won lead. Every account counts once. Deleted, Duplicate and Rejected leads never count.
    Chains come from the hotel's brand name (editable list in Products & settings) or a Supervisor's manual choice. */
 const CHAIN_DEFAULT=[
-  ["Marriott","JW Marriott, Ritz-Carlton, Ritz Carlton, St Regis, St. Regis, Sheraton, Westin, Le Meridien, Le Méridien, W Hotel, W Dubai, W Abu Dhabi, W Doha, W Melbourne, Renaissance, Courtyard, Four Points, Aloft, Element, Autograph Collection, Tribute Portfolio, Delta Hotels, Luxury Collection, Edition, Moxy, Residence Inn, Fairfield, Bulgari, Marriott"],
-  ["Hilton","Waldorf Astoria, Conrad, Canopy by Hilton, Curio Collection, DoubleTree, Double Tree, Embassy Suites, Hampton by Hilton, Hilton Garden Inn, Homewood Suites, Tapestry Collection, LXR, Hilton"],
-  ["IHG","InterContinental, Intercontinental, Crowne Plaza, Holiday Inn, voco, Staybridge, Candlewood, Kimpton, Hotel Indigo, Even Hotels, Regent, Six Senses, Vignette"],
-  ["Accor","Raffles, Fairmont, Sofitel, Pullman, Swissotel, Swissôtel, Movenpick, Mövenpick, Novotel, Mercure, ibis, Adagio, MGallery, Grand Mercure, Banyan Tree, Rixos, Mantis, Tribe, Peppers, Mama Shelter"],
-  ["Hyatt","Park Hyatt, Grand Hyatt, Hyatt Regency, Hyatt Place, Hyatt Centric, Andaz, Alila, Thompson, Destination by Hyatt, Hyatt"],
-  ["Radisson","Radisson Blu, Radisson Collection, Radisson Red, Park Inn, Park Plaza, Country Inn, Radisson"],
-  ["Rotana","Rotana, Centro, Arjaan, Rayhaan, Edge Rotana"],
-  ["Jumeirah","Jumeirah, Burj Al Arab, Madinat Jumeirah"],
+  ["Marriott","JW Marriott, Ritz-Carlton, Ritz Carlton, St Regis, St. Regis, Sheraton, Westin, Le Meridien, Le Méridien, W Hotel, W Dubai, W Abu Dhabi, W Doha, W Melbourne, Renaissance, Courtyard, Four Points, Aloft, Element, Autograph Collection, Tribute Portfolio, Delta Hotels, Luxury Collection, Edition, Moxy, Residence Inn, Fairfield, Bulgari, AC Hotel, AC Hotels, Gaylord, Protea Hotel, City Express, Marriott Executive Apartments, SpringHill Suites, TownePlace, Design Hotels, Marriott"],
+  ["Hilton","Waldorf Astoria, Conrad, Canopy by Hilton, Curio Collection, DoubleTree, Double Tree, Embassy Suites, Hampton by Hilton, Hilton Garden Inn, Homewood Suites, Tapestry Collection, LXR, Signia by Hilton, Motto by Hilton, Tru by Hilton, Tempo by Hilton, Spark by Hilton, Home2 Suites, Hilton Grand Vacations, Hilton"],
+  ["IHG","InterContinental, Intercontinental, Crowne Plaza, Holiday Inn, voco, Staybridge, Candlewood, Kimpton, Hotel Indigo, Even Hotels, Regent, Six Senses, Vignette, Holiday Inn Express, Avid Hotel, Garner, Atwell Suites, Hualuxe"],
+  ["Accor","Raffles, Fairmont, Sofitel, Pullman, Swissotel, Swissôtel, Movenpick, Mövenpick, Novotel, Mercure, ibis, Adagio, MGallery, Grand Mercure, Banyan Tree, Rixos, Mantis, Tribe, Peppers, Mama Shelter, Ibis Styles, Ibis Budget, Sofitel Legend, Orient Express, SLS Hotel, Delano, Mondrian, Hyde Hotel, 25hours, Handwritten, Emblems, JO&JOE, Jo and Joe"],
+  ["Hyatt","Park Hyatt, Grand Hyatt, Hyatt Regency, Hyatt Place, Hyatt Centric, Andaz, Alila, Thompson, Destination by Hyatt, Hyatt House, Hyatt Studios, Miraval, Caption by Hyatt, Dream Hotels, Hyatt Ziva, Hyatt Zilara, Secrets Resorts, Dreams Resorts, Zoetry, Sunscape, Joie de Vivre, Hyatt"],
+  ["Radisson","Radisson Blu, Radisson Collection, Radisson Red, Park Inn, Park Plaza, Country Inn, Radisson Individuals, Radisson Residences, Prize by Radisson, Radisson Inn, Radisson"],
+  ["Rotana","Rotana, Centro, Arjaan, Rayhaan, Edge Rotana, Rotana Hotel"],
+  ["Jumeirah","Jumeirah, Burj Al Arab, Madinat Jumeirah, Zabeel House"],
   ["Emaar Hospitality","Address Hotels, Address Downtown, Address Sky View, Address Dubai, Palace Downtown, Vida, Rove"],
   ["Millennium","Millennium, Copthorne, M Social, Leng's"],
-  ["Wyndham","Wyndham, Ramada, Days Inn, Super 8, Howard Johnson, Tryp, Dolce, La Quinta, Microtel, Wingate"],
+  ["Wyndham","Wyndham, Ramada, Days Inn, Super 8, Howard Johnson, Tryp, Dolce, La Quinta, Microtel, Wingate, Hawthorn Suites, Baymont, Ramada Encore, Registry Collection, Wyndham Garden, Wyndham Alltra, Wyndham Resorts, Esplendor"],
   ["Kempinski","Kempinski"],
-  ["Minor Hotels","Anantara, Avani, NH Collection, NH Hotel, nhow, Tivoli, Elewana, Oaks"],
-  ["Meliá","Melia, Meliá, ME by Melia, Gran Melia, Paradisus, INNSiDE, Sol by Melia"],
+  ["Minor Hotels","Anantara, Avani, NH Collection, NH Hotel, nhow, Tivoli, Elewana, Oaks, Colbert Collection, Minor International"],
+  ["Meliá","Melia, Meliá, ME by Melia, Gran Melia, Paradisus, INNSiDE, Sol by Melia, Melia Hotels"],
   ["Shangri-La","Shangri-La, Shangri La, Kerry Hotel, Traders Hotel"],
-  ["Four Seasons","Four Seasons"],["Mandarin Oriental","Mandarin Oriental"],["Taj","Taj, Vivanta, SeleQtions"],["Oberoi","Oberoi, Trident"],
+  ["Four Seasons","Four Seasons"],["Mandarin Oriental","Mandarin Oriental"],["Taj","Taj, Vivanta, SeleQtions, Ginger Hotel, IHCL"],["Oberoi","Oberoi, Trident"],
   ["Barceló","Barcelo, Barceló, Occidental"],["Louvre Hotels","Golden Tulip, Royal Tulip, Tulip Inn, Campanile, Kyriad, Premiere Classe"],["Best Western","Best Western"],
-  ["Choice Hotels","Comfort Inn, Quality Inn, Clarion, Cambria, Sleep Inn, Econo Lodge"],["Citadines","Citadines, Ascott, Somerset"],["Dusit","Dusit"],["Kerzner","Atlantis, One&Only, One and Only, SIRO"],
-  ["Hospitality by Al Habtoor","Habtoor Palace, Al Habtoor"],["Wyndham Grand","Wyndham Grand"]].map(([name,b])=>({name,brands:b.split(",").map(x=>x.trim()).filter(Boolean)}));
+  ["Choice Hotels","Comfort Inn, Quality Inn, Clarion, Cambria, Sleep Inn, Econo Lodge"],["Citadines","Citadines, Ascott, Somerset"],["Dusit","Dusit, dusitD2, Dusit Thani, Dusit Princess, ASAI"],["Kerzner","Atlantis, One&Only, One and Only, SIRO"],
+  ["Hospitality by Al Habtoor","Habtoor Palace, Al Habtoor"],["Wyndham Grand","Wyndham Grand"],
+  ["Langham","The Langham, Langham Place, Cordis, Eaton Hotel"],["Rosewood","Rosewood, New World Hotels, Asaya"],["Aman","Aman, Janu"],["Belmond","Belmond, Cheval Blanc"],
+  ["Dorchester Collection","Dorchester, Hotel Eden, Le Meurice, Plaza Athenee, Plaza Athénée, Principe de Savoia, Coworth Park, 45 Park Lane, Beverly Hills Hotel, Hotel Bel-Air"],["Corinthia","Corinthia"],["Rocco Forte","Rocco Forte, Hotel de Russie, Villa Kennedy"],
+  ["Hard Rock Hotels","Hard Rock Hotel"],["Iberostar","Iberostar"],["RIU","RIU Hotels, Riu Plaza, Riu Palace, Hotel Riu"],["Swiss-Belhotel","Swiss-Belhotel, Swiss Belhotel, Swiss-Belinn, Zest Hotel, Whiz Hotel"],["Premier Inn","Premier Inn"],["Travelodge","Travelodge"],["Scandic","Scandic"],
+  ["Lemon Tree","Lemon Tree, Red Fox, Aurika, Keys Select"],["ITC Hotels","ITC Hotel, WelcomHotel, Welcomhotel, Fortune Park, Fortune Select, Storii"],["Leela","The Leela, Leela Palace"],["Sarovar","Sarovar Portico, Sarovar Premiere"],["Jin Jiang","Jin Jiang, Metropolo, Jinjiang Inn"],
+  ["Frasers Hospitality","Fraser Suites, Fraser Place, Capri by Fraser, Modena by Fraser, Frasers"],["Lotte Hotels","Lotte Hotel, Signiel"],["Okura Nikko","Okura, Hotel Nikko, Nikko Hotel, JAL City"],["Toyoko Inn","Toyoko Inn"]].map(([name,b])=>({name,brands:b.split(",").map(x=>x.trim()).filter(Boolean)}));
 function chainList(){return(S.settings.chains&&S.settings.chains.length?S.settings.chains:CHAIN_DEFAULT)}
 let _chainIdx=null,_chainSig="";
 function chainIndex(){const L=chainList();const sig=JSON.stringify(L);if(_chainIdx&&sig===_chainSig)return _chainIdx;
-  const ix=[];for(const c of L)for(const b of c.brands||[]){const n=normTxt(b);if(n)ix.push([n,c.name])}ix.sort((a,b)=>b[0].length-a[0].length);_chainSig=sig;return _chainIdx=ix}
+  const ix=[];for(const c of L){for(const b of c.brands||[]){const n=normTxt(b);if(n)ix.push([n,c.name])}const n0=normTxt(c.name);if(n0&&!(c.brands||[]).some(b=>normTxt(b)===n0))ix.push([n0,c.name])}ix.sort((a,b)=>b[0].length-a[0].length);_chainSig=sig;return _chainIdx=ix}
 /* {chain, how:"manual"|"detected"|"none"} */
 function chainOf(key,name){const o=(S.settings.chainOverrides||{})[key];if(o)return{chain:o,how:"manual"};const n=" "+normTxt(name)+" ";
-  for(const[b,c]of chainIndex()){if(b.length<=2){if(n.startsWith(" "+b+" "))return{chain:c,how:"detected"}}else if(n.includes(" "+b+" "))return{chain:c,how:"detected"}}return{chain:"Independent",how:"none"}}
+  for(const[b,c]of chainIndex()){if(b.length<=2){if(n.startsWith(" "+b+" "))return{chain:c,how:"detected"}}else if(n.includes(" "+b+" "))return{chain:c,how:"detected"}}
+  const sv=(S.accounts||{})[key];if(sv&&sv.chain)return{chain:sv.chain,how:"saved"};if(sv&&sv.chainNone)return{chain:"Independent",how:"confirmed"};return{chain:"Independent",how:"none"}}
 const ctryOf=c=>{const a=areaOf(c).country;return a||String(c||"").trim()||"Unknown"};
 const ctryName=c=>COUNTRY_FULL[c]||c;
 function fpState(){return S.fp||(S.fp={period:"all",region:"",ctryOpen:{},chainOpen:{},q:""})}
@@ -3215,6 +3314,7 @@ function chainsPanel(){if(!can("settings.manage"))return"";const L=chainList();c
   const accts=fpData();const big=accts.filter(a=>a.chain==="Independent").sort((a,b)=>b.client-a.client||b.leads.length-a.leads.length).slice(0,50);
   const ov=Object.entries(S.settings.chainOverrides||{}).filter(([,c])=>c);const names=L.map(c=>c.name).sort((a,b)=>a.localeCompare(b));
   return`<div class="panel" id="chainsPanel"><h3>Hotel chains</h3><p class="small muted" style="margin:2px 0 10px;max-width:90ch">Lead Desk finds a hotel's chain from the brand words in its name (longest match first). Edit the brand words below, add chains, or set a hotel's chain by hand; a hand-set chain always wins. Changes are recorded in the audit trail.</p>
+   ${chainSyncHTML()}${chainMissingDefaults().length?`<div class="notice info" style="margin:0 0 10px">The standard brand list has grown. <b>${chainMissingDefaults().reduce((n,x)=>n+x.add.length,0)}</b> brand words (and ${chainMissingDefaults().filter(x=>x.isNew).length} chains) are not in your saved list. <button type="button" class="btn sm" id="chMerge">Add them to my list</button></div>`:""}
    <details><summary style="cursor:pointer"><b>Brand list</b> <span class="small muted">· ${L.length} chains, ${L.reduce((s,c)=>s+c.brands.length,0)} brand words</span></summary>
     <div class="tw" style="margin-top:8px"><table><thead><tr><th style="width:200px">Chain</th><th>Brand words (comma separated)</th><th></th></tr></thead><tbody>
     ${L.map((c,i)=>`<tr><td><input data-chn="${i}" value="${esc(c.name)}" maxlength="60"></td><td><input data-chb="${i}" value="${esc(c.brands.join(", "))}"></td><td><button type="button" class="btn sm" data-chdel="${i}">Remove</button></td></tr>`).join("")}
@@ -3246,6 +3346,9 @@ function bindChains(m){if(!$("#chainsPanel"))return;
   $("#chSave")?.addEventListener("click",()=>{const L=[];const seen=new Set();m.querySelectorAll("[data-chn]").forEach(i=>{const n=i.value.trim().replace(/\s+/g," ");const br=m.querySelector(`[data-chb="${i.dataset.chn}"]`).value.split(",").map(x=>x.trim()).filter(Boolean);if(n&&!seen.has(nk(n))){seen.add(nk(n));L.push({name:n,brands:[...new Set(br)]})}});
     const nn=$("#chNewN").value.trim(),nb=$("#chNewB").value.split(",").map(x=>x.trim()).filter(Boolean);if(nn){if(seen.has(nk(nn))){$("#chMsg").innerHTML=`<span style="color:var(--bad)">${esc(nn)} is already in the list.</span>`;return}L.push({name:nn,brands:nb.length?nb:[nn]})}
     saveS({chains:L},"Brand list saved")});
+  $("#kcSync")?.addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;$("#kcMsg").textContent="Saving…";try{const r=await kcSync();toast(`Saved on ${r.n} account${r.n===1?"":"s"}${r.f?`, ${r.f} failed`:""}`);render()}catch(er){b.disabled=false;$("#kcMsg").innerHTML=`<span style="color:var(--bad)">Couldn't save: ${esc(er.message||er.code||"error")}</span>`}});
+  $("#kcGo")?.addEventListener("click",()=>{S.tab="bo";try{history.replaceState(null,"","#bo")}catch(_){}render()});
+  $("#chMerge")?.addEventListener("click",()=>{const M=chainMissingDefaults();const L=chainList().map(c=>({name:c.name,brands:c.brands.slice()}));for(const x of M){const c=L.find(y=>nk(y.name)===nk(x.name));if(c)c.brands.push(...x.add);else L.push({name:x.name,brands:x.add.slice()})}saveS({chains:L},"Standard brands added to your list")});
   $("#chReset")?.addEventListener("click",()=>saveS({chains:null},"Standard brand list restored"));
   m.querySelectorAll("[data-chdel]").forEach(b=>b.onclick=()=>{const L=chainList().filter((_,i)=>i!==+b.dataset.chdel);saveS({chains:L},"Chain removed")});
   m.querySelectorAll("[data-chset]").forEach(s=>s.onchange=()=>{if(!s.value)return;S.chainEd.open=true;saveS({chainOverrides:Object.assign({},S.settings.chainOverrides||{},{[s.dataset.chset]:s.value})},"Chain set to "+s.value)});
@@ -6331,7 +6434,7 @@ function renderAcctMatrix(m){ensureTip();const M=mxState();const{prods,hotels}=m
 /* ======================= 6. SETTINGS (editors) ======================= */
 /* ---- Products & settings in sections: every block is still rendered (so nothing about saving changes); this only
    decides which blocks are shown. S.setSec = section key (remembered on the device), S.setJump = block to scroll to. */
-const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Register closed orders","Sales engineers","Lead generators"]],
+const SET_SECS=[["people","People & access","Users, roles, sales engineers, lead generators",["Users and access","Roles and permissions","Key account allocations","Register closed orders","Sales engineers","Lead generators"]],
   ["terr","Territories & accounts","Territories, emirates and states, hotel chains",["Territories","Emirates and states","Hotel chains"]],
   ["prod","Products & PMS","Product catalog, PMS integrations",["Product catalog","PMS integrations"]],
   ["sales","Sales rules","Source channels, rates and targets, activity rules, lead flow",["Source channels","Rates and targets","Activity rules and forecast","Lead flow rules"]],
@@ -6362,7 +6465,7 @@ function setSections(m){const sec=m.querySelector("section.view");if(!sec)return
   const on=n.querySelector("button.on");if(on&&n.scrollWidth>n.clientWidth)n.scrollLeft=Math.max(0,on.offsetLeft-12)}
 function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spList(true);
   if(!can("settings.manage")){m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Products, sales engineers, sources, exchange rates and targets. Only a Supervisor can change these.</p></div></div>
-   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
+   ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel()+kamPanel():""}
    <div class="grid3"><div class="panel"><h3>Sales engineers</h3><p class="small">${spList().map(x=>esc(x.name)).join(", ")}</p></div><div class="panel"><h3>Products</h3><p class="small">${prodList().map(p=>esc(p.name)).join(", ")}</p></div><div class="panel"><h3>Sources</h3><p class="small">${st.sources.map(s=>esc(s.name)+" ("+s.cat+")").join(", ")}</p></div></div></section>`;$("#bkBtn")?.addEventListener("click",takeBackup);if(can("users.manage")){bindUsers();bindPerms()}return}
   const row=(x,i,kind)=>`<div class="it" style="padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1;min-width:0;${x.active===false?"color:var(--muted);text-decoration:line-through":""}">${esc(x.name)}</span>
     ${kind==="p"?`<label class="small muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-rep="${i}" ${x.repeatable?"checked":""} style="width:auto">Repeatable</label>`:""}
@@ -6370,7 +6473,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
     ${kind==="s"&&(openLeadsOf(x.name).length||myAreas(x.name).length)?`<button type="button" class="btn sm" data-hand="${esc(x.name)}">Hand over</button>`:""}
     <button type="button" class="btn sm" data-ren="${kind}:${i}">Rename</button><button type="button" class="btn sm" data-tog="${kind}:${i}">${x.active===false?"Restore":"Retire"}</button></div>`;
   m.innerHTML=`<section class="view"><div class="vhead"><div><h2>Settings</h2><p>Supervisors manage users, roles, the product catalog and the sales engineer list here. Names must be unique, ignoring case and spacing. Retired names stay on existing leads but can no longer be chosen.</p></div></div>
-  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel():""}
+  ${can("data.backup")?backupPanel():""}${can("users.manage")?usersPanel()+permsPanel()+kamPanel():""}
   ${territoryPanel()}
   ${subTerrPanel()}
   ${chainsPanel()}
@@ -6417,7 +6520,7 @@ function renderSetBase(m){const st=S.settings;const prods=prodList(true),sps=spL
   $("#addSp").onsubmit=async e=>{e.preventDefault();const n=dupMsg($("#nsMsg"),sps,$("#ns").value);if(!n)return;
     if(await save({salespeople:sps.concat([{name:n,active:true}])},"Added "+n))render()};
   m.querySelectorAll("[data-hand]").forEach(b=>b.onclick=()=>openHandover(b.dataset.hand,false));
-  bindChains(m);if($("#regAccPanel"))regAccLoad();bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
+  bindChains(m);bindKam(m);if($("#regAccPanel"))regAccLoad();bindRules();bindFlow();bindPmsPanel(m);bindGenPanel(m);bindAmcPanel(m);bindCtrSetPanel(m);bindOhipPanel(m);
   m.querySelectorAll("[data-ren]").forEach(b=>b.onclick=()=>{const[k,i]=b.dataset.ren.split(":");const it=(k==="p"?prods:sps)[+i];if(it)openRename(k,it.name)});
   m.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{const[k,i]=b.dataset.tog.split(":");const list=(k==="p"?prods:sps).map(x=>Object.assign({},x));const it=list[+i];
     if(k==="s"&&it.active!==false&&(openLeadsOf(it.name).length||myAreas(it.name).length)){openHandover(it.name,true);return}
