@@ -231,6 +231,18 @@
     if (error) throw Object.assign(new Error(error.message), { code: error.code });
     return true;
   };
+  // Several people on one lead, with a revenue split (supabase/53_team_on_lead.sql)
+  const teamRpc = async (fn, args) => {
+    const { data, error } = await sb.rpc(fn, args);
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    return data;
+  };
+  window.__teamPropose = (id, members, split) => teamRpc("team_propose", { p_id: id, p_members: members || [], p_split: split || {} });
+  window.__teamAnswer = (id, ok, why) => teamRpc("team_answer", { p_id: id, p_accept: !!ok, p_why: why || "" });
+  window.__teamDecide = (id, split, reason) => teamRpc("team_decide", { p_id: id, p_split: split || {}, p_reason: reason || "" });
+  window.__teamMeeting = (id, meeting) => teamRpc("team_add_meeting", { p_id: id, p_meeting: meeting });
+  window.__teamNote = (id, text) => teamRpc("team_add_note", { p_id: id, p_text: text });
+  window.__teamSweep = () => teamRpc("team_sweep", {});
   // Won without a quotation: reminders (supabase/40_won_without_quote.sql)
   window.__remindWonQuotes = async (ids) => {
     const { data, error } = await sb.rpc("remind_won_quotes", { p_ids: ids && ids.length ? ids : null });

@@ -648,6 +648,11 @@ button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:le
 #helpAdm .hrows{display:grid;gap:8px;margin-bottom:6px}#helpAdm .hrow{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--surface)}
 #helpAdm .hrow>div:first-child{min-width:0;flex:1}#helpAdm .hrb{display:flex;gap:6px;flex:none}#helpAdm .hform textarea{width:100%}
 @media(max-width:700px){.drawer.hlpd{width:100%}#helpBtn{width:40px;height:40px}#helpAdm .hrow{flex-direction:column}.hq{width:28px;height:28px;min-width:28px}}
+.tmrow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.tmv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.tmv .tmchip{grid-column:1/-1}
+.tmbar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px}.tmbar i{display:block;height:100%;background:var(--accent)}.tmpct{font-weight:700;font-size:18px}
+.tmmeet{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.tmm{padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+#teamPanel .chip{white-space:normal;text-align:left}
 </style>
 
 <header class="top gut">
@@ -674,7 +679,7 @@ button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:le
 </header>
 <div class="gut"><div class="banner" id="banner"></div></div>
 <main class="gut" id="main"><div class="panel empty">Loading leads, accounts and settings…</div></main>
-<footer class="gut ldver" id="ldver">Lead Desk · version 22 Nov 2026 · build 97f065e</footer>
+<footer class="gut ldver" id="ldver">Lead Desk · version 27 Nov 2026 · build 07b6244</footer>
 <div id="drawerHost"></div>
 <div id="toastHost"></div>
 <div id="helpHost"></div>
@@ -682,7 +687,7 @@ button.apt.kab{background:none;border:0;font:inherit;color:inherit;text-align:le
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
 <script>window.supabase||document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"><\/script>')</script>
-<script src="adapter.js?v=515ea8d5"></script>
+<script src="adapter.js?v=65c51f7c"></script>
 <script>
 /* ---------- defaults (used until the shared settings document loads) ---------- */
 const DEFAULTS={products:["Passport / ID Scanner","eREG","VICAS","Tap & Smile","easyKIOSK","vMobile / Mobile Check-in","e-Invoicing","Mirror","Check-out Box","Dropbox","SamsoSign","Engage","eDOCS","OHIP Integration / Migration","OPERA Cloud Migration","OPERA Interface","Server Migration","Hardware (iPad / Tablet)","PMS"].map(n=>({name:n,repeatable:false})).concat([{name:"Additional Units / Upgrade",repeatable:true},{name:"AMC Renewal",repeatable:true}]),
@@ -1080,7 +1085,7 @@ function renderNew(m){
         <label class="f">Hotel PMS <span class="req">*</span><select id="f-pms">${opts(pmsCfg().list.concat([PMS_UNKNOWN]),"","Choose")}</select></label></div>
         <label class="f">Expected timeline<select id="f-when">${opts(["Within 1 month","1–3 months","3–6 months","6+ months","Not known"],"","Choose")}</select></label>
         ${sales?`<div class="small muted">Assigned to <b>${esc(S.myEng)}</b></div>`:`<label class="f">Preferred sales engineer<select id="f-pref">${opts(spNames(),"","Let back office decide")}</select></label>`}
-        <label class="f">Requirement / notes<textarea id="f-notes" placeholder="What did the client ask for? Any deadline, competitor or compliance driver?"></textarea></label>
+        <label class="f">Requirement / notes <span class="req">*</span><textarea id="f-notes" placeholder="What did the client ask for? Any deadline, competitor or compliance driver? Write a proper description."></textarea><span class="small" id="nwc" style="color:var(--muted)">0 / ${leadMin()} words</span></label>
       </div>
     </div>
     <div class="panel"><h3>6 · Meeting notes <span class="small muted" style="font-weight:400">optional</span></h3>
@@ -1282,6 +1287,12 @@ function drawProducts(){const f=S.form,g=$("#prodGrid");if(!g)return;const key=f
   const hist=f.products.filter(p=>key&&productState(key,p).state==="hist");
   $("#prodNote").innerHTML=!f.account?`<div class="notice info">Choose the account first to see which products are already in progress.</div>`:hist.length?`<div class="notice warn">${esc(hist.join(", "))} ${hist.length>1?"were":"was"} already logged for this property in the 2026 sheet. You can still submit; back office will review it as a possible repeat.</div>`:""}
 function refreshFormChecks(){drawProducts()}
+/* Requirement / notes: every new lead typed in or imported by hand needs a proper description: at least leadMin() words (30 by default; settings key leadMinWords) and half as many different words. SQL 51 enforces the same count. */
+const leadMin=()=>{const v=+(S.settings&&S.settings.leadMinWords);return v>=1&&v<=999?Math.floor(v):30};
+const wordCount=s=>meetWords(s).n;
+const notesErr=t=>{const c=meetWords(t),mn=leadMin();if(c.n<mn)return`Requirement / notes need at least ${mn} words (now ${c.n}). Say what the client asked for, the deadline, and any competitor or compliance driver.`;if(c.d<Math.ceil(mn/2))return`Please write real requirement notes: use at least ${Math.ceil(mn/2)} different words.`;return""};
+function nwcUpdate(){const t=$("#f-notes"),o=$("#nwc");if(!t||!o)return;const n=wordCount(t.value),mn=leadMin(),ok=n>=mn;o.textContent=ok?`${n} words ✓`:`${n} / ${mn} words`;o.style.color=ok?"var(--ok)":"var(--muted)";o.dataset.ok=ok?"1":"0"}
+document.addEventListener("input",e=>{if(e.target&&e.target.id==="f-notes")nwcUpdate()});
 async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn");const v=id=>($("#"+id)?.value||"").trim();
   const errs=[];if(!f.account)errs.push("Choose or create the account");
   if(f.account?.isNew&&!(f.account.country||"").trim())errs.push("Add the account's country");
@@ -1292,6 +1303,7 @@ async function submitLead(){const f=S.form,msg=$("#submitMsg"),btn=$("#submitBtn
   if(!f.category)errs.push("Choose Inbound or Outbound");
   if(!v("f-pms")&&f.products.some(p=>!prodNoPms(p)))errs.push("Choose the hotel's PMS (or “Not known yet”)");
   {const pb=pmsBlock(v("f-pms"),f.products);if(pb)errs.push(pb)}
+  {const m=notesErr(v("f-notes"));if(m)errs.push(m)}
   {const cs=chainStd(f.account&&f.account.name,f.account&&f.account.key);const cg=f.account&&f.account.isNew&&f.account.group?chainStd(f.account.group+" "+f.account.name,"").list:[];const L=cs.list.length?cs.list:cg;if(L.length&&!can("lead.status_override")&&v("f-pms")&&!L.some(x=>nk(x)===nk(v("f-pms"))))errs.push(`${cs.chain!=="Independent"?cs.chain:"This chain"} uses ${L.join(" or ")} as its standard PMS. Ask a Lead Manager or Supervisor if this hotel differs.`)}
   if(!v("f-source"))errs.push("Choose the source channel");
   if(!v("f-genby"))errs.push("Add who generated the lead");
@@ -1538,12 +1550,116 @@ function wonTargets(l){return[...(l.quote?[["Quotation Sent","Back to Quotation 
    (lead.status_override can still change it, with a reason, listed under "Changes after Won"). DB: 33_joint_events.sql. */
 const sameEng=(a,b)=>!!a&&!!b&&nk(a)===nk(b);
 const isJoint=l=>!!S.myEng&&((l.joint||[]).some(n=>sameEng(n,S.myEng))||sameEng((l.share||{}).to,S.myEng));
+/* ---- Team on a lead (27 Nov 2026, SQL 54) ----
+   lead.team = {owner, members[], split{name:%}, status:"proposed"|"final"|"none", by, at, answers{name:{a,at,why}}, final{how:"agreed"|"auto"|"set",at,by,reason}}.
+   The lead's engineer (owner) proposes the split; every other engineer on the lead accepts or disputes it; silence counts as
+   agreement after settings.teamAcceptDays (7); a dispute is settled by a Lead Manager or Supervisor. A final split drives engParts. */
+const teamDays=()=>{const v=+(S.settings&&S.settings.teamAcceptDays);return v>=1&&v<=60?Math.floor(v):7};
+const teamOf=l=>{const t=l&&l.team;return t&&typeof t==="object"&&t.status&&t.status!=="none"&&t.split&&(t.members||[]).length&&sameEng(t.owner,l.assignedTo)?t:null};
+const teamDue=t=>(t&&t.at?new Date(t.at).getTime():0)+teamDays()*864e5;
+const teamSt=l=>{const t=teamOf(l);if(!t)return"none";if(t.status==="final")return"final";if(Object.values(t.answers||{}).some(a=>a&&a.a==="disputed"))return"disputed";return Date.now()>=teamDue(t)?"final":"proposed"};
+const teamParts=l=>{if(teamSt(l)!=="final")return null;const t=teamOf(l);const e=Object.entries(t.split).map(([n,p])=>[n,+p]).filter(x=>x[1]>0);const sum=e.reduce((a,x)=>a+x[1],0);if(e.length<2||Math.abs(sum-100)>.5)return null;e.sort((a,b)=>sameEng(b[0],t.owner)-sameEng(a[0],t.owner));return e.map(([n,p])=>[n,p/sum])};
+const splitTxt=sp=>sp&&Object.keys(sp).length?Object.entries(sp).map(([n,p])=>`${n} ${p}%`).join(", "):"none";
 const shareOn=l=>{const x=l&&l.share;return!!(x&&x.status==="agreed"&&x.to&&!sameEng(x.to,l.assignedTo)&&+x.pct>0&&+x.pct<100)};
-function engParts(l){const o=l.assignedTo||"";if(!shareOn(l))return[[o,1]];const f=+l.share.pct/100;return[[o,1-f],[l.share.to,f]]}
+function engParts(l){const tp=teamParts(l);if(tp)return tp;const o=l.assignedTo||"";if(!shareOn(l))return[[o,1]];const f=+l.share.pct/100;return[[o,1-f],[l.share.to,f]]}
 const shareLabel=l=>{const x=l.share;if(!x||!x.to)return"";return`${x.pct}% to ${x.to} · ${x.status==="agreed"?"agreed":x.status==="declined"?"declined":"waiting for "+x.to+" to agree"}`};
 async function shareDecide(l,ok){try{if(window.__shareDecide)await window.__shareDecide(l.id,!!ok);else{const t=nowISO();await S.db.doc("leads/"+l.id).update({share:Object.assign({},l.share,{status:ok?"agreed":"declined",decidedAt:t}),updatedAt:t,log:[...(l.log||[]),{t,by:actor(),byId:S.uid||null,a:`${actor()||"Colleague"} ${ok?"agreed to":"declined"} the ${l.share.pct}% share`}]})}
     toast(ok?"Share agreed. Your results now include your part of this order when it is won.":"Share declined.")}catch(e){toast("Couldn't save: "+(e.message||e.code))}}
-function drawJoint(l){const J=$("#jointArea");if(!J)return;const jn=(l.joint||[]).filter(n=>!sameEng(n,l.assignedTo));const x=l.share;if(l.deleted||(!jn.length&&!x)){J.innerHTML="";return}
+/* Team actions go through the database functions (SQL 54); without the adapter (artifact mode) the same rules run here. */
+function teamClean(owner,members,split){const names=[owner,...members];const out={};let tot=0;
+  for(const n of names){const k=Object.keys(split||{}).find(x=>sameEng(x,n));const v=k==null?NaN:+split[k];if(!(v>=1&&v<=98)||v!==Math.floor(v))return{err:`Enter a whole percentage from 1 to 98 for ${n}.`};out[n]=v;tot+=v}
+  if(tot!==100)return{err:`The shares must add up to 100% (now ${tot}%).`};return{split:out}}
+async function teamRun(l,op,a){const nm={propose:"__teamPropose",answer:"__teamAnswer",decide:"__teamDecide",meeting:"__teamMeeting",note:"__teamNote"}[op];
+  if(window[nm])return window[nm](l.id,...a);
+  const t=nowISO(),who=actor()||S.myName||"",lg=(x)=>[...(l.log||[]),{t,by:who,byId:S.uid||null,a:x}],T=l.team||{};
+  if(op==="propose"){const[mem,sp]=a;if(!mem.length)return S.db.doc("leads/"+l.id).update({team:{owner:l.assignedTo,members:[],status:"none"},updatedAt:t,log:lg("Team removed from this lead")});
+    const c=teamClean(l.assignedTo,mem,sp);if(c.err)throw{message:c.err};
+    await S.db.doc("leads/"+l.id).update({team:null});
+    return S.db.doc("leads/"+l.id).update({team:{owner:l.assignedTo,members:mem,split:c.split,status:"proposed",by:who,at:t,answers:{}},joint:[...new Set([...(l.joint||[]),...mem])],updatedAt:t,log:lg("Revenue split proposed: "+splitTxt(c.split))})}
+  if(op==="answer"){const[ok,why]=a;const me=(T.members||[]).find(n=>sameEng(n,S.myEng));if(!me)throw{message:"Only an engineer on this lead can answer."};if(!ok&&String(why||"").trim().length<3)throw{message:"Say why you dispute the split."};
+    const ans=Object.assign({},T.answers,{[me]:{a:ok?"accepted":"disputed",at:t,why:ok?"":String(why).trim().slice(0,300)}});const all=(T.members||[]).every(n=>ans[n]&&ans[n].a==="accepted");
+    return S.db.doc("leads/"+l.id).update({team:Object.assign({},T,{answers:ans},all?{status:"final",final:{how:"agreed",at:t,by:me}}:{}),updatedAt:t,log:lg(me+(ok?" accepted":" disputed")+" the revenue split"+(all?" (split is now final)":""))})}
+  if(op==="decide"){const[sp,why]=a;if(!can("lead.status_override"))throw{message:"Only a Lead Manager or Supervisor can set the final split."};if(String(why||"").trim().length<3)throw{message:"Give the reason."};
+    const c=teamClean(T.owner,T.members||[],sp);if(c.err)throw{message:c.err};const body={team:Object.assign({},T,{split:c.split,status:"final",final:{how:"set",at:t,by:who,reason:String(why).trim().slice(0,300)}}),updatedAt:t,log:lg("Final revenue split set: "+splitTxt(c.split)+". Reason: "+why)};
+    if(l.status==="Won")body.wonChanges=[...(l.wonChanges||[]),{at:t,by:who,byId:S.uid||null,kind:"share",reason:String(why).trim(),from:{split:T.split||{},status:T.status},to:{split:c.split,status:"final"}}];return S.db.doc("leads/"+l.id).update(body)}
+  if(op==="meeting"){const m=Object.assign({},a[0],{id:"m"+Date.now().toString(36),by:S.myEng||who,byId:S.uid||null,at:t,viaTeam:true});return S.db.doc("leads/"+l.id).update({meetings:[...meetingsOf(l).map(({legacy,...x})=>x),m],updatedAt:t,log:lg((S.myEng||who)+" logged a meeting held on "+m.date)})}
+  if(op==="note")return S.db.doc("leads/"+l.id).update({updatedAt:t,log:lg("Note: "+String(a[0]).slice(0,1000))})}
+async function teamGo(l,op,a,okMsg){try{await teamRun(l,op,a);if(S.drawer){S.drawer.mode=null}S.teamEd=null;toast(okMsg);setTimeout(()=>{const x=S.leadMap&&S.leadMap[l.id];if(x&&S.drawer&&S.drawer.id===l.id)drawJoint(x)},500)}catch(e){toast("Couldn't save: "+(e.message||e.code));return false}return true}
+const teamPeople=(l,t)=>[l.assignedTo,...(t?t.members:[])];
+function teamEqual(people,owner){const n=people.length,base=Math.floor(100/n);const sp={};people.forEach(p=>sp[p]=base);const rest=100-base*n;sp[owner]+=rest;return sp}
+function teamEditHTML(l,ed,V,won){const people=teamPeople(l,{members:ed.members});const tot=people.reduce((a,n)=>a+(+ed.split[n]||0),0);
+  return`<div class="small muted" style="margin:0 0 6px">${sameEng(S.myEng,l.assignedTo)?"You are the engineer allocated to this lead, so you set the split. The others can accept or dispute it.":`The split is set for <b>${esc(l.assignedTo)}</b>, the engineer allocated to this lead. The others can accept or dispute it.`}</div>
+   ${people.map(n=>`<div class="tmrow"><div style="min-width:0"><b>${esc(n)}</b> <span class="small muted">${sameEng(n,l.assignedTo)?"owner · region":"team member"}</span>${sameEng(n,l.assignedTo)?"":` <button type="button" class="btn sm" data-tmrm="${esc(n)}">Remove</button>`}</div><label class="f" style="margin:0"><input type="number" min="1" max="98" step="1" inputmode="numeric" data-tmp="${esc(n)}" value="${esc(ed.split[n]??"")}" aria-label="Share of ${esc(n)} (%)" style="text-align:right"></label></div>`).join("")}
+   <label class="f" style="margin-top:8px"><select id="tm-add">${opts(spList().map(x=>x.name).filter(n=>n&&!people.some(p=>sameEng(p,n))),"","+ Add a colleague")}</select></label>
+   <div class="row" style="justify-content:space-between;margin-top:8px;gap:8px;flex-wrap:wrap"><span class="chip ${tot===100?"ok":"warn"}" id="tm-tot">${tot===100?"Total 100% ✓":`Total ${tot}% (must be 100%)`}</span>${V?`<span class="small muted">of ${fmtAED(V)} ${won?"order":"quotation"}</span>`:""}</div>
+   <div id="tm-msg" class="small" style="margin-top:6px;min-height:1em"></div>
+   <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn pri" id="tm-send"${ed.members.length?"":" disabled"}>Send split to the team</button><button class="btn" id="tm-x">Cancel</button>${teamOf(l)||(l.team&&(l.team.members||[]).length)?`<button class="btn" id="tm-rm">Remove the team</button>`:""}</div>
+   <div class="small muted" style="margin-top:8px">If nobody disputes in ${teamDays()} days, the split becomes final. Company totals do not change.</div>`}
+function drawTeam(l){const A=$("#teamArea");if(!A)return;const t=teamOf(l),st=teamSt(l);const won=l.status==="Won",closed=["Lost","Duplicate","Rejected"].includes(l.status);
+  const approved=!!l.assignedTo&&!["New","Info Needed"].includes(l.status)&&!l.registered;const over=can("lead.status_override");const ownerMe=isMine(l)&&canAct(l);
+  const canSet=approved&&!closed&&!won&&(ownerMe||over);const me=t?(t.members||[]).find(n=>sameEng(n,S.myEng)):null;
+  const oldShare=l.share&&l.share.to&&["proposed","agreed"].includes(l.share.status);
+  const ed=S.teamEd&&S.teamEd.id===l.id?S.teamEd:null;
+  if(t&&t.status==="proposed"&&st==="final"&&window.__teamSweep&&!S.teamSwept){S.teamSwept=1;window.__teamSweep().catch(()=>{})}
+  if(l.deleted||!approved||(!t&&!(canSet&&!oldShare)&&!ed)){A.innerHTML="";return}
+  const V=won?orderVal(l):(l.quote&&+l.quote.aed)||0;const Vw=won?"order":"quotation";
+  const ans=n=>(t.answers||{})[n];const dTxt=d=>d?fmtD(String(d).slice(0,10)):"";
+  const chipFor=n=>{if(sameEng(n,t.owner))return st==="final"?["ok","Owner"]:["warn","Proposed"];const a=ans(n);
+    if(st==="final")return t.final&&t.final.how==="set"?(a&&a.a==="accepted"?["ok","Accepted "+dTxt(a.at)]:["warn","Set by "+(t.final.by||"a Lead Manager")]):a&&a.a==="accepted"?["ok","Accepted "+dTxt(a.at)]:["ok","Accepted automatically after "+teamDays()+" days"];
+    if(a&&a.a==="accepted")return["ok","Accepted "+dTxt(a.at)];if(a&&a.a==="disputed")return["bad","Disputed "+dTxt(a.at)];return sameEng(n,S.myEng)?["warn","Your share · waiting for your answer"]:["","Waiting for answer"]};
+  const rows=()=>teamPeople(l,t).map(n=>{const k=Object.keys(t.split).find(x=>sameEng(x,n));const p=+t.split[k]||0;const c=chipFor(n);
+    return`<div class="tmv"><div style="min-width:0"><b>${esc(n)}</b> <span class="small muted">${sameEng(n,t.owner)?"owner · region":sameEng(n,S.myEng)?"you":"team member"}</span><div class="tmbar"><i style="width:${p}%"></i></div></div>
+     <div style="text-align:right"><div class="tmpct">${p}%</div>${V?`<div class="small muted">${fmtAED(V*p/100)}</div>`:""}</div><div class="tmchip"><span class="chip ${c[0]}">${esc(c[1])}</span></div></div>`}).join("");
+  const dis=t?Object.entries(t.answers||{}).find(([,a])=>a&&a.a==="disputed"):null;
+  const meets=meetingsOf(l).filter(m=>(m.joined||[]).length);
+  const meetHTML=(t||meets.length)?`<div class="tmmeet"><div class="small muted" style="margin-bottom:6px">Meetings on this lead with more than one engineer</div>${meets.length?meets.slice().sort((a,b)=>a.date<b.date?1:-1).slice(0,4).map(m=>`<div class="tmm"><div class="row" style="justify-content:space-between;gap:8px"><b>${esc(m.type||"Meeting")}</b><span class="small muted">${fmtD(m.date)}</span></div><div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap">${[m.by||l.assignedTo,...(m.joined||[])].map(n=>`<span class="chip">${esc(n)}</span>`).join("")}</div></div>`).join("")+`<div class="small muted" style="margin-top:6px">A meeting counts once for each engineer who attended, and once in company totals.</div>`:`<div class="small muted">None yet. When a meeting names colleagues who joined, it counts for each of them.</div>`}</div>`:"";
+  let body="";
+  if(ed)body=teamEditHTML(l,ed,V,won);
+  else if(!t)body=`<div class="small muted" style="margin-bottom:8px">Working on this lead with colleagues? Add them and set how the revenue is shared.</div><button class="btn sm" id="tm-new">Add colleagues and set the split</button>${meetHTML}`;
+  else{
+    const note=st==="final"?`<div class="row" style="gap:8px;margin-bottom:4px;flex-wrap:wrap"><span class="chip ok">Final split · ${(t.final&&t.final.how==="auto")||!t.final?"no dispute in "+teamDays()+" days":t.final&&t.final.how==="set"?"set by "+esc(t.final.by||"a Lead Manager"):"agreed"}${t.final&&t.final.at?" · "+dTxt(t.final.at):""}</span></div><div class="small muted" style="margin-bottom:4px">Counts in revenue, targets and incentives for each engineer. The company total stays ${V?fmtAED(V):"the same"}.${t.final&&t.final.reason?` Reason: ${esc(t.final.reason)}`:""}</div>`
+      :st==="disputed"?`<div class="notice" style="padding:10px 12px;margin-bottom:6px;border-left:4px solid var(--warn)"><b>${esc(dis[0])}</b> disputed the split: “${esc(dis[1].why||"")}”${over?"":`<div class="small muted" style="margin-top:4px">A Lead Manager or Supervisor will decide.</div>`}</div>`
+      :me&&!ans(me)?`<div class="notice info" style="padding:10px 12px;margin-bottom:6px"><b>${esc(t.by||t.owner)}</b> proposed this split on ${dTxt(t.at)}. You have until ${fmtD(new Date(teamDue(t)).toISOString().slice(0,10))} to accept or dispute it. No answer counts as accepting.</div>`
+      :`<div class="small muted" style="margin-bottom:4px">${esc(t.by||t.owner)} proposed this split on ${dTxt(t.at)}. No answer by ${fmtD(new Date(teamDue(t)).toISOString().slice(0,10))} counts as accepting.</div>`;
+    const answerBox=st==="proposed"&&me&&!ans(me)&&!closed?`<label class="f" style="margin-top:10px">If you dispute, say why<input id="tm-why" maxlength="300" placeholder="Example: I ran the technical demo and two follow-up calls"></label><div id="tm-msg" class="small" style="min-height:1em"></div><div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap"><button class="btn pri" id="tm-yes">Accept my ${+t.split[Object.keys(t.split).find(x=>sameEng(x,me))]}%</button><button class="btn" id="tm-no">Dispute</button></div>`:"";
+    const decideBox=over&&(st==="disputed"||(won&&(st==="final"||st==="proposed")))?(S.drawer&&S.drawer.mode==="teamset"?`<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><b>Set the final split</b> <span class="small muted">(Lead Manager or Supervisor)</span>${teamPeople(l,t).map(n=>`<div class="tmrow"><div><b>${esc(n)}</b></div><label class="f" style="margin:0"><input type="number" min="1" max="98" step="1" inputmode="numeric" data-tmd="${esc(n)}" value="${esc(t.split[Object.keys(t.split).find(x=>sameEng(x,n))]??"")}" style="text-align:right" aria-label="Share of ${esc(n)} (%)"></label></div>`).join("")}<label class="f" style="margin-top:8px">Reason <span class="req">*</span><input id="tm-dr" maxlength="300"></label><div id="tm-msg" class="small" style="min-height:1em"></div><div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap"><button class="btn pri" id="tm-set">Set final split</button><button class="btn" id="tm-sx">Cancel</button></div></div>`:`<div class="row" style="margin-top:10px"><button class="btn sm" id="tm-sd">${st==="disputed"?"Set the final split":"Change the split"}</button></div>`):"";
+    const ownerBtns=!won&&!closed&&(ownerMe||over)?`<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn sm" id="tm-ed">Change the split or the team</button></div>`:"";
+    const memBtns=me&&!closed?(S.drawer&&S.drawer.mode==="teammeet"?teamMeetForm(l,t):S.drawer&&S.drawer.mode==="teamnote"?`<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><label class="f">Note <textarea id="tm-nt" rows="3" maxlength="1000"></textarea></label><div id="tm-msg" class="small" style="min-height:1em"></div><div class="row" style="gap:8px;margin-top:6px"><button class="btn pri" id="tm-nsave">Save note</button><button class="btn" id="tm-nx">Cancel</button></div></div>`:`<div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn sm" id="tm-mt">Log a meeting I attended</button><button class="btn sm" id="tm-note">Add a note</button></div>`):"";
+    body=`${note}${rows()}${answerBox}${decideBox}${ownerBtns}${memBtns}${meetHTML}`}
+  A.innerHTML=`<div class="panel" style="padding:14px;margin-bottom:12px" id="teamPanel"><h3 style="margin-bottom:6px">Team and revenue split</h3>${body}</div>`;
+  bindTeam(l,t,V,won)}
+function teamMeetForm(l,t){const ppl=teamPeople(l,t).filter(n=>!sameEng(n,S.myEng));const prods=productsOf(l);
+  return`<div id="tm-mform" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:10px"><b>Log a meeting I attended</b>
+   <div class="grid2"><label class="f">Meeting date <span class="req">*</span><input type="date" id="tm-md" max="${todayISO()}" value="${todayISO()}"></label><label class="f">Meeting type<select id="tm-mtype">${opts(MEET_TYPES,"Follow-up meeting")}</select></label></div>
+   <div class="f" style="display:grid;gap:4px;font-size:12.5px;font-weight:500;color:var(--muted)">Held <span class="req">*</span><span class="seg" id="tm-mmode"><button type="button" data-v="Online">Online</button><button type="button" data-v="Onsite">Onsite</button></span></div>
+   <div class="f" style="display:grid;gap:6px;font-size:12.5px;font-weight:500;color:var(--muted)">Products discussed <span class="req">*</span><div class="row" style="gap:6px;flex-wrap:wrap" id="tm-mprods">${prods.map(n=>`<label class="pchk sel" style="padding:5px 9px"><input type="checkbox" data-tmp2="${esc(n)}" checked>${esc(n)}</label>`).join("")}</div></div>
+   <div class="f" style="display:grid;gap:6px;font-size:12.5px;font-weight:500;color:var(--muted)">Who else attended <div class="row" style="gap:6px;flex-wrap:wrap" id="tm-mj">${ppl.map(n=>`<label class="pchk sel" style="padding:5px 9px"><input type="checkbox" data-tmj="${esc(n)}" checked>${esc(n)}</label>`).join("")}</div></div>
+   <label class="f">What happened in the meeting <span class="muted small">(at least ${meetMin()} words)</span><textarea id="tm-mn" data-mw rows="4" placeholder="Who attended, what was discussed, client's concerns, agreed next step"></textarea>${meetWC("")}</label>
+   <div id="tm-msg" class="small" style="min-height:1em"></div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn pri" id="tm-msave">Save meeting</button><button class="btn" id="tm-mx">Cancel</button></div></div>`}
+function bindTeam(l,t,V,won){const A=$("#teamArea");if(!A)return;const redraw=()=>drawTeam(l);const msg=h=>{const m=$("#tm-msg");if(m)m.innerHTML=h};const bad=x=>`<span style="color:var(--bad)">${esc(x)}</span>`;
+  $("#tm-new")?.addEventListener("click",()=>{S.teamEd={id:l.id,members:[],split:{[l.assignedTo]:100}};redraw()});
+  $("#tm-ed")?.addEventListener("click",()=>{const mem=t?t.members.slice():[];const sp=t?Object.assign({},t.split):teamEqual([l.assignedTo],l.assignedTo);S.teamEd={id:l.id,members:mem,split:sp};redraw()});
+  $("#tm-x")?.addEventListener("click",()=>{S.teamEd=null;redraw()});
+  const ed=S.teamEd&&S.teamEd.id===l.id?S.teamEd:null;
+  if(ed){const sync=()=>{A.querySelectorAll("[data-tmp]").forEach(i=>{const v=i.value===""?"":Math.round(+i.value);ed.split[i.dataset.tmp]=v});const tot=teamPeople(l,{members:ed.members}).reduce((a,n)=>a+(+ed.split[n]||0),0);const c=$("#tm-tot");if(c){c.className="chip "+(tot===100?"ok":"warn");c.textContent=tot===100?"Total 100% ✓":`Total ${tot}% (must be 100%)`}};
+    A.querySelectorAll("[data-tmp]").forEach(i=>i.addEventListener("input",sync));
+    A.querySelectorAll("[data-tmrm]").forEach(b=>b.addEventListener("click",()=>{sync();const n=b.dataset.tmrm;ed.members=ed.members.filter(x=>x!==n);delete ed.split[n];const ppl=teamPeople(l,{members:ed.members});if(ppl.length>1)ed.split=teamEqual(ppl,l.assignedTo);redraw()}));
+    $("#tm-add")?.addEventListener("change",e=>{const n=e.target.value;if(!n)return;sync();ed.members.push(n);ed.split=teamEqual(teamPeople(l,{members:ed.members}),l.assignedTo);redraw()});
+    $("#tm-send")?.addEventListener("click",async e=>{sync();const c=teamClean(l.assignedTo,ed.members,ed.split);if(c.err){msg(bad(c.err));return}e.currentTarget.disabled=true;if(!await teamGo(l,"propose",[ed.members,c.split],"Split sent to the team."))e.currentTarget.disabled=false});
+    $("#tm-rm")?.addEventListener("click",async e=>{e.currentTarget.disabled=true;if(!await teamGo(l,"propose",[[],{}],"Team removed."))e.currentTarget.disabled=false})}
+  $("#tm-yes")?.addEventListener("click",async e=>{e.currentTarget.disabled=true;if(!await teamGo(l,"answer",[true,""],"You accepted the split."))e.currentTarget.disabled=false});
+  $("#tm-no")?.addEventListener("click",async e=>{const w=($("#tm-why").value||"").trim();if(w.length<3){msg(bad("Say why you dispute the split."));return}e.currentTarget.disabled=true;if(!await teamGo(l,"answer",[false,w],"Your dispute was sent."))e.currentTarget.disabled=false});
+  $("#tm-sd")?.addEventListener("click",()=>{S.drawer.mode="teamset";redraw()});$("#tm-sx")?.addEventListener("click",()=>{S.drawer.mode=null;redraw()});
+  $("#tm-set")?.addEventListener("click",async e=>{const sp={};A.querySelectorAll("[data-tmd]").forEach(i=>sp[i.dataset.tmd]=Math.round(+i.value));const c=teamClean(t.owner,t.members,sp);if(c.err){msg(bad(c.err));return}const why=($("#tm-dr").value||"").trim();if(why.length<3){msg(bad("Give the reason."));return}e.currentTarget.disabled=true;if(!await teamGo(l,"decide",[c.split,why],"Final split saved."))e.currentTarget.disabled=false});
+  $("#tm-mt")?.addEventListener("click",()=>{S.drawer.mode="teammeet";redraw()});$("#tm-note")?.addEventListener("click",()=>{S.drawer.mode="teamnote";redraw()});$("#tm-mx")?.addEventListener("click",()=>{S.drawer.mode=null;redraw()});$("#tm-nx")?.addEventListener("click",()=>{S.drawer.mode=null;redraw()});
+  $("#tm-mmode")?.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("#tm-mmode").dataset.v=b.dataset.v;A.querySelectorAll("#tm-mmode button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===b.dataset.v))});
+  $("#tm-mprods")?.addEventListener("change",e=>{const c=e.target.closest("input");if(c)c.closest("label").classList.toggle("sel",c.checked)});$("#tm-mj")?.addEventListener("change",e=>{const c=e.target.closest("input");if(c)c.closest("label").classList.toggle("sel",c.checked)});
+  $("#tm-msave")?.addEventListener("click",async e=>{const mode=$("#tm-mmode").dataset.v||"";const prods=[...A.querySelectorAll("[data-tmp2]:checked")].map(c=>c.dataset.tmp2);const d=$("#tm-md").value;const notes=$("#tm-mn").value;
+    if(!mode){msg(bad("Choose whether the meeting was Online or Onsite."));return}if(!prods.length){msg(bad("Tick at least one product discussed."));return}if(!d||d>todayISO()){msg(bad("Pick the meeting date (not in the future)."));return}{const ne=meetNotesErr(notes);if(ne){msg(bad(ne));return}}
+    const joined=[...A.querySelectorAll("[data-tmj]:checked")].map(c=>c.dataset.tmj);e.currentTarget.disabled=true;if(!await teamGo(l,"meeting",[Object.assign({date:d,mode,type:$("#tm-mtype").value,products:prods,notes},joined.length?{joined}:{})],"Meeting saved."))e.currentTarget.disabled=false});
+  $("#tm-nsave")?.addEventListener("click",async e=>{const x=($("#tm-nt").value||"").trim();if(x.length<3){msg(bad("Write the note."));return}e.currentTarget.disabled=true;if(!await teamGo(l,"note",[x],"Note saved."))e.currentTarget.disabled=false})}
+function drawJoint(l){const J=$("#jointArea");if(!J)return;J.innerHTML=`<div id="teamArea"></div><div id="jointOld"></div>`;drawTeam(l);drawJointOld(l)}
+function drawJointOld(l){const J=$("#jointOld");if(!J)return;const jn=(l.joint||[]).filter(n=>!sameEng(n,l.assignedTo));const x=l.share;if(l.deleted||!(x&&x.to)){J.innerHTML="";return}
   const over=can("lead.status_override");const won=l.status==="Won";const closed=["Lost","Duplicate","Rejected"].includes(l.status);
   const owner=(isMine(l)&&canAct(l)&&!won)||over;const mineTo=x&&sameEng(x.to,S.myEng)&&x.status==="proposed"&&!won&&!closed;const ed=S.drawer.mode==="share"&&owner&&!closed;
   const part=shareOn(l)&&won&&orderVal(l)?` · ${fmtAED(orderVal(l)*x.pct/100)} of ${fmtAED(orderVal(l))}`:"";
@@ -1623,7 +1739,7 @@ async function fixOrder(l,o,why,nq){if(!(canUnwin(l)||wqClean(l))||!l.order)retu
   if(sameV&&ohCh){const w=body.wonChanges[body.wonChanges.length-1];w.kind="ohip";w.from.ohip=old.ohip==null?null:+old.ohip;w.to.ohip=nw.ohip}
   return await patch(l,body,sameV&&ohCh?`OHIP part of the order set to ${nw.ohip==null?"the quotation lines":fmtAED(nw.ohip)}${why?" · "+why:""}`:`Order value changed from ${fmtAED(old.aed)} to ${fmtAED(nw.aed)}${nq?` · revised quotation${nq.no?" "+nq.no:""}${nq.src==="manual"?" entered by hand":" uploaded"}`:""}${(old.no||"")!==(nw.no||"")?` · order no. ${nw.no||"removed"}`:""}${why?" · "+why:""}`)}
 function wonChangeRows(){const out=[];(S.leads||[]).forEach(l=>{(l.statusChanges||[]).forEach(c=>{if(c.from==="Won")out.push({at:c.at,l,what:"Moved back to "+c.to,from:c.order?c.order.aed:null,to:null,by:c.by,reason:c.reason||""})});
-  (l.wonChanges||[]).forEach(c=>out.push(c.kind==="share"?{at:c.at,l,what:`Share changed: ${c.from&&c.from.to?c.from.pct+"% to "+c.from.to:"none"} → ${c.to&&c.to.to?c.to.pct+"% to "+c.to.to:"none"}`,from:null,to:null,by:c.by,reason:c.reason||""}:c.kind==="ohip"?{at:c.at,l,what:"OHIP part of the order set",from:c.from?c.from.ohip:null,to:c.to?c.to.ohip:null,by:c.by,reason:c.reason||""}:{at:c.at,l,what:(c.from&&c.to&&Math.abs((+c.from.aed||0)-(+c.to.aed||0))<0.005?"Quotation uploaded":"Order value changed")+(c.quoteNo?" · quote "+c.quoteNo:c.src==="manual"?" · entered by hand":""),from:c.from?c.from.aed:null,to:c.to?c.to.aed:null,by:c.by,reason:c.reason||""}))});return out.sort((a,b)=>a.at<b.at?1:-1)}
+  (l.wonChanges||[]).forEach(c=>out.push(c.kind==="share"?{at:c.at,l,what:(c.to&&c.to.split)?`Revenue split changed: ${splitTxt(c.from&&c.from.split)} → ${splitTxt(c.to.split)}`:`Share changed: ${c.from&&c.from.to?c.from.pct+"% to "+c.from.to:"none"} → ${c.to&&c.to.to?c.to.pct+"% to "+c.to.to:"none"}`,from:null,to:null,by:c.by,reason:c.reason||""}:c.kind==="ohip"?{at:c.at,l,what:"OHIP part of the order set",from:c.from?c.from.ohip:null,to:c.to?c.to.ohip:null,by:c.by,reason:c.reason||""}:{at:c.at,l,what:(c.from&&c.to&&Math.abs((+c.from.aed||0)-(+c.to.aed||0))<0.005?"Quotation uploaded":"Order value changed")+(c.quoteNo?" · quote "+c.quoteNo:c.src==="manual"?" · entered by hand":""),from:c.from?c.from.aed:null,to:c.to?c.to.aed:null,by:c.by,reason:c.reason||""}))});return out.sort((a,b)=>a.at<b.at?1:-1)}
 function wonChangesHTML(){const all=wonChangeRows();const since=new Date(Date.now()-365*864e5).toISOString();const rows=all.filter(r=>String(r.at)>=since);if(!all.length)return"";
   return`<div class="panel" id="wonChg"><h3>Changes after Won <span class="chip">${rows.length}</span></h3><p class="small muted" style="margin:2px 0 12px;max-width:90ch">Won orders that were moved back to an earlier stage or had their order value corrected in the last 12 months. Revenue, targets and incentives already use the new figures.</p>
    ${rows.length?`<div class="tw plain"><table><thead><tr><th>Date</th><th>Lead</th><th>Sales engineer</th><th>Change</th><th class="num">Before</th><th class="num">After</th><th>By</th><th>Reason</th></tr></thead><tbody>
@@ -2212,7 +2328,7 @@ function suggestOwner(l){const prev=S.leads.filter(x=>x.accountKey===l.accountKe
 function monthMeetings(month){const out=[];const isSales=!viewAll();
   for(const l of S.leads){if(isSales&&nk(l.assignedTo)!==nk(S.myEng))continue;
     for(const m of meetingsOf(l))if((m.date||"").slice(0,7)===month)out.push({m,l})}
-  if(isSales)for(const l of(S.jointOnly||[]))for(const m of meetingsOf(l))if((m.date||"").slice(0,7)===month&&(m.joined||[]).some(n=>nk(n)===nk(S.myEng)))out.push({m,l,j:true});
+  if(isSales)for(const l of(S.jointOnly||[]))for(const m of meetingsOf(l))if((m.date||"").slice(0,7)===month&&((m.joined||[]).some(n=>nk(n)===nk(S.myEng))||nk(m.by||"")===nk(S.myEng)))out.push({m,l,j:true});
   return out.sort((a,b)=>a.m.date<b.m.date?1:a.m.date>b.m.date?-1:a.l.ref<b.l.ref?-1:1)}
 function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO().slice(0,7);S.mMonth=month;
   const F=S.mf||(S.mf={eng:"",cat:"All",mode:"All",type:"All"});
@@ -2221,7 +2337,7 @@ function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO()
   const cnt=f=>rows.filter(f).length;const isOn=r=>r.m.mode==="Online",isSite=r=>r.m.mode==="Onsite",isIn=r=>r.l.category!=="Outbound",isOut=r=>r.l.category==="Outbound",isNew=r=>r.m.type==="New lead meeting",isFu=r=>r.m.type==="Follow-up meeting";
   const mName=new Date(month+"-15").toLocaleDateString("en-GB",{month:"long",year:"numeric"});
   const byEng={};rows.forEach(r=>{const k=r.l.assignedTo||"—";const o=byEng[k]||(byEng[k]={n:0,on:0,site:0,nw:0,fu:0,inb:0,outb:0,leads:new Set()});o.n++;if(isOn(r))o.on++;if(isSite(r))o.site++;if(isNew(r))o.nw++;if(isFu(r))o.fu++;if(isOut(r))o.outb++;else o.inb++;o.leads.add(r.l.id);
-    (r.m.joined||[]).forEach(n=>{const h=byEng[n]||(byEng[n]={n:0,on:0,site:0,nw:0,fu:0,inb:0,outb:0,leads:new Set()});h.jn=(h.jn||0)+1})});const anyJoint=rows.some(r=>(r.m.joined||[]).length);
+    [...new Set([...(r.m.joined||[]),...(r.m.by&&!sameEng(r.m.by,r.l.assignedTo)?[r.m.by]:[])])].forEach(n=>{if(sameEng(n,r.l.assignedTo))return;const h=byEng[n]||(byEng[n]={n:0,on:0,site:0,nw:0,fu:0,inb:0,outb:0,leads:new Set()});h.jn=(h.jn||0)+1;h.n++;if(isOn(r))h.on++;if(isSite(r))h.site++;if(isNew(r))h.nw++;if(isFu(r))h.fu++;if(isOut(r))h.outb++;else h.inb++;h.leads.add(r.l.id)})});const anyJoint=rows.some(r=>(r.m.joined||[]).length);
   const byProd={};rows.forEach(r=>(r.m.products||[]).forEach(p=>{const o=byProd[p]||(byProd[p]={n:0,on:0,site:0,nw:0,fu:0});o.n++;if(isOn(r))o.on++;if(isSite(r))o.site++;if(isNew(r))o.nw++;if(isFu(r))o.fu++}));
   const seg=(id,vals,cur)=>`<span class="seg" id="${id}">${vals.map(v=>`<button data-v="${v}" aria-pressed="${cur===v}">${v}</button>`).join("")}</span>`;
   m.innerHTML=`<section class="view">
@@ -2252,7 +2368,7 @@ function renderMeet(m){const isSales=!viewAll();const month=S.mMonth||todayISO()
   </section>`;
   $("#mMonth").onchange=e=>{S.mMonth=e.target.value||todayISO().slice(0,7);render()};
   const step=d=>{const[y,mo]=month.split("-").map(Number);const t=new Date(y,mo-1+d,1);S.mMonth=ymd(t).slice(0,7);render()};$("#mPrev").onclick=()=>step(-1);$("#mNext").onclick=()=>step(1);
-  if(!rows.length){const v=m.querySelector(".view");[...v.children].slice(2).forEach(n=>n.remove());
+  if(!rows.length){const v=m.querySelector(".view");{const ch=[...v.children],fi=ch.indexOf($("#mCat").closest(".row"));ch.slice(fi+1).forEach(n=>n.remove())}
     const months=[...new Set(S.leads.filter(l=>viewAll()||isMine(l)).flatMap(l=>meetingsOf(l).map(x=>(x.date||"").slice(0,7))).filter(Boolean))].sort().reverse();const last=months.find(x=>x<month)||months[0];
     v.insertAdjacentHTML("beforeend",`<div class="panel emptyst"><h3>${allMonth?"No meetings match these filters":"No meetings logged in "+esc(mName)}</h3><p class="muted">${allMonth?`There are ${allMonth} meeting${allMonth===1?"":"s"} this month, but none match the filters above.`:`Meetings appear here once an engineer opens a lead and uses <b>Meeting done</b> or <b>Log a meeting</b>.`}</p>
      <div class="row">${allMonth?`<button class="btn pri" id="mReset" type="button">Clear filters</button>`:""}${!allMonth&&last&&last!==month?`<button class="btn" id="mLast" type="button">Go to ${esc(new Date(last+"-15").toLocaleDateString("en-GB",{month:"long",year:"numeric"}))}</button>`:""}</div></div>`);
@@ -3137,11 +3253,11 @@ function kaProfileTimeline(key){const out=[];if(!window.__sb)return out;
   return out}
 
 /* ======================= 4. MANAGEMENT ======================= */
-function orderTree(ls,x){const os=ls.filter(l=>(l.assignedTo===x.name||(shareOn(l)&&sameEng(l.share.to,x.name)))&&l.status==="Won"&&engCredit(l)).sort((a,b)=>orderVal(b)-orderVal(a)||reqDate(b).localeCompare(reqDate(a)));
-  const wonOn=l=>l.order?.date||l.stageAt?.Won||reqDate(l);const mx=Math.max(1,...os.map(orderVal));
+function orderTree(ls,x){const frOf=l=>{const p=engParts(l).find(q=>sameEng(q[0],x.name));return p?p[1]:1};const os=ls.filter(l=>(l.assignedTo===x.name||engParts(l).some(q=>sameEng(q[0],x.name)))&&l.status==="Won"&&engCredit(l)).sort((a,b)=>orderVal(b)-orderVal(a)||reqDate(b).localeCompare(reqDate(a)));
+  const wonOn=l=>l.order?.date||l.stageAt?.Won||reqDate(l);const mx=Math.max(1,...os.map(l=>orderVal(l)*frOf(l)));
   return`<tr class="xrow"><td colspan="10"><div class="otree" role="group" aria-label="${esc(x.name)}'s orders">
    <div class="otr oth"><span>Order</span><span>Property</span><span>Won</span><span>Source</span><span>Products</span><span class="num">Value</span><span class="num">Share</span></div>
-   ${os.map(l=>{const v=orderVal(l);return`<button type="button" class="otr" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span class="ell"><b>${esc(l.accountName)}</b> <span class="muted small">${esc(l.country||"")}</span></span><span>${fmtD(wonOn(l))}</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span></span><span class="ell small">${esc(productsOf(l).join(", "))}</span><span class="num">${v?fmtAED(v):`<span class="muted" data-tip="Won, but no order amount was recorded">no amount</span>`}${v?dbar(v,mx,"--c-main"):""}</span><span class="num muted">${x.rev?fmtP(v/x.rev):"—"}</span></button>`}).join("")}
+   ${os.map(l=>{const v=orderVal(l)*frOf(l);return`<button type="button" class="otr" data-open="${esc(l.id)}"><span class="mono">${esc(l.ref)}</span><span class="ell"><b>${esc(l.accountName)}</b> <span class="muted small">${esc(l.country||"")}</span></span><span>${fmtD(wonOn(l))}</span><span><span class="chip ${l.category==="Outbound"?"outb":"inb"}">${l.category==="Outbound"?"Out":"In"}</span></span><span class="ell small">${esc(productsOf(l).join(", "))}</span><span class="num">${v?fmtAED(v):`<span class="muted" data-tip="Won, but no order amount was recorded">no amount</span>`}${v?dbar(v,mx,"--c-main"):""}</span><span class="num muted">${x.rev?fmtP(v/x.rev):"—"}</span></button>`}).join("")}
    <div class="otr otot"><span></span><span>${os.length} order${os.length===1?"":"s"}${x.noVal?` · ${x.noVal} without amount`:""}</span><span></span><span></span><span class="small muted">${x.inbOrders} inbound · ${x.outbOrders} outbound</span><span class="num"><b>${fmtAED(x.rev)}</b></span><span class="num muted">100%</span></div>
   </div></td></tr>`}
 /* ======================= DATA ISSUES (Supervisor, Lead Manager) =======================
@@ -3630,11 +3746,11 @@ function rulesPanel(){if(!can("settings.manage"))return"";const R=rules(),P=stag
   return`<div class="panel" id="rulesPanel"><h3>Activity rules and forecast</h3><p class="small muted" style="margin:2px 0 10px;max-width:90ch">Leads that break these rules are flagged on pipeline cards, in the lead and in the Focus tab, for the engineer and their managers. Working days are Monday to Friday.</p>
    <div class="fgrid"><label class="f fsm">First contact within (working days)<input id="ru-c" type="number" min="1" max="30" value="${R.contactDays}"></label><label class="f fsm">First meeting within (days)<input id="ru-m" type="number" min="1" max="90" value="${R.meetingDays}"></label>
     <label class="f fsm">Flag as quiet after (days)<input id="ru-s" type="number" min="3" max="120" value="${R.staleDays}"></label><label class="f fsm">Apply to leads assigned from<input id="ru-f" type="date" value="${esc(R.from)}"></label></div>
-   <div class="fgrid" style="margin-top:10px">${Object.keys(PROB_DEF).map(k=>`<label class="f fsm">${k} probability %<input data-prob="${esc(k)}" type="number" min="0" max="100" value="${P[k]}"></label>`).join("")}<label class="f fsm">Commit counts as of day<input id="ru-cut" type="number" min="1" max="28" value="${R.cutoff}"></label><label class="f fsm">Sales can change their own won lead for (days)<input id="ru-won" type="number" min="0" max="365" value="${wonDays()}"></label></div>
+   <div class="fgrid" style="margin-top:10px">${Object.keys(PROB_DEF).map(k=>`<label class="f fsm">${k} probability %<input data-prob="${esc(k)}" type="number" min="0" max="100" value="${P[k]}"></label>`).join("")}<label class="f fsm">Commit counts as of day<input id="ru-cut" type="number" min="1" max="28" value="${R.cutoff}"></label><label class="f fsm">Sales can change their own won lead for (days)<input id="ru-won" type="number" min="0" max="365" value="${wonDays()}"></label><label class="f fsm">Team revenue split: silence counts as agreed after (days)<input id="ru-team" type="number" min="1" max="60" value="${teamDays()}"></label></div>
    <div class="row" style="margin-top:10px"><button type="button" class="btn pri" id="ruSave">Save rules</button></div></div>`}
 function bindRules(){$("#ruSave")?.addEventListener("click",async()=>{const v=id=>Math.round(+$(id).value);const r={contactDays:v("#ru-c"),meetingDays:v("#ru-m"),staleDays:v("#ru-s"),from:$("#ru-f").value||RULE_DEF.from,cutoff:Math.min(28,Math.max(1,v("#ru-cut")))};
   if(!(r.contactDays>0&&r.meetingDays>0&&r.staleDays>0)){toast("Enter numbers above zero");return}const p={};document.querySelectorAll("[data-prob]").forEach(i=>p[i.dataset.prob]=Math.min(100,Math.max(0,Math.round(+i.value||0))));
-  const wd=Math.min(365,Math.max(0,Math.round(+($("#ru-won")||{}).value||0)));try{await S.db.doc("config/settings").update({rules:r,stageProb:p,wonEditDays:wd});Object.assign(S.settings,{rules:r,stageProb:p,wonEditDays:wd});toast("Rules saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}})}
+  const wd=Math.min(365,Math.max(0,Math.round(+($("#ru-won")||{}).value||0)));const td=Math.min(60,Math.max(1,Math.round(+($("#ru-team")||{}).value||7)));try{await S.db.doc("config/settings").update({rules:r,stageProb:p,wonEditDays:wd,teamAcceptDays:td});Object.assign(S.settings,{rules:r,stageProb:p,wonEditDays:wd,teamAcceptDays:td});toast("Rules saved");render()}catch(e){toast("Couldn't save: "+(e.message||e.code))}})}
 
 /* Supervisor settings: the guided stage flow (Assigned → accept → Attended → Meeting done → Quotation sent) */
 function flowPanel(){if(!can("settings.manage"))return"";const F=flow();const yn=(id,v)=>`<select id="${id}"><option value="1"${v?" selected":""}>Yes</option><option value="0"${v?"":" selected"}>No</option></select>`;
@@ -4351,7 +4467,7 @@ const IL_COLS=[["Hotel name","name",1,"The property, as the client writes it. An
  ["Products","products",1,"One or more products from the Lists sheet, separated by commas."],["Hotel PMS","pms",1,"From the Lists sheet. Leave empty for a chain that has a standard PMS. Use “Not known yet” if unsure."],["Rooms","rooms",0,"A number."],
  ["Region","region",0,"From the Lists sheet. Left blank, it is worked out from the country."],["State / province / emirate","sub",0,"Helps to find the territory owner."],["Source channel","source",1,"From the Lists sheet. It decides Inbound or Outbound."],
  ["Requirement received on","reqdate",0,"A date, e.g. 17-Nov-2026. Left blank, today is used."],["Lead generated by","genby",1,"The person who brought the lead."],["Department","dept",0,"Left blank, it is taken from the person above."],
- ["Expected timeline","when",0,"From the Lists sheet."],["Preferred sales engineer","pref",0,"From the Lists sheet. Left blank, back office decides."],["Requirement / notes","notes",0,""]];
+ ["Expected timeline","when",0,"From the Lists sheet."],["Preferred sales engineer","pref",0,"From the Lists sheet. Left blank, back office decides."],["Requirement / notes","notes",1,"A proper description (30 words or more): what the client asked for, the deadline, any competitor or compliance driver."]];
 const IL_ALIAS={name:["hotelname","hotel","property","propertyname","account","accountname","name"],country:["country"],city:["city"],group:["groupchain","group","chain"],cname:["contactperson","contact","contactname"],ctitle:["designation","title","jobtitle"],cemail:["email","emailaddress"],cphone:["phonewhatsapp","phone","mobile","whatsapp"],
  products:["products","product","productsofinterest"],pms:["hotelpms","pms"],rooms:["rooms","noofrooms"],region:["region"],sub:["stateprovinceemirate","stateprovince","state","province","emirate"],source:["sourcechannel","source"],reqdate:["requirementreceivedon","requirementdate","receivedon","date"],
  genby:["leadgeneratedby","generatedby","generator"],dept:["department","dept"],when:["expectedtimeline","timeline"],pref:["preferredsalesengineer","preferredengineer","engineer"],notes:["requirementnotes","notes","requirement","remarks"]};
@@ -4367,6 +4483,7 @@ function ilDate(v){if(v instanceof Date){const d=new Date(v.getTime()+43200000);
 function ilEval(r){const v=r.v,E={},W=[],B=[],st=S.settings||{};const name=v.name.trim();r.acc=null;r.sim=null;
   if(!name)E.name="Hotel name is missing";
   else{const k=keyOf(name),all=allAccounts();if(all[k])r.acc=all[k];else{const m=findAccounts(name,4);const ex=m.find(a=>a.score>=1||(a.was&&normTxt(a.was)===normTxt(name)));if(ex)r.acc=ex;else{const sm=m.find(a=>a.score>=.75);if(sm)r.sim=sm}}}
+  {const m=notesErr(v.notes);if(m)E.notes=m}
   const A=r.acc||(r.sim&&r.accChoice!=="new"?r.sim:null);
   const country=v.country.trim()||(A&&A.country)||"";if(!country)E.country="Country is missing";
   if(!v.cname.trim())E.cname="Contact person is missing";
@@ -4443,9 +4560,10 @@ async function ilDownloadRest(){const I=ilState();const R=I.res;if(!R)return;let
   const rows=R.skipped.concat(R.failed);const hdr=(I.resHdr||IL_COLS.map(c=>c[0])).concat(["Row in your file","Why it was not imported"]);
   const ws=X.utils.aoa_to_sheet([hdr].concat(rows.map(x=>(x.r.raw||[]).map(c=>c instanceof Date?ilDate(c):c).concat([x.r.n,x.why]))));ws["!cols"]=hdr.map(h=>({wch:Math.max(14,String(h).length+4)}));const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Not imported");
   const name=`leads-not-imported-${todayISO()}.xlsx`;try{await ilSaveFile(name,new Blob([X.write(wb,{bookType:"xlsx",type:"array",cellDates:true})],{type:IL_XLSX}));toast(name+" is ready")}catch(e){if(e?.code!=="cancelled")toast("Couldn't save the file")}}
-const IL_EDIT={name:["text","Hotel name"],country:["text","Country"],cname:["text","Contact person"],cemail:["text","Email"],genby:["text","Lead generated by"],reqdate:["date","Requirement date"],rooms:["number","Rooms"],pms:["pms","Hotel PMS"],source:["source","Source channel"],region:["region","Region"],products:["products","Products"]};
+const IL_EDIT={name:["text","Hotel name"],country:["text","Country"],cname:["text","Contact person"],cemail:["text","Email"],genby:["text","Lead generated by"],reqdate:["date","Requirement date"],rooms:["number","Rooms"],pms:["pms","Hotel PMS"],source:["source","Source channel"],region:["region","Region"],products:["products","Products"],notes:["textarea","Requirement / notes"]};
 function ilEditor(r,i,f){const[k,lab]=IL_EDIT[f]||["text",f];const dv=esc(r.v[f]||"");
   if(k==="products"){const sel=String(r.v.products||"").split(/[,;\n]+/).map(x=>nk(x)).filter(Boolean);return`<fieldset class="f ilprods"><legend>${lab}</legend><div class="ilpg">${prodList(false).map(p=>`<label class="ilpc"><input type="checkbox" data-ilp="${i}" value="${esc(p.name)}"${sel.includes(nk(p.name))?" checked":""}> ${esc(p.name)}</label>`).join("")}</div></fieldset>`}
+  if(k==="textarea")return`<label class="f" style="grid-column:1/-1">${lab} <span class="small muted">· ${wordCount(r.v[f])} / ${leadMin()} words</span><textarea data-ilf="${i}|${f}" rows="3">${dv}</textarea></label>`;
   if(k==="pms")return`<label class="f">${lab}<select data-ilf="${i}|pms">${opts(pmsCfg().list.concat([PMS_UNKNOWN]),r.pmsV,"Choose")}</select></label>`;
   if(k==="source")return`<label class="f">${lab}<select data-ilf="${i}|source">${opts((S.settings.sources||[]).map(x=>x.name),r.srcName,"Choose")}</select></label>`;
   if(k==="region")return`<label class="f">${lab}<select data-ilf="${i}|region">${opts(regionList(),r.reg,"Choose")}</select></label>`;
@@ -7012,7 +7130,8 @@ const HELP_GLANCE_RULES=["Every open lead has a next follow-up date. Set it ever
  "Record the hotel's PMS. It is needed from Quotation Sent onwards.","Upload the right quotation. The order value is the quotation value before tax.","Split before you quote if the customer wants separate quotations.",
  "Give a clear reason whenever Lead Desk asks for one. It is kept with the change.","Never share your password. Everything you do is recorded under your name."];
 
-const HELP_NEW=[["22 Nov 2026","Help centre: the ? button now opens quick steps, shortcuts and answers for your role.","*"],
+const HELP_NEW=[["27 Nov 2026","Several engineers on one lead: the owner sets the revenue split, colleagues accept or dispute it. A meeting counts for everyone who attended.","SLUM"],
+ ["22 Nov 2026","Help centre: the ? button now opens quick steps, shortcuts and answers for your role.","*"],
  ["22 Nov 2026","Split a lead into separate leads when the customer wants a separate quotation for each product.","SLU"],
  ["21 Nov 2026","Key Account Manager role: read-only view of the chains and regions allocated to a person.","*"],
  ["21 Nov 2026","Key accounts: log account meetings (notes of at least the minimum word count) and track requirements.","LMUK"],
